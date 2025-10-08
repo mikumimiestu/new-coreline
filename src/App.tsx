@@ -1,13 +1,15 @@
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import LoginPage from './components/LoginPage';
-import Dashboard from './components/Dashboard';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import LoginPage from "./components/LoginPage";
+import Dashboard from "./components/Dashboard";
+import PricingPage from "./components/Pricing";
 
 function AppContent() {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-600"></div>
           <p className="mt-4 text-gray-600">Memuat...</p>
@@ -16,15 +18,30 @@ function AppContent() {
     );
   }
 
-  return user ? <Dashboard /> : <LoginPage />;
-}
-
-function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <Routes>
+      {/* Halaman utama: kalau user login → Dashboard, kalau belum → Login */}
+      <Route path="/" element={user ? <Dashboard /> : <LoginPage />} />
+
+      {/* Pricing bisa diakses siapa pun */}
+      <Route path="/pricing" element={<PricingPage />} />
+
+      {/* Optional checkout placeholder */}
+      <Route path="/checkout/pro" element={<div className="p-8">Checkout Pro (placeholder)</div>} />
+      <Route path="/checkout/prime" element={<div className="p-8">Checkout Prime (placeholder)</div>} />
+
+      {/* Redirect 404 ke / */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}

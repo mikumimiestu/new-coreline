@@ -6,7 +6,6 @@ import ProfilePage from './ProfilePage';
 import {
   LogOut,
   BookOpen,
-  Code2,
   Award,
   ChevronRight,
   X,
@@ -16,20 +15,60 @@ import {
   Loader2,
   Search,
   Filter,
-  Moon,
-  SunMedium,
+  PartyPopper,
+  Crown,
+  CheckCircle2,
+  Lock,
 } from 'lucide-react';
 
-// --- Language filter config ---
-const languageData = [
-  { id: 'python', name: 'Python', icon: '🐍' },
-  { id: 'php', name: 'PHP', icon: '🐘' },
-  { id: 'javascript', name: 'JavaScript', icon: '⚡' },
+/* ================================
+ * Language filter config (pakai logo link)
+ * ================================ */
+type Lang = {
+  id: 'python' | 'php' | 'javascript' | 'typescript' | 'ruby';
+  name: string;
+  iconUrl: string;       // logo via CDN
+  comingSoon?: boolean;  // TS & Ruby
+};
+
+const languageData: readonly Lang[] = [
+  {
+    id: 'python',
+    name: 'Python',
+    iconUrl:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+  },
+  {
+    id: 'php',
+    name: 'PHP',
+    iconUrl:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg',
+  },
+  {
+    id: 'javascript',
+    name: 'JavaScript',
+    iconUrl:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
+  },
+  {
+    id: 'typescript',
+    name: 'TypeScript',
+    iconUrl:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
+    comingSoon: true,
+  },
+  {
+    id: 'ruby',
+    name: 'Ruby',
+    iconUrl:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg',
+    comingSoon: true,
+  },
 ] as const;
 
 type Level = 'beginner' | 'intermediate' | 'advanced';
-
 type SortKey = 'order' | 'title' | 'level';
+type Plan = 'free' | 'pro' | 'plus';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -42,11 +81,31 @@ export default function Dashboard() {
   const [showProfile, setShowProfile] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // --- completed materials (persist) ---
+  const [completedIds, setCompletedIds] = useState<Set<string>>(() => {
+    if (typeof window === 'undefined') return new Set();
+    try {
+      const raw = localStorage.getItem('cl_completed');
+      return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+    } catch {
+      return new Set();
+    }
+  });
+  const saveCompleted = (setVal: Set<string>) => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('cl_completed', JSON.stringify(Array.from(setVal)));
+  };
+
+  // --- SEARCH ---
+  const [searchText, setSearchText] = useState('');
   const [query, setQuery] = useState('');
+  useEffect(() => {
+    const t = setTimeout(() => setQuery(searchText), 200);
+    return () => clearTimeout(t);
+  }, [searchText]);
+
   const [sortKey, setSortKey] = useState<SortKey>('order');
-  const [dark, setDark] = useState<boolean>(() =>
-    typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false
-  );
 
   const drawerRef = useRef<HTMLDivElement>(null);
 
@@ -85,20 +144,37 @@ export default function Dashboard() {
     }
   }, [user?.user_type]);
 
+  // --- PLAN from subscription (source of truth) ---
+  const getPlanFromUser = (u: any): Plan => {
+    const status = (u?.subscription_status ?? '').toString().toLowerCase().trim();
+    const type = (u?.subscription_type ?? 'free').toString().toLowerCase().trim() as Plan | string;
+
+    // hanya aktif kalau status aktif
+    if (status !== 'active') return 'free';
+
+    if (type === 'plus') return 'plus';
+    if (type === 'pro') return 'pro';
+    return 'free';
+  };
+  const plan: Plan = getPlanFromUser(user);
+
+  const nextTier = plan === 'free' ? 'Pro' : plan === 'pro' ? 'Plus' : null;
+  const nextHref =
+    plan === 'free' ? '/pricing?tier=pro' :
+    plan === 'pro' ? '/pricing?tier=plus' :
+    undefined;
+
   // --- effects ---
   useEffect(() => {
     if (!user) return;
     setLoading(true);
 
-    // filter by user type
     let list = MOCK_MATERIALS.filter((m) => m.user_type === user.user_type);
 
-    // filter by language
     if (selectedLanguage) {
       list = list.filter((m) => m.language === selectedLanguage);
     }
 
-    // search by title/desc
     const q = query.trim().toLowerCase();
     if (q) {
       list = list.filter(
@@ -106,16 +182,16 @@ export default function Dashboard() {
       );
     }
 
-    // sort
     list.sort((a, b) => {
       if (sortKey === 'order') return a.order - b.order;
       if (sortKey === 'title') return a.title.localeCompare(b.title);
-      if (sortKey === 'level') return levelLabel[a.level as Level].localeCompare(levelLabel[b.level as Level]);
+      if (sortKey === 'level')
+        return levelLabel[a.level as Level].localeCompare(levelLabel[b.level as Level]);
       return 0;
     });
 
     setMaterials(list);
-    const timer = setTimeout(() => setLoading(false), 300); // small delay for smoother UX
+    const timer = setTimeout(() => setLoading(false), 150);
     return () => clearTimeout(timer);
   }, [user, selectedLanguage, query, sortKey]);
 
@@ -137,42 +213,75 @@ export default function Dashboard() {
     return () => window.removeEventListener('keydown', onKey);
   }, [selectedMaterial, isSidebarOpen]);
 
-  const handleLanguageSelect = (langId: string) => {
+  const handleLanguageSelect = (langId: string, comingSoon?: boolean) => {
+    if (comingSoon) return; // tidak memilih jika Coming Soon
     setSelectedLanguage(selectedLanguage === langId ? null : langId);
     setIsSidebarOpen(false);
   };
 
-  const toggleTheme = () => {
-    const root = document.documentElement;
-    const enable = !root.classList.contains('dark');
-    root.classList.toggle('dark', enable);
-    setDark(enable);
-  };
-
   if (showProfile) return <ProfilePage onBack={() => setShowProfile(false)} />;
 
-  // --- Components ---
+  /* ================================
+   * Components
+   * ================================ */
+
+  // Sidebar dibuat sticky & tidak ikut scroll nabrak header
   const LanguageSidebar = () => (
-    <div className={`p-6 ${user?.user_type === 'student' ? 'lg:block' : 'hidden'} bg-white/80 dark:bg-slate-900/70 shadow-xl lg:shadow-none lg:rounded-xl ring-1 ring-black/5 dark:ring-white/10`}>
+    <aside
+      className={[
+        'p-6',
+        user?.user_type === 'student' ? 'lg:block' : 'hidden',
+        'bg-white/80 dark:bg-slate-900/70 shadow-xl lg:shadow-none lg:rounded-xl ring-1 ring-black/5 dark:ring-white/10',
+        'lg:sticky lg:top-[82px]', // <- kunci anti “terscroll mendekati header”
+      ].join(' ')}
+    >
       <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
         <Languages className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
         Jalur Bahasa
       </h3>
+
       <div className="flex flex-col gap-3">
-        {languageData.map((lang) => (
-          <button
-            key={lang.id}
-            onClick={() => handleLanguageSelect(lang.id)}
-            className={`flex items-center gap-4 p-4 rounded-lg transition text-left w-full ring-1 ring-black/5 dark:ring-white/10
-            ${selectedLanguage === lang.id
-              ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
-              : 'bg-gray-50/80 dark:bg-slate-800/70 text-gray-700 dark:text-slate-200 hover:bg-blue-50/80 hover:text-blue-700 dark:hover:bg-slate-800'}
-            `}
-          >
-            <span className="text-2xl">{lang.icon}</span>
-            <span className="font-semibold">{lang.name}</span>
-          </button>
-        ))}
+        {languageData.map((lang) => {
+          const isActive = selectedLanguage === lang.id;
+          const disabled = !!lang.comingSoon;
+
+          return (
+            <button
+              key={lang.id}
+              onClick={() => handleLanguageSelect(lang.id, lang.comingSoon)}
+              disabled={disabled}
+              className={[
+                'group flex items-center gap-4 p-4 rounded-lg transition text-left w-full ring-1 ring-black/5 dark:ring-white/10',
+                isActive
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
+                  : 'bg-gray-50/80 dark:bg-slate-800/70 text-gray-700 dark:text-slate-200 hover:bg-blue-50/80 hover:text-blue-700 dark:hover:bg-slate-800',
+                disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer',
+              ].join(' ')}
+              title={disabled ? `${lang.name} — Coming Soon` : lang.name}
+            >
+              <span className="relative inline-flex items-center justify-center h-7 w-7 overflow-hidden rounded-md bg-white">
+                <img
+                  src={lang.iconUrl}
+                  alt={`${lang.name} logo`}
+                  className="h-7 w-7 object-contain"
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                />
+              </span>
+
+              <div className="flex items-center gap-3">
+                <span className="font-semibold">{lang.name}</span>
+                {lang.comingSoon && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
+                    <Lock className="w-3 h-3" />
+                    Coming&nbsp;Soon
+                  </span>
+                )}
+              </div>
+            </button>
+          );
+        })}
+
         {selectedLanguage && (
           <button
             onClick={() => setSelectedLanguage(null)}
@@ -183,42 +292,95 @@ export default function Dashboard() {
           </button>
         )}
       </div>
-    </div>
+    </aside>
   );
 
-  const Toolbar = () => (
-    <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-      <div className="relative flex-1 min-w-[220px]">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Cari materi (judul/deskripsi)"
-          className="w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 pl-10 pr-4 py-2.5 text-sm text-gray-800 dark:text-white outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15"
-        />
-      </div>
-      <div className="flex items-center gap-2">
-        <div className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2">
-          <Filter className="h-4 w-4 text-gray-400" />
-          <select
-            value={sortKey}
-            onChange={(e) => setSortKey(e.target.value as SortKey)}
-            className="bg-transparent text-sm text-gray-800 dark:text-white outline-none"
-          >
-            <option value="order">Urutan Modul</option>
-            <option value="title">Judul A-Z</option>
-            <option value="level">Level</option>
-          </select>
+  // --- Banner upgrade dinamis ---
+  const UpgradeBanner = () => {
+    if (plan === 'plus') {
+      return (
+        <div className="mt-3 rounded-xl ring-1 ring-emerald-200/60 dark:ring-emerald-800/40 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 dark:from-emerald-900/10 dark:via-slate-900 dark:to-emerald-900/10 p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex-1">
+              <p className="text-sm sm:text-base font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                <PartyPopper className="w-5 h-5" />
+                Selamat! Kamu sudah di paket <span className="underline decoration-emerald-400">Plus</span>
+              </p>
+              <p className="text-xs sm:text-sm text-emerald-700/90 dark:text-emerald-200/90">
+                Semua fitur premium telah terbuka. Nikmati akses penuh materi, mentor prioritas, dan sinkronisasi perangkat tanpa batas. 🚀
+              </p>
+            </div>
+          </div>
         </div>
-        <button
-          onClick={toggleTheme}
-          className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800"
-          title={dark ? 'Switch to Light' : 'Switch to Dark'}
-        >
-          {dark ? <SunMedium className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          <span className="hidden sm:inline">{dark ? 'Light' : 'Dark'}</span>
-        </button>
+      );
+    }
+
+    // free || pro → tampilkan CTA ke tier berikutnya
+    return (
+      <div className="mt-3 rounded-xl ring-1 ring-black/5 dark:ring-white/10 bg-gradient-to-r from-amber-50 via-white to-amber-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex-1">
+            <p className="text-sm sm:text-base font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-2">
+              <Crown className="w-5 h-5" />
+              {plan === 'free'
+                ? <>Upgrade ke <span className="underline decoration-amber-400">Pro</span></>
+                : <>Upgrade ke <span className="underline decoration-amber-400">Plus</span></>}
+            </p>
+            <p className="text-xs sm:text-sm text-amber-700/90 dark:text-amber-200/90">
+              {plan === 'free'
+                ? 'Buka modul premium, progress sync multi-device, dan dukungan mentor prioritas.'
+                : 'Dapatkan semua benefit Pro + fitur eksklusif Plus untuk pengalaman terbaik.'}
+            </p>
+          </div>
+          {nextTier && nextHref && (
+            <div className="flex gap-2">
+              <a
+                href={nextHref}
+                className="px-4 py-2 rounded-lg bg-amber-500 text-white font-semibold hover:bg-amber-600 transition"
+              >
+                Ke {nextTier}
+              </a>
+            </div>
+          )}
+        </div>
       </div>
+    );
+  };
+
+  const Toolbar = () => (
+    <div className="flex flex-col gap-3">
+      {/* Baris kontrol (search + sort) */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+        <div className="relative flex-1 min-w-[220px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <input
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            placeholder="Cari materi (judul/deskripsi)"
+            autoComplete="off"
+            spellCheck={false}
+            className="w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 pl-10 pr-4 py-2.5 text-sm text-gray-800 dark:text-white outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15"
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2">
+            <Filter className="h-4 w-4 text-gray-400" />
+            <select
+              value={sortKey}
+              onChange={(e) => setSortKey(e.target.value as SortKey)}
+              className="bg-transparent text-sm text-gray-800 dark:text-white outline-none"
+            >
+              <option value="order">Urutan Modul</option>
+              <option value="title">Judul A-Z</option>
+              <option value="level">Level</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Banner Upgrade di bawah pencarian */}
+      <UpgradeBanner />
     </div>
   );
 
@@ -331,36 +493,45 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="grid gap-4 sm:gap-6">
-                {materials.map((m) => (
-                  <article
-                    key={m.id}
-                    className="cursor-pointer rounded-2xl bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 shadow-md ring-1 ring-black/5 dark:ring-white/10 transition hover:shadow-lg hover:ring-blue-500/30 dark:hover:ring-cyan-400/30"
-                    onClick={() => setSelectedMaterial(m)}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="mb-2 flex items-center gap-3">
-                          <Award className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-cyan-400" />
-                          <h4 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white leading-snug">
-                            {m.order}. {m.title}
-                          </h4>
-                        </div>
-                        <p className="ml-8 text-gray-600 dark:text-slate-300 mb-3">{m.description}</p>
-                        <div className="ml-8 flex flex-wrap items-center gap-3">
-                          <span className={`text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold border ${levelPill(m.level as Level)}`}>
-                            {levelLabel[m.level as Level]}
-                          </span>
-                          {m.language && (
-                            <span className="text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-slate-200 border border-gray-300 dark:border-slate-700">
-                              {m.language.toUpperCase()}
+                {materials.map((m) => {
+                  const done = completedIds.has(m.id);
+                  return (
+                    <article
+                      key={m.id}
+                      className="cursor-pointer rounded-2xl bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 shadow-md ring-1 ring-black/5 dark:ring-white/10 transition hover:shadow-lg hover:ring-blue-500/30 dark:hover:ring-cyan-400/30"
+                      onClick={() => setSelectedMaterial(m)}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="mb-2 flex items-center gap-3">
+                            <Award className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-cyan-400" />
+                            <h4 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white leading-snug">
+                              {m.order}. {m.title}
+                            </h4>
+                            {done && (
+                              <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 text-xs font-semibold bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900/40 px-2.5 py-0.5 rounded-full">
+                                <CheckCircle2 className="w-4 h-4" />
+                                Selesai
+                              </span>
+                            )}
+                          </div>
+                          <p className="ml-8 text-gray-600 dark:text-slate-300 mb-3">{m.description}</p>
+                          <div className="ml-8 flex flex-wrap items-center gap-3">
+                            <span className={`text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold border ${levelPill(m.level as Level)}`}>
+                              {levelLabel[m.level as Level]}
                             </span>
-                          )}
+                            {m.language && (
+                              <span className="text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-slate-200 border border-gray-300 dark:border-slate-700">
+                                {m.language.toUpperCase()}
+                              </span>
+                            )}
+                          </div>
                         </div>
+                        <ChevronRight className="mt-1 h-6 w-6 text-blue-500 dark:text-cyan-300 flex-shrink-0" />
                       </div>
-                      <ChevronRight className="mt-1 h-6 w-6 text-blue-500 dark:text-cyan-300 flex-shrink-0" />
-                    </div>
-                  </article>
-                ))}
+                    </article>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -370,8 +541,8 @@ export default function Dashboard() {
       {/* Material Modal */}
       {selectedMaterial && (
         <div className="fixed inset-0 bg-black/60 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-4xl w-full my-8 max-h-[90vh] flex flex-col ring-1 ring-black/5 dark:ring-white/10">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
+          <div className="bg-white dark:bg-slate-800 dark:text-white rounded-2xl shadow-2xl max-w-4xl w-full my-8 max-h-[90vh] flex flex-col ring-1 ring-black/5 dark:ring-white/10">
+            <div className="flex rounded-2xl items-center justify-between p-6 border-b border-gray-200 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
               <div>
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{selectedMaterial.title}</h3>
                 <div className="mt-2 flex flex-wrap items-center gap-3">
@@ -398,12 +569,21 @@ export default function Dashboard() {
               <MaterialContent content={selectedMaterial.content} />
             </div>
 
-            <div className="p-6 border-t border-gray-200 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-900/60 flex justify-end">
+            <div className="p-6 border-t rounded-2xl border-gray-200 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-900/60 flex justify-end">
               <button
-                onClick={() => setSelectedMaterial(null)}
+                onClick={() => {
+                  // tandai selesai + simpan
+                  setCompletedIds((prev) => {
+                    const next = new Set(prev);
+                    next.add(selectedMaterial.id);
+                    saveCompleted(next);
+                    return next;
+                  });
+                  setSelectedMaterial(null);
+                }}
                 className="px-6 sm:px-8 py-2.5 sm:py-3 bg-blue-600 dark:bg-cyan-600 text-white rounded-xl font-semibold hover:bg-blue-700 dark:hover:bg-cyan-500 transition shadow-lg shadow-blue-600/20 dark:shadow-cyan-600/20"
               >
-                Selesai / Tutup
+                Selesai
               </button>
             </div>
           </div>

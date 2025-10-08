@@ -1,5 +1,7 @@
+import React, { useMemo, useState } from 'react';
 import { Copy, Check, WrapText, AlignLeft } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import ReactMarkdown, { Components } from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface MaterialContentProps {
   content: string;
@@ -19,12 +21,70 @@ export default function MaterialContent({ content }: MaterialContentProps) {
       setCopiedIndex(index);
       setTimeout(() => setCopiedIndex(null), 1800);
     } catch {
-      // noop
+      /* noop */
     }
   };
 
   const toggleWrap = (index: number) =>
     setWrapMap((m) => ({ ...m, [index]: !m[index] }));
+
+  // --------- Markdown components (typed) ----------
+  const mdComponents: Components = {
+    table: ({ children }) => (
+      <div className="my-4 overflow-x-auto rounded-xl ring-1 ring-black/5 dark:ring-white/10">
+        <table className="w-full border-collapse bg-white dark:bg-slate-900">
+          {children}
+        </table>
+      </div>
+    ),
+    thead: ({ children }) => (
+      <thead className="bg-gray-100/70 dark:bg-slate-800/80">{children}</thead>
+    ),
+    tbody: ({ children }) => <tbody>{children}</tbody>,
+    tr: ({ children }) => (
+      <tr className="border-b border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition">
+        {children}
+      </tr>
+    ),
+    th: ({ children, ...props }) => (
+      <th
+        {...props}
+        className="px-4 py-2 text-sm font-semibold text-left [&[align=center]]:text-center [&[align=right]]:text-right"
+      >
+        {children}
+      </th>
+    ),
+    td: ({ children, ...props }) => (
+      <td
+        {...props}
+        className="px-4 py-2 text-sm text-left [&[align=center]]:text-center [&[align=right]]:text-right"
+      >
+        {children}
+      </td>
+    ),
+    a: ({ href, children }) => (
+      <a
+        href={href as string}
+        className="underline decoration-dotted underline-offset-2 text-blue-600 dark:text-cyan-300 hover:opacity-90"
+        target="_blank"
+        rel="noreferrer noopener"
+      >
+        {children}
+      </a>
+    ),
+    code: (props) => {
+  const inline = (props as any).inline; // ← solusi universal
+  const { children } = props as any;
+  if (inline) {
+    return (
+      <code className="rounded bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 text-[0.85em] font-mono text-slate-800 dark:text-slate-200">
+        {children}
+      </code>
+    );
+  }
+  return <code>{children}</code>;
+},
+  };
 
   return (
     <div className="space-y-5">
@@ -35,7 +95,7 @@ export default function MaterialContent({ content }: MaterialContentProps) {
           return (
             <section
               key={index}
-              className="relative group overflow-hidden rounded-xl ring-1 ring-black/5 dark:ring-white/10"
+              className="relative group overflow-hidden rounded-2xl ring-1 ring-black/5 dark:ring-white/10"
             >
               {/* Header */}
               <div
@@ -99,7 +159,7 @@ export default function MaterialContent({ content }: MaterialContentProps) {
           );
         }
 
-        // text (markdown-lite) - tuned colors for dark mode
+        // TEXT pakai ReactMarkdown + GFM (tables, checklist, dsb)
         return (
           <article
             key={index}
@@ -116,7 +176,12 @@ export default function MaterialContent({ content }: MaterialContentProps) {
               prose-h3:text-slate-900 dark:prose-h3:text-slate-100
             "
           >
-            {renderMarkdownLite(part.content)}
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={mdComponents}
+            >
+              {normalizeTables(part.content)}
+            </ReactMarkdown>
           </article>
         );
       })}
@@ -124,7 +189,8 @@ export default function MaterialContent({ content }: MaterialContentProps) {
   );
 }
 
-// --- helpers ---
+/* ================= helpers ================= */
+
 function parseContent(text: string): Part[] {
   const parts: Part[] = [];
   const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
@@ -138,12 +204,62 @@ function parseContent(text: string): Part[] {
     parts.push({
       type: 'code',
       content: match[2].replace(/\n$/, ''),
-      language: match[1] || 'code',
+      language: (match[1] || 'code').trim(),
     });
     lastIndex = match.index + match[0].length;
   }
   if (lastIndex < text.length) parts.push({ type: 'text', content: text.substring(lastIndex) });
   return parts;
+}
+
+// Normalisasi blok tabel: hapus baris kosong di dalam tabel biar GFM selalu deteksi
+function normalizeTables(src: string): string {
+  const lines = src.replace(/\r\n?/g, '\n').split('\n');
+
+  const isPipeRow = (s: string) => {
+    const t = s.trim();
+    return t.includes('|') && /[^|\s]/.test(t.replace(/^\|/, '').replace(/\|$/, ''));
+  };
+  const isSeparator = (s: string) => {
+    const t = s.trim();
+    if (!isPipeRow(t)) return false;
+    const cells = t.replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
+    return cells.length > 0 && cells.every((c) => /^:?-{3,}:?$/.test(c));
+  };
+
+  const out: string[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+
+    if (isPipeRow(line)) {
+      let j = i + 1;
+      while (j < lines.length && lines[j].trim() === '') j++;
+      if (j < lines.length && isSeparator(lines[j])) {
+        out.push(lines[i].trim());
+        out.push(lines[j].trim());
+        j++;
+        while (j < lines.length) {
+          const t = lines[j].trim();
+          if (t === '') {
+            j++; // skip blank di dalam blok tabel
+            continue;
+          }
+          if (!isPipeRow(t)) break;
+          out.push(t);
+          j++;
+        }
+        out.push(''); // spacer sesudah tabel
+        i = j;
+        continue;
+      }
+    }
+
+    out.push(line);
+    i++;
+  }
+
+  return out.join('\n');
 }
 
 function getLanguageColor(language: string) {
@@ -166,172 +282,4 @@ function getLanguageColor(language: string) {
     code: 'bg-gray-800',
   };
   return map[language.toLowerCase()] || 'bg-gray-800';
-}
-
-// Lightweight markdown renderer with grouping for lists & basic inline styles
-function renderMarkdownLite(raw: string) {
-  const lines = raw.split('\n');
-  const nodes: JSX.Element[] = [];
-  let i = 0;
-  while (i < lines.length) {
-    const line = lines[i];
-
-    // headings
-    if (/^#\s+/.test(line)) {
-      nodes.push(
-        <h1 key={`h1-${i}`} className="text-2xl sm:text-3xl font-bold mt-6 mb-3">
-          {line.replace(/^#\s+/, '')}
-        </h1>
-      );
-      i++;
-      continue;
-    }
-    if (/^##\s+/.test(line)) {
-      nodes.push(
-        <h2 key={`h2-${i}`} className="text-xl sm:text-2xl font-bold mt-5 mb-3">
-          {line.replace(/^##\s+/, '')}
-        </h2>
-      );
-      i++;
-      continue;
-    }
-    if (/^###\s+/.test(line)) {
-      nodes.push(
-        <h3 key={`h3-${i}`} className="text-lg sm:text-xl font-semibold mt-4 mb-2">
-          {line.replace(/^###\s+/, '')}
-        </h3>
-      );
-      i++;
-      continue;
-    }
-
-    // unordered list block
-    if (/^-\s+/.test(line)) {
-      const items: string[] = [];
-      while (i < lines.length && /^-\s+/.test(lines[i])) {
-        items.push(lines[i].replace(/^-\s+/, ''));
-        i++;
-      }
-      nodes.push(
-        <ul key={`ul-${i}`} className="my-2 list-disc pl-6">
-          {items.map((it, idx) => (
-            <li key={idx} className="leading-relaxed">
-              {formatInline(it)}
-            </li>
-          ))}
-        </ul>
-      );
-      continue;
-    }
-
-    // ordered list block
-    if (/^\d+\.\s+/.test(line)) {
-      const items: string[] = [];
-      while (i < lines.length && /^\d+\.\s+/.test(lines[i])) {
-        items.push(lines[i].replace(/^\d+\.\s+/, ''));
-        i++;
-      }
-      nodes.push(
-        <ol key={`ol-${i}`} className="my-2 list-decimal pl-6">
-          {items.map((it, idx) => (
-            <li key={idx} className="leading-relaxed">
-              {formatInline(it)}
-            </li>
-          ))}
-        </ol>
-      );
-      continue;
-    }
-
-    // blockquote
-    if (/^>\s?/.test(line)) {
-      const quotes: string[] = [];
-      while (i < lines.length && /^>\s?/.test(lines[i])) {
-        quotes.push(lines[i].replace(/^>\s?/, ''));
-        i++;
-      }
-      nodes.push(
-        <blockquote className="border-l-4 border-blue-400/60 dark:border-cyan-400/60 pl-4 italic text-gray-700 dark:text-slate-300">
-          {quotes.map((q, idx) => (
-            <p key={idx} className="my-1">
-              {formatInline(q)}
-            </p>
-          ))}
-        </blockquote>
-      );
-      continue;
-    }
-
-    // horizontal rule
-    if (/^---+$/.test(line.trim())) {
-      nodes.push(<hr key={`hr-${i}`} className="my-4 border-gray-200 dark:border-slate-700" />);
-      i++;
-      continue;
-    }
-
-    // empty line -> spacer
-    if (line.trim() === '') {
-      nodes.push(<div key={`sp-${i}`} className="h-2" />);
-      i++;
-      continue;
-    }
-
-    // paragraph
-    nodes.push(
-      <p key={`p-${i}`} className="text-gray-700 dark:text-slate-300 leading-relaxed">
-        {formatInline(line)}
-      </p>
-    );
-    i++;
-  }
-
-  return nodes;
-}
-
-// Basic inline formatter: `code`, **bold**, *italic*, links [text](url)
-function formatInline(text: string) {
-  // split by backticks for inline code
-  const chunks = text.split(/(`[^`]+`)/g);
-  return (
-    <>
-      {chunks.map((ch, i) => {
-        if (/^`[^`]+`$/.test(ch)) {
-          return (
-            <code
-              key={i}
-              className="rounded bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 text-[0.85em] font-mono text-slate-800 dark:text-slate-200"
-            >
-              {ch.slice(1, -1)}
-            </code>
-          );
-        }
-        // links [text](url)
-        const linkMatch = ch.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
-        if (linkMatch) {
-          return (
-            <a
-              key={i}
-              href={linkMatch[2]}
-              className="underline decoration-dotted underline-offset-2 text-blue-600 dark:text-cyan-300 hover:opacity-90"
-              target="_blank"
-              rel="noreferrer noopener"
-            >
-              {linkMatch[1]}
-            </a>
-          );
-        }
-        // bold/italic (very lite)
-        let node: JSX.Element | string = ch;
-        node = Reactify(node)
-          .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-          .replace(/\*([^*]+)\*/g, '<em>$1</em>');
-        return <span key={i} dangerouslySetInnerHTML={{ __html: node }} />;
-      })}
-    </>
-  );
-}
-
-// helper to keep TS happy when using string replace to HTML
-function Reactify(s: string) {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
