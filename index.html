@@ -1,13 +1,210 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>New Coreline | by astbyte</title>
+
+    <!-- Title & Branding -->
+    <title>New Coreline | by AstByte</title>
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <link rel="apple-touch-icon" href="/icon.png" />
+
+    <!-- Theme Colors -->
+    <meta name="theme-color" content="#0ea5e9" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- SEO Meta -->
+    <meta
+      name="description"
+      content="Platform pembelajaran modern oleh AstByte — tingkatkan skill coding dengan Coreline."
+    />
+    <meta
+      name="keywords"
+      content="AstByte, Coreline, Coding, Programming, Student, Learning, AI, Education"
+    />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="New Coreline | by AstByte" />
+    <meta
+      property="og:description"
+      content="Platform pembelajaran interaktif oleh AstByte. Mulai perjalanan codingmu hari ini."
+    />
+    <meta property="og:image" content="/icon.png" />
+    <meta property="og:url" content="https://newcoreline.astbyte.com" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="New Coreline | by AstByte" />
+    <meta
+      name="twitter:description"
+      content="Platform pembelajaran modern oleh AstByte — tingkatkan skill coding dengan Coreline."
+    />
+    <meta name="twitter:image" content="/icon.png" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Wappalyzer-friendly meta (helps detection for Astro) -->
+<meta name="generator" content="Astro" />
+
+<!-- Sentry (Browser) -->
+<script src="https://browser.sentry-cdn.com/7.0.0/bundle.tracing.min.js" integrity="" crossorigin="anonymous"></script>
+<script>
+  Sentry && Sentry.init({
+    dsn: "https://YOUR_SENTRY_DSN@sentry.io/YOUR_PROJECT_ID",
+    tracesSampleRate: 0.2,
+  });
+</script>
+
+<!-- Google reCAPTCHA v3 (client) -->
+<script src="https://www.google.com/recaptcha/api.js?render=YOUR_RECAPTCHA_SITE_KEY"></script>
+<script>
+  grecaptcha.ready(function() {
+    grecaptcha.execute('YOUR_RECAPTCHA_SITE_KEY', {action: 'homepage'}).then(function(token) {
+      // kirim token ke server ketika perlu
+      console.log('recaptcha token', token);
+    });
+  });
+</script>
+
+<!-- Segment (analytics.js classic) -->
+<script>
+  !function(){var analytics=window.analytics=window.analytics||[]; if(!analytics.initialize){
+    if(analytics.invoked) return void(console && console.error && console.error("Segment snippet included twice."));
+    analytics.invoked=!0;
+    analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on"];
+    analytics.factory=function(e){return function(){var t=Array.prototype.slice.call(arguments); t.unshift(e); analytics.push(t); return analytics}};
+    for(var i=0;i<analytics.methods.length;i++){var key=analytics.methods[i]; analytics[key]=analytics.factory(key)}
+    analytics.load=function(key){var script=document.createElement("script"); script.type="text/javascript"; script.async=!0; script.src="https://cdn.segment.com/analytics.js/v1/" + key + "/analytics.min.js"; var first=document.getElementsByTagName("script")[0]; first.parentNode.insertBefore(script, first)};
+    analytics.SNIPPET_VERSION="4.1.0";
+    analytics.load("YOUR_SEGMENT_WRITE_KEY");
+    analytics.page();
+  }}();
+</script>
+
+<!-- Sift (client-side snippet - optional, detection by presence of sift global) -->
+<script>
+  window._sift = window._sift || [];
+  (function() {
+    var e = document.createElement("script"); e.type = "text/javascript"; e.async = true;
+    e.src = "https://cdn.sift.com/sift.js";
+    var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(e, s);
+  })();
+</script>
+
+<!-- Statsig (client-side SDK) -->
+<script src="https://cdn.statsig.com/js/statsig-1.3.0.min.js"></script>
+<script>
+  // CLIENT SDK key (safe to expose) — server needs secret for admin
+  statsig.initialize("YOUR_STATSIG_CLIENT_KEY")
+    .then(() => {
+      console.log("Statsig initialized");
+      // example check
+      const enabled = statsig.checkGate({ userID: "anon" }, "some_gate");
+      console.log("gate:", enabled);
+    });
+</script>
+
+    <!-- Base Style -->
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: linear-gradient(
+          135deg,
+          #f9fafb,
+          #e0f2fe,
+          #f0f9ff,
+          #e0f2fe
+        );
+        background-size: 300% 300%;
+        animation: gradientMove 15s ease infinite;
+        color: #0f172a;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: linear-gradient(135deg, #020617, #0f172a, #1e293b);
+          color: #f8fafc;
+        }
+      }
+      @keyframes gradientMove {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      #root {
+        opacity: 0;
+        transform: translateY(10px);
+        animation: fadeIn 0.8s ease-out forwards;
+      }
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      /* Loading indicator (sementara) */
+      #loading-screen {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #e0f2fe, #f0f9ff);
+        color: #0ea5e9;
+        font-weight: 700;
+        letter-spacing: 1px;
+        z-index: 50;
+      }
+      @media (prefers-color-scheme: dark) {
+        #loading-screen {
+          background: linear-gradient(135deg, #020617, #0f172a);
+          color: #38bdf8;
+        }
+      }
+    </style>
   </head>
+
   <body>
+    <!-- Optional preload screen -->
+    <div id="loading-screen">
+      <img 
+        src="/icon.png" 
+        alt="logo coreline by astbyte" 
+        class="w-6 h-5" />
+      Loading New Coreline...
+    </div>
     <div id="root"></div>
+
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Optional fadeout preload -->
+    <script>
+      window.addEventListener("load", () => {
+        const loader = document.getElementById("loading-screen");
+        if (loader) {
+          loader.style.opacity = "0";
+          loader.style.transition = "opacity 0.5s ease";
+          setTimeout(() => loader.remove(), 600);
+        }
+      });
+    </script>
   </body>
 </html>
