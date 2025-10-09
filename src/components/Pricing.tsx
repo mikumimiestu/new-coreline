@@ -5,7 +5,7 @@ import { Check, Zap, Crown, Sparkles, Shield, MessageCircle, ArrowRight, BadgeCh
  * Coreline Pricing Page
  * - React + TailwindCSS (no external state)
  * - Monthly/Yearly toggle with ~20% discount for yearly
- * - Three tiers: Student (Free), Pro, Prime
+ * - Three tiers: Student (Free), Pro, Plus
  * - Feature comparison, FAQs, Testimonials
  * - CTA buttons wired to placeholder links (replace with your routes/checkout)
  */
@@ -43,13 +43,13 @@ export default function PricingPage() {
       name: "Pro",
       tagline: "Level up dengan modul premium & sertifikat",
       icon: <Zap className="w-5 h-5" />,
-      monthly: 79000,
-      yearly: 760000, // ~20% off
+      monthly: 25000,
+      yearly: 240000, // ~20% off
       cta: { label: "Upgrade Pro", href: "/checkout/pro" },
       popular: true,
       features: [
         { label: "Semua di Student", ok: true },
-        { label: "Modul premium & studi kasus nyata", ok: true },
+        { label: "Modul penjelasan lengkap & studi kasus nyata", ok: true },
         { label: "Progress cloud sync multi-device", ok: true },
         { label: "Sertifikat terverifikasi Coreline", ok: true },
         { label: "Mentoring grup (2×/bulan)", ok: false },
@@ -58,13 +58,13 @@ export default function PricingPage() {
       ],
     },
     {
-      id: "prime",
-      name: "Prime",
+      id: "plus",
+      name: "Plus",
       tagline: "Pendampingan 1:1 & jalur karier intensif",
       icon: <Crown className="w-5 h-5" />,
       monthly: 149000,
       yearly: 1440000,
-      cta: { label: "Gabung Prime", href: "/checkout/prime" },
+      cta: { label: "Gabung Plus", href: "/checkout/Plus" },
       popular: false,
       features: [
         { label: "Semua di Pro", ok: true },
@@ -82,7 +82,7 @@ export default function PricingPage() {
       q: "Apakah bisa ganti paket kapan saja?",
       a: "Bisa. Upgrade/downgrade kapan pun; tagihan akan disesuaikan secara prorata tergantung metode pembayaran Anda.",
     },
-    { q: "Apakah ada diskon untuk pelajar?", a: "Ya, Student gratis. Untuk Pro/Prime kadang ada promo musiman—pantau pengumuman kami." },
+    { q: "Apakah ada diskon untuk pelajar?", a: "Ya, Student gratis. Untuk Pro/Plus kadang ada promo musiman—pantau pengumuman kami." },
     { q: "Bagaimana sertifikat diterbitkan?", a: "Sertifikat otomatis keluar saat progres materi mencapai 100% di aplikasi Coreline Anda." },
   ];
 
@@ -211,7 +211,7 @@ export default function PricingPage() {
             <p className="text-sm">Masih bingung pilih paket? Chat tim kami untuk rekomendasi.</p>
           </div>
           <a
-            href="https://wa.me/6281234567890?text=Halo%20Coreline%2C%20saya%20ingin%20konsultasi%20soal%20paket%20harga"
+            href="https://wa.me/6285183209494?text=Halo%20Coreline%2C%20saya%20ingin%20konsultasi%20soal%20paket%20harga"
             className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 text-white px-4 py-2.5 text-sm font-semibold hover:bg-emerald-600"
           >
             Konsultasi via WhatsApp
@@ -230,7 +230,7 @@ export default function PricingPage() {
                 <th className="py-4 pl-5 pr-3 font-semibold">Fitur</th>
                 <th className="py-4 px-3 font-semibold">Student</th>
                 <th className="py-4 px-3 font-semibold">Pro</th>
-                <th className="py-4 px-3 font-semibold">Prime</th>
+                <th className="py-4 px-3 font-semibold">Plus</th>
               </tr>
             </thead>
             <tbody>
@@ -241,7 +241,9 @@ export default function PricingPage() {
                 ["Cloud sync", false, true, true],
                 ["Mentoring grup", false, true, true],
                 ["Mentoring 1:1", false, false, true],
-                ["Bimbingan karier", false, true, true],
+                ["Bimbingan karier", false, false, true],
+                ["Kelas live", false, false, true],
+                ["Dukungan prioritas", false, false, true],
               ].map((row, i) => (
                 <tr key={i} className="border-t border-slate-100 dark:border-slate-800">
                   <td className="py-3 pl-5 pr-3 text-slate-800 dark:text-slate-200">{row[0] as string}</td>

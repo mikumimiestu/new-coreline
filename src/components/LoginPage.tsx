@@ -1,15 +1,7 @@
-import { useState} from 'react';
-import { Code2, Lock, AlertCircle, Loader2, Check } from 'lucide-react';
+import { useState } from 'react';
+import { Lock, AlertCircle, Loader2, Check, MessageCircle, Clock, ArrowRight } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
-/**
- * Modern, responsive, accessible login page using an access code.
- * Extra contents added:
- * - Contoh Kode Akses (copy-to-clipboard)
- * - Keuntungan (benefits)
- * - Help/Support card
- * - FAQ section
- */
 export default function LoginPage() {
   const [accessCode, setAccessCode] = useState('');
   const [error, setError] = useState('');
@@ -17,28 +9,21 @@ export default function LoginPage() {
   const { login } = useAuth();
 
   const normalized = (val: string) =>
-    val
-      .toUpperCase()
-      .replace(/\s+/g, '') // remove spaces
-      .slice(0, 24); // guardrail
+    val.toUpperCase().replace(/\s+/g, '').slice(0, 24);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
     const trimmed = normalized(accessCode);
     if (!trimmed) {
       setError('Kode akses wajib diisi.');
       return;
     }
-
     setLoading(true);
     try {
       const success = await login(trimmed);
-      if (!success) {
-        setError('Kode akses tidak valid. Silakan coba lagi.');
-      }
-    } catch (_err) {
+      if (!success) setError('Kode akses tidak valid. Silakan coba lagi.');
+    } catch {
       setError('Terjadi kesalahan. Silakan coba lagi.');
     } finally {
       setLoading(false);
@@ -56,6 +41,9 @@ export default function LoginPage() {
     setAccessCode(normalized(text));
   };
 
+  const waHref =
+    'https://api.whatsapp.com/send/?phone=6285183209494&text=Halo+AstByte%2C+saya+ingin+mendapatkan+code+akses+coreline.&type=phone_number&app_absent=0';
+
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
       {/* Decorative gradient blobs */}
@@ -63,6 +51,25 @@ export default function LoginPage() {
         <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-cyan-400/30 blur-3xl dark:bg-cyan-500/20" />
         <div className="absolute -bottom-16 -left-16 h-80 w-80 rounded-full bg-blue-400/30 blur-3xl dark:bg-blue-500/20" />
       </div>
+
+      {/* Sticky WhatsApp CTA (mobile-first) */}
+      {/* <div className="fixed inset-x-0 bottom-0 z-40 md:hidden">
+        <a
+          href={waHref}
+          target="_blank"
+          rel="noreferrer"
+          className="mx-3 mb-3 flex items-center justify-between gap-3 rounded-2xl bg-emerald-600 px-4 py-3 text-white shadow-xl ring-1 ring-black/5"
+        >
+          <span className="flex items-center gap-2">
+            <MessageCircle className="h-5 w-5" />
+            <span className="font-semibold">WhatsApp Admin</span>
+          </span>
+          <span className="flex items-center gap-2 text-xs rounded-full bg-white/20 px-2 py-1">
+            <Clock className="h-4 w-4" />
+            Very Speed &lt; 1 jam
+          </span>
+        </a>
+      </div> */}
 
       <div className="relative container mx-auto px-4 py-10 md:py-16">
         <div className="mx-auto max-w-6xl">
@@ -83,6 +90,23 @@ export default function LoginPage() {
           <section className="grid gap-6 md:grid-cols-2 md:gap-8 items-stretch">
             {/* Left: Form card */}
             <div className="relative rounded-2xl bg-white/80 p-6 md:p-8 shadow-xl ring-1 ring-black/5 backdrop-blur dark:bg-slate-900/70 dark:ring-white/10">
+              {/* Highlighted WhatsApp banner (desktop) */}
+              {/* <a
+                href={waHref}
+                target="_blank"
+                rel="noreferrer"
+                className="mb-6 hidden md:flex items-center justify-between rounded-xl bg-emerald-600/95 px-4 py-3 text-white shadow-lg"
+              > */}
+                {/* <div className="flex items-center gap-3">
+                  <MessageCircle className="h-5 w-5" />
+                  <span className="font-semibold">Butuh Kode Akses / Bantuan? WhatsApp Admin</span>
+                </div> */}
+                {/* <span className="flex items-center gap-2 text-xs rounded-full bg-white/20 px-2 py-1">
+                  <Clock className="h-4 w-4" />
+                  Very Speed &lt; 1 jam
+                </span> */}
+              {/* </a> */}
+
               <div className="mb-6 flex items-center gap-3">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-cyan-900/40 dark:text-cyan-300">
                   <Lock className="h-5 w-5" />
@@ -110,7 +134,6 @@ export default function LoginPage() {
                       aria-describedby={error ? 'accessCode-error' : undefined}
                       className="peer w-full rounded-xl border border-gray-300 bg-white/70 px-4 py-3 text-base font-semibold tracking-wider text-gray-900 placeholder:font-normal placeholder:tracking-normal placeholder:text-gray-400 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-400 dark:focus:border-cyan-400 dark:focus:ring-cyan-400/20"
                     />
-                    {/* Uppercase hint */}
                     <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 select-none rounded-md bg-gray-100 px-2 py-1 text-[10px] font-bold tracking-widest text-gray-500 shadow-sm ring-1 ring-black/5 dark:bg-slate-700 dark:text-slate-200 dark:ring-white/10">
                       UPPERCASE
                     </span>
@@ -146,8 +169,27 @@ export default function LoginPage() {
                   )}
                 </button>
 
+                {/* Prominent WhatsApp CTA inside form */}
+                <a
+                  href={waHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 outline-none transition hover:bg-emerald-700 focus-visible:ring-4 focus-visible:ring-emerald-500/30"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  <span>Minta Kode via WhatsApp</span>
+                  {/* <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px]">
+                    <Clock className="h-3.5 w-3.5" />
+                    Balasan &lt; 1 jam
+                  </span> */}
+                  <ArrowRight className="h-4 w-4 opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
+                </a>
+
                 <p className="text-center text-xs text-gray-500 dark:text-slate-400">
-                  Jika belum memiliki kode akses, silakan hubungi admin kami melalui <a href="https://api.whatsapp.com/send/?phone=6285183209494&text=Halo+AstByte%2C+saya+ingin+mendapatkan+code+akses+coreline.&type=phone_number&app_absent=0" className="underline underline-offset-2 hover:text-white">WhatsApp</a>.
+                  Atau email kami di{' '}
+                  <a href="mailto:admin@astbyte.com" className="underline underline-offset-2 hover:text-gray-700 dark:hover:text-white">
+                    admin@astbyte.com
+                  </a>.
                 </p>
               </form>
             </div>
@@ -162,21 +204,51 @@ export default function LoginPage() {
               </div>
 
               <div className="grid gap-3">
-                <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm">
-                  <h4 className="font-semibold">👨‍🎓 Student</h4>
+                {/* Student - aktif */}
+                <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm ring-1 ring-white/10">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-semibold">👨‍🎓 Student</h4>
+                    <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-100 ring-1 ring-emerald-200/30">
+                      Tersedia
+                    </span>
+                  </div>
                   <p className="text-sm text-blue-50/90">Akses materi Python, PHP, dan JavaScript</p>
                 </div>
-                <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm">
-                  <h4 className="font-semibold">🌐 Umum</h4>
-                  <p className="text-sm text-blue-50/90">Pengenalan programming dan algoritma dasar</p>
+
+                {/* Umum - Coming Soon */}
+                <div className="relative rounded-xl bg-white/5 p-4 backdrop-blur-sm ring-1 ring-white/10 opacity-90">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-semibold">🌐 Umum</h4>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-yellow-400/20 px-2 py-0.5 text-[10px] font-semibold text-yellow-100 ring-1 ring-yellow-200/30">
+                      <Lock className="h-3.5 w-3.5" />
+                      Coming&nbsp;Soon
+                    </span>
+                  </div>
+                  <p className="text-sm text-blue-50/80">Pengenalan programming & algoritma dasar</p>
                 </div>
-                <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm">
-                  <h4 className="font-semibold">💼 Pro</h4>
-                  <p className="text-sm text-blue-50/90">Design patterns dan clean code principles</p>
+
+                {/* Pro - Coming Soon */}
+                <div className="relative rounded-xl bg-white/5 p-4 backdrop-blur-sm ring-1 ring-white/10 opacity-90">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-semibold">💼 Pro</h4>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-yellow-400/20 px-2 py-0.5 text-[10px] font-semibold text-yellow-100 ring-1 ring-yellow-200/30">
+                      <Lock className="h-3.5 w-3.5" />
+                      Coming&nbsp;Soon
+                    </span>
+                  </div>
+                  <p className="text-sm text-blue-50/80">Design patterns & clean code principles</p>
                 </div>
-                <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm">
-                  <h4 className="font-semibold">🎮 Game</h4>
-                  <p className="text-sm text-blue-50/90">Game development dan Unity fundamentals</p>
+
+                {/* Game - Coming Soon */}
+                <div className="relative rounded-xl bg-white/5 p-4 backdrop-blur-sm ring-1 ring-white/10 opacity-90">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-semibold">🎮 Game</h4>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-yellow-400/20 px-2 py-0.5 text-[10px] font-semibold text-yellow-100 ring-1 ring-yellow-200/30">
+                      <Lock className="h-3.5 w-3.5" />
+                      Coming&nbsp;Soon
+                    </span>
+                  </div>
+                  <p className="text-sm text-blue-50/80">Game development & Unity fundamentals</p>
                 </div>
               </div>
 
@@ -198,13 +270,24 @@ export default function LoginPage() {
               </div>
 
               {/* Help */}
-              <div className="mt-6 rounded-xl bg-white/10 p-4 text-sm">
-                <p className="mb-1 font-semibold">Butuh bantuan?</p>
-                <p className="text-white/80">
-                  Hubungi support kami di{' '}
-                  <a href="mailto:support@codelearn.id" className="underline underline-offset-2 hover:text-white">admin@astbyte.com</a>{' '}
-                  atau hubungi admin kami <a href="https://api.whatsapp.com/send/?phone=6285183209494&text=Halo+AstByte%2C+saya+ingin+mendapatkan+code+akses+coreline.&type=phone_number&app_absent=0" className="underline underline-offset-2 hover:text-white">WhatsApp</a>.
-                </p>
+              <div className="mt-6 rounded-xl bg-white/10 p-4 text-sm ring-1 ring-white/10">
+                <p className="mb-2 font-semibold">Butuh bantuan cepat?</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <a
+                    href={waHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-white ring-1 ring-white"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    WhatsApp Admin
+                  </a>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-1 text-[10px]">
+                    <Clock className="h-3.5 w-3.5" />
+                    Very Speed &lt; 1 jam
+                  </span>
+                  <span className="text-white/80">atau email: <a href="mailto:admin@astbyte.com" className="underline">admin@astbyte.com</a></span>
+                </div>
               </div>
             </div>
           </section>
@@ -219,7 +302,9 @@ export default function LoginPage() {
                   <span className="text-xs text-gray-500 group-open:hidden">Buka</span>
                   <span className="text-xs text-gray-500 hidden group-open:inline">Tutup</span>
                 </summary>
-                <p className="mt-2 text-sm text-gray-600 dark:text-slate-300">Kode akses dikirim oleh admin/instruktur. Jika belum menerima, silakan hubungi support atau mendaftar jalur yang diinginkan.</p>
+                <p className="mt-2 text-sm text-gray-600 dark:text-slate-300">
+                  Kode akses dikirim oleh admin/instruktur. Jika belum menerima, silakan hubungi support atau mendaftar jalur yang diinginkan.
+                </p>
               </details>
               <details className="group rounded-xl border border-gray-200 bg-white/70 p-4 shadow-sm open:shadow-md dark:border-slate-700 dark:bg-slate-900/60">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-2">
@@ -227,7 +312,9 @@ export default function LoginPage() {
                   <span className="text-xs text-gray-500 group-open:hidden">Buka</span>
                   <span className="text-xs text-gray-500 hidden group-open:inline">Tutup</span>
                 </summary>
-                <p className="mt-2 text-sm text-gray-600 dark:text-slate-300">Masukkan kode apa adanya; sistem akan otomatis merapikan menjadi huruf besar tanpa spasi.</p>
+                <p className="mt-2 text-sm text-gray-600 dark:text-slate-300">
+                  Masukkan kode apa adanya; sistem akan otomatis merapikan menjadi huruf besar tanpa spasi.
+                </p>
               </details>
               <details className="group rounded-xl border border-gray-200 bg-white/70 p-4 shadow-sm open:shadow-md dark:border-slate-700 dark:bg-slate-900/60">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-2">
@@ -235,7 +322,9 @@ export default function LoginPage() {
                   <span className="text-xs text-gray-500 group-open:hidden">Buka</span>
                   <span className="text-xs text-gray-500 hidden group-open:inline">Tutup</span>
                 </summary>
-                <p className="mt-2 text-sm text-gray-600 dark:text-slate-300">Kami menerapkan praktik keamanan yang baik dan tidak menyimpan kode akses lebih lama dari yang diperlukan untuk proses autentikasi.</p>
+                <p className="mt-2 text-sm text-gray-600 dark:text-slate-300">
+                  Kami menerapkan praktik keamanan yang baik dan tidak menyimpan kode akses lebih lama dari yang diperlukan untuk proses autentikasi.
+                </p>
               </details>
             </div>
           </section>

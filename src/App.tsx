@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import LoginPage from "./components/LoginPage";
 import Dashboard from "./components/Dashboard";
 import PricingPage from "./components/Pricing";
+import MaterialPage from "./pages/MaterialPage";
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -22,6 +23,9 @@ function AppContent() {
     <Routes>
       {/* Halaman utama: kalau user login → Dashboard, kalau belum → Login */}
       <Route path="/" element={user ? <Dashboard /> : <LoginPage />} />
+      
+      {/* Halaman materi, bisa diakses siapa pun */}
+      <Route path="/materials/:id" element={<MaterialPage />} />
 
       {/* Pricing bisa diakses siapa pun */}
       <Route path="/pricing" element={<PricingPage />} />
