@@ -393,11 +393,11 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
               </div>
             </div>
 
-            {user?.subscription_type === 'free' && (
-              <button onClick={() => setShowPricing(true)} className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700">
+            <a href="/pricing">
+              <button className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700">
                 Upgrade Paket Sekarang
               </button>
-            )}
+            </a>
           </div>
 
           {/* History */}
