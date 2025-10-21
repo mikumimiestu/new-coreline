@@ -66,6 +66,11 @@ type Plan = 'free' | 'pro' | 'plus';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+      document.title = "Dashboard | New Coreline by AstByte";
+    }, []);
+
   const [materials, setMaterials] = useState<LearningMaterial[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(() =>
     typeof window !== 'undefined' ? localStorage.getItem('cl_lang') : null

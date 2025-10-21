@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Zap, Crown, Sparkles, Shield, MessageCircle, ArrowRight, BadgeCheck, HelpCircle, Star } from "lucide-react";
 
 /**
@@ -12,6 +12,10 @@ import { Check, Zap, Crown, Sparkles, Shield, MessageCircle, ArrowRight, BadgeCh
 
 export default function PricingPage() {
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
+
+  useEffect(() => {
+    document.title = "Pricing | New Coreline by AstByte";
+  }, []);
 
   const currency = (n: number) =>
     new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);

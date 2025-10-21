@@ -1,18 +1,28 @@
 // src/pages/ManualQRISPage.tsx
-// Final: no redirect pada logo, WA message sesuai metode (QRIS/bank/ewallet),
-// header/footer attribution, prominent Total (satu-satunya yang bisa disalin),
-// anti-inspect deterrent ringan, + alasan kenapa konfirmasi manual.
-// Perbaikan: hindari bentrok nama `Info` (ikon) vs komponen lokal.
+// Pay New Coreline by Xenza ID — Versi lengkap sesuai permintaan.
+//
+// - Title halaman & document.title jadi "Pay New Coreline by Xenza ID"
+// - Bank: BCA, BNI, Mandiri, BRI, UOB, CIMB, OCBC NISP (coming soon)
+// - E-Wallet: GoPay, DANA, ShopeePay, LinkAja, DOKU, OVO (OVO coming soon)
+// - Retail: Indomaret & Alfamart (coming soon) -> tampilkan kode (contoh) + cara bayar
+// - Logo tidak redirect (no href), hanya selectable
+// - Voucher opsional + diskon dihitung ke total; "Total Transfer" paling menonjol & satu-satunya yang bisa di-copy
+// - WA confirm menyesuaikan metode + brand; QRIS pakai wording "sudah bayar via QRIS"
+// - Alasan kenapa konfirmasi manual (card info)
+// - Anti-inspect deterrent ringan (disable contextmenu & hotkeys umum)
+//
+// Catatan: "coming soon" channel tetap bisa dipilih untuk preview UI, tapi diberi badge/notice.
+//          Anda bisa mengunci tombol WA jika ingin, tinggal tambahkan disabled state.
 
 import { useMemo, useState, useEffect } from "react";
 import {
   Copy, QrCode, Shield, Phone, BadgeCheck, ArrowRight,
-  BadgePercent, CreditCard, Info as InfoIcon
+  BadgePercent, CreditCard, Info as InfoIcon, AlertTriangle
 } from "lucide-react";
 
 type Tier = "student" | "pro" | "plus";
 type Cycle = "monthly" | "yearly";
-type MethodTab = "qris" | "bank" | "ewallet";
+type MethodTab = "qris" | "bank" | "ewallet" | "retail";
 
 const MERCHANT_NAME = "Xenza ID";
 const NMID = "ID1023244802444";
@@ -28,9 +38,9 @@ const DEFAULT_PRICE: Record<Tier, { monthly: number; yearly: number }> = {
 
 // Demo vouchers
 const VOUCHERS: Record<string, { type: "percent" | "fixed"; value: number; note?: string }> = {
-  CORELINE10: { type: "percent", value: 10, note: "Diskon 10%" },
-  ASTBYTE20: { type: "percent", value: 20, note: "Diskon 20%" },
-  GASKEN50K: { type: "fixed", value: 50000, note: "Potongan Rp50.000" },
+  CORELINESATU: { type: "percent", value: 5, note: "Diskon 5%" },
+  ASTBYTEJAYA25: { type: "percent", value: 15, note: "Diskon 15%" },
+  HARUSCORELINE: { type: "fixed", value: 70000, note: "Potongan Rp70.000" },
 };
 
 const rupiah = (n: number) =>
@@ -61,18 +71,29 @@ function calcDiscount(nominal: number, code: string) {
 }
 
 // Logo sets (local files or text fallback)
-type BrandLogo = { id: string; name: string; src?: string };
+type BrandLogo = { id: string; name: string; src?: string; comingSoon?: boolean };
 
 const BANK_LOGOS: BrandLogo[] = [
-  { id: "bca", name: "BCA", src: "/logos/bca.svg" },
-  { id: "bni", name: "BNI", src: "/logos/bni.svg" },
-  { id: "dbs", name: "DBS", src: "/logos/dbs.svg" },
+  { id: "bca", name: "BCA", src: "/logos/bca.png" },
+  { id: "bni", name: "BNI", src: "/logos/bni.png" },
+  { id: "mandiri", name: "Mandiri", src: "/logos/mandiri.png" },
+  { id: "bri", name: "BRI", src: "/logos/bri.png", comingSoon: true  },
+  { id: "uob", name: "UOB", src: "/logos/uob.png", comingSoon: true  },
+  { id: "cimb", name: "CIMB", src: "/logos/cimb.png", comingSoon: true  },
+  { id: "ocbcnisp", name: "OCBC NISP", src: "/logos/ocbc.png", comingSoon: true },
 ];
 
 const EWALLET_LOGOS: BrandLogo[] = [
-  { id: "gopay", name: "GoPay", src: "/logos/gopay.svg" },
-  { id: "dana", name: "DANA", src: "/logos/dana.svg" },
-  { id: "shopeepay", name: "ShopeePay", src: "/logos/shopeepay.svg" },
+  { id: "gopay", name: "GoPay", src: "/logos/gopay.png" },
+  { id: "dana", name: "DANA", src: "/logos/dana.png" },
+  { id: "shopeepay", name: "ShopeePay", src: "/logos/spay.png" },
+  { id: "linkaja", name: "LinkAja", src: "/logos/linkaja.png", comingSoon: true },
+  { id: "ovo", name: "OVO", src: "/logos/ovo.png", comingSoon: true },
+];
+
+const RETAIL_LOGOS: BrandLogo[] = [
+  { id: "indomaret", name: "Indomaret", src: "/logos/indomaret.png", comingSoon: true },
+  { id: "alfamart", name: "Alfamart", src: "/logos/alfamart.png", comingSoon: true },
 ];
 
 // Build WhatsApp confirmation link with proper wording
@@ -87,18 +108,31 @@ const makeWaLink = (p: {
   methodTab: MethodTab;
   brandName?: string;
   voucher?: string;
+  comingSoon?: boolean;
+  retailCode?: string;
 }) => {
-  const methodText =
+  let methodText =
     p.methodTab === "qris"
       ? "QRIS"
       : p.methodTab === "bank"
       ? `transfer bank${p.brandName ? ` (${p.brandName})` : ""}`
-      : `e-wallet${p.brandName ? ` (${p.brandName})` : ""}`;
+      : p.methodTab === "ewallet"
+      ? `e-wallet${p.brandName ? ` (${p.brandName})` : ""}`
+      : `retail${p.brandName ? ` (${p.brandName})` : ""}`;
 
   const header =
     p.methodTab === "qris"
       ? "Saya sudah melakukan pembayaran via QRIS."
       : `Saya mau bayar lewat ${methodText}.`;
+
+  const extra =
+    p.methodTab === "retail"
+      ? (p.comingSoon
+          ? "\n\nCatatan: Channel retail ini masih COMING SOON. Mohon panduan lebih lanjut/alternatif pembayaran."
+          : p.retailCode
+          ? `\n• Kode Retail: ${p.retailCode}\nSaya akan menunjukkan kode ini ke kasir.`
+          : "")
+      : "";
 
   const text = `Halo Admin Xenza 👋
 ${header}
@@ -111,13 +145,18 @@ ${header}
 • Diskon   : ${p.discount > 0 ? "-" + rupiah(p.discount) : "-"}
 • Kode unik: ${p.unique}
 • Total TF : ${rupiah(p.total)}
-${p.voucher ? `• Voucher  : ${p.voucher.toUpperCase()}` : ""}
+${p.voucher ? `• Voucher  : ${p.voucher.toUpperCase()}` : ""}${extra}
 
 Saya akan kirim bukti transfer (screenshot) setelah ini. Terima kasih 🙏`;
   return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(text)}`;
 };
 
 export default function ManualQRISPage() {
+  // Set browser tab title
+  useEffect(() => {
+    document.title = "Pay | New Coreline by Xenza ID";
+  }, []);
+
   // Anti-inspect deterrent (not foolproof)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -159,12 +198,28 @@ export default function ManualQRISPage() {
   const unique = useMemo(() => uniqueFromPayload(nominalAfterDisc, Date.now() % 1e6), [nominalAfterDisc]);
   const total = nominalAfterDisc + unique;
 
-  const brandName =
+  const brandFromSets =
     methodTab === "bank"
-      ? BANK_LOGOS.find((b) => b.id === selectedBrand)?.name
+      ? BANK_LOGOS.find((b) => b.id === selectedBrand)
       : methodTab === "ewallet"
-      ? EWALLET_LOGOS.find((e) => e.id === selectedBrand)?.name
+      ? EWALLET_LOGOS.find((e) => e.id === selectedBrand)
+      : methodTab === "retail"
+      ? RETAIL_LOGOS.find((r) => r.id === selectedBrand)
       : undefined;
+
+  const brandName = brandFromSets?.name;
+  const brandComingSoon = !!brandFromSets?.comingSoon;
+
+  // Retail: generate example payment code (dummy) for UX preview
+  const retailCode = useMemo(() => {
+    if (methodTab !== "retail" || !selectedBrand) return "";
+    const seed = orderId.replace(/\D/g, "").slice(-6);
+    // 12-digit demo code
+    const base = `${seed}${(unique % 1000).toString().padStart(3, "0")}${(nominalAfterDisc % 1000)
+      .toString()
+      .padStart(3, "0")}`;
+    return base.slice(0, 12);
+  }, [methodTab, selectedBrand, orderId, unique, nominalAfterDisc]);
 
   const onCopyTotal = async () => {
     try {
@@ -173,17 +228,32 @@ export default function ManualQRISPage() {
     } catch {}
   };
 
+  const waLink = makeWaLink({
+    orderId,
+    nominal: nominalRaw,
+    discount: disc.amount,
+    unique,
+    total,
+    tier: tierParam,
+    cycle: cycleParam,
+    methodTab,
+    brandName,
+    voucher,
+    comingSoon: brandComingSoon || methodTab === "retail",
+    retailCode: methodTab === "retail" ? retailCode : undefined,
+  });
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 text-slate-800 dark:text-slate-100 select-none">
       <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 max-w-5xl">
         {/* Header */}
         <div className="mb-6 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-sky-200/70 dark:border-cyan-800/40 bg-white/80 dark:bg-slate-900/60 px-3 py-1 text-xs font-semibold text-sky-700 dark:text-cyan-300">
-            <BadgeCheck className="w-4 h-4" /> Halaman Pembayaran by Xenza ID
+            <BadgeCheck className="w-4 h-4" /> Pay New Coreline by Xenza ID
           </div>
           <h1 className="mt-3 text-2xl sm:text-4xl font-extrabold tracking-tight">Pembayaran Aman & Terverifikasi</h1>
           <p className="mt-2 text-slate-600 dark:text-slate-300">
-            Pilih metode (QRIS / Bank / E-Wallet), lakukan pembayaran sesuai <b>Total Transfer</b>, lalu konfirmasi via WhatsApp.
+            Pilih metode (QRIS / Bank / E-Wallet / Retail), lakukan pembayaran sesuai <b>Total Transfer</b>, lalu konfirmasi via WhatsApp.
           </p>
         </div>
 
@@ -215,7 +285,6 @@ export default function ManualQRISPage() {
               <div className="mt-1 flex rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900 overflow-hidden">
                 <input
                   type="text"
-                  placeholder="Misal: CORELINE10"
                   className="w-full bg-transparent px-4 py-3 outline-none uppercase tracking-wider"
                   value={voucher}
                   onChange={(e) => setVoucher(e.target.value)}
@@ -265,23 +334,27 @@ export default function ManualQRISPage() {
 
           {/* Right: Method & content */}
           <div className="rounded-2xl ring-1 ring-black/5 dark:ring-white/10 bg-white/90 dark:bg-slate-900/70 p-5 sm:p-6">
-            <div className="flex items中心 gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
               <CreditCard className="w-4 h-4" /> Pilih Metode Pembayaran
             </div>
             <div className="mt-3 inline-flex rounded-xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900 p-1">
-              {(["qris", "bank", "ewallet"] as MethodTab[]).map((tab) => (
+              {(["qris", "bank", "ewallet", "retail"] as MethodTab[]).map((tab) => (
                 <button
                   key={tab}
-                  onClick={() => setMethodTab(tab)}
+                  onClick={() => {
+                    setMethodTab(tab);
+                    setSelectedBrand(undefined);
+                  }}
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
                     methodTab === tab ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-700 dark:text-slate-200"
                   }`}
                 >
-                  {tab === "qris" ? "QRIS" : tab === "bank" ? "Bank" : "E-Wallet"}
+                  {tab === "qris" ? "QRIS" : tab === "bank" ? "Bank" : tab === "ewallet" ? "E-Wallet" : "Retail"}
                 </button>
               ))}
             </div>
 
+            {/* Content per method */}
             {methodTab === "qris" ? (
               <div className="mt-4">
                 <div className="text-sm text-slate-500 mb-2">Scan QR berikut di aplikasi e-wallet/bank kamu:</div>
@@ -289,13 +362,62 @@ export default function ManualQRISPage() {
                   <img src={QR_IMAGE_PATH} alt="QRIS Xenza" className="w-full h-full object-contain p-4" />
                 </div>
               </div>
-            ) : (
+            ) : methodTab === "bank" ? (
               <LogoGrid
-                title={methodTab === "bank" ? "Pilih Bank:" : "Pilih E-Wallet:"}
-                items={methodTab === "bank" ? BANK_LOGOS : EWALLET_LOGOS}
+                title="Pilih Bank:"
+                items={BANK_LOGOS}
                 selectedId={selectedBrand}
                 onSelect={(id) => setSelectedBrand(id)}
               />
+            ) : methodTab === "ewallet" ? (
+              <LogoGrid
+                title="Pilih E-Wallet:"
+                items={EWALLET_LOGOS}
+                selectedId={selectedBrand}
+                onSelect={(id) => setSelectedBrand(id)}
+              />
+            ) : (
+              <>
+                <LogoGrid
+                  title="Pilih Gerai Retail:"
+                  items={RETAIL_LOGOS}
+                  selectedId={selectedBrand}
+                  onSelect={(id) => setSelectedBrand(id)}
+                />
+
+                {/* Retail payment code & steps (coming soon preview) */}
+                <div className="mt-4 rounded-2xl ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+                  <div className="px-4 py-3 bg-slate-100 dark:bg-slate-800/60 text-sm font-semibold flex items-center justify-between">
+                    <span>Kode Pembayaran (contoh)</span>
+                    <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-300">
+                      <AlertTriangle className="w-4 h-4" /> Coming Soon
+                    </span>
+                  </div>
+                  <div className="px-4 py-5 bg-white/90 dark:bg-slate-900/70">
+                    {selectedBrand ? (
+                      <>
+                        <div className="text-2xl font-mono font-bold tracking-widest text-slate-900 dark:text-white">
+                          {retailCode || "—"}
+                        </div>
+                        <div className="mt-3 text-xs text-slate-500">
+                          * Kode di atas adalah <b>contoh</b>. Kode asli akan tampil saat channel aktif.
+                        </div>
+                        <div className="mt-4">
+                          <div className="text-sm font-semibold">Cara Bayar di {brandName} (nanti saat aktif):</div>
+                          <ol className="mt-2 text-sm text-slate-700 dark:text-slate-300 list-decimal pl-5 space-y-1.5">
+                            <li>Tunjukkan <b>kode pembayaran</b> ini ke kasir {brandName}.</li>
+                            <li>Sebutkan nominal total: <b>{rupiah(total)}</b>.</li>
+                            <li>Selesaikan pembayaran dan simpan <b>struk</b>.</li>
+                            <li>Kirimkan foto struk via WhatsApp untuk verifikasi.</li>
+                          </ol>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-sm text-slate-500">Pilih gerai retail terlebih dahulu.</div>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
 
             {/* WHY MANUAL CONFIRMATION */}
@@ -305,30 +427,20 @@ export default function ManualQRISPage() {
                 Kenapa konfirmasi pembayaran <i>manual</i>?
               </div>
               <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-                Untuk keamanan & akurasi. Beberapa kanal (bank/e-wallet) tidak selalu mengirim notifikasi otomatis yang konsisten.
-                Dengan bukti transfer, tim kami bisa:
+                Untuk keamanan & akurasi. Beberapa kanal (bank/e-wallet/retail) tidak selalu mengirim notifikasi otomatis yang konsisten.
+                Dengan bukti transfer/struk, tim kami bisa:
               </p>
               <ul className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300 list-disc pl-5 space-y-1">
-                <li>Mencocokkan <b>nominal + kode unik</b> agar tidak salah imput.</li>
+                <li>Mencocokkan <b>nominal + kode unik</b> agar tidak salah input.</li>
                 <li>Menghindari <b>fraud/chargeback</b> & transaksi ganda.</li>
                 <li>Menyesuaikan perbedaan waktu <b>settlement</b> antar kanal.</li>
                 <li>Memastikan aktivasi akses tepat ke akun yang benar.</li>
               </ul>
             </div>
 
+            {/* WA Confirm */}
             <a
-              href={makeWaLink({
-                orderId,
-                nominal: nominalRaw,
-                discount: disc.amount,
-                unique,
-                total,
-                tier: tierParam,
-                cycle: cycleParam,
-                methodTab,
-                brandName,
-                voucher,
-              })}
+              href={waLink}
               target="_blank"
               rel="noreferrer"
               className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 text-white px-4 py-3 text-sm font-semibold hover:bg-emerald-600"
@@ -388,7 +500,7 @@ function LogoGrid({
   onSelect,
 }: {
   title: string;
-  items: { id: string; name: string; src?: string }[];
+  items: { id: string; name: string; src?: string; comingSoon?: boolean }[];
   selectedId?: string;
   onSelect: (id: string) => void;
 }) {
@@ -402,16 +514,22 @@ function LogoGrid({
             <button
               key={it.id}
               onClick={() => onSelect(it.id)}
-              className={`w-full h-full grid place-items-center p-3 rounded-xl border transition ${
+              className={`relative w-full h-full grid place-items-center p-3 rounded-xl border transition ${
                 isSel
                   ? "border-sky-400 ring-2 ring-sky-200 dark:ring-cyan-800 bg-white dark:bg-slate-800"
                   : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 hover:opacity-90"
               }`}
+              title={it.comingSoon ? "Coming Soon" : it.name}
             >
               {it.src ? (
                 <img src={it.src} alt={it.name} className="h-8 object-contain" />
               ) : (
                 <span className="text-sm font-semibold">{it.name}</span>
+              )}
+              {it.comingSoon && (
+                <span className="absolute top-2 right-2 text-[10px] font-semibold rounded bg-amber-100 text-amber-700 px-2 py-0.5">
+                  Coming Soon
+                </span>
               )}
             </button>
           );
@@ -419,9 +537,11 @@ function LogoGrid({
       </div>
       <div className="mt-2 text-xs text-slate-500">
         {selectedId ? (
-          <>Dipilih: <b>{items.find((x) => x.id === selectedId)?.name}</b></>
+          <>
+            Dipilih: <b>{items.find((x) => x.id === selectedId)?.name}</b>
+          </>
         ) : (
-          <>Silakan pilih salah satu logo di atas.</>
+          <>Silakan pilih salah satu metode pembayaran di atas.</>
         )}
       </div>
     </div>

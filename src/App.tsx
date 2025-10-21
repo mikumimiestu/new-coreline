@@ -4,7 +4,8 @@ import LoginPage from "./components/LoginPage";
 import Dashboard from "./components/Dashboard";
 import PricingPage from "./components/Pricing";
 import MaterialPage from "./pages/MaterialPage";
-import ManualQRISPage from "./components/Pay"; // pastikan file komponen /pay kamu di-import benar
+import ManualQRISPage from "./components/Pay";
+import PromoPage from "./components/Promo";
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -33,6 +34,9 @@ function AppContent() {
 
       {/* Halaman pembayaran manual QRIS (match dengan href dari Pricing: /pay?tier=...&amount=...&cycle=...) */}
       <Route path="/pay" element={<ManualQRISPage />} />
+
+      {/* Halaman promo */}
+      <Route path="/promo" element={<PromoPage />} />
 
       {/* Optional placeholder lama (boleh hapus kalau nggak dipakai) */}
       <Route path="/checkout/pro" element={<div className="p-8">Checkout Pro (placeholder)</div>} />

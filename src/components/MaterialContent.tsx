@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Copy, Check, WrapText, AlignLeft } from 'lucide-react';
 import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -11,6 +11,12 @@ type Part = { type: 'text' | 'code'; content: string; language?: string };
 
 export default function MaterialContent({ content }: MaterialContentProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
+  // Title berdasarkan halaman materi
+  useEffect(() => {
+      document.title = "Materi | New Coreline by AstByte";
+    }, []);
+
   const [wrapMap, setWrapMap] = useState<Record<number, boolean>>({});
 
   const parts = useMemo(() => parseContent(content), [content]);
