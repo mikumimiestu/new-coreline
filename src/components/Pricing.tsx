@@ -7,7 +7,7 @@ import { Check, Zap, Crown, Sparkles, Shield, MessageCircle, ArrowRight, BadgeCh
  * - Monthly/Yearly toggle with ~20% discount for yearly
  * - Three tiers: Student (Free), Pro, Plus
  * - Feature comparison, FAQs, Testimonials
- * - CTA buttons wired to placeholder links (replace with your routes/checkout)
+ * - CTA -> /pay?tier=...&amount=...&cycle=monthly|yearly
  */
 
 export default function PricingPage() {
@@ -18,6 +18,10 @@ export default function PricingPage() {
 
   const price = (monthly: number, yearly: number) => (billing === "monthly" ? monthly : yearly);
 
+  // helper buat bikin link ke /pay
+  const payHref = (id: string, monthly: number, yearly: number) =>
+    `/pay?tier=${encodeURIComponent(id)}&amount=${price(monthly, yearly)}&cycle=${billing}`;
+
   const tiers = [
     {
       id: "student",
@@ -26,7 +30,6 @@ export default function PricingPage() {
       icon: <Sparkles className="w-5 h-5" />,
       monthly: 0,
       yearly: 0,
-      cta: { label: "Mulai Gratis", href: "/register" },
       popular: false,
       features: [
         { label: "Akses materi dasar (bahasa pemrograman pilihan)", ok: true },
@@ -45,7 +48,6 @@ export default function PricingPage() {
       icon: <Zap className="w-5 h-5" />,
       monthly: 25000,
       yearly: 240000, // ~20% off
-      cta: { label: "Upgrade Pro", href: "/checkout/pro" },
       popular: true,
       features: [
         { label: "Semua di Student", ok: true },
@@ -64,7 +66,6 @@ export default function PricingPage() {
       icon: <Crown className="w-5 h-5" />,
       monthly: 149000,
       yearly: 1440000,
-      cta: { label: "Gabung Plus", href: "/checkout/Plus" },
       popular: false,
       features: [
         { label: "Semua di Pro", ok: true },
@@ -75,7 +76,7 @@ export default function PricingPage() {
         { label: "SLAs dukungan < 24 jam", ok: true },
       ],
     },
-  ];
+  ] as const;
 
   const faqs = [
     {
@@ -182,8 +183,9 @@ export default function PricingPage() {
                 ))}
               </ul>
 
+              {/* CTA -> /pay */}
               <a
-                href={t.cta.href}
+                href={payHref(t.id, t.monthly, t.yearly)}
                 className={`mt-7 group w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition ${
                   t.id === "student"
                     ? "bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 hover:opacity-90"
@@ -192,7 +194,7 @@ export default function PricingPage() {
                     : "bg-amber-500 text-white hover:bg-amber-600"
                 }`}
               >
-                {t.cta.label}
+                {t.id === "student" ? "Mulai Gratis" : t.id === "pro" ? "Upgrade Pro" : "Gabung Plus"}
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
               </a>
 
@@ -306,10 +308,10 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* Footer CTA */}
+        {/* Footer CTA -> /pay untuk Student */}
         <div className="mt-10 text-center">
           <a
-            href="/register"
+            href={payHref("student", 0, 0)}
             className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-6 py-3 font-semibold hover:opacity-90"
           >
             Coba Student Gratis Sekarang <ArrowRight className="w-4 h-4" />

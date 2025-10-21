@@ -393,11 +393,10 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
               </div>
             </div>
 
-            <a href="/pricing">
+            <a href="/pricing"></a>
               <button className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700">
                 Upgrade Paket Sekarang
               </button>
-            </a>
           </div>
 
           {/* History */}
