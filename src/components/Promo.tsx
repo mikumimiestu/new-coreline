@@ -76,7 +76,7 @@ export default function PromoPage() {
   }
 
   async function handleShare(promo: Promo) {
-    const shareUrl = `${window.location.origin}/promo?id=${promo.id}`;
+    const shareUrl = `${window.location.origin}/promo/${promo.id}.html`;
     const shareData = {
       title: promo.title,
       text: `${promo.description}\nLihat promo lengkap di sini:`,
