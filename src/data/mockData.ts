@@ -50,7 +50,7 @@ export const MOCK_USERS: User[] = [
     username: 'mikumistu',
     email: 'mikumiestu@astbyte.com',
     phone: '-',
-    subscription_type: 'free',
+    subscription_type: 'pro',
     subscription_period: null,
     subscription_start: null,
     subscription_end: null,
