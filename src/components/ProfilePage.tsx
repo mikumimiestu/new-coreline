@@ -7,7 +7,6 @@ import {
   Mail,
   Phone,
   CreditCard,
-  Calendar,
   CheckCircle,
   XCircle,
   Crown,
@@ -17,6 +16,8 @@ import {
   Check,
   ShieldCheck,
   Edit3,
+  Loader2,
+  Image as ImageIcon,
 } from "lucide-react";
 
 interface ProfilePageProps {
@@ -28,10 +29,12 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [showPricing, setShowPricing] = useState(false);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [toast, setToast] = useState<string | null>(null);
+
+  // --- NEW: track photo error (fallback ke inisial) ---
+  const [photoError, setPhotoError] = useState(false);
 
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -39,6 +42,19 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
     email: user?.email || "",
     phone: user?.phone || "",
   });
+
+  // Sinkronisasi form ketika user berganti (misal refresh/restore dari localStorage)
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        username: user.username || "",
+        email: user.email || "",
+        phone: (user.phone as string) || "",
+      });
+      setPhotoError(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -64,20 +80,20 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
   function getSubscriptionBadge(type?: string) {
     if (type === "pro") {
       return (
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full font-semibold">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full text-sm font-semibold shadow-sm">
           <Crown className="w-4 h-4" /> PRO
         </div>
       );
     }
     if (type === "plus") {
       return (
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full font-semibold">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-sm font-semibold shadow-sm">
           <Sparkles className="w-4 h-4" /> PLUS
         </div>
       );
     }
     return (
-      <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-full font-semibold">
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-200 text-gray-700 rounded-full text-sm font-semibold">
         FREE
       </div>
     );
@@ -156,6 +172,18 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
     }
   }
 
+  function handleCancel() {
+    if (!user) return;
+    setFormData({
+      name: user.name || "",
+      username: user.username || "",
+      email: user.email || "",
+      phone: (user.phone as string) || "",
+    });
+    setErrors({});
+    setIsEditing(false);
+  }
+
   function handleCopyId() {
     if (!user?.id) return;
     navigator.clipboard.writeText(user.id);
@@ -163,21 +191,40 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
     setTimeout(() => setCopied(false), 1200);
   }
 
+  // --- NEW: Avatar with photo_url fallback ---
   const avatar = (
-    <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-600 text-white">
-      <span className="text-xl font-bold">
-        {initials(formData.name || user?.name)}
-      </span>
+    <div className="relative h-16 w-16 sm:h-20 sm:w-20">
+      {user?.photo_url && !photoError ? (
+        <img
+          src={user.photo_url}
+          alt={user.name || "User avatar"}
+          className="h-full w-full rounded-full object-cover ring-2 ring-white/60 shadow-md"
+          onError={() => setPhotoError(true)}
+          loading="lazy"
+        />
+      ) : (
+        <div className="relative flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-600 text-white ring-2 ring-white/60 shadow-md">
+          <span className="text-xl sm:text-2xl font-bold">
+            {initials(formData.name || user?.name)}
+          </span>
+        </div>
+      )}
+
+      {/* verified badge */}
       <span className="absolute -bottom-2 right-0 rounded-full bg-white p-1 shadow ring-1 ring-black/5">
         <ShieldCheck className="h-4 w-4 text-blue-600" />
       </span>
+
+      {/* edit hint (visual only) */}
+      <span className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-t from-black/0 via-black/0 to-black/10"></span>
     </div>
   );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 pb-8">
+      {/* Top bar */}
       <div className="bg-white/80 dark:bg-slate-900/70 backdrop-blur ring-1 ring-black/5 dark:ring-white/10 mb-6 sticky top-0 z-30">
-        <div className="container mx-auto px-4 py-3">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <button
             onClick={onBack}
             className="inline-flex items-center gap-2 text-gray-800 dark:text-slate-200 hover:opacity-80"
@@ -192,7 +239,8 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
         <div className="mx-auto max-w-4xl">
           {/* Card */}
           <div className="overflow-hidden rounded-2xl ring-1 ring-black/5 dark:ring-white/10 bg-white/80 dark:bg-slate-900/70 shadow">
-            <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-8 text-white">
+            {/* Header gradient */}
+            <div className="bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-blue-600 via-sky-600 to-cyan-500 px-6 py-8 text-white">
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-4">
                   {avatar}
@@ -200,12 +248,14 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
                     <h1 className="text-2xl sm:text-3xl font-bold mb-1">
                       Profil Saya
                     </h1>
-                    <p className="text-white/80">
+                    <p className="text-white/85">
                       Kelola informasi akun Anda dengan mudah
                     </p>
                   </div>
                 </div>
-                {planBadge}
+                <div className="flex items-center gap-2">
+                  {planBadge}
+                </div>
               </div>
             </div>
 
@@ -232,7 +282,7 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
                       className="text-gray-900 dark:text-white font-mono text-sm truncate"
                       title={user?.id}
                     >
-                      {user?.id?.slice(0, 10)}
+                      {user?.id ?? "-"}
                     </p>
                     <button
                       onClick={handleCopyId}
@@ -276,6 +326,15 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
                   onChange={(val) => setFormData({ ...formData, phone: val })}
                 />
               </div>
+
+              {/* Photo helper (info kecil)
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 p-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 flex items-start gap-3">
+                <ImageIcon className="w-4 h-4 mt-0.5" />
+                <p>
+                  Foto profil akan otomatis diambil dari data user (<code>photo_url</code>) di <b>mockData</b>. 
+                  Jika gambar tidak ditemukan, sistem menampilkan inisial nama dengan latar gradien.
+                </p>
+              </div> */}
             </div>
           </div>
 
@@ -417,7 +476,7 @@ function ProfileField({
           {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
         </>
       ) : (
-        <p className="text-gray-900 dark:text-white font-medium">{value}</p>
+        <p className="text-gray-900 dark:text-white font-medium break-words">{value || "-"}</p>
       )}
     </div>
   );

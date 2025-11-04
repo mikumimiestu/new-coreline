@@ -1,28 +1,26 @@
 // src/pages/ManualQRISPage.tsx
-// Pay New Coreline by Xenza ID — Versi lengkap sesuai permintaan.
+// Pay New Coreline by Xenza ID — Versi lengkap + Virtual Account (BCA/BNI) Coming Soon.
 //
-// - Title halaman & document.title jadi "Pay New Coreline by Xenza ID"
-// - Bank: BCA, BNI, Mandiri, BRI, UOB, CIMB, OCBC NISP (coming soon)
-// - E-Wallet: GoPay, DANA, ShopeePay, LinkAja, DOKU, OVO (OVO coming soon)
-// - Retail: Indomaret & Alfamart (coming soon) -> tampilkan kode (contoh) + cara bayar
-// - Logo tidak redirect (no href), hanya selectable
-// - Voucher opsional + diskon dihitung ke total; "Total Transfer" paling menonjol & satu-satunya yang bisa di-copy
-// - WA confirm menyesuaikan metode + brand; QRIS pakai wording "sudah bayar via QRIS"
-// - Alasan kenapa konfirmasi manual (card info)
-// - Anti-inspect deterrent ringan (disable contextmenu & hotkeys umum)
+// Update:
+// - Tambah tab "VA" (Virtual Account) — status Coming Soon, tapi ditandai "Instant".
+// - VA hanya BCA & BNI.
+// - Tampilkan nomor VA (contoh) + langkah pembayaran.
+// - WhatsApp confirm auto menyesuaikan (menyebut Virtual Account + nomor VA contoh jika ada).
 //
-// Catatan: "coming soon" channel tetap bisa dipilih untuk preview UI, tapi diberi badge/notice.
-//          Anda bisa mengunci tombol WA jika ingin, tinggal tambahkan disabled state.
+// Catatan:
+// - Channel Coming Soon tetap bisa dipilih untuk preview UI (tidak memproses transaksi nyata).
+// - “Total Transfer” tetap satu-satunya yang bisa di-copy.
+// - Anti-inspect deterrent tetap aktif.
 
 import { useMemo, useState, useEffect } from "react";
 import {
   Copy, QrCode, Shield, Phone, BadgeCheck, ArrowRight,
-  BadgePercent, CreditCard, Info as InfoIcon, AlertTriangle
+  BadgePercent, CreditCard, Info as InfoIcon, AlertTriangle, Zap
 } from "lucide-react";
 
 type Tier = "student" | "pro" | "plus";
 type Cycle = "monthly" | "yearly";
-type MethodTab = "qris" | "bank" | "ewallet" | "retail";
+type MethodTab = "qris" | "bank" | "va" | "ewallet" | "retail";
 
 const MERCHANT_NAME = "Xenza ID";
 const NMID = "ID1023244802444";
@@ -83,6 +81,12 @@ const BANK_LOGOS: BrandLogo[] = [
   { id: "ocbcnisp", name: "OCBC NISP", src: "/logos/ocbc.png", comingSoon: true },
 ];
 
+const VA_LOGOS: BrandLogo[] = [
+  // VA hanya BCA & BNI, status masih Coming Soon (tapi ditandai Instant)
+  { id: "bca", name: "BCA VA", src: "/logos/bca.png", comingSoon: true },
+  { id: "bni", name: "BNI VA", src: "/logos/bni.png", comingSoon: true },
+];
+
 const EWALLET_LOGOS: BrandLogo[] = [
   { id: "gopay", name: "GoPay", src: "/logos/gopay.png" },
   { id: "dana", name: "DANA", src: "/logos/dana.png" },
@@ -110,12 +114,15 @@ const makeWaLink = (p: {
   voucher?: string;
   comingSoon?: boolean;
   retailCode?: string;
+  vaNumber?: string;
 }) => {
   let methodText =
     p.methodTab === "qris"
       ? "QRIS"
       : p.methodTab === "bank"
       ? `transfer bank${p.brandName ? ` (${p.brandName})` : ""}`
+      : p.methodTab === "va"
+      ? `virtual account${p.brandName ? ` (${p.brandName})` : ""}`
       : p.methodTab === "ewallet"
       ? `e-wallet${p.brandName ? ` (${p.brandName})` : ""}`
       : `retail${p.brandName ? ` (${p.brandName})` : ""}`;
@@ -123,15 +130,22 @@ const makeWaLink = (p: {
   const header =
     p.methodTab === "qris"
       ? "Saya sudah melakukan pembayaran via QRIS."
+      : p.methodTab === "va"
+      ? "Saya akan membayar via Virtual Account (instant)."
       : `Saya mau bayar lewat ${methodText}.`;
 
-  const extra =
+  const extraRetail =
     p.methodTab === "retail"
       ? (p.comingSoon
           ? "\n\nCatatan: Channel retail ini masih COMING SOON. Mohon panduan lebih lanjut/alternatif pembayaran."
           : p.retailCode
           ? `\n• Kode Retail: ${p.retailCode}\nSaya akan menunjukkan kode ini ke kasir.`
           : "")
+      : "";
+
+  const extraVA =
+    p.methodTab === "va"
+      ? `\n• Nomor VA: ${p.vaNumber || "-"}\n• Sifat: INSTANT (Coming Soon)`
       : "";
 
   const text = `Halo Admin Xenza 👋
@@ -145,7 +159,7 @@ ${header}
 • Diskon   : ${p.discount > 0 ? "-" + rupiah(p.discount) : "-"}
 • Kode unik: ${p.unique}
 • Total TF : ${rupiah(p.total)}
-${p.voucher ? `• Voucher  : ${p.voucher.toUpperCase()}` : ""}${extra}
+${p.voucher ? `• Voucher  : ${p.voucher.toUpperCase()}` : ""}${extraVA}${extraRetail}
 
 Saya akan kirim bukti transfer (screenshot) setelah ini. Terima kasih 🙏`;
   return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(text)}`;
@@ -201,6 +215,8 @@ export default function ManualQRISPage() {
   const brandFromSets =
     methodTab === "bank"
       ? BANK_LOGOS.find((b) => b.id === selectedBrand)
+      : methodTab === "va"
+      ? VA_LOGOS.find((v) => v.id === selectedBrand)
       : methodTab === "ewallet"
       ? EWALLET_LOGOS.find((e) => e.id === selectedBrand)
       : methodTab === "retail"
@@ -221,6 +237,17 @@ export default function ManualQRISPage() {
     return base.slice(0, 12);
   }, [methodTab, selectedBrand, orderId, unique, nominalAfterDisc]);
 
+  // VA: generate example VA number (dummy) for UX preview
+  const vaNumber = useMemo(() => {
+    if (methodTab !== "va" || !selectedBrand) return "";
+    // Contoh prefix (dummy): BCA=3901, BNI=8060
+    const prefix = selectedBrand === "bca" ? "3901" : "8060";
+    const seed = orderId.replace(/\D/g, "").slice(-10);
+    // Bentuk nomor VA contoh 16 digit: prefix (4) + seed (10) + unique (3) dipotong 16
+    const body = `${prefix}${seed}${(unique % 1000).toString().padStart(3, "0")}`;
+    return body.slice(0, 16);
+  }, [methodTab, selectedBrand, orderId, unique]);
+
   const onCopyTotal = async () => {
     try {
       await navigator.clipboard.writeText(String(total));
@@ -239,8 +266,9 @@ export default function ManualQRISPage() {
     methodTab,
     brandName,
     voucher,
-    comingSoon: brandComingSoon || methodTab === "retail",
+    comingSoon: brandComingSoon || methodTab === "retail" || methodTab === "va",
     retailCode: methodTab === "retail" ? retailCode : undefined,
+    vaNumber: methodTab === "va" ? vaNumber : undefined,
   });
 
   return (
@@ -253,7 +281,7 @@ export default function ManualQRISPage() {
           </div>
           <h1 className="mt-3 text-2xl sm:text-4xl font-extrabold tracking-tight">Pembayaran Aman & Terverifikasi</h1>
           <p className="mt-2 text-slate-600 dark:text-slate-300">
-            Pilih metode (QRIS / Bank / E-Wallet / Retail), lakukan pembayaran sesuai <b>Total Transfer</b>, lalu konfirmasi via WhatsApp.
+            Pilih metode (QRIS / Bank / <b>VA</b> / E-Wallet / Retail), lakukan pembayaran sesuai <b>Total Transfer</b>, lalu konfirmasi via WhatsApp.
           </p>
         </div>
 
@@ -338,7 +366,7 @@ export default function ManualQRISPage() {
               <CreditCard className="w-4 h-4" /> Pilih Metode Pembayaran
             </div>
             <div className="mt-3 inline-flex rounded-xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900 p-1">
-              {(["qris", "bank", "ewallet", "retail"] as MethodTab[]).map((tab) => (
+              {(["qris", "bank", "va", "ewallet", "retail"] as MethodTab[]).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => {
@@ -349,7 +377,7 @@ export default function ManualQRISPage() {
                     methodTab === tab ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-700 dark:text-slate-200"
                   }`}
                 >
-                  {tab === "qris" ? "QRIS" : tab === "bank" ? "Bank" : tab === "ewallet" ? "E-Wallet" : "Retail"}
+                  {tab === "qris" ? "QRIS" : tab === "bank" ? "Bank" : tab === "va" ? "VA" : tab === "ewallet" ? "E-Wallet" : "Retail"}
                 </button>
               ))}
             </div>
@@ -369,6 +397,53 @@ export default function ManualQRISPage() {
                 selectedId={selectedBrand}
                 onSelect={(id) => setSelectedBrand(id)}
               />
+            ) : methodTab === "va" ? (
+              <>
+                <LogoGrid
+                  title="Pilih Virtual Account (Instant):"
+                  items={VA_LOGOS}
+                  selectedId={selectedBrand}
+                  onSelect={(id) => setSelectedBrand(id)}
+                />
+                {/* VA number preview */}
+                <div className="mt-4 rounded-2xl ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+                  <div className="px-4 py-3 bg-slate-100 dark:bg-slate-800/60 text-sm font-semibold flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span>Nomor Virtual Account (contoh)</span>
+                      <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-300 text-[11px]">
+                        <Zap className="w-3.5 h-3.5" /> Instant
+                      </span>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-300">
+                      <AlertTriangle className="w-4 h-4" /> Coming Soon
+                    </span>
+                  </div>
+                  <div className="px-4 py-5 bg-white/90 dark:bg-slate-900/70">
+                    {selectedBrand ? (
+                      <>
+                        <div className="text-2xl font-mono font-bold tracking-widest text-slate-900 dark:text-white">
+                          {vaNumber || "—"}
+                        </div>
+                        <div className="mt-3 text-xs text-slate-500">
+                          * Nomor di atas adalah <b>contoh</b>. Nomor asli akan tampil saat channel aktif.
+                        </div>
+                        <div className="mt-4">
+                          <div className="text-sm font-semibold">Cara Bayar VA {brandName} (nanti saat aktif):</div>
+                          <ol className="mt-2 text-sm text-slate-700 dark:text-slate-300 list-decimal pl-5 space-y-1.5">
+                            <li>Buka m-banking/i-banking {brandName?.replace(" VA", "")} kamu.</li>
+                            <li>Pilih menu <b>Virtual Account</b> dan masukkan nomor VA di atas.</li>
+                            <li>Pastikan nominal <b>{rupiah(total)}</b> dan nama penerima sesuai.</li>
+                            <li>Konfirmasi & bayar. Simpan bukti pembayaran.</li>
+                            <li>Kirim bukti via WhatsApp untuk verifikasi cepat.</li>
+                          </ol>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-sm text-slate-500">Pilih Virtual Account terlebih dahulu.</div>
+                    )}
+                  </div>
+                </div>
+              </>
             ) : methodTab === "ewallet" ? (
               <LogoGrid
                 title="Pilih E-Wallet:"

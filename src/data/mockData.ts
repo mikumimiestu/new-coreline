@@ -1,6 +1,7 @@
 export interface User {
   id: string;
   access_code: string;
+  photo_url?: string;
   user_type: 'student' | 'umum' | 'pro' | 'game';
   name: string;
   username: string;
@@ -46,10 +47,11 @@ export const MOCK_USERS: User[] = [
     id: '1011',
     access_code: 'MIKU001',
     user_type: 'student',
+    photo_url: '/user/male.png',
     name: 'Mikumiestu',
     username: 'mikumistu',
     email: 'mikumiestu@astbyte.com',
-    phone: '-',
+    phone: '628123456789',
     subscription_type: 'pro',
     subscription_period: null,
     subscription_start: null,
