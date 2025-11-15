@@ -1,24 +1,38 @@
 // src/components/ProfilePage.tsx
-import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import { Subscription, MOCK_SUBSCRIPTIONS } from "../data/mockData";
+import { useEffect, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import {
   User as UserIcon,
   Mail,
   Phone,
   CreditCard,
-  CheckCircle,
-  XCircle,
-  Crown,
-  Sparkles,
   ArrowLeft,
   Copy,
   Check,
   ShieldCheck,
-  Edit3,
   Loader2,
-  Image as ImageIcon,
-} from "lucide-react";
+  Sparkles,
+  Calendar,
+  Crown,
+  Edit3,
+  Save,
+  X,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
+
+const AUTHX_BASE = 'https://authx.astbyte.com';
+
+interface Subscription {
+  id: number;
+  email: string;
+  public_id: string;
+  subscribe_type: string;
+  period: string;
+  start_date: string;
+  end_date: string;
+  payment_method: string;
+}
 
 interface ProfilePageProps {
   onBack: () => void;
@@ -26,473 +40,540 @@ interface ProfilePageProps {
 
 export default function ProfilePage({ onBack }: ProfilePageProps) {
   const { user } = useAuth();
+
+  const [authUser, setAuthUser] = useState<any>(null);
+  const [subs, setSubs] = useState<Subscription[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [toast, setToast] = useState<string | null>(null);
 
-  // --- NEW: track photo error (fallback ke inisial) ---
-  const [photoError, setPhotoError] = useState(false);
+  // toggle visibility public ID
+  const [showPublicId, setShowPublicId] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    username: user?.username || "",
-    email: user?.email || "",
-    phone: user?.phone || "",
+    full_name: '',
+    email: '',
+    phone: '',
   });
 
-  // Sinkronisasi form ketika user berganti (misal refresh/restore dari localStorage)
+  const [photoError, setPhotoError] = useState(false);
+
+  // =============================
+  // LOAD DATA USER + SUBSCRIPTIONS
+  // =============================
   useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name || "",
-        username: user.username || "",
-        email: user.email || "",
-        phone: (user.phone as string) || "",
-      });
-      setPhotoError(false);
+    const token = localStorage.getItem('authx_token');
+    if (!token) {
+      setLoading(false);
+      return;
     }
-  }, [user]);
 
-  useEffect(() => {
-    if (user) {
-      const userSubs = MOCK_SUBSCRIPTIONS
-        .filter((s) => s.user_id === user.id)
-        .sort(
-          (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-      setSubscriptions(userSubs);
+    async function loadData() {
+      try {
+        // GET /me
+        const meRes = await fetch(`${AUTHX_BASE}/api/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const meData = await meRes.json();
+
+        if (!meRes.ok) {
+          setLoading(false);
+          return;
+        }
+
+        setAuthUser(meData.data.user);
+        setFormData({
+          full_name: meData.data.user.full_name,
+          email: meData.data.user.email,
+          phone: meData.data.user.phone || '',
+        });
+
+        // GET /subscriptions/me
+        const subRes = await fetch(`${AUTHX_BASE}/api/subscriptions/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const subData = await subRes.json();
+
+        if (subRes.ok && subData?.data?.subscriptions) {
+          setSubs(subData.data.subscriptions);
+        }
+      } catch (e) {
+        console.log('Load error:', e);
+      } finally {
+        setLoading(false);
+      }
     }
-  }, [user]);
 
-  const planBadge = useMemo(
-    () => getSubscriptionBadge(user?.subscription_type),
-    [user?.subscription_type]
-  );
-  const statusBadge = useMemo(
-    () => getStatusBadge(user?.subscription_status),
-    [user?.subscription_status]
-  );
+    loadData();
+  }, []);
 
-  function getSubscriptionBadge(type?: string) {
-    if (type === "pro") {
-      return (
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full text-sm font-semibold shadow-sm">
-          <Crown className="w-4 h-4" /> PRO
-        </div>
-      );
-    }
-    if (type === "plus") {
-      return (
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full text-sm font-semibold shadow-sm">
-          <Sparkles className="w-4 h-4" /> PLUS
-        </div>
-      );
-    }
-    return (
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-200 text-gray-700 rounded-full text-sm font-semibold">
-        FREE
-      </div>
-    );
-  }
-
-  function getStatusBadge(status?: string) {
-    if (status === "active") {
-      return (
-        <div className="inline-flex items-center gap-1 text-green-600">
-          <CheckCircle className="w-4 h-4" />
-          <span className="text-sm font-medium">Aktif</span>
-        </div>
-      );
-    }
-    return (
-      <div className="inline-flex items-center gap-1 text-red-600">
-        <XCircle className="w-4 h-4" />
-        <span className="text-sm font-medium">Tidak Aktif</span>
-      </div>
-    );
-  }
-
-  function formatDate(dateString: string | null | undefined) {
-    if (!dateString) return "-";
-    try {
-      return new Date(dateString).toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-    } catch {
-      return "-";
-    }
-  }
-
-  function formatCurrency(amount: number) {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(amount);
-  }
-
+  // =============================
+  // UPDATE PROFILE
+  // =============================
   function validate() {
     const e: Record<string, string> = {};
-    if (!formData.name.trim()) e.name = "Nama wajib diisi";
-    if (!/^[a-zA-Z0-9_]{3,}$/.test(formData.username))
-      e.username = "Username minimal 3 karakter (huruf/angka/_)";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      e.email = "Email tidak valid";
-    if (
-      formData.phone &&
-      !/^0\d{8,13}$/.test(formData.phone.replace(/\D/g, ""))
-    )
-      e.phone = "No. HP tidak valid";
+
+    if (!formData.full_name.trim()) e.full_name = 'Nama wajib diisi.';
+    if (!formData.email.includes('@')) e.email = 'Email tidak valid.';
+    if (!formData.phone) e.phone = 'Nomor HP wajib diisi.';
+
     setErrors(e);
     return Object.keys(e).length === 0;
   }
 
   async function handleSave() {
-    if (!user) return;
     if (!validate()) return;
 
+    const token = localStorage.getItem('authx_token');
+    if (!token) return;
+
     setSaving(true);
+
+    const form = new FormData();
+    form.append('full_name', formData.full_name);
+    form.append('email', formData.email);
+    form.append('phone', formData.phone);
+
     try {
-      const updatedUser = { ...user, ...formData } as typeof user;
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      window.dispatchEvent(new CustomEvent("user-updated", { detail: updatedUser }));
-      setToast("Profil berhasil disimpan");
-      setIsEditing(false);
+      const res = await fetch(`${AUTHX_BASE}/api/account`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setToast(data.message || 'Gagal memperbarui profil.');
+      } else {
+        setToast('Profil berhasil diperbarui! ✨');
+        setAuthUser(data.data.user);
+        setIsEditing(false);
+      }
     } catch {
-      setToast("Gagal menyimpan profil");
+      setToast('Terjadi kesalahan.');
     } finally {
       setSaving(false);
-      setTimeout(() => setToast(null), 2000);
+      setTimeout(() => setToast(null), 2500);
     }
   }
 
-  function handleCancel() {
-    if (!user) return;
-    setFormData({
-      name: user.name || "",
-      username: user.username || "",
-      email: user.email || "",
-      phone: (user.phone as string) || "",
-    });
-    setErrors({});
-    setIsEditing(false);
-  }
-
+  // =============================
+  // COPY PUBLIC ID
+  // =============================
   function handleCopyId() {
-    if (!user?.id) return;
-    navigator.clipboard.writeText(user.id);
+    if (!authUser?.public_id) return;
+    navigator.clipboard.writeText(authUser.public_id);
     setCopied(true);
-    setTimeout(() => setCopied(false), 1200);
+    setTimeout(() => setCopied(false), 1500);
   }
 
-  // --- NEW: Avatar with photo_url fallback ---
-  const avatar = (
-    <div className="relative h-16 w-16 sm:h-20 sm:w-20">
-      {user?.photo_url && !photoError ? (
-        <img
-          src={user.photo_url}
-          alt={user.name || "User avatar"}
-          className="h-full w-full rounded-full object-cover ring-2 ring-white/60 shadow-md"
-          onError={() => setPhotoError(true)}
-          loading="lazy"
-        />
-      ) : (
-        <div className="relative flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-600 text-white ring-2 ring-white/60 shadow-md">
-          <span className="text-xl sm:text-2xl font-bold">
-            {initials(formData.name || user?.name)}
-          </span>
+  // toggle public ID visibility
+  function togglePublicIdVisibility() {
+    setShowPublicId((v) => !v);
+  }
+
+  // mask public ID
+  function getMaskedPublicId(id: string) {
+    if (!id) return '';
+    if (id.length <= 8) return '•'.repeat(id.length);
+    const firstPart = id.slice(0, 4);
+    const lastPart = id.slice(-4);
+    const middleLength = id.length - 8;
+    return `${firstPart}${'•'.repeat(middleLength)}${lastPart}`;
+  }
+
+  // =============================
+  // LOADING STATE
+  // =============================
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 overflow-x-hidden">
+        <div className="text-center animate-fade-in">
+          <div className="relative mb-4">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-20 w-20 rounded-full bg-blue-500/20 animate-ping" />
+            </div>
+            <Loader2 className="relative mx-auto h-12 w-12 animate-spin text-blue-600 dark:text-cyan-400" />
+          </div>
+          <p className="text-base font-medium text-gray-600 dark:text-slate-300">
+            Memuat profil kamu...
+          </p>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* verified badge */}
-      <span className="absolute -bottom-2 right-0 rounded-full bg-white p-1 shadow ring-1 ring-black/5">
-        <ShieldCheck className="h-4 w-4 text-blue-600" />
-      </span>
-
-      {/* edit hint (visual only) */}
-      <span className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-t from-black/0 via-black/0 to-black/10"></span>
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 pb-8">
-      {/* Top bar */}
-      <div className="bg-white/80 dark:bg-slate-900/70 backdrop-blur ring-1 ring-black/5 dark:ring-white/10 mb-6 sticky top-0 z-30">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+  if (!authUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 p-6 overflow-x-hidden">
+        <div className="animate-scale-in max-w-md w-full bg-white/90 dark:bg-slate-900/80 rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10 p-8 text-center backdrop-blur-xl">
+          <div className="mb-6 mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-500 shadow-xl shadow-red-500/30">
+            <X className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+            Belum Login
+          </h1>
+          <p className="text-gray-600 dark:text-slate-300 mb-6">
+            Silakan login terlebih dahulu.
+          </p>
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-2 text-gray-800 dark:text-slate-200 hover:opacity-80"
+            className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 text-sm font-bold text-white shadow-xl shadow-blue-600/30 transition-all hover:scale-105 hover:shadow-2xl"
           >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-medium">Kembali ke Dashboard</span>
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+            Kembali
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // =============================
+  // AVATAR LOGIC
+  // =============================
+  const avatarUrl =
+    authUser.avatar_url && !photoError
+      ? `${AUTHX_BASE}${authUser.avatar_url}`
+      : `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
+          authUser.full_name || 'User'
+        )}`;
+
+  const subType = authUser.subscription_type?.toLowerCase();
+
+  // helper: frame style by subscription type
+  const frameClass =
+    subType === 'plus'
+      ? 'from-purple-500 via-pink-500 to-cyan-400'
+      : subType === 'pro'
+      ? 'from-amber-400 via-yellow-500 to-amber-600'
+      : 'from-blue-500 to-cyan-500';
+
+  return (
+    <div className="min-h-screen relative pb-10 bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 overflow-x-hidden">
+      {/* Background blobs (now absolute, bukan fixed, supaya aman di mobile) */}
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-[-8rem] right-[-6rem] h-80 w-80 animate-blob rounded-full bg-gradient-to-br from-blue-400/30 to-cyan-400/30 blur-3xl dark:from-blue-500/20 dark:to-cyan-500/20" />
+        <div className="absolute bottom-[-8rem] left-[-6rem] h-80 w-80 animate-blob animation-delay-2000 rounded-full bg-gradient-to-tr from-purple-400/30 to-pink-400/30 blur-3xl dark:from-purple-500/20 dark:to-pink-500/20" />
+      </div>
+
+      {/* Top bar */}
+      <div className="animate-slide-down sticky top-0 z-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-md ring-1 ring-black/5 dark:ring-white/10 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto py-3 flex justify-between items-center">
+          <button
+            onClick={onBack}
+            className="group flex items-center gap-2 text-gray-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-cyan-400 transition-all font-semibold"
+          >
+            <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+            Kembali
           </button>
         </div>
       </div>
 
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-4xl">
-          {/* Card */}
-          <div className="overflow-hidden rounded-2xl ring-1 ring-black/5 dark:ring-white/10 bg-white/80 dark:bg-slate-900/70 shadow">
-            {/* Header gradient */}
-            <div className="bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-blue-600 via-sky-600 to-cyan-500 px-6 py-8 text-white">
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-4">
-                  {avatar}
-                  <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold mb-1">
-                      Profil Saya
-                    </h1>
-                    <p className="text-white/85">
-                      Kelola informasi akun Anda dengan mudah
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {planBadge}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 sm:p-8 space-y-6">
-              {/* Basic info grid */}
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Nama */}
-                <ProfileField
-                  label="Nama Lengkap"
-                  icon={<UserIcon className="w-4 h-4 inline mr-2" />}
-                  value={formData.name}
-                  isEditing={isEditing}
-                  error={errors.name}
-                  onChange={(val) => setFormData({ ...formData, name: val })}
+      <div className="relative max-w-4xl mx-auto mt-6 sm:mt-8 px-4 sm:px-6">
+        {/* PROFILE CARD */}
+        <div className="animate-fade-in bg-white/95 dark:bg-slate-900/85 backdrop-blur-xl p-5 sm:p-7 rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10 transition-all hover:shadow-blue-500/20 dark:hover:shadow-cyan-500/20">
+          {/* Header avatar + info */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-6 sm:mb-8">
+            {/* Avatar dengan frame baru */}
+            <div className="relative">
+              <div className="relative group">
+                {/* outer glow frame */}
+                <div
+                  className={`absolute inset-[-6px] rounded-3xl bg-gradient-to-r ${frameClass} opacity-60 blur-md group-hover:opacity-90 transition-opacity`}
                 />
-
-                {/* User ID */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-2">
-                    User ID
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <p
-                      className="text-gray-900 dark:text-white font-mono text-sm truncate"
-                      title={user?.id}
-                    >
-                      {user?.id ?? "-"}
-                    </p>
-                    <button
-                      onClick={handleCopyId}
-                      className="inline-flex items-center gap-1 rounded-md bg-gray-100 dark:bg-slate-800 px-2 py-1 text-xs hover:opacity-90"
-                    >
-                      {copied ? (
-                        <Check className="w-3.5 h-3.5" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5" />
-                      )}
-                      {copied ? "Disalin" : "Salin"}
-                    </button>
-                  </div>
-                </div>
-
-                <ProfileField
-                  label="Username"
-                  icon={<UserIcon className="w-4 h-4 inline mr-2" />}
-                  value={formData.username}
-                  isEditing={isEditing}
-                  error={errors.username}
-                  onChange={(val) => setFormData({ ...formData, username: val })}
-                />
-
-                <ProfileField
-                  label="Email"
-                  icon={<Mail className="w-4 h-4 inline mr-2" />}
-                  value={formData.email}
-                  isEditing={isEditing}
-                  error={errors.email}
-                  onChange={(val) => setFormData({ ...formData, email: val })}
-                />
-
-                <ProfileField
-                  label="No. HP"
-                  icon={<Phone className="w-4 h-4 inline mr-2" />}
-                  value={formData.phone}
-                  isEditing={isEditing}
-                  error={errors.phone}
-                  placeholder="08xx-xxxx-xxxx"
-                  onChange={(val) => setFormData({ ...formData, phone: val })}
-                />
-              </div>
-
-              {/* Photo helper (info kecil)
-              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 p-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 flex items-start gap-3">
-                <ImageIcon className="w-4 h-4 mt-0.5" />
-                <p>
-                  Foto profil akan otomatis diambil dari data user (<code>photo_url</code>) di <b>mockData</b>. 
-                  Jika gambar tidak ditemukan, sistem menampilkan inisial nama dengan latar gradien.
-                </p>
-              </div> */}
-            </div>
-          </div>
-
-          {/* Status Paket */}
-          <div className="rounded-2xl ring-1 ring-black/5 dark:ring-white/10 bg-white/80 dark:bg-slate-900/70 mt-6 p-6 sm:p-8">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-gray-700 dark:text-slate-200" />
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                  Status Paket
-                </h2>
-              </div>
-              {statusBadge}
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4 mb-6">
-              <StatusItem
-                label="Paket Saat Ini"
-                value={user?.subscription_type?.toUpperCase() || "-"}
-              />
-              <StatusItem
-                label="Periode"
-                value={
-                  user?.subscription_period
-                    ? user.subscription_period === "monthly"
-                      ? "Bulanan"
-                      : "Tahunan"
-                    : "-"
-                }
-              />
-              <StatusItem
-                label="Tanggal Mulai"
-                value={formatDate(user?.subscription_start)}
-              />
-              <StatusItem
-                label="Tanggal Berakhir"
-                value={formatDate(user?.subscription_end)}
-              />
-            </div>
-
-            <a
-              href="/pricing"
-              className="block w-full text-center py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700"
-            >
-              Upgrade Paket Sekarang
-            </a>
-          </div>
-
-          {/* History */}
-          {subscriptions.length > 0 && (
-            <div className="rounded-2xl ring-1 ring-black/5 dark:ring-white/10 bg-white/80 dark:bg-slate-900/70 mt-6 p-6 sm:p-8">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                Riwayat Pembayaran
-              </h2>
-              <div className="space-y-3">
-                {subscriptions.map((sub) => (
+                {/* glass card */}
+                <div className="relative rounded-3xl bg-slate-950/5 dark:bg-white/5 p-1 ring-1 ring-white/30 dark:ring-slate-700 shadow-xl">
                   <div
-                    key={sub.id}
-                    className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-lg"
+                    className={`rounded-3xl bg-gradient-to-r ${frameClass} p-[2px]`}
                   >
-                    <div>
-                      <p className="font-semibold text-gray-900 dark:text-white uppercase">
-                        {sub.subscription_type}
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-slate-400">
-                        {sub.period === "monthly" ? "Bulanan" : "Tahunan"} •{" "}
-                        {formatDate(sub.payment_date)}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-gray-900 dark:text-white">
-                        {formatCurrency(sub.amount)}
-                      </p>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          sub.status === "paid"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-700"
-                        }`}
-                      >
-                        {sub.status === "paid" ? "Lunas" : sub.status}
-                      </span>
+                    <div className="rounded-3xl bg-white dark:bg-slate-900 p-2">
+                      <img
+                        src={avatarUrl}
+                        alt="Avatar"
+                        className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover shadow-md transition-transform group-hover:scale-105"
+                        onError={() => setPhotoError(true)}
+                      />
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
+
+              {/* Verified badge */}
+              <div className="absolute -bottom-2 -right-2 flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-green-500 shadow-lg ring-4 ring-white dark:ring-slate-900 z-10">
+                <ShieldCheck className="h-5 w-5 text-white" />
+              </div>
+            </div>
+
+            <div className="flex-1 text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white mb-2 flex items-center justify-center sm:justify-start gap-2">
+                {authUser.full_name}
+                <Sparkles className="h-6 w-6 text-cyan-500 animate-pulse" />
+              </h1>
+              <p className="text-gray-600 dark:text-slate-300 flex items-center justify-center sm:justify-start gap-2 mb-3">
+                <Mail className="h-4 w-4" />
+                <span className="break-all">{authUser.email}</span>
+              </p>
+
+              {/* Subscription Badge */}
+              {authUser.subscription_type &&
+                authUser.subscription_status === 'active' && (
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 text-white text-xs sm:text-sm shadow-lg border border-white/10">
+                    <div
+                      className={`flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-r ${frameClass}`}
+                    >
+                      <Crown className="h-3.5 w-3.5 text-white" />
+                    </div>
+                    <span className="uppercase tracking-wide font-semibold">
+                      {authUser.subscription_type}
+                    </span>
+                  </div>
+                )}
+            </div>
+          </div>
+
+          {/* PUBLIC ID CARD */}
+          <div className="animate-fade-in mb-7 p-5 rounded-2xl bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-800 dark:to-slate-700 ring-1 ring-gray-200 dark:ring-slate-600 shadow-inner">
+            <div className="flex items-center gap-2 mb-3">
+              <ShieldCheck className="h-5 w-5 text-blue-600 dark:text-cyan-400" />
+              <p className="text-sm font-bold text-gray-700 dark:text-slate-200">
+                Public ID Astbyte
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:items-center">
+              <code className="flex-1 font-mono text-xs sm:text-sm bg-white dark:bg-slate-900 px-3 sm:px-4 py-2.5 rounded-xl text-gray-800 dark:text-slate-200 font-semibold ring-1 ring-gray-300 dark:ring-slate-600 shadow-sm break-all">
+                {showPublicId
+                  ? authUser.public_id
+                  : getMaskedPublicId(authUser.public_id)}
+              </code>
+
+              <div className="flex items-center gap-2 sm:flex-shrink-0">
+                <button
+                  onClick={togglePublicIdVisibility}
+                  className="group flex items-center justify-center bg-slate-700 hover:bg-slate-800 px-3 py-2 rounded-xl text-white font-semibold shadow-md text-xs sm:text-sm transition-all hover:scale-105"
+                  title={showPublicId ? 'Sembunyikan ID' : 'Tampilkan ID'}
+                >
+                  {showPublicId ? (
+                    <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:scale-110" />
+                  ) : (
+                    <Eye className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:scale-110" />
+                  )}
+                </button>
+
+                <button
+                  onClick={handleCopyId}
+                  className="group flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-3 sm:px-4 py-2 rounded-xl text-white text-xs sm:text-sm font-semibold shadow-lg transition-all hover:scale-105 whitespace-nowrap"
+                  title="Salin Public ID"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4 sm:h-5 sm:w-5 animate-bounce-in" />
+                      <span className="hidden sm:inline">Disalin!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:scale-110" />
+                      <span className="hidden sm:inline">Salin</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* EDITABLE FIELDS */}
+          <div className="space-y-5">
+            <Field
+              label="Nama Lengkap"
+              icon={<UserIcon className="w-5 h-5" />}
+              value={formData.full_name}
+              editable={isEditing}
+              error={errors.full_name}
+              onChange={(v) => setFormData((f) => ({ ...f, full_name: v }))}
+            />
+
+            <Field
+              label="Email"
+              icon={<Mail className="w-5 h-5" />}
+              value={formData.email}
+              editable={isEditing}
+              error={errors.email}
+              onChange={(v) => setFormData((f) => ({ ...f, email: v }))}
+            />
+
+            <Field
+              label="Nomor HP"
+              icon={<Phone className="w-5 h-5" />}
+              value={formData.phone}
+              editable={isEditing}
+              error={errors.phone}
+              onChange={(v) => setFormData((f) => ({ ...f, phone: v }))}
+            />
+          </div>
+        </div>
+
+        {/* SUBSCRIPTIONS */}
+        <div className="animate-fade-in mt-6 bg-white/95 dark:bg-slate-900/85 backdrop-blur-xl p-5 sm:p-7 rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
+          <h2 className="text-lg sm:text-xl font-bold mb-5 sm:mb-6 flex items-center gap-3 text-gray-900 dark:text-white">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg">
+              <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            </div>
+            Riwayat Langganan
+          </h2>
+
+          {subs.length === 0 ? (
+            <div className="text-center py-10 rounded-2xl bg-gray-50 dark:bg-slate-800/60 ring-1 ring-gray-200 dark:ring-slate-700">
+              <div className="flex h-14 w-14 mx-auto mb-4 items-center justify-center rounded-xl bg-gray-200 dark:bg-slate-700">
+                <CreditCard className="h-7 w-7 text-gray-400 dark:text-slate-500" />
+              </div>
+              <p className="text-gray-600 dark:text-slate-300 font-medium text-sm sm:text-base">
+                Belum ada subscription.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {subs.map((s, idx) => (
+                <div
+                  key={s.id}
+                  style={{ animationDelay: `${idx * 80}ms` }}
+                  className="animate-slide-in-up group p-4 sm:p-5 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-slate-800 dark:to-slate-700 rounded-2xl ring-1 ring-gray-200 dark:ring-slate-600 shadow-md transition-all hover:shadow-xl hover:ring-blue-500/50 dark:hover:ring-cyan-400/50"
+                >
+                  <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <Crown className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                        <p className="font-bold text-sm sm:text-base uppercase text-gray-900 dark:text-white">
+                          {s.subscribe_type}
+                        </p>
+                      </div>
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-300 flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        {s.period} • {s.payment_method}
+                      </p>
+                    </div>
+                    <div className="text-left sm:text-right text-xs sm:text-sm">
+                      <p className="font-semibold text-gray-700 dark:text-slate-200">
+                        {s.start_date}
+                      </p>
+                      <p className="text-gray-500 dark:text-slate-400">
+                        s/d {s.end_date}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* Toast */}
+      {/* TOAST */}
       {toast && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
-          <div className="rounded-xl bg-gray-900 text-white px-4 py-2 shadow-lg text-sm">
-            {toast}
+        <div className="animate-bounce-in fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-[90vw] px-4 sm:px-6 py-3 bg-gradient-to-r from-gray-900 to-slate-900 text-white rounded-xl shadow-2xl ring-1 ring-white/10 backdrop-blur-xl">
+          <div className="flex items-center gap-2">
+            <Check className="h-5 w-5 text-emerald-400" />
+            <span className="font-semibold text-sm sm:text-base">{toast}</span>
           </div>
         </div>
       )}
+
+      {/* Custom CSS for animations & globals */}
+      <style>{`
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slide-down {
+          from { opacity: 0; transform: translateY(-16px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slide-in-up {
+          from { opacity: 0; transform: translateY(16px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scale-in {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes bounce-in {
+          0% { opacity: 0; transform: scale(0.3); }
+          50% { transform: scale(1.05); }
+          70% { transform: scale(0.97); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes blob {
+          0%,100% { transform: translate(0,0) scale(1); }
+          33% { transform: translate(24px,-32px) scale(1.1); }
+          66% { transform: translate(-20px,18px) scale(0.9); }
+        }
+
+        .animate-fade-in { animation: fade-in 0.45s ease-out; }
+        .animate-slide-down { animation: slide-down 0.4s ease-out; }
+        .animate-slide-in-up { animation: slide-in-up 0.45s ease-out; }
+        .animate-scale-in { animation: scale-in 0.4s ease-out; }
+        .animate-bounce-in { animation: bounce-in 0.45s cubic-bezier(0.68,-0.55,0.265,1.55); }
+        .animate-blob { animation: blob 8s ease-in-out infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+
+        /* Hilangin horizontal scroll global (jaga-jaga) */
+        body {
+          overflow-x: hidden;
+        }
+      `}</style>
     </div>
   );
 }
 
-function ProfileField({
+function Field({
   label,
   icon,
   value,
-  onChange,
-  isEditing,
+  editable,
   error,
-  placeholder,
+  onChange,
 }: {
   label: string;
-  icon?: JSX.Element;
+  icon: JSX.Element;
   value: string;
-  isEditing: boolean;
+  editable: boolean;
   error?: string;
-  placeholder?: string;
   onChange: (v: string) => void;
 }) {
   return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-2">
-        {icon} {label}
+    <div className="animate-fade-in group">
+      <label className="flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-700 dark:text-slate-200 mb-1.5">
+        <span className="text-blue-600 dark:text-cyan-400">{icon}</span>
+        {label}
       </label>
-      {isEditing ? (
+      {editable ? (
         <>
           <input
-            type="text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={placeholder}
-            className={`w-full px-4 py-2 rounded-lg border ${
+            className={`w-full px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl border-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white text-sm sm:text-base font-medium outline-none transition-all ${
               error
-                ? "border-red-400 focus:ring-red-200"
-                : "border-gray-300 focus:ring-blue-200"
-            } focus:ring-2 focus:border-transparent bg-white/70 dark:bg-slate-800 dark:text-white`}
+                ? 'border-red-500 ring-4 ring-red-500/20'
+                : 'border-gray-300 dark:border-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 dark:focus:border-cyan-400 dark:focus:ring-cyan-400/20'
+            }`}
           />
-          {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+          {error && (
+            <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 font-semibold flex items-center gap-1">
+              <X className="h-3 w-3" />
+              {error}
+            </p>
+          )}
         </>
       ) : (
-        <p className="text-gray-900 dark:text-white font-medium break-words">{value || "-"}</p>
+        <p className="px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-800 dark:text-slate-200 text-sm sm:text-base font-semibold ring-1 ring-gray-200 dark:ring-slate-700 break-all">
+          {value || '-'}
+        </p>
       )}
     </div>
   );
-}
-
-function StatusItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="bg-gray-50 dark:bg-slate-800 rounded-lg p-4">
-      <p className="text-sm text-gray-600 dark:text-slate-400 mb-1">{label}</p>
-      <p className="text-lg font-bold text-gray-900 dark:text-white">{value}</p>
-    </div>
-  );
-}
-
-function initials(name?: string) {
-  if (!name) return "CL";
-  const parts = name.trim().split(/\s+/).slice(0, 2);
-  return parts.map((p) => p[0]?.toUpperCase()).join("");
 }

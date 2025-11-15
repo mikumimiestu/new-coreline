@@ -1,3 +1,4 @@
+// src/pages/Dashboard.tsx
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -34,28 +35,33 @@ const languageData: readonly Lang[] = [
   {
     id: 'python',
     name: 'Python',
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+    iconUrl:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
   },
   {
     id: 'php',
     name: 'PHP',
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg',
+    iconUrl:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg',
   },
   {
     id: 'javascript',
     name: 'JavaScript',
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
+    iconUrl:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
   },
   {
     id: 'typescript',
     name: 'TypeScript',
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
+    iconUrl:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
     comingSoon: true,
   },
   {
     id: 'ruby',
     name: 'Ruby',
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg',
+    iconUrl:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg',
     comingSoon: true,
   },
 ] as const;
@@ -65,11 +71,11 @@ type SortKey = 'order' | 'title' | 'level';
 type Plan = 'free' | 'pro' | 'plus';
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
 
   useEffect(() => {
-      document.title = "Dashboard | New Coreline by AstByte";
-    }, []);
+    document.title = 'Dashboard | New Coreline by AstByte';
+  }, []);
 
   const [materials, setMaterials] = useState<LearningMaterial[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(() =>
@@ -109,8 +115,18 @@ export default function Dashboard() {
     }
   };
 
+  // helper: user_type (dari AuthX optional, default: student)
+  const resolveUserType = (): 'student' | 'umum' | 'pro' | 'game' => {
+    const raw = (user as any)?.user_type;
+    if (raw === 'umum' || raw === 'pro' || raw === 'game' || raw === 'student') {
+      return raw;
+    }
+    return 'student';
+  };
+
   const userTitle = useMemo(() => {
-    switch (user?.user_type) {
+    const ut = resolveUserType();
+    switch (ut) {
       case 'student':
         return 'Code Path Student';
       case 'umum':
@@ -122,38 +138,47 @@ export default function Dashboard() {
       default:
         return 'Dashboard Pembelajaran';
     }
-  }, [user?.user_type]);
+  }, [user]);
 
   // --- PLAN from subscription (source of truth) ---
   const getPlanFromUser = (u: any): Plan => {
-    const status = (u?.subscription_status ?? '').toString().toLowerCase().trim();
-    const type = (u?.subscription_type ?? 'free').toString().toLowerCase().trim() as Plan | string;
-    if (status !== 'active') return 'free';
+    const type = (u?.subscription_type ?? 'free')
+      .toString()
+      .toLowerCase()
+      .trim() as string;
+
     if (type === 'plus') return 'plus';
     if (type === 'pro') return 'pro';
     return 'free';
   };
+
   const plan: Plan = getPlanFromUser(user);
 
   const nextTier = plan === 'free' ? 'Pro' : plan === 'pro' ? 'Plus' : null;
   const nextHref =
-    plan === 'free' ? '/pricing' :
-    plan === 'pro' ? '/pricing' :
-    undefined;
+    plan === 'free'
+      ? '/pricing'
+      : plan === 'pro'
+      ? '/pricing'
+      : undefined;
 
   // --- load materials ---
   useEffect(() => {
     if (!user) return;
     setLoading(true);
 
-    let list = MOCK_MATERIALS.filter((m) => m.user_type === user.user_type);
+    const userType = resolveUserType();
+
+    let list = MOCK_MATERIALS.filter((m) => m.user_type === userType);
 
     if (selectedLanguage) list = list.filter((m) => m.language === selectedLanguage);
 
     const q = query.trim().toLowerCase();
     if (q) {
       list = list.filter(
-        (m) => m.title.toLowerCase().includes(q) || m.description.toLowerCase().includes(q)
+        (m) =>
+          m.title.toLowerCase().includes(q) ||
+          m.description.toLowerCase().includes(q)
       );
     }
 
@@ -178,86 +203,145 @@ export default function Dashboard() {
     }
   }, [selectedLanguage]);
 
+  // Kalau lagi cek token ke authx
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="text-center animate-pulse">
+          <Loader2 className="mx-auto h-10 w-10 animate-spin text-blue-600 dark:text-cyan-400" />
+          <p className="mt-3 text-sm text-gray-600 dark:text-slate-300">
+            Memverifikasi sesi Astbyte kamu...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Kalau belum login sama sekali
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 px-4">
+        <div className="max-w-md w-full bg-white/90 dark:bg-slate-900/80 rounded-2xl shadow-xl ring-1 ring-black/5 dark:ring-white/10 p-6 sm:p-8 text-center space-y-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+            Kamu belum login
+          </h1>
+          <p className="text-sm text-gray-600 dark:text-slate-300">
+            Silakan login dulu dengan Astbyte Account untuk mengakses Dashboard Coreline.
+          </p>
+          <Link
+            to="/login"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700 focus-visible:ring-4 focus-visible:ring-blue-500/30 transition-transform transform hover:-translate-y-0.5"
+          >
+            Masuk ke Coreline
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (showProfile) return <ProfilePage onBack={() => setShowProfile(false)} />;
 
   /* ================================
    * Components
    * ================================ */
 
-  const LanguageSidebar = () => (
-    <aside
-      className={[
-        'p-6',
-        'bg-white/80 dark:bg-slate-900/70 shadow-xl lg:shadow-none lg:rounded-xl ring-1 ring-black/5 dark:ring-white/10',
-        'lg:sticky lg:top-[82px]',
-      ].join(' ')}
-    >
-      <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-        <Languages className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
-        Jalur Bahasa
-      </h3>
+  const LanguageSidebar = ({ mode = 'desktop' }: { mode?: 'desktop' | 'mobile' }) => {
+    const isDesktop = mode === 'desktop';
 
-      <div className="flex flex-col gap-3">
-        {languageData.map((lang) => {
-          const isActive = selectedLanguage === lang.id;
-          const disabled = !!lang.comingSoon;
-
-          return (
-            <button
-              key={lang.id}
-              onClick={() => {
-                if (!disabled) setSelectedLanguage(isActive ? null : lang.id);
-                setIsSidebarOpen(false);
-              }}
-              disabled={disabled}
-              className={[
-                'group flex items-center gap-4 p-4 rounded-lg transition text-left w-full ring-1 ring-black/5 dark:ring-white/10',
-                isActive
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
-                  : 'bg-gray-50/80 dark:bg-slate-800/70 text-gray-700 dark:text-slate-200 hover:bg-blue-50/80 hover:text-blue-700 dark:hover:bg-slate-800',
-                disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer',
-              ].join(' ')}
-              title={disabled ? `${lang.name} — Coming Soon` : lang.name}
-            >
-              <img
-                src={lang.iconUrl}
-                alt=""
-                className="h-7 w-7 object-contain rounded-md bg-white"
-              />
-              <div className="flex items-center gap-3">
-                <span className="font-semibold">{lang.name}</span>
-                {lang.comingSoon && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
-                    <Lock className="w-3 h-3" />
-                    Coming&nbsp;Soon
-                  </span>
-                )}
-              </div>
-            </button>
-          );
-        })}
-
-        {selectedLanguage && (
-          <button
-            onClick={() => setSelectedLanguage(null)}
-            className="flex items-center justify-center gap-2 mt-2 py-2 text-sm text-gray-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 transition"
-          >
-            <X className="w-4 h-4" />
-            Reset Filter
-          </button>
+    return (
+      <aside
+        className={[
+          'p-5 sm:p-6',
+          'flex flex-col',
+          isDesktop
+            ? 'bg-white/80 dark:bg-slate-900/70 shadow-xl lg:shadow-none lg:rounded-xl ring-1 ring-black/5 dark:ring-white/10 lg:sticky lg:top-[82px] rounded-2xl'
+            : 'bg-transparent shadow-none ring-0 rounded-none',
+        ].join(' ')}
+      >
+        {isDesktop && (
+          <h3 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+            <Languages className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
+            Jalur Bahasa
+          </h3>
         )}
-      </div>
-    </aside>
-  );
+
+        {!isDesktop && (
+          <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
+            <Languages className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
+            Pilih Bahasa
+          </h3>
+        )}
+
+        <div className="flex flex-col gap-3">
+          {languageData.map((lang) => {
+            const isActive = selectedLanguage === lang.id;
+            const disabled = !!lang.comingSoon;
+
+            return (
+              <button
+                key={lang.id}
+                onClick={() => {
+                  if (!disabled) setSelectedLanguage(isActive ? null : lang.id);
+                  setIsSidebarOpen(false);
+                }}
+                disabled={disabled}
+                className={[
+                  'group flex items-center gap-4 p-3.5 rounded-xl transition-all text-left w-full ring-1 ring-black/5 dark:ring-white/10',
+                  'transform duration-200',
+                  isActive
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25 scale-[1.02]'
+                    : 'bg-gray-50/80 dark:bg-slate-800/70 text-gray-700 dark:text-slate-200 hover:bg-blue-50/80 hover:text-blue-700 dark:hover:bg-slate-800 hover:-translate-y-0.5',
+                  disabled ? 'opacity-60 cursor-not-allowed hover:translate-y-0' : 'cursor-pointer',
+                ].join(' ')}
+                title={disabled ? `${lang.name} — Coming Soon` : lang.name}
+              >
+                <div className="h-8 w-8 rounded-lg bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center">
+                  <img
+                    src={lang.iconUrl}
+                    alt=""
+                    className="h-6 w-6 object-contain"
+                  />
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="font-semibold text-sm sm:text-base">
+                    {lang.name}
+                  </span>
+                  {lang.comingSoon && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
+                      <Lock className="w-3 h-3" />
+                      Coming&nbsp;Soon
+                    </span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+
+          {selectedLanguage && (
+            <button
+              onClick={() => setSelectedLanguage(null)}
+              className="flex items-center justify-center gap-2 mt-2 py-2 text-xs sm:text-sm text-gray-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 transition"
+            >
+              <X className="w-4 h-4" />
+              Reset Filter
+            </button>
+          )}
+        </div>
+      </aside>
+    );
+  };
 
   const UpgradeBanner = () => {
     if (plan === 'plus') {
       return (
-        <div className="mt-3 rounded-xl ring-1 ring-emerald-200/60 dark:ring-emerald-800/40 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 dark:from-emerald-900/10 dark:via-slate-900 dark:to-emerald-900/10 p-4">
+        <div className="mt-4 rounded-xl ring-1 ring-emerald-200/60 dark:ring-emerald-800/40 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 dark:from-emerald-900/10 dark:via-slate-900 dark:to-emerald-900/10 p-4 sm:p-5 transition-all duration-300 hover:shadow-md">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <p className="text-sm sm:text-base font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
               <PartyPopper className="w-5 h-5" />
-              Selamat! Kamu di paket <span className="underline decoration-emerald-400">Plus</span>
+              Selamat! Kamu di paket{' '}
+              <span className="underline decoration-emerald-400 decoration-2">
+                Plus
+              </span>
             </p>
           </div>
         </div>
@@ -265,16 +349,20 @@ export default function Dashboard() {
     }
 
     return (
-      <div className="mt-3 rounded-xl ring-1 ring-black/5 dark:ring-white/10 bg-gradient-to-r from-amber-50 via-white to-amber-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 p-4">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+      <div className="mt-4 rounded-xl ring-1 ring-black/5 dark:ring-white/10 bg-gradient-to-r from-amber-50 via-white to-amber-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 p-4 sm:p-5 transition-all duration-300 hover:shadow-md">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
           <p className="text-sm sm:text-base font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-2">
             <Crown className="w-5 h-5" />
-            Upgrade ke <span className="underline decoration-amber-400">{nextTier}</span>
+            Upgrade ke{' '}
+            <span className="underline decoration-amber-400 decoration-2">
+              {nextTier}
+            </span>{' '}
+            untuk akses penuh semua path & modul premium.
           </p>
           {nextTier && nextHref && (
             <Link
               to={nextHref}
-              className="px-4 py-2 rounded-lg bg-amber-500 text-white font-semibold hover:bg-amber-600 transition"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 transition-transform transform hover:-translate-y-0.5"
             >
               Ke {nextTier}
             </Link>
@@ -286,7 +374,7 @@ export default function Dashboard() {
 
   const Toolbar = () => (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between flex-wrap">
         <div className="relative flex-1 min-w-[220px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
@@ -295,17 +383,17 @@ export default function Dashboard() {
             placeholder="Cari materi (judul/deskripsi)"
             autoComplete="off"
             spellCheck={false}
-            className="w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 pl-10 pr-4 py-2.5 text-sm text-gray-800 dark:text-white outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15"
+            className="w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 pl-10 pr-4 py-2.5 text-sm text-gray-800 dark:text-white outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 transition-all"
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 justify-end">
           <div className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2">
             <Filter className="h-4 w-4 text-gray-400" />
             <select
               value={sortKey}
               onChange={(e) => setSortKey(e.target.value as SortKey)}
-              className="bg-transparent text-sm text-gray-800 dark:text-white outline-none"
+              className="bg-transparent text-xs sm:text-sm text-gray-800 dark:text-white outline-none"
             >
               <option value="order">Urutan Modul</option>
               <option value="title">Judul A-Z</option>
@@ -319,54 +407,64 @@ export default function Dashboard() {
     </div>
   );
 
+  const userType = resolveUserType();
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 flex flex-col">
       {/* Navbar */}
-      <nav className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/70 backdrop-blur ring-1 ring-black/5 dark:ring-white/10">
+      <nav className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/70 backdrop-blur ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl">
-                <a href="/">
-                  <img src="/icon.png" alt="coreline logo" />
+                <a href="/" className="block h-8 w-8">
+                  <img
+                    src="/icon.png"
+                    alt="coreline logo"
+                    className="h-8 w-8 object-contain"
+                  />
                 </a>
-              </div>
-              <div>
-                <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
-                  Coreline
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1.5">
+                  <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
+                    Coreline
+                  </h1>
                   <a href="https://www.astbyte.com">
-                    <span className="text-[8px] text-blue-500 ml-1">by astbyte</span>
+                    <span className="text-[9px] uppercase tracking-wide font-semibold text-blue-500 bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 rounded-full">
+                      by AstByte
+                    </span>
                   </a>
-                </h1>
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-300">Hai, {user?.name}!</p>
+                </div>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-300">
+                  Hai, {user.full_name || user.email || 'User'} 👋
+                </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              {user?.user_type === 'student' && (
+              {userType === 'student' && (
                 <button
                   onClick={() => setIsSidebarOpen(true)}
                   className="p-2 lg:hidden text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition"
                   title="Filter Bahasa"
                 >
-                  <Menu className="w-6 h-6" />
+                  <Menu className="w-5 h-5" />
                 </button>
               )}
 
               <button
                 onClick={() => setShowProfile(true)}
-                className="flex items-center gap-2 px-3 py-2 text-gray-800 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition"
+                className="flex items-center gap-2 px-3 py-2 text-gray-800 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition text-sm"
                 title="Profil"
               >
-                <UserIcon className="w-5 h-5" />
+                <UserIcon className="w-4 h-4" />
                 <span className="hidden md:inline">Profil</span>
               </button>
               <button
                 onClick={logout}
-                className="flex items-center gap-2 px-3 py-2 bg-red-500 text-white hover:bg-red-600 rounded-lg transition font-semibold"
+                className="flex items-center gap-2 px-3 py-2 bg-red-500 text-white hover:bg-red-600 rounded-lg transition text-sm font-semibold"
                 title="Keluar"
               >
-                <LogOut className="w-5 h-5" />
+                <LogOut className="w-4 h-4" />
                 <span className="hidden md:inline">Keluar</span>
               </button>
             </div>
@@ -375,89 +473,129 @@ export default function Dashboard() {
       </nav>
 
       {/* Mobile Sidebar Drawer */}
-      {isSidebarOpen && user?.user_type === 'student' && (
+      {isSidebarOpen && userType === 'student' && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setIsSidebarOpen(false)} />
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
+            onClick={() => setIsSidebarOpen(false)}
+          />
           <div
             ref={drawerRef}
-            className="absolute left-0 top-0 h-full w-4/5 max-w-sm bg-white dark:bg-slate-900 shadow-2xl p-6 transform transition-transform duration-300 ease-in-out"
+            className="absolute left-0 top-0 h-full w-full max-w-sm bg-white dark:bg-slate-900 shadow-2xl flex flex-col transform transition-transform duration-300 ease-out"
           >
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-800 dark:text-white">Filter Bahasa</h2>
-              <button onClick={() => setIsSidebarOpen(false)} className="p-1 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg" aria-label="Tutup Sidebar">
-                <X className="w-6 h-6" />
+            <div className="flex justify-between items-center px-5 pt-5 pb-3 border-b border-gray-200/70 dark:border-slate-800">
+              <h2 className="text-lg font-bold text-gray-800 dark:text-white">
+                Filter Bahasa
+              </h2>
+              <button
+                onClick={() => setIsSidebarOpen(false)}
+                className="p-1.5 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg"
+                aria-label="Tutup Sidebar"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <LanguageSidebar />
+
+            {/* konten scrollable */}
+            <div className="flex-1 overflow-y-auto px-5 pb-6">
+              <LanguageSidebar mode="mobile" />
+            </div>
           </div>
         </div>
       )}
 
       {/* Main */}
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-        <div className="mb-6 sm:mb-8 rounded-2xl bg-white/80 dark:bg-slate-900/70 ring-1 ring-black/5 dark:ring-white/10 p-6 sm:p-8 shadow">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-blue-800 dark:text-cyan-300 mb-2">{userTitle}</h2>
-          <p className="text-gray-600 dark:text-slate-300 text-sm sm:text-base">Akses materi dan lanjutkan perjalanan coding Anda hari ini!</p>
-          <div className="mt-5"><Toolbar /></div>
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10 flex-1">
+        <div className="mb-6 sm:mb-8 rounded-2xl bg-white/80 dark:bg-slate-900/70 ring-1 ring-black/5 dark:ring-white/10 p-6 sm:p-8 shadow-sm transition-all duration-300">
+          <div className="flex flex-col gap-2">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-blue-800 dark:text-cyan-300 tracking-tight">
+                {userTitle}
+              </h2>
+              <p className="text-gray-600 dark:text-slate-300 text-sm sm:text-base mt-1">
+                Akses materi dan lanjutkan perjalanan coding kamu hari ini. 🚀
+              </p>
+            </div>
+            <Toolbar />
+          </div>
         </div>
 
-        <div className="lg:grid lg:grid-cols-12 lg:gap-8">
+        <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-start">
           {/* Sidebar Desktop */}
           <div className="hidden lg:col-span-3 lg:block">
-            <LanguageSidebar />
+            <LanguageSidebar mode="desktop" />
           </div>
 
           {/* Content */}
-          <div className={`${user?.user_type === 'student' ? 'lg:col-span-9' : 'lg:col-span-12'}`}>
-            <div className="flex items-center gap-3 mb-4 sm:mb-6">
-              <BookOpen className="w-6 h-6 text-blue-600 dark:text-cyan-400" />
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Materi Tersedia</h3>
+          <div
+            className={
+              userType === 'student' ? 'lg:col-span-9 space-y-4' : 'lg:col-span-12 space-y-4'
+            }
+          >
+            <div className="flex flex-wrap items-center gap-3 mb-3 sm:mb-4">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-cyan-400" />
+                <h3 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
+                  Materi Tersedia
+                </h3>
+              </div>
               {selectedLanguage && (
                 <span className="text-xs sm:text-sm font-semibold px-3 py-1 bg-blue-100 text-blue-700 dark:bg-cyan-900/40 dark:text-cyan-200 rounded-full">
                   Filter: {selectedLanguage.toUpperCase()}
                 </span>
               )}
+              <span className="text-xs sm:text-sm text-gray-500 dark:text-slate-400">
+                {materials.length} modul siap dipelajari
+              </span>
             </div>
 
             {loading ? (
-              <div className="text-center py-16 sm:py-20 rounded-xl bg-white/70 dark:bg-slate-900/60 ring-1 ring-black/5 dark:ring-white/10">
+              <div className="text-center py-12 sm:py-16 rounded-2xl bg-white/70 dark:bg-slate-900/60 ring-1 ring-black/5 dark:ring-white/10">
                 <Loader2 className="inline-block animate-spin h-10 w-10 text-blue-600 dark:text-cyan-400" />
-                <p className="mt-4 text-gray-600 dark:text-slate-300 text-base sm:text-lg font-medium">Memuat materi pembelajaran...</p>
+                <p className="mt-4 text-gray-600 dark:text-slate-300 text-base sm:text-lg font-medium">
+                  Memuat materi pembelajaran...
+                </p>
               </div>
             ) : materials.length === 0 ? (
-              <div className="rounded-xl bg-white/70 dark:bg-slate-900/60 p-10 sm:p-12 text-center ring-2 ring-dashed ring-gray-200 dark:ring-slate-700">
+              <div className="rounded-2xl bg-white/70 dark:bg-slate-900/60 p-10 sm:p-12 text-center ring-2 ring-dashed ring-gray-200 dark:ring-slate-700">
                 <BookOpen className="w-14 h-14 sm:w-16 sm:h-16 text-gray-400 dark:text-slate-500 mx-auto mb-4" />
                 <p className="text-base sm:text-lg text-gray-700 dark:text-slate-300 font-medium">
-                  {user?.user_type === 'student' && !selectedLanguage
-                    ? 'Pilih bahasa pemrograman dari filter untuk memulai'
+                  {userType === 'student' && !selectedLanguage
+                    ? 'Pilih bahasa pemrograman dari filter untuk memulai.'
                     : 'Belum ada materi yang sesuai dengan profil Anda atau filter yang dipilih.'}
                 </p>
               </div>
             ) : (
-              <div className="grid gap-4 sm:gap-6">
-                {materials.map((m) => (
+              <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {materials.map((m, index) => (
                   <Link
                     key={m.id}
                     to={`/materials/${encodeURIComponent(m.id)}`}
-                    className="block rounded-2xl bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 shadow-md ring-1 ring-black/5 dark:ring-white/10 transition hover:shadow-lg hover:ring-blue-500/30 dark:hover:ring-cyan-400/30"
+                    className="group block rounded-2xl bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 shadow-md ring-1 ring-black/5 dark:ring-white/10 transition-all duration-300 hover:shadow-xl hover:ring-blue-500/30 dark:hover:ring-cyan-400/30 transform hover:-translate-y-1"
+                    style={{
+                      animation: `fadeInUp 0.35s ease-out both`,
+                      animationDelay: `${index * 40}ms`,
+                    }}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
                         <div className="mb-2 flex items-center gap-3">
-                          <Award className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-cyan-400" />
-                          <h4 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white leading-snug">
+                          <div className="h-8 w-8 rounded-xl bg-blue-50 dark:bg-cyan-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Award className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-cyan-400" />
+                          </div>
+                          <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-snug">
                             {m.order}. {m.title}
                           </h4>
                         </div>
-                        <p className="ml-8 text-gray-600 dark:text-slate-300 mb-3">{m.description}</p>
-                        <div className="ml-8 flex flex-wrap items-center gap-3">
-                          <span className={`text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold border ${
-                            m.level === 'beginner'
-                              ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-200 dark:border-green-900/40'
-                              : m.level === 'intermediate'
-                              ? 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-200 dark:border-yellow-900/40'
-                              : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-200 dark:border-red-900/40'
-                          }`}>
+                        <p className="ml-0 sm:ml-1 text-sm sm:text-[15px] text-gray-600 dark:text-slate-300 mb-3 line-clamp-3">
+                          {m.description}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                          <span
+                            className={`text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold border ${levelPill(
+                              m.level as Level
+                            )}`}
+                          >
                             {levelLabel[m.level as Level]}
                           </span>
                           {m.language && (
@@ -467,7 +605,7 @@ export default function Dashboard() {
                           )}
                         </div>
                       </div>
-                      <ChevronRight className="mt-1 h-6 w-6 text-blue-500 dark:text-cyan-300 flex-shrink-0" />
+                      <ChevronRight className="mt-1 h-5 w-5 text-blue-400 dark:text-cyan-300 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </Link>
                 ))}
@@ -476,6 +614,23 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
+
+      {/* Simple keyframe for fadeInUp (inline, supaya ga perlu edit Tailwind config) */}
+      <style>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translate3d(0, 10px, 0);
+          }
+          to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+          }
+        }
+        .animate-fade-in {
+          animation: fadeInUp 0.25s ease-out;
+        }
+      `}</style>
     </div>
   );
 }

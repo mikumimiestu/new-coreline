@@ -112,44 +112,164 @@ export const MOCK_USERS: User[] = [
 
 export const MOCK_MATERIALS: LearningMaterial[] = [
   {
-    id: 'py-01',
-    user_type: 'student',
-    language: 'python',
-    title: 'Pengenalan Python (Apa itu & Sejarah)',
-    description: 'Definisi, ekosistem, dan sejarah Python; use cases industri.',
-    content: `# Pengenalan Python
+  id: 'py-01',
+  user_type: 'student',
+  language: 'python',
+  title: 'Pengenalan Python (Apa itu & Sejarah)',
+  description: 'Definisi, ekosistem, dan sejarah Python; use cases industri.',
+  content: `# 🐍 Pengenalan Python
 
 ## Apa itu Python?
-Python adalah bahasa pemrograman **high-level**, **interpreted**, dan **multi-paradigm** (prosedural, OOP, fungsional). Fokusnya: **readability** dan **developer productivity**.
+Python adalah bahasa pemrograman **high-level**, **interpreted**, dan **multi-paradigm** (prosedural, OOP, dan fungsional).  
+Fokus utama Python adalah **readability** (mudah dibaca) dan **developer productivity** (cepat dikembangkan).
 
-## Sejarah Singkat
+**Karakteristik Utama:**
+- Sintaks sederhana & ekspresif
+- Dynamic typing (tipe data fleksibel)
+- Cross-platform (Windows, macOS, Linux)
+- Ribuan library siap pakai melalui **PyPI**
+- Open-source & gratis digunakan
+
+---
+
+## 🕰️ Sejarah Singkat
 | Tahun | Peristiwa | Catatan |
 |:---:|:---|:---|
 | 1989 | Guido van Rossum mulai mengembangkan | CWI (Belanda) |
-| 1991 | Rilis Python 0.9.0 | Ex. kelas, fungsi, exception |
-| 2000 | Python 2.0 | GC, list comprehension |
-| 2008 | Python 3.0 | Breaking changes, unicode-first |
-| 2010s–2020s | 3.4–3.12+ | Asyncio, f-string, walrus, pattern matching |
+| 1991 | Rilis Python 0.9.0 | Class, fungsi, exception pertama |
+| 1994 | Python 1.0 | Tambah lambda, map/filter/reduce |
+| 2000 | Python 2.0 | Garbage Collection, List Comprehension |
+| 2008 | Python 3.0 | Breaking changes, Unicode-first |
+| 2010s–2020s | 3.4–3.12+ | Asyncio, f-string, walrus (:=), pattern matching |
 
-## Kegunaan Utama
-- **Data/ML** (NumPy, Pandas, scikit-learn, PyTorch)
-- **Web** (Django, Flask, FastAPI)
-- **Scripting & Automation**
-- **DevOps & Infra** (Ansible)
+---
 
-## Contoh Pertama
+## 💡 Kenapa Python Populer?
+- **Mudah dipelajari** – sintaks mirip bahasa manusia  
+- **Serbaguna** – bisa untuk web, data, AI, IoT, automasi  
+- **Komunitas besar** – dokumentasi & forum melimpah  
+- **Didukung perusahaan besar** seperti Google, NASA, Netflix, Spotify  
+- **Banyak peluang kerja** di bidang data dan AI  
+
+---
+
+## ⚙️ Kegunaan Utama
+### 🧠 Data Science & Machine Learning
+- Library: NumPy, Pandas, Matplotlib, Scikit-learn, TensorFlow, PyTorch  
+- Contoh: prediksi harga saham, analisis data, deteksi wajah  
+
+### 🌐 Web Development
+- Framework: Django, Flask, FastAPI  
+- Contoh: aplikasi web, REST API, backend sistem  
+
+### ⚙️ Automation & Scripting
+- Contoh: bot Telegram, scraping, manajemen file, cron task  
+
+### 🧩 DevOps & Infrastruktur
+- Tools: Ansible, Fabric, Docker SDK  
+- Contoh: deployment otomatis, CI/CD, server config  
+
+### 🎮 Game & IoT
+- Library: Pygame, MicroPython, Raspberry Pi  
+- Contoh: game edukasi, kontrol perangkat pintar  
+
+---
+
+## 💻 Contoh Pertama
 \`\`\`python
 print("Halo, dunia Python!")
 \`\`\`
 
-## Outcome Modul
-- Memahami filosofi Python dan area penerapan industri.
-- Mengetahui perubahan penting dari Python 2 → 3.
+### Input-Output sederhana
+\`\`\`python
+nama = input("Siapa nama kamu? ")
+print(f"Halo, {nama}!")
+\`\`\`
+
+---
+
+## 🧠 Konsep Dasar Python
+
+### Variabel & Tipe Data
+\`\`\`python
+umur = 21          # int
+nama = "Raju"      # string
+nilai = 92.5       # float
+aktif = True       # boolean
+\`\`\`
+
+### Struktur Kondisi
+\`\`\`python
+if umur >= 18:
+    print("Dewasa")
+else:
+    print("Belum dewasa")
+\`\`\`
+
+### Perulangan
+\`\`\`python
+for i in range(5):
+    print("Iterasi ke-", i)
+\`\`\`
+
+### Fungsi
+\`\`\`python
+def salam(nama):
+    return f"Halo, {nama}!"
+
+print(salam("Mikumiestu"))
+\`\`\`
+
+### OOP (Object-Oriented Programming)
+\`\`\`python
+class Mahasiswa:
+    def __init__(self, nama, jurusan):
+        self.nama = nama
+        self.jurusan = jurusan
+
+    def info(self):
+        print(f"{self.nama} dari jurusan {self.jurusan}")
+
+mhs1 = Mahasiswa("Zaki", "Informatika")
+mhs1.info()
+\`\`\`
+
+---
+
+## 🚀 Fitur Modern Python (3.x)
+- **F-String:** \`f"Halo {nama}!"\`  
+- **Async/Await:** untuk concurrency & IO async  
+- **Type Hints:** \`def tambah(a: int, b: int) -> int:\`  
+- **Pattern Matching:** (Python 3.10+)  
+- **Walrus Operator (:=):** assignment di dalam ekspresi  
+
+---
+
+## ✅ Kelebihan Python
+- Mudah dipelajari & fleksibel  
+- Komunitas global yang aktif  
+- Banyak library & framework  
+- Cocok untuk AI, data, dan prototyping  
+
+## ⚠️ Kelemahan Python
+- Eksekusi lebih lambat dari C/C++  
+- Tidak ideal untuk mobile native  
+- Memakan memori lebih banyak  
+
+---
+
+## 🎯 Outcome Modul
+- Memahami filosofi dan karakteristik Python  
+- Mengenal sejarah dan evolusi versi 2 → 3  
+- Mengetahui area penerapan Python di industri  
+- Dapat menulis script Python dasar  
+- Mengenal fitur modern Python versi terbaru  
 `,
-    level: 'beginner',
-    order: 1,
-    created_at: '2025-01-01T00:00:00Z'
-  },
+  level: 'beginner',
+  order: 1,
+  created_at: '2025-01-01T00:00:00Z'
+}
+  ,
   {
     id: 'py-02',
     user_type: 'student',
