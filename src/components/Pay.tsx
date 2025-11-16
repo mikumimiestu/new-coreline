@@ -13,16 +13,21 @@ import {
   AlertTriangle,
   Zap,
   Check,
+  Wallet,
+  Loader2,
 } from 'lucide-react';
 
 type Tier = 'student' | 'pro' | 'plus';
 type Cycle = 'monthly' | 'yearly';
-type MethodTab = 'qris' | 'bank' | 'va' | 'ewallet' | 'retail';
+type MethodTab = 'qris' | 'bank' | 'va' | 'ewallet' | 'retail' | 'balance';
 
 const MERCHANT_NAME = 'Xenza ID';
 const NMID = 'ID1023244802444';
 const WHATSAPP = '6285183209494';
 const QR_IMAGE_PATH = '/qr.jpg';
+
+const API_BASE = 'https://authx.astbyte.com';
+const TOKEN_KEY = 'astbyte_token';
 
 const DEFAULT_PRICE: Record<Tier, { monthly: number; yearly: number }> = {
   student: { monthly: 0, yearly: 0 },
@@ -80,6 +85,13 @@ type BrandLogo = {
   name: string;
   src?: string;
   comingSoon?: boolean;
+};
+
+type AuthUser = {
+  public_id: string;
+  full_name: string;
+  email: string;
+  balance: number;
 };
 
 const BANK_LOGOS: BrandLogo[] = [
@@ -149,13 +161,17 @@ const makeWaLink = (p: {
       ? `virtual account${p.brandName ? ` (${p.brandName})` : ''}`
       : p.methodTab === 'ewallet'
       ? `e-wallet${p.brandName ? ` (${p.brandName})` : ''}`
-      : `retail${p.brandName ? ` (${p.brandName})` : ''}`;
+      : p.methodTab === 'retail'
+      ? `retail${p.brandName ? ` (${p.brandName})` : ''}`
+      : 'saldo AstByte';
 
   const header =
     p.methodTab === 'qris'
       ? 'Saya sudah melakukan pembayaran via QRIS.'
       : p.methodTab === 'va'
       ? 'Saya akan membayar via Virtual Account (instant).'
+      : p.methodTab === 'balance'
+      ? 'Saya baru saja membayar menggunakan saldo AstByte di sistem.'
       : `Saya mau bayar lewat ${methodText}.`;
 
   const extraRetail =
@@ -192,6 +208,12 @@ Saya akan kirim bukti transfer (screenshot) setelah ini. Terima kasih 🙏`;
 export default function ManualQRISPage() {
   const [copied, setCopied] = useState(false);
 
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+  const [balanceError, setBalanceError] = useState<string | null>(null);
+  const [balanceSuccess, setBalanceSuccess] = useState<string | null>(null);
+  const [payingWithBalance, setPayingWithBalance] = useState(false);
+
   useEffect(() => {
     document.title = 'Pay | New Coreline by Xenza ID';
   }, []);
@@ -216,6 +238,44 @@ export default function ManualQRISPage() {
       document.removeEventListener('keydown', onKey);
       document.removeEventListener('contextmenu', onCtx);
     };
+  }, []);
+
+  // Ambil user + saldo dari authx
+  useEffect(() => {
+    const token = typeof window !== 'undefined'
+      ? localStorage.getItem(TOKEN_KEY)
+      : null;
+
+    if (!token) {
+      setLoadingUser(false);
+      return;
+    }
+
+    const fetchMe = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (res.ok && data?.data?.user) {
+          const u = data.data.user;
+          setUser({
+            public_id: u.public_id,
+            full_name: u.full_name,
+            email: u.email,
+            balance: u.balance ?? 0,
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+
+    fetchMe();
   }, []);
 
   const params = new URLSearchParams(
@@ -307,6 +367,81 @@ export default function ManualQRISPage() {
     vaNumber: methodTab === 'va' ? vaNumber : undefined,
   });
 
+  // Handler bayar pakai saldo AstByte
+  const handlePayWithBalance = async () => {
+    setBalanceError(null);
+    setBalanceSuccess(null);
+
+    const token =
+      typeof window !== 'undefined'
+        ? localStorage.getItem(TOKEN_KEY)
+        : null;
+
+    if (!token) {
+      setBalanceError('Token tidak ditemukan. Silakan login terlebih dahulu.');
+      return;
+    }
+
+    if (!user) {
+      setBalanceError('Data user tidak tersedia. Silakan login ulang.');
+      return;
+    }
+
+    if (user.balance < total) {
+      setBalanceError(
+        `Saldo tidak cukup. Saldo kamu ${rupiah(
+          user.balance
+        )}, sedangkan total yang harus dibayar ${rupiah(total)}.`
+      );
+      return;
+    }
+
+    setPayingWithBalance(true);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/payment/pay-balance`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          amount: total,
+          order_id: orderId,
+          tier: tierParam,
+          cycle: cycleParam,
+          voucher_code: voucher || null,
+          nominal: nominalRaw,
+          discount: disc.amount,
+          payment_source: 'coreline-subscription',
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || data?.status !== 'success') {
+        setBalanceError(
+          data?.message || 'Gagal memproses pembayaran saldo. Coba lagi.'
+        );
+        return;
+      }
+
+      const newBalance =
+        data?.data?.balance !== undefined
+          ? Number(data.data.balance)
+          : user.balance - total;
+
+      setUser((prev) =>
+        prev ? { ...prev, balance: newBalance } : prev
+      );
+      setBalanceSuccess('Pembayaran dengan saldo AstByte berhasil! 🎉');
+    } catch (err) {
+      console.error(err);
+      setBalanceError('Terjadi kesalahan jaringan. Coba beberapa saat lagi.');
+    } finally {
+      setPayingWithBalance(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 text-slate-800 dark:text-slate-100 select-none">
       <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 max-w-6xl">
@@ -321,7 +456,7 @@ export default function ManualQRISPage() {
           </h1>
           <p className="mt-3 text-base text-gray-600 dark:text-slate-300 max-w-2xl mx-auto">
             Pilih metode pembayaran, lakukan transfer sesuai total yang tertera, lalu
-            konfirmasi via WhatsApp
+            konfirmasi via WhatsApp atau bayar instan dengan saldo AstByte
           </p>
         </div>
 
@@ -439,6 +574,16 @@ export default function ManualQRISPage() {
                   Pastikan nominal dan kode unik sesuai sebelum melakukan transfer
                 </span>
               </div>
+
+              {methodTab === 'balance' && (
+                <div className="mt-4 rounded-lg border border-sky-200 dark:border-sky-800/60 bg-sky-50 dark:bg-sky-900/20 p-3 text-xs text-sky-800 dark:text-sky-200 flex items-start gap-2">
+                  <Wallet className="w-4 h-4 mt-0.5" />
+                  <span>
+                    Metode <strong>Saldo AstByte</strong> akan langsung memotong saldo
+                    kamu sebesar {rupiah(total)} tanpa perlu konfirmasi manual.
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -450,32 +595,36 @@ export default function ManualQRISPage() {
             </div>
 
             <div className="inline-flex w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 p-1 mb-6">
-              {(['qris', 'bank', 'va', 'ewallet', 'retail'] as MethodTab[]).map(
-                (tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => {
-                      setMethodTab(tab);
-                      setSelectedBrand(undefined);
-                    }}
-                    className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold transition-colors ${
-                      methodTab === tab
-                        ? 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-sm'
-                        : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
-                    }`}
-                  >
-                    {tab === 'qris'
-                      ? 'QRIS'
-                      : tab === 'bank'
-                      ? 'Bank'
-                      : tab === 'va'
-                      ? 'VA'
-                      : tab === 'ewallet'
-                      ? 'E-Wallet'
-                      : 'Retail'}
-                  </button>
-                )
-              )}
+              {(
+                ['qris', 'bank', 'va', 'ewallet', 'retail', 'balance'] as MethodTab[]
+              ).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => {
+                    setMethodTab(tab);
+                    setSelectedBrand(undefined);
+                    setBalanceError(null);
+                    setBalanceSuccess(null);
+                  }}
+                  className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold transition-colors ${
+                    methodTab === tab
+                      ? 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-sm'
+                      : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  {tab === 'qris'
+                    ? 'QRIS'
+                    : tab === 'bank'
+                    ? 'Bank'
+                    : tab === 'va'
+                    ? 'VA'
+                    : tab === 'ewallet'
+                    ? 'E-Wallet'
+                    : tab === 'retail'
+                    ? 'Retail'
+                    : 'Saldo AstByte'}
+                </button>
+              ))}
             </div>
 
             {/* Content per method */}
@@ -568,7 +717,7 @@ export default function ManualQRISPage() {
                   selectedId={selectedBrand}
                   onSelect={(id) => setSelectedBrand(id)}
                 />
-              ) : (
+              ) : methodTab === 'retail' ? (
                 <>
                   <LogoGrid
                     title="Pilih Gerai Retail"
@@ -617,41 +766,129 @@ export default function ManualQRISPage() {
                     </div>
                   </div>
                 </>
+              ) : (
+                // Saldo AstByte
+                <div className="space-y-4">
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-900 dark:via-slate-900/80 dark:to-slate-900 p-4 flex items-center justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <Wallet className="w-4 h-4 text-slate-700 dark:text-slate-200" />
+                        <span className="text-sm font-semibold text-slate-900 dark:text-white">
+                          Saldo AstByte
+                        </span>
+                      </div>
+                      {loadingUser ? (
+                        <div className="h-5 w-32 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+                      ) : user ? (
+                        <div className="text-xl font-extrabold text-slate-900 dark:text-white">
+                          {rupiah(user.balance)}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-slate-600 dark:text-slate-400 max-w-xs">
+                          Kamu perlu login ke akun AstByte untuk menggunakan saldo.
+                          Silakan login dulu di halaman akun.
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right text-[11px] text-slate-500 dark:text-slate-400">
+                      <p>Pembayaran instan tanpa konfirmasi manual.</p>
+                      <p>Saldo akan langsung terpotong.</p>
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-slate-500 dark:text-slate-400">
+                    Pastikan saldo kamu mencukupi untuk membayar{' '}
+                    <span className="font-semibold">{rupiah(total)}</span>. Setelah
+                    pembayaran berhasil, akses paket akan diaktifkan otomatis sesuai
+                    implementasi backend.
+                  </div>
+                </div>
               )}
             </div>
 
-            {/* WHY MANUAL */}
-            <div className="mb-6 rounded-lg border border-blue-200 dark:border-cyan-800/40 bg-blue-50 dark:bg-blue-900/10 p-4">
-              <div className="flex items-start gap-2 text-sm font-medium text-gray-900 dark:text-white mb-2">
-                <InfoIcon className="w-4 h-4 flex-shrink-0 mt-0.5 text-blue-600 dark:text-cyan-400" />
-                Mengapa konfirmasi manual?
+            {/* WHY MANUAL – tidak ditampilkan untuk saldo */}
+            {methodTab !== 'balance' && (
+              <div className="mb-6 rounded-lg border border-blue-200 dark:border-cyan-800/40 bg-blue-50 dark:bg-blue-900/10 p-4">
+                <div className="flex items-start gap-2 text-sm font-medium text-gray-900 dark:text-white mb-2">
+                  <InfoIcon className="w-4 h-4 flex-shrink-0 mt-0.5 text-blue-600 dark:text-cyan-400" />
+                  Mengapa konfirmasi manual?
+                </div>
+                <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">
+                  Untuk memastikan keamanan dan akurasi transaksi, kami memverifikasi
+                  setiap pembayaran secara manual karena:
+                </p>
+                <ul className="text-sm text-gray-600 dark:text-slate-300 list-disc pl-5 space-y-1">
+                  <li>Mencocokkan nominal dan kode unik dengan tepat</li>
+                  <li>Mencegah fraud dan transaksi ganda</li>
+                  <li>Menyesuaikan waktu settlement antar channel</li>
+                  <li>Memastikan aktivasi akses ke akun yang benar</li>
+                </ul>
               </div>
-              <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">
-                Untuk memastikan keamanan dan akurasi transaksi, kami memverifikasi
-                setiap pembayaran secara manual karena:
-              </p>
-              <ul className="text-sm text-gray-600 dark:text-slate-300 list-disc pl-5 space-y-1">
-                <li>Mencocokkan nominal dan kode unik dengan tepat</li>
-                <li>Mencegah fraud dan transaksi ganda</li>
-                <li>Menyesuaikan waktu settlement antar channel</li>
-                <li>Memastikan aktivasi akses ke akun yang benar</li>
-              </ul>
-            </div>
+            )}
 
-            {/* WA Confirm */}
-            <a
-              href={waLink}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 text-white px-4 py-3 text-sm font-semibold hover:bg-emerald-700 transition-colors shadow-sm"
-            >
-              <Phone className="w-4 h-4" />
-              Konfirmasi via WhatsApp
-            </a>
+            {/* Alert khusus saldo */}
+            {methodTab === 'balance' && (balanceError || balanceSuccess) && (
+              <div
+                className={`mb-4 rounded-lg border px-4 py-3 text-xs flex items-start gap-2 ${
+                  balanceError
+                    ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-800/50 dark:bg-red-900/20 dark:text-red-200'
+                    : 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800/50 dark:bg-emerald-900/20 dark:text-emerald-200'
+                }`}
+              >
+                {balanceError ? (
+                  <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                ) : (
+                  <Check className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                )}
+                <span>{balanceError || balanceSuccess}</span>
+              </div>
+            )}
+
+            {/* WA Confirm / Pay with balance */}
+            {methodTab === 'balance' ? (
+              <button
+                type="button"
+                onClick={handlePayWithBalance}
+                disabled={
+                  payingWithBalance ||
+                  loadingUser ||
+                  !user ||
+                  user.balance < total
+                }
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 text-white px-4 py-3 text-sm font-semibold hover:bg-slate-800 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {payingWithBalance ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Memproses Pembayaran...
+                  </>
+                ) : (
+                  <>
+                    <Wallet className="w-4 h-4" />
+                    Bayar dengan Saldo AstByte
+                    <span className="text-xs opacity-80">
+                      ({rupiah(total)})
+                    </span>
+                  </>
+                )}
+              </button>
+            ) : (
+              <a
+                href={waLink}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 text-white px-4 py-3 text-sm font-semibold hover:bg-emerald-700 transition-colors shadow-sm"
+              >
+                <Phone className="w-4 h-4" />
+                Konfirmasi via WhatsApp
+              </a>
+            )}
 
             <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-gray-500 dark:text-slate-400">
               <span>
-                Pembayaran manual. Tim kami akan verifikasi bukti transfer Anda.
+                {methodTab === 'balance'
+                  ? 'Pembayaran saldo diproses langsung oleh sistem.'
+                  : 'Pembayaran manual. Tim kami akan verifikasi bukti transfer Anda.'}
               </span>
               <a
                 href="/pricing"
@@ -793,7 +1030,8 @@ function LogoGrid({
       <div className="mt-3 text-xs text-gray-500 dark:text-slate-400">
         {selectedId ? (
           <>
-            Terpilih: <strong>{items.find((x) => x.id === selectedId)?.name}</strong>
+            Terpilih:{' '}
+            <strong>{items.find((x) => x.id === selectedId)?.name}</strong>
           </>
         ) : (
           <>Silakan pilih salah satu metode pembayaran</>
