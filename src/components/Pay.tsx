@@ -3,7 +3,6 @@ import { useMemo, useState, useEffect } from "react";
 import {
   Copy,
   Shield,
-  Phone,
   BadgeCheck,
   ArrowRight,
   BadgePercent,
@@ -12,6 +11,7 @@ import {
   Check,
   Wallet,
   Loader2,
+  User,
 } from "lucide-react";
 
 type Tier = "student" | "pro" | "plus";
@@ -20,7 +20,9 @@ type Cycle = "monthly" | "yearly";
 const MERCHANT_NAME = "Xenza ID";
 const NMID = "ID1023244802444";
 
+// API base: localhost saat dev, authx saat prod
 const API_BASE = "https://authx.astbyte.com";
+
 const TOKEN_KEY = "astbyte_token";
 
 const DEFAULT_PRICE: Record<Tier, { monthly: number; yearly: number }> = {
@@ -79,16 +81,21 @@ export default function ManualQRISPage() {
   const [copied, setCopied] = useState(false);
 
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [loadingUser, setLoadingUser] = useState(true);
+  const [loadingUser, setLoadingUser] = useState(false);
   const [balanceError, setBalanceError] = useState<string | null>(null);
   const [balanceSuccess, setBalanceSuccess] = useState<string | null>(null);
   const [payingWithBalance, setPayingWithBalance] = useState(false);
+
+  // NEW: input Public ID + loading login
+  const [publicId, setPublicId] = useState("");
+  const [checkingPublicId, setCheckingPublicId] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+  const [publicIdError, setPublicIdError] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = "Pay with Balance | New Coreline by Xenza ID";
   }, []);
 
-  // Ambil search params (tier/cycle/amount/token)
   const params =
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search)
@@ -96,55 +103,6 @@ export default function ManualQRISPage() {
   const tierParam = (params.get("tier") as Tier) || "student";
   const cycleParam = (params.get("cycle") as Cycle) || "monthly";
   const amountParam = Number(params.get("amount") || NaN);
-
-  // Ambil user + saldo dari authx, dengan fallback token URL -> localStorage
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      setLoadingUser(false);
-      return;
-    }
-
-    const sp = new URLSearchParams(window.location.search);
-    const tokenFromUrl = sp.get("token");
-    const tokenFromStorage = localStorage.getItem(TOKEN_KEY);
-    const token = tokenFromUrl || tokenFromStorage;
-
-    // Simpan token URL ke localStorage kalau belum ada (biar di prod kebaca)
-    if (tokenFromUrl && !tokenFromStorage) {
-      localStorage.setItem(TOKEN_KEY, tokenFromUrl);
-    }
-
-    if (!token) {
-      setLoadingUser(false);
-      return;
-    }
-
-    const fetchMe = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const data = await res.json();
-        if (res.ok && data?.data?.user) {
-          const u = data.data.user;
-          setUser({
-            public_id: u.public_id,
-            full_name: u.full_name,
-            email: u.email,
-            balance: u.balance ?? 0,
-          });
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoadingUser(false);
-      }
-    };
-
-    fetchMe();
-  }, []);
 
   const nominalRaw = useMemo(() => {
     const defaults = DEFAULT_PRICE[tierParam];
@@ -161,7 +119,7 @@ export default function ManualQRISPage() {
     [nominalRaw, voucher]
   );
   const nominalAfterDisc = Math.max(0, nominalRaw - disc.amount);
-  const total = nominalAfterDisc; // TANPA kode unik, karena ini full saldo
+  const total = nominalAfterDisc;
 
   const onCopyTotal = async () => {
     try {
@@ -173,32 +131,81 @@ export default function ManualQRISPage() {
     }
   };
 
-  // Handler bayar pakai saldo AstByte (satu-satunya metode)
+  // Step 1: user isi Public ID -> login ke authx -> dapat token + user
+  const handleCheckPublicId = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPublicIdError(null);
+    setBalanceError(null);
+    setBalanceSuccess(null);
+    setUser(null);
+    setToken(null);
+
+    const trimmed = publicId.trim();
+    if (!trimmed) {
+      setPublicIdError("Public ID wajib diisi.");
+      return;
+    }
+
+    setCheckingPublicId(true);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/login/public-id`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ public_id: trimmed }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setPublicIdError(
+          data?.message || "Login dengan Public ID gagal. Coba lagi."
+        );
+        return;
+      }
+
+      const t = data?.data?.token;
+      const u = data?.data?.user;
+      if (!t || !u) {
+        setPublicIdError("Token atau data user tidak ditemukan dari server.");
+        return;
+      }
+
+      // simpan token ke state + localStorage
+      setToken(t);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(TOKEN_KEY, t);
+      }
+
+      // set user dari respons login langsung (sudah cukup)
+      setUser({
+        public_id: u.public_id,
+        full_name: u.full_name,
+        email: u.email,
+        balance: u.balance ?? 0,
+      });
+    } catch (err) {
+      console.error(err);
+      setPublicIdError("Terjadi kesalahan jaringan. Coba lagi beberapa saat.");
+    } finally {
+      setCheckingPublicId(false);
+    }
+  };
+
+  // Step 2: Bayar pakai saldo AstByte (wajib sudah ada token + user)
   const handlePayWithBalance = async () => {
     setBalanceError(null);
     setBalanceSuccess(null);
 
-    if (typeof window === "undefined") {
-      setBalanceError("Browser environment tidak tersedia.");
-      return;
-    }
-
-    const sp = new URLSearchParams(window.location.search);
-    const tokenFromUrl = sp.get("token");
-    const tokenFromStorage = localStorage.getItem(TOKEN_KEY);
-    const token = tokenFromUrl || tokenFromStorage;
-
-    if (tokenFromUrl && !tokenFromStorage) {
-      localStorage.setItem(TOKEN_KEY, tokenFromUrl);
-    }
-
     if (!token) {
-      setBalanceError("Token tidak ditemukan. Silakan login terlebih dahulu.");
+      setBalanceError(
+        "Kamu belum login dengan Public ID. Silakan cek akun terlebih dahulu."
+      );
       return;
     }
 
     if (!user) {
-      setBalanceError("Data user tidak tersedia. Silakan login ulang.");
+      setBalanceError("Data user tidak tersedia. Silakan cek akun lagi.");
       return;
     }
 
@@ -242,8 +249,17 @@ export default function ManualQRISPage() {
           ? Number(data.data.balance)
           : user.balance - total;
 
-      setUser((prev) => (prev ? { ...prev, balance: newBalance } : prev));
-      setBalanceSuccess("Pembayaran dengan saldo AstByte berhasil! 🎉");
+      setUser((prev) =>
+        prev ? { ...prev, balance: newBalance } : prev
+      );
+      setBalanceSuccess("Pembayaran dengan saldo AstByte berhasil!");
+
+      // Redirect ke halaman utama setelah 1.5 detik
+      if (typeof window !== "undefined") {
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1500);
+      }
     } catch (err) {
       console.error(err);
       setBalanceError("Terjadi kesalahan jaringan. Coba beberapa saat lagi.");
@@ -286,9 +302,7 @@ export default function ManualQRISPage() {
                 <span className="text-[11px] text-slate-400">Status</span>
                 <span
                   className={`text-xs font-medium ${
-                    balanceEnough
-                      ? "text-emerald-400"
-                      : "text-amber-300"
+                    balanceEnough ? "text-emerald-400" : "text-amber-300"
                   }`}
                 >
                   {balanceEnough ? "Saldo cukup" : "Saldo kurang"}
@@ -298,11 +312,63 @@ export default function ManualQRISPage() {
           )}
         </header>
 
-        {/* Content */}
         <main className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-5 sm:gap-6 items-start">
-          {/* Left: Detail & Form */}
+          {/* Left */}
           <div className="space-y-4 sm:space-y-5">
-            {/* Paket & Ringkasan */}
+            {/* Public ID Section */}
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-[0_20px_55px_rgba(15,23,42,1)]">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-7 h-7 rounded-2xl bg-sky-500/20 border border-sky-500/60 flex items-center justify-center">
+                  <User className="w-4 h-4 text-sky-300" />
+                </div>
+                <h2 className="text-sm sm:text-base font-semibold text-slate-50">
+                  Masukkan Public ID AstByte
+                </h2>
+              </div>
+              <p className="text-[11px] sm:text-xs text-slate-400 mb-3">
+                Public ID bisa kamu lihat di halaman Account Center AstByte.
+                Data akun & saldo akan dicek sebelum pembayaran.
+              </p>
+              <form onSubmit={handleCheckPublicId} className="space-y-3">
+                <input
+                  type="text"
+                  value={publicId}
+                  onChange={(e) => {
+                    setPublicId(e.target.value);
+                    setPublicIdError(null);
+                    setBalanceError(null);
+                    setBalanceSuccess(null);
+                  }}
+                  placeholder="Contoh: 3e02d5cb-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                  className="w-full rounded-2xl border border-slate-700 bg-slate-950/80 px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/60 outline-none"
+                />
+                {publicIdError && (
+                  <div className="rounded-2xl border border-red-300/70 bg-red-50/10 px-3 py-2 text-xs text-red-200 flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <span>{publicIdError}</span>
+                  </div>
+                )}
+                <button
+                  type="submit"
+                  disabled={checkingPublicId}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-sky-500/90 hover:bg-sky-400 text-slate-950 px-4 py-2.5 text-sm sm:text-base font-semibold shadow-[0_16px_40px_rgba(56,189,248,0.9)] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {checkingPublicId ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Mengecek Akun...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Cek Akun & Saldo
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+
+            {/* Paket & Diskon */}
             <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-[0_20px_55px_rgba(15,23,42,1)]">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <div>
@@ -314,9 +380,7 @@ export default function ManualQRISPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-[11px] text-slate-400">Order ID</p>
-                  <p className="text-xs font-mono text-slate-200">
-                    {orderId}
-                  </p>
+                  <p className="text-xs font-mono text-slate-200">{orderId}</p>
                 </div>
               </div>
 
@@ -359,12 +423,10 @@ export default function ManualQRISPage() {
                   )}
                 </button>
               </div>
-            </div>
 
-            {/* Voucher & Kenapa Saldo */}
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 space-y-4">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-200">
+              {/* Voucher */}
+              <div className="mt-4 space-y-2.5">
+                <label className="text-sm font-medium text-slate-200">
                   Kode Voucher (opsional)
                 </label>
                 <div className="flex items-center gap-2">
@@ -372,8 +434,8 @@ export default function ManualQRISPage() {
                     type="text"
                     value={voucher}
                     onChange={(e) => setVoucher(e.target.value)}
-                    className="flex-1 rounded-2xl border border-slate-700 bg-slate-950/80 px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/60 outline-none"
                     placeholder="Masukkan kode voucher"
+                    className="flex-1 rounded-2xl border border-slate-700 bg-slate-950/80 px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/60 outline-none"
                   />
                   <div className="hidden sm:flex items-center gap-1.5 rounded-2xl bg-slate-900 border border-slate-700 px-3 py-2 text-[11px] text-slate-300">
                     <BadgePercent className="w-3.5 h-3.5 text-sky-300" />
@@ -381,30 +443,14 @@ export default function ManualQRISPage() {
                   </div>
                 </div>
                 {disc.valid && (
-                  <p className="mt-1 text-xs text-emerald-300">
+                  <p className="text-xs text-emerald-300">
                     Voucher aktif: {disc.label} (potongan {rupiah(disc.amount)})
                   </p>
                 )}
               </div>
-
-              <div className="rounded-2xl border border-blue-200/40 bg-blue-50/5 dark:border-cyan-800/40 dark:bg-cyan-900/10 p-4">
-                <div className="flex items-start gap-2 text-sm font-medium text-slate-100 mb-2">
-                  <InfoIcon className="w-4 h-4 flex-shrink-0 mt-0.5 text-sky-300" />
-                  Kenapa pakai saldo AstByte?
-                </div>
-                <p className="text-xs sm:text-sm text-slate-300 mb-2">
-                  Pembayaran via saldo AstByte lebih cepat karena diproses penuh
-                  di sistem tanpa perlu kirim bukti transfer.
-                </p>
-                <ul className="text-xs sm:text-sm text-slate-300 list-disc pl-5 space-y-1">
-                  <li>Akses paket aktif langsung setelah pembayaran sukses</li>
-                  <li>Tidak perlu menunggu verifikasi manual admin</li>
-                  <li>Riwayat transaksi lebih rapi di dalam sistem</li>
-                </ul>
-              </div>
             </div>
 
-            {/* Alert saldo */}
+            {/* Error / Success */}
             {balanceError || balanceSuccess ? (
               <div
                 className={`rounded-2xl border px-4 py-3 text-xs sm:text-sm flex items-start gap-2 ${
@@ -428,8 +474,8 @@ export default function ManualQRISPage() {
               onClick={handlePayWithBalance}
               disabled={
                 payingWithBalance ||
-                loadingUser ||
                 !user ||
+                !token ||
                 !Number.isFinite(total) ||
                 total <= 0
               }
@@ -453,8 +499,8 @@ export default function ManualQRISPage() {
 
             <div className="mt-3 flex items-start justify-between gap-2 text-[11px] sm:text-xs text-slate-500">
               <span>
-                Pembayaran saldo diproses langsung oleh sistem. Pastikan saldo
-                kamu mencukupi sebelum melanjutkan.
+                Pembayaran saldo diproses langsung oleh sistem. Pastikan kamu
+                sudah cek Public ID kamu di atas.
               </span>
               <a
                 href="/pricing"
@@ -466,7 +512,7 @@ export default function ManualQRISPage() {
             </div>
           </div>
 
-          {/* Right: Info User & Ringkasan */}
+          {/* Right */}
           <div className="space-y-4 sm:space-y-5">
             <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6">
               <div className="flex items-center gap-2 mb-3">
@@ -475,18 +521,16 @@ export default function ManualQRISPage() {
                   Info Akun
                 </h2>
               </div>
-              {loadingUser ? (
-                <p className="text-xs text-slate-500">Memuat data akun...</p>
-              ) : user ? (
+              {user ? (
                 <div className="space-y-2 text-xs sm:text-sm">
                   <Row label="Nama" value={user.full_name} />
                   <Row label="Email" value={user.email} />
                   <Row label="Saldo" value={rupiah(user.balance)} highlight />
                 </div>
               ) : (
-                <p className="text-xs text-amber-300">
-                  Data akun tidak terbaca. Pastikan kamu membuka halaman ini
-                  dari link resmi dan sudah login.
+                <p className="text-xs text-slate-400">
+                  Masukkan Public ID di sebelah kiri untuk menampilkan data
+                  akun & saldo.
                 </p>
               )}
             </div>
@@ -506,10 +550,7 @@ export default function ManualQRISPage() {
                 <Row label="Merchant" value={MERCHANT_NAME} />
                 <Row label="NMID" value={NMID} mono />
                 <Row label="Order ID" value={orderId} mono />
-                <Row
-                  label="Nominal Paket"
-                  value={rupiah(nominalRaw)}
-                />
+                <Row label="Nominal Paket" value={rupiah(nominalRaw)} />
                 <Row
                   label="Diskon"
                   value={
@@ -533,8 +574,8 @@ export default function ManualQRISPage() {
                   <div>
                     Nominal tidak terdeteksi dari URL. Sistem menggunakan harga
                     default paket{" "}
-                    <strong>{tierParam.toUpperCase()}</strong>{" "}
-                    (<strong>{cycleParam}</strong>). Untuk nominal spesifik,
+                    <strong>{tierParam.toUpperCase()}</strong> (
+                    <strong>{cycleParam}</strong>). Untuk nominal spesifik,
                     pastikan link dari halaman pricing menyertakan parameter{" "}
                     <code className="mx-1 px-1.5 py-0.5 rounded bg-black/10 font-mono text-[10px]">
                       amount
@@ -548,10 +589,9 @@ export default function ManualQRISPage() {
         </main>
       </div>
 
-      {/* Footer */}
       <footer className="text-center text-xs sm:text-sm text-slate-500 py-6 border-t border-slate-800">
-        Powered by <strong>XenzaDigital</strong> — Halaman pembayaran ini dibuat
-        oleh XenzaDigital (Xenza ID)
+        Powered by <strong>XenzaDigital</strong> — Halaman pembayaran ini
+        dibuat oleh XenzaDigital (Xenza ID)
       </footer>
     </div>
   );
