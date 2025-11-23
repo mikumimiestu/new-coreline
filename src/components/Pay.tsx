@@ -1,33 +1,27 @@
 // src/pages/ManualQRISPage.tsx
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from "react";
 import {
   Copy,
-  QrCode,
   Shield,
   Phone,
   BadgeCheck,
   ArrowRight,
   BadgePercent,
-  CreditCard,
   Info as InfoIcon,
   AlertTriangle,
-  Zap,
   Check,
   Wallet,
   Loader2,
-} from 'lucide-react';
+} from "lucide-react";
 
-type Tier = 'student' | 'pro' | 'plus';
-type Cycle = 'monthly' | 'yearly';
-type MethodTab = 'qris' | 'bank' | 'va' | 'ewallet' | 'retail' | 'balance';
+type Tier = "student" | "pro" | "plus";
+type Cycle = "monthly" | "yearly";
 
-const MERCHANT_NAME = 'Xenza ID';
-const NMID = 'ID1023244802444';
-const WHATSAPP = '6285183209494';
-const QR_IMAGE_PATH = '/qr.jpg';
+const MERCHANT_NAME = "Xenza ID";
+const NMID = "ID1023244802444";
 
-const API_BASE = 'https://authx.astbyte.com';
-const TOKEN_KEY = 'astbyte_token';
+const API_BASE = "https://authx.astbyte.com";
+const TOKEN_KEY = "astbyte_token";
 
 const DEFAULT_PRICE: Record<Tier, { monthly: number; yearly: number }> = {
   student: { monthly: 0, yearly: 0 },
@@ -37,172 +31,48 @@ const DEFAULT_PRICE: Record<Tier, { monthly: number; yearly: number }> = {
 
 const VOUCHERS: Record<
   string,
-  { type: 'percent' | 'fixed'; value: number; note?: string }
+  { type: "percent" | "fixed"; value: number; note?: string }
 > = {
-  CORELINESATU: { type: 'percent', value: 5, note: 'Diskon 5%' },
-  ASTBYTEJAYA25: { type: 'percent', value: 15, note: 'Diskon 15%' },
-  HARUSCORELINE: { type: 'fixed', value: 70000, note: 'Potongan Rp70.000' },
+  CORELINESATU: { type: "percent", value: 5, note: "Diskon 5%" },
+  ASTBYTEJAYA25: { type: "percent", value: 15, note: "Diskon 15%" },
+  HARUSCORELINE: { type: "fixed", value: 70000, note: "Potongan Rp70.000" },
 };
 
 const rupiah = (n: number) =>
-  new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
     maximumFractionDigits: 0,
   }).format(Math.max(0, Math.round(n)));
-
-function uniqueFromPayload(amount: number, seed: number) {
-  if (!amount) return 0;
-  const base = (amount * 97 + seed) % 900;
-  return Math.floor(base) + 100;
-}
 
 function makeOrderId() {
   const d = new Date();
   const ts = [d.getFullYear(), d.getMonth() + 1, d.getDate()]
-    .map((v) => String(v).padStart(2, '0'))
-    .join('');
+    .map((v) => String(v).padStart(2, "0"))
+    .join("");
   const hms = [d.getHours(), d.getMinutes(), d.getSeconds()]
-    .map((v) => String(v).padStart(2, '0'))
-    .join('');
+    .map((v) => String(v).padStart(2, "0"))
+    .join("");
   return `ORD-${ts}-${hms}`;
 }
 
 function calcDiscount(nominal: number, code: string) {
-  if (!code) return { valid: false, amount: 0, label: '' };
+  if (!code) return { valid: false, amount: 0, label: "" };
   const v = VOUCHERS[code.toUpperCase().trim()];
-  if (!v) return { valid: false, amount: 0, label: '' };
+  if (!v) return { valid: false, amount: 0, label: "" };
   let disc =
-    v.type === 'percent' ? Math.floor((nominal * v.value) / 100) : v.value;
+    v.type === "percent" ? Math.floor((nominal * v.value) / 100) : v.value;
   disc = Math.min(disc, nominal);
   const label =
-    v.note || (v.type === 'percent' ? `${v.value}%` : rupiah(v.value));
+    v.note || (v.type === "percent" ? `${v.value}%` : rupiah(v.value));
   return { valid: true, amount: disc, label };
 }
-
-type BrandLogo = {
-  id: string;
-  name: string;
-  src?: string;
-  comingSoon?: boolean;
-};
 
 type AuthUser = {
   public_id: string;
   full_name: string;
   email: string;
   balance: number;
-};
-
-const BANK_LOGOS: BrandLogo[] = [
-  { id: 'bca', name: 'BCA', src: '/logos/bca.png' },
-  { id: 'bni', name: 'BNI', src: '/logos/bni.png' },
-  { id: 'mandiri', name: 'Mandiri', src: '/logos/mandiri.png' },
-  { id: 'bri', name: 'BRI', src: '/logos/bri.png', comingSoon: true },
-  { id: 'uob', name: 'UOB', src: '/logos/uob.png', comingSoon: true },
-  { id: 'cimb', name: 'CIMB', src: '/logos/cimb.png', comingSoon: true },
-  {
-    id: 'ocbcnisp',
-    name: 'OCBC NISP',
-    src: '/logos/ocbc.png',
-    comingSoon: true,
-  },
-];
-
-const VA_LOGOS: BrandLogo[] = [
-  { id: 'bca', name: 'BCA VA', src: '/logos/bca.png', comingSoon: true },
-  { id: 'bni', name: 'BNI VA', src: '/logos/bni.png', comingSoon: true },
-];
-
-const EWALLET_LOGOS: BrandLogo[] = [
-  { id: 'gopay', name: 'GoPay', src: '/logos/gopay.png' },
-  { id: 'dana', name: 'DANA', src: '/logos/dana.png' },
-  { id: 'shopeepay', name: 'ShopeePay', src: '/logos/spay.png' },
-  { id: 'linkaja', name: 'LinkAja', src: '/logos/linkaja.png', comingSoon: true },
-  { id: 'ovo', name: 'OVO', src: '/logos/ovo.png', comingSoon: true },
-];
-
-const RETAIL_LOGOS: BrandLogo[] = [
-  {
-    id: 'indomaret',
-    name: 'Indomaret',
-    src: '/logos/indomaret.png',
-    comingSoon: true,
-  },
-  {
-    id: 'alfamart',
-    name: 'Alfamart',
-    src: '/logos/alfamart.png',
-    comingSoon: true,
-  },
-];
-
-const makeWaLink = (p: {
-  orderId: string;
-  nominal: number;
-  discount: number;
-  unique: number;
-  total: number;
-  tier: Tier;
-  cycle: Cycle;
-  methodTab: MethodTab;
-  brandName?: string;
-  voucher?: string;
-  comingSoon?: boolean;
-  retailCode?: string;
-  vaNumber?: string;
-}) => {
-  let methodText =
-    p.methodTab === 'qris'
-      ? 'QRIS'
-      : p.methodTab === 'bank'
-      ? `transfer bank${p.brandName ? ` (${p.brandName})` : ''}`
-      : p.methodTab === 'va'
-      ? `virtual account${p.brandName ? ` (${p.brandName})` : ''}`
-      : p.methodTab === 'ewallet'
-      ? `e-wallet${p.brandName ? ` (${p.brandName})` : ''}`
-      : p.methodTab === 'retail'
-      ? `retail${p.brandName ? ` (${p.brandName})` : ''}`
-      : 'saldo AstByte';
-
-  const header =
-    p.methodTab === 'qris'
-      ? 'Saya sudah melakukan pembayaran via QRIS.'
-      : p.methodTab === 'va'
-      ? 'Saya akan membayar via Virtual Account (instant).'
-      : p.methodTab === 'balance'
-      ? 'Saya baru saja membayar menggunakan saldo AstByte di sistem.'
-      : `Saya mau bayar lewat ${methodText}.`;
-
-  const extraRetail =
-    p.methodTab === 'retail'
-      ? p.comingSoon
-        ? '\n\nCatatan: Channel retail ini masih COMING SOON. Mohon panduan lebih lanjut/alternatif pembayaran.'
-        : p.retailCode
-        ? `\n• Kode Retail: ${p.retailCode}\nSaya akan menunjukkan kode ini ke kasir.`
-        : ''
-      : '';
-
-  const extraVA =
-    p.methodTab === 'va'
-      ? `\n• Nomor VA: ${p.vaNumber || '-'}\n• Sifat: INSTANT (Coming Soon)`
-      : '';
-
-  const text = `Halo Admin Xenza 👋
-${header}
-
-• Order ID : ${p.orderId}
-• Paket    : ${p.tier.toUpperCase()} (${p.cycle})
-• Merchant : ${MERCHANT_NAME}
-• NMID     : ${NMID}
-• Nominal  : ${rupiah(p.nominal)}
-• Diskon   : ${p.discount > 0 ? '-' + rupiah(p.discount) : '-'}
-• Kode unik: ${p.unique}
-• Total TF : ${rupiah(p.total)}
-${p.voucher ? `• Voucher  : ${p.voucher.toUpperCase()}` : ''}${extraVA}${extraRetail}
-
-Saya akan kirim bukti transfer (screenshot) setelah ini. Terima kasih 🙏`;
-  return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(text)}`;
 };
 
 export default function ManualQRISPage() {
@@ -215,36 +85,34 @@ export default function ManualQRISPage() {
   const [payingWithBalance, setPayingWithBalance] = useState(false);
 
   useEffect(() => {
-    document.title = 'Pay | New Coreline by Xenza ID';
+    document.title = "Pay with Balance | New Coreline by Xenza ID";
   }, []);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (
-        e.key === 'F12' ||
-        (e.ctrlKey &&
-          e.shiftKey &&
-          ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
-        (e.ctrlKey && e.key.toUpperCase() === 'U')
-      ) {
-        e.preventDefault();
-        alert('Inspect element dinonaktifkan.');
-      }
-    };
-    const onCtx = (e: MouseEvent) => e.preventDefault();
-    document.addEventListener('keydown', onKey);
-    document.addEventListener('contextmenu', onCtx);
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      document.removeEventListener('contextmenu', onCtx);
-    };
-  }, []);
+  // Ambil search params (tier/cycle/amount/token)
+  const params =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search)
+      : new URLSearchParams();
+  const tierParam = (params.get("tier") as Tier) || "student";
+  const cycleParam = (params.get("cycle") as Cycle) || "monthly";
+  const amountParam = Number(params.get("amount") || NaN);
 
-  // Ambil user + saldo dari authx
+  // Ambil user + saldo dari authx, dengan fallback token URL -> localStorage
   useEffect(() => {
-    const token = typeof window !== 'undefined'
-      ? localStorage.getItem(TOKEN_KEY)
-      : null;
+    if (typeof window === "undefined") {
+      setLoadingUser(false);
+      return;
+    }
+
+    const sp = new URLSearchParams(window.location.search);
+    const tokenFromUrl = sp.get("token");
+    const tokenFromStorage = localStorage.getItem(TOKEN_KEY);
+    const token = tokenFromUrl || tokenFromStorage;
+
+    // Simpan token URL ke localStorage kalau belum ada (biar di prod kebaca)
+    if (tokenFromUrl && !tokenFromStorage) {
+      localStorage.setItem(TOKEN_KEY, tokenFromUrl);
+    }
 
     if (!token) {
       setLoadingUser(false);
@@ -278,13 +146,6 @@ export default function ManualQRISPage() {
     fetchMe();
   }, []);
 
-  const params = new URLSearchParams(
-    typeof window !== 'undefined' ? window.location.search : ''
-  );
-  const tierParam = (params.get('tier') as Tier) || 'student';
-  const cycleParam = (params.get('cycle') as Cycle) || 'monthly';
-  const amountParam = Number(params.get('amount') || NaN);
-
   const nominalRaw = useMemo(() => {
     const defaults = DEFAULT_PRICE[tierParam];
     return Number.isFinite(amountParam)
@@ -293,97 +154,51 @@ export default function ManualQRISPage() {
   }, [tierParam, cycleParam, amountParam]);
 
   const orderId = useMemo(() => makeOrderId(), []);
-  const [voucher, setVoucher] = useState('');
-  const [methodTab, setMethodTab] = useState<MethodTab>('qris');
-  const [selectedBrand, setSelectedBrand] = useState<string>();
+  const [voucher, setVoucher] = useState("");
 
   const disc = useMemo(
     () => calcDiscount(nominalRaw, voucher),
     [nominalRaw, voucher]
   );
   const nominalAfterDisc = Math.max(0, nominalRaw - disc.amount);
-  const unique = useMemo(
-    () => uniqueFromPayload(nominalAfterDisc, Date.now() % 1e6),
-    [nominalAfterDisc]
-  );
-  const total = nominalAfterDisc + unique;
-
-  const brandFromSets =
-    methodTab === 'bank'
-      ? BANK_LOGOS.find((b) => b.id === selectedBrand)
-      : methodTab === 'va'
-      ? VA_LOGOS.find((v) => v.id === selectedBrand)
-      : methodTab === 'ewallet'
-      ? EWALLET_LOGOS.find((e) => e.id === selectedBrand)
-      : methodTab === 'retail'
-      ? RETAIL_LOGOS.find((r) => r.id === selectedBrand)
-      : undefined;
-
-  const brandName = brandFromSets?.name;
-  const brandComingSoon = !!brandFromSets?.comingSoon;
-
-  const retailCode = useMemo(() => {
-    if (methodTab !== 'retail' || !selectedBrand) return '';
-    const seed = orderId.replace(/\D/g, '').slice(-6);
-    const base = `${seed}${(unique % 1000).toString().padStart(3, '0')}${(
-      nominalAfterDisc % 1000
-    )
-      .toString()
-      .padStart(3, '0')}`;
-    return base.slice(0, 12);
-  }, [methodTab, selectedBrand, orderId, unique, nominalAfterDisc]);
-
-  const vaNumber = useMemo(() => {
-    if (methodTab !== 'va' || !selectedBrand) return '';
-    const prefix = selectedBrand === 'bca' ? '3901' : '8060';
-    const seed = orderId.replace(/\D/g, '').slice(-10);
-    const body = `${prefix}${seed}${(unique % 1000)
-      .toString()
-      .padStart(3, '0')}`;
-    return body.slice(0, 16);
-  }, [methodTab, selectedBrand, orderId, unique]);
+  const total = nominalAfterDisc; // TANPA kode unik, karena ini full saldo
 
   const onCopyTotal = async () => {
     try {
       await navigator.clipboard.writeText(String(total));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {}
+    } catch {
+      // ignore
+    }
   };
 
-  const waLink = makeWaLink({
-    orderId,
-    nominal: nominalRaw,
-    discount: disc.amount,
-    unique,
-    total,
-    tier: tierParam,
-    cycle: cycleParam,
-    methodTab,
-    brandName,
-    voucher,
-    comingSoon: brandComingSoon || methodTab === 'retail' || methodTab === 'va',
-    retailCode: methodTab === 'retail' ? retailCode : undefined,
-    vaNumber: methodTab === 'va' ? vaNumber : undefined,
-  });
-
-  // Handler bayar pakai saldo AstByte
+  // Handler bayar pakai saldo AstByte (satu-satunya metode)
   const handlePayWithBalance = async () => {
     setBalanceError(null);
     setBalanceSuccess(null);
 
-    const token =
-      typeof window !== 'undefined'
-        ? localStorage.getItem(TOKEN_KEY)
-        : null;
+    if (typeof window === "undefined") {
+      setBalanceError("Browser environment tidak tersedia.");
+      return;
+    }
+
+    const sp = new URLSearchParams(window.location.search);
+    const tokenFromUrl = sp.get("token");
+    const tokenFromStorage = localStorage.getItem(TOKEN_KEY);
+    const token = tokenFromUrl || tokenFromStorage;
+
+    if (tokenFromUrl && !tokenFromStorage) {
+      localStorage.setItem(TOKEN_KEY, tokenFromUrl);
+    }
 
     if (!token) {
-      setBalanceError('Token tidak ditemukan. Silakan login terlebih dahulu.');
+      setBalanceError("Token tidak ditemukan. Silakan login terlebih dahulu.");
       return;
     }
 
     if (!user) {
-      setBalanceError('Data user tidak tersedia. Silakan login ulang.');
+      setBalanceError("Data user tidak tersedia. Silakan login ulang.");
       return;
     }
 
@@ -400,9 +215,9 @@ export default function ManualQRISPage() {
 
     try {
       const res = await fetch(`${API_BASE}/api/payment/pay-balance`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
@@ -411,16 +226,13 @@ export default function ManualQRISPage() {
           tier: tierParam,
           cycle: cycleParam,
           voucher_code: voucher || null,
-          nominal: nominalRaw,
-          discount: disc.amount,
-          payment_source: 'coreline-subscription',
         }),
       });
 
       const data = await res.json();
-      if (!res.ok || data?.status !== 'success') {
+      if (!res.ok || data?.status !== "success") {
         setBalanceError(
-          data?.message || 'Gagal memproses pembayaran saldo. Coba lagi.'
+          data?.message || "Gagal memproses pembayaran saldo. Coba lagi."
         );
         return;
       }
@@ -430,409 +242,175 @@ export default function ManualQRISPage() {
           ? Number(data.data.balance)
           : user.balance - total;
 
-      setUser((prev) =>
-        prev ? { ...prev, balance: newBalance } : prev
-      );
-      setBalanceSuccess('Pembayaran dengan saldo AstByte berhasil! 🎉');
+      setUser((prev) => (prev ? { ...prev, balance: newBalance } : prev));
+      setBalanceSuccess("Pembayaran dengan saldo AstByte berhasil! 🎉");
     } catch (err) {
       console.error(err);
-      setBalanceError('Terjadi kesalahan jaringan. Coba beberapa saat lagi.');
+      setBalanceError("Terjadi kesalahan jaringan. Coba beberapa saat lagi.");
     } finally {
       setPayingWithBalance(false);
     }
   };
 
+  const balanceEnough = user ? user.balance >= total : false;
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 text-slate-800 dark:text-slate-100 select-none">
-      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 max-w-6xl">
+    <div className="min-h-screen bg-slate-950 text-slate-50">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header */}
-        <div className="mb-8 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-xs font-medium text-gray-700 dark:text-slate-300 shadow-sm">
-            <BadgeCheck className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
-            Pay New Coreline by Xenza ID
+        <header className="mb-6 sm:mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-2xl bg-slate-900 border border-sky-500/60 flex items-center justify-center shadow-[0_0_35px_rgba(56,189,248,0.7)]">
+              <QrIcon />
+            </div>
+            <div>
+              <h1 className="text-lg sm:text-xl font-semibold tracking-tight bg-gradient-to-r from-sky-400 via-blue-300 to-indigo-300 bg-clip-text text-transparent">
+                Bayar dengan Saldo AstByte
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-400">
+                Subscripsi New Coreline by Xenza ID
+              </p>
+            </div>
           </div>
-          <h1 className="mt-6 text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-            Pembayaran Aman & Terverifikasi
-          </h1>
-          <p className="mt-3 text-base text-gray-600 dark:text-slate-300 max-w-2xl mx-auto">
-            Pilih metode pembayaran, lakukan transfer sesuai total yang tertera, lalu
-            konfirmasi via WhatsApp atau bayar instan dengan saldo AstByte
-          </p>
-        </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left: Summary */}
-          <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm">
-            {/* Merchant */}
-            <div className="flex items-center justify-between pb-6 border-b border-gray-200 dark:border-slate-800">
-              <div>
-                <div className="text-xs uppercase font-medium text-gray-500 dark:text-slate-400 mb-1">
-                  Merchant
-                </div>
-                <div className="text-xl font-bold text-gray-900 dark:text-white">
-                  {MERCHANT_NAME}
-                </div>
-                <div className="text-xs text-gray-500 dark:text-slate-400 font-mono mt-0.5">
-                  NMID: {NMID}
-                </div>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-slate-800">
-                <QrCode className="w-6 h-6 text-gray-700 dark:text-slate-300" />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 py-6 border-b border-gray-200 dark:border-slate-800">
-              <StatItem label="Paket" value={tierParam.toUpperCase()} />
-              <StatItem
-                label="Siklus"
-                value={cycleParam === 'yearly' ? 'Tahunan' : 'Bulanan'}
-              />
-            </div>
-
-            {/* Voucher */}
-            <div className="py-6 border-b border-gray-200 dark:border-slate-800">
-              <label className="text-sm font-medium text-gray-700 dark:text-slate-200 flex items-center gap-2 mb-3">
-                <BadgePercent className="w-4 h-4 text-gray-500 dark:text-slate-400" />
-                Kode Voucher (opsional)
-              </label>
-              <div className="flex rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 dark:focus-within:border-cyan-400 dark:focus-within:ring-cyan-400/20 transition-all">
-                <input
-                  type="text"
-                  className="flex-1 bg-transparent px-4 py-2.5 outline-none uppercase tracking-wider text-sm font-medium text-gray-900 dark:text-white placeholder:text-gray-400"
-                  placeholder="MASUKKAN KODE"
-                  value={voucher}
-                  onChange={(e) => setVoucher(e.target.value)}
-                />
-                <div className="px-4 py-2.5 min-w-32 text-right flex items-center justify-end border-l border-gray-200 dark:border-slate-700">
-                  {disc.valid ? (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 px-2 py-1 text-xs font-semibold">
-                      <Check className="w-3 h-3" />
-                      {disc.label}
-                    </span>
-                  ) : voucher.trim() ? (
-                    <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
-                      Tidak valid
-                    </span>
-                  ) : (
-                    <span className="text-xs text-gray-400">-</span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Amount summary */}
-            <div className="pt-6">
-              <div className="space-y-3 mb-4">
-                <Row label="Order ID" value={orderId} mono />
-                <Row label="Nominal" value={rupiah(nominalRaw)} />
-                {disc.valid && disc.amount > 0 && (
-                  <Row
-                    label="Diskon Voucher"
-                    value={`- ${rupiah(disc.amount)}`}
-                    highlight
-                  />
-                )}
-                <Row
-                  label="Setelah Diskon"
-                  value={rupiah(Math.max(0, nominalRaw - disc.amount))}
-                />
-                <Row label="Kode Unik" value={String(unique)} mono />
-              </div>
-
-              {/* TOTAL */}
-              <div className="mt-4 pt-4 border-t-2 border-gray-200 dark:border-slate-700">
-                <div className="flex items-center justify-between gap-4 mb-2">
-                  <div className="text-sm font-semibold text-gray-700 dark:text-slate-300">
-                    Total Transfer
-                  </div>
-                  <button
-                    onClick={onCopyTotal}
-                    className="inline-flex items-center gap-1.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
-                    title="Salin total"
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="w-3.5 h-3.5" />
-                        Tersalin
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5" />
-                        Salin
-                      </>
-                    )}
-                  </button>
-                </div>
-                <div className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">
-                  {rupiah(total)}
-                </div>
-              </div>
-
-              <div className="mt-4 flex items-start gap-2 text-xs text-gray-500 dark:text-slate-400">
-                <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <span>
-                  Pastikan nominal dan kode unik sesuai sebelum melakukan transfer
+          {user && (
+            <div className="rounded-2xl bg-slate-900 border border-slate-700 px-4 py-2.5 flex items-center gap-3 shadow-[0_16px_40px_rgba(15,23,42,1)]">
+              <div className="flex flex-col">
+                <span className="text-[11px] text-slate-400">Saldo kamu</span>
+                <span className="text-sm sm:text-base font-semibold text-slate-50">
+                  {rupiah(user.balance)}
                 </span>
               </div>
-
-              {methodTab === 'balance' && (
-                <div className="mt-4 rounded-lg border border-sky-200 dark:border-sky-800/60 bg-sky-50 dark:bg-sky-900/20 p-3 text-xs text-sky-800 dark:text-sky-200 flex items-start gap-2">
-                  <Wallet className="w-4 h-4 mt-0.5" />
-                  <span>
-                    Metode <strong>Saldo AstByte</strong> akan langsung memotong saldo
-                    kamu sebesar {rupiah(total)} tanpa perlu konfirmasi manual.
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Right: Method & content */}
-          <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm">
-            <div className="flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-white mb-6">
-              <CreditCard className="w-5 h-5 text-gray-600 dark:text-slate-400" />
-              Pilih Metode Pembayaran
-            </div>
-
-            <div className="inline-flex w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 p-1 mb-6">
-              {(
-                ['qris', 'bank', 'va', 'ewallet', 'retail', 'balance'] as MethodTab[]
-              ).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => {
-                    setMethodTab(tab);
-                    setSelectedBrand(undefined);
-                    setBalanceError(null);
-                    setBalanceSuccess(null);
-                  }}
-                  className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold transition-colors ${
-                    methodTab === tab
-                      ? 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-sm'
-                      : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
+              <div className="h-8 w-px bg-slate-800" />
+              <div className="flex flex-col">
+                <span className="text-[11px] text-slate-400">Status</span>
+                <span
+                  className={`text-xs font-medium ${
+                    balanceEnough
+                      ? "text-emerald-400"
+                      : "text-amber-300"
                   }`}
                 >
-                  {tab === 'qris'
-                    ? 'QRIS'
-                    : tab === 'bank'
-                    ? 'Bank'
-                    : tab === 'va'
-                    ? 'VA'
-                    : tab === 'ewallet'
-                    ? 'E-Wallet'
-                    : tab === 'retail'
-                    ? 'Retail'
-                    : 'Saldo AstByte'}
-                </button>
-              ))}
+                  {balanceEnough ? "Saldo cukup" : "Saldo kurang"}
+                </span>
+              </div>
             </div>
+          )}
+        </header>
 
-            {/* Content per method */}
-            <div className="mb-6">
-              {methodTab === 'qris' ? (
+        {/* Content */}
+        <main className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-5 sm:gap-6 items-start">
+          {/* Left: Detail & Form */}
+          <div className="space-y-4 sm:space-y-5">
+            {/* Paket & Ringkasan */}
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-[0_20px_55px_rgba(15,23,42,1)]">
+              <div className="flex items-center justify-between gap-3 mb-4">
                 <div>
-                  <div className="text-sm font-medium text-gray-600 dark:text-slate-300 mb-4">
-                    Scan QR code berikut dengan aplikasi e-wallet atau mobile banking
-                  </div>
-                  <div className="aspect-square rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 grid place-items-center overflow-hidden">
-                    <img
-                      src={QR_IMAGE_PATH}
-                      alt="QRIS Xenza"
-                      className="w-full h-full object-contain p-6"
-                    />
-                  </div>
+                  <p className="text-xs text-slate-400 mb-1">Paket Dipilih</p>
+                  <p className="text-base sm:text-lg font-semibold text-slate-50">
+                    {tierParam.toUpperCase()} •{" "}
+                    <span className="capitalize">{cycleParam}</span>
+                  </p>
                 </div>
-              ) : methodTab === 'bank' ? (
-                <LogoGrid
-                  title="Pilih Bank"
-                  items={BANK_LOGOS}
-                  selectedId={selectedBrand}
-                  onSelect={(id) => setSelectedBrand(id)}
-                />
-              ) : methodTab === 'va' ? (
-                <>
-                  <LogoGrid
-                    title="Pilih Virtual Account"
-                    items={VA_LOGOS}
-                    selectedId={selectedBrand}
-                    onSelect={(id) => setSelectedBrand(id)}
-                  />
-                  <div className="mt-6 rounded-xl border border-gray-200 dark:border-slate-800 overflow-hidden">
-                    <div className="px-4 py-3 bg-gray-50 dark:bg-slate-800 flex items-center justify-between border-b border-gray-200 dark:border-slate-700">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                          Nomor Virtual Account
-                        </span>
-                        <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/30">
-                          <Zap className="w-3 h-3" />
-                          Instant
-                        </span>
-                      </div>
-                      <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-400 text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30">
-                        <AlertTriangle className="w-3 h-3" />
-                        Coming Soon
-                      </span>
-                    </div>
-                    <div className="px-4 py-5 bg-white dark:bg-slate-900">
-                      {selectedBrand ? (
-                        <>
-                          <div className="text-2xl font-mono font-bold tracking-widest text-gray-900 dark:text-white mb-3">
-                            {vaNumber || '—'}
-                          </div>
-                          <div className="text-xs text-gray-500 dark:text-slate-400 mb-5">
-                            * Nomor di atas adalah contoh. Nomor asli akan tampil saat
-                            channel aktif.
-                          </div>
-                          <div>
-                            <div className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                              Cara Pembayaran via {brandName}
-                            </div>
-                            <ol className="text-sm text-gray-600 dark:text-slate-300 list-decimal pl-5 space-y-2">
-                              <li>
-                                Buka mobile banking atau internet banking{' '}
-                                {brandName?.replace(' VA', '')}
-                              </li>
-                              <li>Pilih menu Virtual Account</li>
-                              <li>Masukkan nomor VA di atas</li>
-                              <li>
-                                Pastikan nominal {rupiah(total)} dan nama penerima sesuai
-                              </li>
-                              <li>Konfirmasi pembayaran dan simpan bukti</li>
-                              <li>Kirim bukti via WhatsApp untuk verifikasi</li>
-                            </ol>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-center py-8 text-sm text-gray-500 dark:text-slate-400">
-                          Pilih Virtual Account terlebih dahulu
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </>
-              ) : methodTab === 'ewallet' ? (
-                <LogoGrid
-                  title="Pilih E-Wallet"
-                  items={EWALLET_LOGOS}
-                  selectedId={selectedBrand}
-                  onSelect={(id) => setSelectedBrand(id)}
-                />
-              ) : methodTab === 'retail' ? (
-                <>
-                  <LogoGrid
-                    title="Pilih Gerai Retail"
-                    items={RETAIL_LOGOS}
-                    selectedId={selectedBrand}
-                    onSelect={(id) => setSelectedBrand(id)}
-                  />
-                  <div className="mt-6 rounded-xl border border-gray-200 dark:border-slate-800 overflow-hidden">
-                    <div className="px-4 py-3 bg-gray-50 dark:bg-slate-800 flex items-center justify-between border-b border-gray-200 dark:border-slate-700">
-                      <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                        Kode Pembayaran
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-400 text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30">
-                        <AlertTriangle className="w-3 h-3" />
-                        Coming Soon
-                      </span>
-                    </div>
-                    <div className="px-4 py-5 bg-white dark:bg-slate-900">
-                      {selectedBrand ? (
-                        <>
-                          <div className="text-2xl font-mono font-bold tracking-widest text-gray-900 dark:text-white mb-3">
-                            {retailCode || '—'}
-                          </div>
-                          <div className="text-xs text-gray-500 dark:text-slate-400 mb-5">
-                            * Kode di atas adalah contoh. Kode asli akan tampil saat
-                            channel aktif.
-                          </div>
-                          <div>
-                            <div className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                              Cara Pembayaran di {brandName}
-                            </div>
-                            <ol className="text-sm text-gray-600 dark:text-slate-300 list-decimal pl-5 space-y-2">
-                              <li>Datang ke gerai {brandName} terdekat</li>
-                              <li>Tunjukkan kode pembayaran ini ke kasir</li>
-                              <li>Sebutkan nominal total: {rupiah(total)}</li>
-                              <li>Selesaikan pembayaran dan simpan struk</li>
-                              <li>Kirimkan foto struk via WhatsApp untuk verifikasi</li>
-                            </ol>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-center py-8 text-sm text-gray-500 dark:text-slate-400">
-                          Pilih gerai retail terlebih dahulu
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </>
-              ) : (
-                // Saldo AstByte
-                <div className="space-y-4">
-                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-900 dark:via-slate-900/80 dark:to-slate-900 p-4 flex items-center justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <Wallet className="w-4 h-4 text-slate-700 dark:text-slate-200" />
-                        <span className="text-sm font-semibold text-slate-900 dark:text-white">
-                          Saldo AstByte
-                        </span>
-                      </div>
-                      {loadingUser ? (
-                        <div className="h-5 w-32 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-                      ) : user ? (
-                        <div className="text-xl font-extrabold text-slate-900 dark:text-white">
-                          {rupiah(user.balance)}
-                        </div>
-                      ) : (
-                        <p className="text-xs text-slate-600 dark:text-slate-400 max-w-xs">
-                          Kamu perlu login ke akun AstByte untuk menggunakan saldo.
-                          Silakan login dulu di halaman akun.
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-right text-[11px] text-slate-500 dark:text-slate-400">
-                      <p>Pembayaran instan tanpa konfirmasi manual.</p>
-                      <p>Saldo akan langsung terpotong.</p>
-                    </div>
-                  </div>
+                <div className="text-right">
+                  <p className="text-[11px] text-slate-400">Order ID</p>
+                  <p className="text-xs font-mono text-slate-200">
+                    {orderId}
+                  </p>
+                </div>
+              </div>
 
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
-                    Pastikan saldo kamu mencukupi untuk membayar{' '}
-                    <span className="font-semibold">{rupiah(total)}</span>. Setelah
-                    pembayaran berhasil, akses paket akan diaktifkan otomatis sesuai
-                    implementasi backend.
-                  </div>
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <StatItem label="Nominal Paket" value={rupiah(nominalRaw)} />
+                <StatItem
+                  label="Diskon"
+                  value={
+                    disc.valid && disc.amount > 0
+                      ? `-${rupiah(disc.amount)} (${disc.label})`
+                      : "Tidak ada"
+                  }
+                />
+              </div>
+
+              <div className="rounded-2xl border border-sky-500/60 bg-gradient-to-r from-sky-500/20 via-sky-500/15 to-indigo-500/20 px-4 py-3 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs text-sky-100/80 mb-1">
+                    Total Bayar (dari saldo)
+                  </p>
+                  <p className="text-lg sm:text-xl font-semibold text-slate-50">
+                    {rupiah(total)}
+                  </p>
                 </div>
-              )}
+                <button
+                  type="button"
+                  onClick={onCopyTotal}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-slate-950/80 border border-sky-400/80 px-3 py-1.5 text-[11px] text-sky-100 hover:bg-slate-900 transition-colors"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Tersalin</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy Total</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
-            {/* WHY MANUAL – tidak ditampilkan untuk saldo */}
-            {methodTab !== 'balance' && (
-              <div className="mb-6 rounded-lg border border-blue-200 dark:border-cyan-800/40 bg-blue-50 dark:bg-blue-900/10 p-4">
-                <div className="flex items-start gap-2 text-sm font-medium text-gray-900 dark:text-white mb-2">
-                  <InfoIcon className="w-4 h-4 flex-shrink-0 mt-0.5 text-blue-600 dark:text-cyan-400" />
-                  Mengapa konfirmasi manual?
+            {/* Voucher & Kenapa Saldo */}
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 space-y-4">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-200">
+                  Kode Voucher (opsional)
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={voucher}
+                    onChange={(e) => setVoucher(e.target.value)}
+                    className="flex-1 rounded-2xl border border-slate-700 bg-slate-950/80 px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/60 outline-none"
+                    placeholder="Masukkan kode voucher"
+                  />
+                  <div className="hidden sm:flex items-center gap-1.5 rounded-2xl bg-slate-900 border border-slate-700 px-3 py-2 text-[11px] text-slate-300">
+                    <BadgePercent className="w-3.5 h-3.5 text-sky-300" />
+                    <span>Promo tersedia</span>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-slate-300 mb-3">
-                  Untuk memastikan keamanan dan akurasi transaksi, kami memverifikasi
-                  setiap pembayaran secara manual karena:
+                {disc.valid && (
+                  <p className="mt-1 text-xs text-emerald-300">
+                    Voucher aktif: {disc.label} (potongan {rupiah(disc.amount)})
+                  </p>
+                )}
+              </div>
+
+              <div className="rounded-2xl border border-blue-200/40 bg-blue-50/5 dark:border-cyan-800/40 dark:bg-cyan-900/10 p-4">
+                <div className="flex items-start gap-2 text-sm font-medium text-slate-100 mb-2">
+                  <InfoIcon className="w-4 h-4 flex-shrink-0 mt-0.5 text-sky-300" />
+                  Kenapa pakai saldo AstByte?
+                </div>
+                <p className="text-xs sm:text-sm text-slate-300 mb-2">
+                  Pembayaran via saldo AstByte lebih cepat karena diproses penuh
+                  di sistem tanpa perlu kirim bukti transfer.
                 </p>
-                <ul className="text-sm text-gray-600 dark:text-slate-300 list-disc pl-5 space-y-1">
-                  <li>Mencocokkan nominal dan kode unik dengan tepat</li>
-                  <li>Mencegah fraud dan transaksi ganda</li>
-                  <li>Menyesuaikan waktu settlement antar channel</li>
-                  <li>Memastikan aktivasi akses ke akun yang benar</li>
+                <ul className="text-xs sm:text-sm text-slate-300 list-disc pl-5 space-y-1">
+                  <li>Akses paket aktif langsung setelah pembayaran sukses</li>
+                  <li>Tidak perlu menunggu verifikasi manual admin</li>
+                  <li>Riwayat transaksi lebih rapi di dalam sistem</li>
                 </ul>
               </div>
-            )}
+            </div>
 
-            {/* Alert khusus saldo */}
-            {methodTab === 'balance' && (balanceError || balanceSuccess) && (
+            {/* Alert saldo */}
+            {balanceError || balanceSuccess ? (
               <div
-                className={`mb-4 rounded-lg border px-4 py-3 text-xs flex items-start gap-2 ${
+                className={`rounded-2xl border px-4 py-3 text-xs sm:text-sm flex items-start gap-2 ${
                   balanceError
-                    ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-800/50 dark:bg-red-900/20 dark:text-red-200'
-                    : 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800/50 dark:bg-emerald-900/20 dark:text-emerald-200'
+                    ? "border-red-200 bg-red-50/10 text-red-200"
+                    : "border-emerald-200 bg-emerald-50/10 text-emerald-200"
                 }`}
               >
                 {balanceError ? (
@@ -842,87 +420,136 @@ export default function ManualQRISPage() {
                 )}
                 <span>{balanceError || balanceSuccess}</span>
               </div>
-            )}
+            ) : null}
 
-            {/* WA Confirm / Pay with balance */}
-            {methodTab === 'balance' ? (
-              <button
-                type="button"
-                onClick={handlePayWithBalance}
-                disabled={
-                  payingWithBalance ||
-                  loadingUser ||
-                  !user ||
-                  user.balance < total
-                }
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 text-white px-4 py-3 text-sm font-semibold hover:bg-slate-800 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {payingWithBalance ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Memproses Pembayaran...
-                  </>
-                ) : (
-                  <>
-                    <Wallet className="w-4 h-4" />
-                    Bayar dengan Saldo AstByte
-                    <span className="text-xs opacity-80">
-                      ({rupiah(total)})
-                    </span>
-                  </>
-                )}
-              </button>
-            ) : (
-              <a
-                href={waLink}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 text-white px-4 py-3 text-sm font-semibold hover:bg-emerald-700 transition-colors shadow-sm"
-              >
-                <Phone className="w-4 h-4" />
-                Konfirmasi via WhatsApp
-              </a>
-            )}
+            {/* Tombol Bayar */}
+            <button
+              type="button"
+              onClick={handlePayWithBalance}
+              disabled={
+                payingWithBalance ||
+                loadingUser ||
+                !user ||
+                !Number.isFinite(total) ||
+                total <= 0
+              }
+              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 text-slate-50 px-4 py-3 text-sm sm:text-base font-semibold hover:bg-slate-900 transition-colors shadow-[0_20px_55px_rgba(15,23,42,1)] disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {payingWithBalance ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Memproses Pembayaran...
+                </>
+              ) : (
+                <>
+                  <Wallet className="w-4 h-4" />
+                  Bayar dengan Saldo AstByte
+                  <span className="text-xs opacity-80">
+                    ({rupiah(total)})
+                  </span>
+                </>
+              )}
+            </button>
 
-            <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-gray-500 dark:text-slate-400">
+            <div className="mt-3 flex items-start justify-between gap-2 text-[11px] sm:text-xs text-slate-500">
               <span>
-                {methodTab === 'balance'
-                  ? 'Pembayaran saldo diproses langsung oleh sistem.'
-                  : 'Pembayaran manual. Tim kami akan verifikasi bukti transfer Anda.'}
+                Pembayaran saldo diproses langsung oleh sistem. Pastikan saldo
+                kamu mencukupi sebelum melanjutkan.
               </span>
               <a
                 href="/pricing"
-                className="inline-flex items-center gap-1 text-blue-600 dark:text-cyan-400 hover:text-blue-700 dark:hover:text-cyan-300 font-medium transition-colors"
+                className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 font-medium transition-colors"
               >
                 Kembali
                 <ArrowRight className="w-3 h-3" />
               </a>
             </div>
           </div>
-        </div>
 
-        {/* Fallback note */}
-        {!Number.isFinite(Number(params.get('amount'))) && (
-          <div className="mt-8 rounded-lg border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-900/10 text-amber-800 dark:text-amber-200 p-4 text-sm">
-            <div className="flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <div>
-                Nominal tidak terdeteksi dari URL. Sistem menggunakan harga default
-                paket <strong>{tierParam.toUpperCase()}</strong> (
-                <strong>{cycleParam}</strong>). Untuk nominal spesifik, pastikan link
-                dari halaman pricing menyertakan parameter{' '}
-                <code className="mx-1 px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-xs">
-                  amount
-                </code>
-                .
+          {/* Right: Info User & Ringkasan */}
+          <div className="space-y-4 sm:space-y-5">
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Shield className="w-4 h-4 text-sky-300" />
+                <h2 className="text-sm sm:text-base font-semibold text-slate-50">
+                  Info Akun
+                </h2>
+              </div>
+              {loadingUser ? (
+                <p className="text-xs text-slate-500">Memuat data akun...</p>
+              ) : user ? (
+                <div className="space-y-2 text-xs sm:text-sm">
+                  <Row label="Nama" value={user.full_name} />
+                  <Row label="Email" value={user.email} />
+                  <Row label="Saldo" value={rupiah(user.balance)} highlight />
+                </div>
+              ) : (
+                <p className="text-xs text-amber-300">
+                  Data akun tidak terbaca. Pastikan kamu membuka halaman ini
+                  dari link resmi dan sudah login.
+                </p>
+              )}
+            </div>
+
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <BadgeCheck className="w-4 h-4 text-emerald-300" />
+                <h2 className="text-sm sm:text-base font-semibold text-slate-50">
+                  Ringkasan Order
+                </h2>
+              </div>
+              <div className="space-y-2 text-xs sm:text-sm">
+                <Row
+                  label="Paket"
+                  value={`${tierParam.toUpperCase()} (${cycleParam})`}
+                />
+                <Row label="Merchant" value={MERCHANT_NAME} />
+                <Row label="NMID" value={NMID} mono />
+                <Row label="Order ID" value={orderId} mono />
+                <Row
+                  label="Nominal Paket"
+                  value={rupiah(nominalRaw)}
+                />
+                <Row
+                  label="Diskon"
+                  value={
+                    disc.valid && disc.amount > 0
+                      ? `-${rupiah(disc.amount)} (${disc.label})`
+                      : "-"
+                  }
+                />
+                <Row
+                  label="Total dari Saldo"
+                  value={rupiah(total)}
+                  highlight
+                />
               </div>
             </div>
+
+            {!Number.isFinite(amountParam) && (
+              <div className="rounded-2xl border border-amber-200/40 bg-amber-50/10 text-amber-200 p-4 text-xs sm:text-sm">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <div>
+                    Nominal tidak terdeteksi dari URL. Sistem menggunakan harga
+                    default paket{" "}
+                    <strong>{tierParam.toUpperCase()}</strong>{" "}
+                    (<strong>{cycleParam}</strong>). Untuk nominal spesifik,
+                    pastikan link dari halaman pricing menyertakan parameter{" "}
+                    <code className="mx-1 px-1.5 py-0.5 rounded bg-black/10 font-mono text-[10px]">
+                      amount
+                    </code>
+                    .
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </main>
+        </main>
+      </div>
 
       {/* Footer */}
-      <footer className="text-center text-sm text-gray-500 dark:text-slate-400 py-8 border-t border-gray-200 dark:border-slate-800">
+      <footer className="text-center text-xs sm:text-sm text-slate-500 py-6 border-t border-slate-800">
         Powered by <strong>XenzaDigital</strong> — Halaman pembayaran ini dibuat
         oleh XenzaDigital (Xenza ID)
       </footer>
@@ -932,13 +559,11 @@ export default function ManualQRISPage() {
 
 function StatItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-gray-50 dark:bg-slate-800 p-3">
-      <div className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">
+    <div className="rounded-2xl bg-slate-900 border border-slate-800 p-3">
+      <div className="text-[11px] font-medium text-slate-400 mb-1">
         {label}
       </div>
-      <div className="text-sm font-semibold text-gray-900 dark:text-white">
-        {value}
-      </div>
+      <div className="text-sm font-semibold text-slate-50">{value}</div>
     </div>
   );
 }
@@ -956,13 +581,11 @@ function Row({
 }) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <div className="text-sm text-gray-600 dark:text-slate-300">{label}</div>
+      <div className="text-xs sm:text-sm text-slate-300">{label}</div>
       <div
-        className={`text-sm font-semibold ${
-          highlight
-            ? 'text-emerald-700 dark:text-emerald-400'
-            : 'text-gray-900 dark:text-white'
-        } ${mono ? 'font-mono tracking-wider' : ''}`}
+        className={`text-xs sm:text-sm font-semibold ${
+          highlight ? "text-emerald-300" : "text-slate-50"
+        } ${mono ? "font-mono tracking-wider" : ""}`}
       >
         {value}
       </div>
@@ -970,73 +593,20 @@ function Row({
   );
 }
 
-function LogoGrid({
-  title,
-  items,
-  selectedId,
-  onSelect,
-}: {
-  title: string;
-  items: BrandLogo[];
-  selectedId?: string;
-  onSelect: (id: string) => void;
-}) {
+function QrIcon() {
   return (
-    <div>
-      <div className="text-sm font-medium text-gray-700 dark:text-slate-200 mb-4">
-        {title}
-      </div>
-      <div className="grid grid-cols-3 gap-3">
-        {items.map((it) => {
-          const isSel = selectedId === it.id;
-          return (
-            <button
-              key={it.id}
-              onClick={() => onSelect(it.id)}
-              className={`relative aspect-square rounded-lg border-2 transition-all ${
-                isSel
-                  ? 'border-blue-600 dark:border-cyan-400 bg-blue-50 dark:bg-blue-900/20'
-                  : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-gray-300 dark:hover:border-slate-600'
-              }`}
-              title={it.comingSoon ? 'Coming Soon' : it.name}
-            >
-              <div className="absolute inset-0 flex items-center justify-center p-3">
-                {it.src ? (
-                  <img
-                    src={it.src}
-                    alt={it.name}
-                    className="h-full w-full object-contain"
-                  />
-                ) : (
-                  <span className="text-xs font-semibold text-gray-700 dark:text-slate-200">
-                    {it.name}
-                  </span>
-                )}
-              </div>
-              {it.comingSoon && (
-                <span className="absolute top-1.5 right-1.5 text-[9px] font-semibold rounded bg-amber-500 text-white px-1.5 py-0.5">
-                  Soon
-                </span>
-              )}
-              {isSel && !it.comingSoon && (
-                <div className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 dark:bg-cyan-400">
-                  <Check className="h-3 w-3 text-white dark:text-gray-900" />
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-      <div className="mt-3 text-xs text-gray-500 dark:text-slate-400">
-        {selectedId ? (
-          <>
-            Terpilih:{' '}
-            <strong>{items.find((x) => x.id === selectedId)?.name}</strong>
-          </>
-        ) : (
-          <>Silakan pilih salah satu metode pembayaran</>
-        )}
-      </div>
-    </div>
+    <svg
+      viewBox="0 0 24 24"
+      className="w-5 h-5 text-sky-300"
+      fill="none"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+        d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 4h4v4h-4v-4z"
+      />
+    </svg>
   );
 }

@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
-import { Check, Zap, Crown, Sparkles, Shield, MessageCircle, ArrowRight, BadgeCheck, HelpCircle, Star } from "lucide-react";
+import {
+  Check,
+  Zap,
+  Crown,
+  Sparkles,
+  Shield,
+  MessageCircle,
+  ArrowRight,
+  BadgeCheck,
+  HelpCircle,
+  Star,
+} from "lucide-react";
 
 /**
  * Coreline Pricing Page
@@ -7,8 +18,10 @@ import { Check, Zap, Crown, Sparkles, Shield, MessageCircle, ArrowRight, BadgeCh
  * - Monthly/Yearly toggle with ~20% discount for yearly
  * - Three tiers: Student (Free), Pro, Plus
  * - Feature comparison, FAQs, Testimonials
- * - CTA -> /pay?tier=...&amount=...&cycle=monthly|yearly
+ * - CTA -> /pay?tier=...&amount=...&cycle=monthly|yearly&token=...
  */
+
+const TOKEN_KEY = "astbyte_token";
 
 export default function PricingPage() {
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
@@ -18,13 +31,39 @@ export default function PricingPage() {
   }, []);
 
   const currency = (n: number) =>
-    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
+    new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(n);
 
-  const price = (monthly: number, yearly: number) => (billing === "monthly" ? monthly : yearly);
+  const price = (monthly: number, yearly: number) =>
+    billing === "monthly" ? monthly : yearly;
 
-  // helper buat bikin link ke /pay
-  const payHref = (id: string, monthly: number, yearly: number) =>
-    `/pay?tier=${encodeURIComponent(id)}&amount=${price(monthly, yearly)}&cycle=${billing}`;
+  // helper ambil token dari localStorage (kalau ada)
+  const getToken = () => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem(TOKEN_KEY) || "";
+  };
+
+  // helper buat bikin link ke /pay + ikut sertakan token
+  const payHref = (id: string, monthly: number, yearly: number) => {
+    const base = "/pay";
+    const tier = encodeURIComponent(id);
+    const amount = price(monthly, yearly);
+    const cycle = billing;
+    const token = getToken();
+
+    const params = new URLSearchParams();
+    params.set("tier", tier);
+    params.set("amount", String(amount));
+    params.set("cycle", cycle);
+    if (token) {
+      params.set("token", token);
+    }
+
+    return `${base}?${params.toString()}`;
+  };
 
   const tiers = [
     {
@@ -87,8 +126,14 @@ export default function PricingPage() {
       q: "Apakah bisa ganti paket kapan saja?",
       a: "Bisa. Upgrade/downgrade kapan pun; tagihan akan disesuaikan secara prorata tergantung metode pembayaran Anda.",
     },
-    { q: "Apakah ada diskon untuk pelajar?", a: "Ya, Student gratis. Untuk Pro/Plus kadang ada promo musiman—pantau pengumuman kami." },
-    { q: "Bagaimana sertifikat diterbitkan?", a: "Sertifikat otomatis keluar saat progres materi mencapai 100% di aplikasi Coreline Anda." },
+    {
+      q: "Apakah ada diskon untuk pelajar?",
+      a: "Ya, Student gratis. Untuk Pro/Plus kadang ada promo musiman—pantau pengumuman kami.",
+    },
+    {
+      q: "Bagaimana sertifikat diterbitkan?",
+      a: "Sertifikat otomatis keluar saat progres materi mencapai 100% di aplikasi Coreline Anda.",
+    },
   ];
 
   return (
@@ -99,13 +144,16 @@ export default function PricingPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-sky-200/70 dark:border-cyan-800/40 bg-white/70 dark:bg-slate-900/60 px-3 py-1 text-xs font-semibold text-sky-700 dark:text-cyan-300">
-              <BadgeCheck className="w-4 h-4" /> Harga transparan, manfaat maksimal
+              <BadgeCheck className="w-4 h-4" /> Harga transparan, manfaat
+              maksimal
             </div>
             <h1 className="mt-4 text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Invest ke diri sendiri, mulai dari <span className="text-sky-600 dark:text-cyan-400">gratis</span>
+              Invest ke diri sendiri, mulai dari{" "}
+              <span className="text-sky-600 dark:text-cyan-400">gratis</span>
             </h1>
             <p className="mt-4 text-slate-600 dark:text-slate-300 max-w-2xl">
-              Pilih paket yang pas buat perjalanan belajarmu. Upgrade kapan saja. Berhenti kapan saja.
+              Pilih paket yang pas buat perjalanan belajarmu. Upgrade kapan
+              saja. Berhenti kapan saja.
             </p>
 
             {/* Billing Toggle */}
@@ -128,7 +176,10 @@ export default function PricingPage() {
                     : "text-slate-700 dark:text-slate-200"
                 }`}
               >
-                Tahunan <span className="ml-1 inline-block rounded bg-amber-100 text-amber-700 px-2 py-0.5 text-[11px]">Hemat ~20%</span>
+                Tahunan{" "}
+                <span className="ml-1 inline-block rounded bg-amber-100 text-amber-700 px-2 py-0.5 text-[11px]">
+                  Hemat ~20%
+                </span>
               </button>
             </div>
           </div>
@@ -142,7 +193,9 @@ export default function PricingPage() {
             <div
               key={t.id}
               className={`relative rounded-2xl ring-1 ring-black/5 dark:ring-white/10 bg-white/90 dark:bg-slate-900/70 p-6 sm:p-8 shadow transition hover:shadow-lg ${
-                t.popular ? "border-2 border-sky-300/70 dark:border-cyan-700/50" : ""
+                t.popular
+                  ? "border-2 border-sky-300/70 dark:border-cyan-700/50"
+                  : ""
               }`}
             >
               {t.popular && (
@@ -157,17 +210,25 @@ export default function PricingPage() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold">{t.name}</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-300">{t.tagline}</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                    {t.tagline}
+                  </p>
                 </div>
               </div>
 
               <div className="mt-5 flex items-end gap-2">
                 {t.monthly === 0 ? (
-                  <span className="text-3xl sm:text-4xl font-extrabold">Gratis</span>
+                  <span className="text-3xl sm:text-4xl font-extrabold">
+                    Gratis
+                  </span>
                 ) : (
                   <>
-                    <span className="text-3xl sm:text-4xl font-extrabold">{currency(price(t.monthly, t.yearly))}</span>
-                    <span className="text-sm text-slate-600 dark:text-slate-300">/ {billing === "monthly" ? "bulan" : "tahun"}</span>
+                    <span className="text-3xl sm:text-4xl font-extrabold">
+                      {currency(price(t.monthly, t.yearly))}
+                    </span>
+                    <span className="text-sm text-slate-600 dark:text-slate-300">
+                      / {billing === "monthly" ? "bulan" : "tahun"}
+                    </span>
                   </>
                 )}
               </div>
@@ -177,17 +238,27 @@ export default function PricingPage() {
                   <li key={i} className="flex items-start gap-3 text-sm">
                     <span
                       className={`mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full ${
-                        f.ok ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" : "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500"
+                        f.ok
+                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+                          : "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500"
                       }`}
                     >
                       <Check className="w-4 h-4" />
                     </span>
-                    <span className={`${f.ok ? "text-slate-800 dark:text-slate-200" : "text-slate-400 dark:text-slate-500"}`}>{f.label}</span>
+                    <span
+                      className={`${
+                        f.ok
+                          ? "text-slate-800 dark:text-slate-200"
+                          : "text-slate-400 dark:text-slate-500"
+                      }`}
+                    >
+                      {f.label}
+                    </span>
                   </li>
                 ))}
               </ul>
 
-              {/* CTA -> /pay */}
+              {/* CTA -> /pay (+ token) */}
               <a
                 href={payHref(t.id, t.monthly, t.yearly)}
                 className={`mt-7 group w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition ${
@@ -198,13 +269,17 @@ export default function PricingPage() {
                     : "bg-amber-500 text-white hover:bg-amber-600"
                 }`}
               >
-                {t.id === "student" ? "Mulai Gratis" : t.id === "pro" ? "Upgrade Pro" : "Gabung Plus"}
+                {t.id === "student"
+                  ? "Mulai Gratis"
+                  : t.id === "pro"
+                  ? "Upgrade Pro"
+                  : "Gabung Plus"}
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
               </a>
 
-              {/* Guarantee */}
               <div className="mt-4 flex items-center gap-2 text-[12px] text-slate-500 dark:text-slate-400">
-                <Shield className="w-4 h-4" /> Garansi 7 hari uang kembali (syarat berlaku)
+                <Shield className="w-4 h-4" /> Garansi 7 hari uang kembali
+                (syarat berlaku)
               </div>
             </div>
           ))}
@@ -214,7 +289,9 @@ export default function PricingPage() {
         <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 p-5">
           <div className="flex items-center gap-3 text-slate-800 dark:text-slate-200">
             <MessageCircle className="w-5 h-5 text-sky-600 dark:text-cyan-400" />
-            <p className="text-sm">Masih bingung pilih paket? Chat tim kami untuk rekomendasi.</p>
+            <p className="text-sm">
+              Masih bingung pilih paket? Chat tim kami untuk rekomendasi.
+            </p>
           </div>
           <a
             href="https://wa.me/6285183209494?text=Halo%20Coreline%2C%20saya%20ingin%20konsultasi%20soal%20paket%20harga"
@@ -228,7 +305,9 @@ export default function PricingPage() {
 
       {/* Comparison Table */}
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Perbandingan Fitur</h2>
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+          Perbandingan Fitur
+        </h2>
         <div className="mt-5 overflow-x-auto rounded-2xl ring-1 ring-black/5 dark:ring-white/10 bg-white/90 dark:bg-slate-900/70">
           <table className="min-w-full text-sm">
             <thead>
@@ -251,8 +330,13 @@ export default function PricingPage() {
                 ["Kelas live", false, false, true],
                 ["Dukungan prioritas", false, false, true],
               ].map((row, i) => (
-                <tr key={i} className="border-t border-slate-100 dark:border-slate-800">
-                  <td className="py-3 pl-5 pr-3 text-slate-800 dark:text-slate-200">{row[0] as string}</td>
+                <tr
+                  key={i}
+                  className="border-t border-slate-100 dark:border-slate-800"
+                >
+                  <td className="py-3 pl-5 pr-3 text-slate-800 dark:text-slate-200">
+                    {row[0] as string}
+                  </td>
                   {[1, 2, 3].map((col) => (
                     <td key={col} className="py-3 px-3">
                       {(row[col] as boolean) ? (
@@ -283,11 +367,17 @@ export default function PricingPage() {
             </h3>
             <div className="mt-4 space-y-5">
               {[1, 2, 3].map((i) => (
-                <blockquote key={i} className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-4">
+                <blockquote
+                  key={i}
+                  className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-4"
+                >
                   <p className="text-[15px] text-slate-700 dark:text-slate-300">
-                    “Materinya enak diikuti, proyeknya relevan. Lulus Pro langsung dapet sertifikat—kepake buat apply kerja!”
+                    “Materinya enak diikuti, proyeknya relevan. Lulus Pro
+                    langsung dapet sertifikat—kepake buat apply kerja!”
                   </p>
-                  <footer className="mt-2 text-xs text-slate-500">— Alumni Coreline Pro #{i}</footer>
+                  <footer className="mt-2 text-xs text-slate-500">
+                    — Alumni Coreline Pro #{i}
+                  </footer>
                 </blockquote>
               ))}
             </div>
@@ -296,29 +386,35 @@ export default function PricingPage() {
           {/* FAQs */}
           <div className="rounded-2xl ring-1 ring-black/5 dark:ring-white/10 bg-white/90 dark:bg-slate-900/70 p-6">
             <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <HelpCircle className="w-5 h-5 text-sky-600 dark:text-cyan-400" /> Pertanyaan Umum
+              <HelpCircle className="w-5 h-5 text-sky-600 dark:text-cyan-400" />{" "}
+              Pertanyaan Umum
             </h3>
             <div className="mt-4 divide-y divide-slate-200 dark:divide-slate-800">
               {faqs.map((f, i) => (
                 <details key={i} className="group py-3">
                   <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-semibold text-slate-800 dark:text-slate-200">
                     {f.q}
-                    <span className="ml-3 text-slate-400 group-open:rotate-180 transition-transform">▾</span>
+                    <span className="ml-3 text-slate-400 group-open:rotate-180 transition-transform">
+                      ▾
+                    </span>
                   </summary>
-                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{f.a}</p>
+                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                    {f.a}
+                  </p>
                 </details>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Footer CTA -> /pay untuk Student */}
+        {/* Footer CTA -> /pay untuk Student (ikut token juga) */}
         <div className="mt-10 text-center">
           <a
             href={payHref("student", 0, 0)}
             className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-6 py-3 font-semibold hover:opacity-90"
           >
-            Coba Student Gratis Sekarang <ArrowRight className="w-4 h-4" />
+            Coba Student Gratis Sekarang
+            <ArrowRight className="w-4 h-4" />
           </a>
         </div>
       </section>
