@@ -55,7 +55,8 @@ export default function MaterialPage() {
       </header>
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="rounded-2xl bg-white/80 dark:bg-slate-900/70 ring-1 ring-black/5 dark:ring-white/10 p-6 sm:p-8 shadow">
+        {/* 🔥 Tambah class "material-content" di sini */}
+        <div className="material-content rounded-2xl bg-white dark:bg-slate-900 ring-1 ring-black/5 dark:ring-white/10 p-6 sm:p-8 shadow">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white mb-3">
             {material.title}
           </h1>

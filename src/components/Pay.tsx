@@ -1,29 +1,30 @@
 // src/pages/ManualQRISPage.tsx
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from 'react';
 import {
   Copy,
   Shield,
   BadgeCheck,
   ArrowRight,
   BadgePercent,
-  Info as InfoIcon,
   AlertTriangle,
   Check,
   Wallet,
   Loader2,
   User,
-} from "lucide-react";
+  CreditCard,
+  QrCode,
+  ArrowLeft,
+} from 'lucide-react';
 
-type Tier = "student" | "pro" | "plus";
-type Cycle = "monthly" | "yearly";
+/* =========================================
+   TYPES & CONFIG
+   ========================================= */
+type Tier = 'student' | 'pro' | 'plus';
+type Cycle = 'monthly' | 'yearly';
 
-const MERCHANT_NAME = "Xenza ID";
-const NMID = "ID1023244802444";
-
-// API base: localhost saat dev, authx saat prod
-const API_BASE = "https://authx.astbyte.com";
-
-const TOKEN_KEY = "astbyte_token";
+const MERCHANT_NAME = 'AstByte System';
+const API_BASE = 'https://authx.astbyte.com'; // Ganti ke localhost jika dev
+const TOKEN_KEY = 'astbyte_token';
 
 const DEFAULT_PRICE: Record<Tier, { monthly: number; yearly: number }> = {
   student: { monthly: 0, yearly: 0 },
@@ -31,42 +32,41 @@ const DEFAULT_PRICE: Record<Tier, { monthly: number; yearly: number }> = {
   plus: { monthly: 149000, yearly: 1440000 },
 };
 
-const VOUCHERS: Record<
-  string,
-  { type: "percent" | "fixed"; value: number; note?: string }
-> = {
-  CORELINESATU: { type: "percent", value: 5, note: "Diskon 5%" },
-  ASTBYTEJAYA25: { type: "percent", value: 15, note: "Diskon 15%" },
-  HARUSCORELINE: { type: "fixed", value: 70000, note: "Potongan Rp70.000" },
+const VOUCHERS: Record<string, { type: 'percent' | 'fixed'; value: number; note?: string }> = {
+  CORELINESATU: { type: 'percent', value: 5, note: 'Diskon 5%' },
+  ASTBYTEJAYA25: { type: 'percent', value: 15, note: 'Diskon 15%' },
+  HARUSCORELINE: { type: 'fixed', value: 70000, note: 'Potongan Rp70.000' },
+  MABA2025: { type: 'fixed', value: 50000, note: 'Promo Mahasiswa Baru' },
 };
 
+/* =========================================
+   HELPERS
+   ========================================= */
 const rupiah = (n: number) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
+  new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
     maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
   }).format(Math.max(0, Math.round(n)));
 
 function makeOrderId() {
   const d = new Date();
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
   const ts = [d.getFullYear(), d.getMonth() + 1, d.getDate()]
-    .map((v) => String(v).padStart(2, "0"))
-    .join("");
-  const hms = [d.getHours(), d.getMinutes(), d.getSeconds()]
-    .map((v) => String(v).padStart(2, "0"))
-    .join("");
-  return `ORD-${ts}-${hms}`;
+    .map((v) => String(v).padStart(2, '0')).join('');
+  return `TRX-${ts}-${random}`;
 }
 
 function calcDiscount(nominal: number, code: string) {
-  if (!code) return { valid: false, amount: 0, label: "" };
+  if (!code) return { valid: false, amount: 0, label: '' };
   const v = VOUCHERS[code.toUpperCase().trim()];
-  if (!v) return { valid: false, amount: 0, label: "" };
-  let disc =
-    v.type === "percent" ? Math.floor((nominal * v.value) / 100) : v.value;
-  disc = Math.min(disc, nominal);
-  const label =
-    v.note || (v.type === "percent" ? `${v.value}%` : rupiah(v.value));
+  if (!v) return { valid: false, amount: 0, label: '' };
+  
+  let disc = v.type === 'percent' ? Math.floor((nominal * v.value) / 100) : v.value;
+  disc = Math.min(disc, nominal); // Diskon tidak boleh melebihi harga
+  
+  const label = v.note || (v.type === 'percent' ? `Diskon ${v.value}%` : `Potongan ${rupiah(v.value)}`);
   return { valid: true, amount: disc, label };
 }
 
@@ -77,154 +77,125 @@ type AuthUser = {
   balance: number;
 };
 
+/* =========================================
+   MAIN COMPONENT
+   ========================================= */
 export default function ManualQRISPage() {
+  // State
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [publicId, setPublicId] = useState('');
+  const [voucher, setVoucher] = useState('');
+  const [token, setToken] = useState<string | null>(null);
+  
+  // UI State
+  const [loadingCheck, setLoadingCheck] = useState(false);
+  const [loadingPay, setLoadingPay] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loadingUser, setLoadingUser] = useState(false);
-  const [balanceError, setBalanceError] = useState<string | null>(null);
-  const [balanceSuccess, setBalanceSuccess] = useState<string | null>(null);
-  const [payingWithBalance, setPayingWithBalance] = useState(false);
+  // URL Params
+  const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const tierParam = (params.get('tier') as Tier) || 'student';
+  const cycleParam = (params.get('cycle') as Cycle) || 'monthly';
+  const amountParam = Number(params.get('amount') || NaN);
 
-  // NEW: input Public ID + loading login
-  const [publicId, setPublicId] = useState("");
-  const [checkingPublicId, setCheckingPublicId] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
-  const [publicIdError, setPublicIdError] = useState<string | null>(null);
-
-  useEffect(() => {
-    document.title = "Pay with Balance | New Coreline by Xenza ID";
-  }, []);
-
-  const params =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search)
-      : new URLSearchParams();
-  const tierParam = (params.get("tier") as Tier) || "student";
-  const cycleParam = (params.get("cycle") as Cycle) || "monthly";
-  const amountParam = Number(params.get("amount") || NaN);
-
+  // Computed Values
+  const orderId = useMemo(() => makeOrderId(), []);
+  
   const nominalRaw = useMemo(() => {
     const defaults = DEFAULT_PRICE[tierParam];
-    return Number.isFinite(amountParam)
-      ? Math.max(0, Math.round(amountParam))
-      : defaults[cycleParam];
+    return Number.isFinite(amountParam) ? Math.max(0, Math.round(amountParam)) : defaults[cycleParam];
   }, [tierParam, cycleParam, amountParam]);
 
-  const orderId = useMemo(() => makeOrderId(), []);
-  const [voucher, setVoucher] = useState("");
+  const disc = useMemo(() => calcDiscount(nominalRaw, voucher), [nominalRaw, voucher]);
+  const total = Math.max(0, nominalRaw - disc.amount);
 
-  const disc = useMemo(
-    () => calcDiscount(nominalRaw, voucher),
-    [nominalRaw, voucher]
-  );
-  const nominalAfterDisc = Math.max(0, nominalRaw - disc.amount);
-  const total = nominalAfterDisc;
+  useEffect(() => {
+    document.title = 'Pembayaran Saldo | Coreline';
+  }, []);
 
-  const onCopyTotal = async () => {
+  // --- Actions ---
+
+  const handleCopyTotal = async () => {
     try {
       await navigator.clipboard.writeText(String(total));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // ignore
-    }
+    } catch { /* noop */ }
   };
 
-  // Step 1: user isi Public ID -> login ke authx -> dapat token + user
   const handleCheckPublicId = async (e: React.FormEvent) => {
     e.preventDefault();
-    setPublicIdError(null);
-    setBalanceError(null);
-    setBalanceSuccess(null);
+    setErrorMsg(null);
+    setSuccessMsg(null);
     setUser(null);
     setToken(null);
 
-    const trimmed = publicId.trim();
-    if (!trimmed) {
-      setPublicIdError("Public ID wajib diisi.");
+    const pid = publicId.trim();
+    if (!pid) {
+      setErrorMsg('Harap masukkan Public ID.');
       return;
     }
 
-    setCheckingPublicId(true);
+    setLoadingCheck(true);
 
     try {
       const res = await fetch(`${API_BASE}/api/auth/login/public-id`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ public_id: trimmed }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ public_id: pid }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setPublicIdError(
-          data?.message || "Login dengan Public ID gagal. Coba lagi."
-        );
-        return;
+        throw new Error(data?.message || 'ID tidak ditemukan atau tidak valid.');
       }
 
       const t = data?.data?.token;
       const u = data?.data?.user;
-      if (!t || !u) {
-        setPublicIdError("Token atau data user tidak ditemukan dari server.");
-        return;
-      }
 
-      // simpan token ke state + localStorage
+      if (!t || !u) throw new Error('Data user tidak valid.');
+
       setToken(t);
-      if (typeof window !== "undefined") {
-        localStorage.setItem(TOKEN_KEY, t);
-      }
+      if (typeof window !== 'undefined') localStorage.setItem(TOKEN_KEY, t);
 
-      // set user dari respons login langsung (sudah cukup)
       setUser({
         public_id: u.public_id,
         full_name: u.full_name,
         email: u.email,
         balance: u.balance ?? 0,
       });
-    } catch (err) {
-      console.error(err);
-      setPublicIdError("Terjadi kesalahan jaringan. Coba lagi beberapa saat.");
+
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Gagal mengecek akun.');
     } finally {
-      setCheckingPublicId(false);
+      setLoadingCheck(false);
     }
   };
 
-  // Step 2: Bayar pakai saldo AstByte (wajib sudah ada token + user)
-  const handlePayWithBalance = async () => {
-    setBalanceError(null);
-    setBalanceSuccess(null);
+  const handlePay = async () => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
 
-    if (!token) {
-      setBalanceError(
-        "Kamu belum login dengan Public ID. Silakan cek akun terlebih dahulu."
-      );
-      return;
-    }
-
-    if (!user) {
-      setBalanceError("Data user tidak tersedia. Silakan cek akun lagi.");
+    if (!token || !user) {
+      setErrorMsg('Sesi tidak valid. Silakan cek akun ulang.');
       return;
     }
 
     if (user.balance < total) {
-      setBalanceError(
-        `Saldo tidak cukup. Saldo kamu ${rupiah(
-          user.balance
-        )}, sedangkan total yang harus dibayar ${rupiah(total)}.`
-      );
+      setErrorMsg(`Saldo tidak cukup. Saldo: ${rupiah(user.balance)}, Tagihan: ${rupiah(total)}.`);
       return;
     }
 
-    setPayingWithBalance(true);
+    setLoadingPay(true);
 
     try {
       const res = await fetch(`${API_BASE}/api/payment/pay-balance`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
@@ -237,416 +208,330 @@ export default function ManualQRISPage() {
       });
 
       const data = await res.json();
-      if (!res.ok || data?.status !== "success") {
-        setBalanceError(
-          data?.message || "Gagal memproses pembayaran saldo. Coba lagi."
-        );
-        return;
+      if (!res.ok || data?.status !== 'success') {
+        throw new Error(data?.message || 'Pembayaran gagal.');
       }
 
-      const newBalance =
-        data?.data?.balance !== undefined
-          ? Number(data.data.balance)
-          : user.balance - total;
+      // Update local balance state for UX
+      const newBalance = data?.data?.balance !== undefined ? Number(data.data.balance) : user.balance - total;
+      setUser(prev => prev ? { ...prev, balance: newBalance } : prev);
+      
+      setSuccessMsg('Pembayaran berhasil! Mengalihkan...');
+      
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 2000);
 
-      setUser((prev) =>
-        prev ? { ...prev, balance: newBalance } : prev
-      );
-      setBalanceSuccess("Pembayaran dengan saldo AstByte berhasil!");
-
-      // Redirect ke halaman utama setelah 1.5 detik
-      if (typeof window !== "undefined") {
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 1500);
-      }
-    } catch (err) {
-      console.error(err);
-      setBalanceError("Terjadi kesalahan jaringan. Coba beberapa saat lagi.");
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Terjadi kesalahan sistem.');
     } finally {
-      setPayingWithBalance(false);
+      setLoadingPay(false);
     }
   };
 
-  const balanceEnough = user ? user.balance >= total : false;
+  const isBalanceSufficient = user ? user.balance >= total : false;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50">
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Header */}
-        <header className="mb-6 sm:mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-slate-900 border border-sky-500/60 flex items-center justify-center shadow-[0_0_35px_rgba(56,189,248,0.7)]">
-              <QrIcon />
-            </div>
+    <div className="min-h-screen bg-[#0B0F19] text-slate-100 font-sans selection:bg-sky-500/30">
+      
+      {/* Background Ambience */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-[20%] -left-[10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px]" />
+        <div className="absolute top-[20%] -right-[10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px]" />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-10">
+        
+        {/* HEADER */}
+        <header className="mb-10">
+          <a href="/pricing" className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors text-sm font-medium">
+            <ArrowLeft className="w-4 h-4" /> Kembali ke Pilihan Paket
+          </a>
+          
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <h1 className="text-lg sm:text-xl font-semibold tracking-tight bg-gradient-to-r from-sky-400 via-blue-300 to-indigo-300 bg-clip-text text-transparent">
-                Bayar dengan Saldo AstByte
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-400">
-                Subscripsi New Coreline by Xenza ID
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                  <Wallet className="w-5 h-5 text-white" />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                  AstByte Pay
+                </h1>
+              </div>
+              <p className="text-slate-400 max-w-lg">
+                Gunakan saldo akun AstByte Anda untuk berlangganan layanan Coreline secara instan tanpa biaya admin.
               </p>
             </div>
-          </div>
 
-          {user && (
-            <div className="rounded-2xl bg-slate-900 border border-slate-700 px-4 py-2.5 flex items-center gap-3 shadow-[0_16px_40px_rgba(15,23,42,1)]">
-              <div className="flex flex-col">
-                <span className="text-[11px] text-slate-400">Saldo kamu</span>
-                <span className="text-sm sm:text-base font-semibold text-slate-50">
-                  {rupiah(user.balance)}
-                </span>
-              </div>
-              <div className="h-8 w-px bg-slate-800" />
-              <div className="flex flex-col">
-                <span className="text-[11px] text-slate-400">Status</span>
-                <span
-                  className={`text-xs font-medium ${
-                    balanceEnough ? "text-emerald-400" : "text-amber-300"
-                  }`}
-                >
-                  {balanceEnough ? "Saldo cukup" : "Saldo kurang"}
-                </span>
-              </div>
-            </div>
-          )}
-        </header>
-
-        <main className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-5 sm:gap-6 items-start">
-          {/* Left */}
-          <div className="space-y-4 sm:space-y-5">
-            {/* Public ID Section */}
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-[0_20px_55px_rgba(15,23,42,1)]">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 rounded-2xl bg-sky-500/20 border border-sky-500/60 flex items-center justify-center">
-                  <User className="w-4 h-4 text-sky-300" />
-                </div>
-                <h2 className="text-sm sm:text-base font-semibold text-slate-50">
-                  Masukkan Public ID AstByte
-                </h2>
-              </div>
-              <p className="text-[11px] sm:text-xs text-slate-400 mb-3">
-                Public ID bisa kamu lihat di halaman Account Center AstByte.
-                Data akun & saldo akan dicek sebelum pembayaran.
-              </p>
-              <form onSubmit={handleCheckPublicId} className="space-y-3">
-                <input
-                  type="text"
-                  value={publicId}
-                  onChange={(e) => {
-                    setPublicId(e.target.value);
-                    setPublicIdError(null);
-                    setBalanceError(null);
-                    setBalanceSuccess(null);
-                  }}
-                  placeholder="Contoh: 3e02d5cb-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                  className="w-full rounded-2xl border border-slate-700 bg-slate-950/80 px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/60 outline-none"
-                />
-                {publicIdError && (
-                  <div className="rounded-2xl border border-red-300/70 bg-red-50/10 px-3 py-2 text-xs text-red-200 flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    <span>{publicIdError}</span>
-                  </div>
-                )}
-                <button
-                  type="submit"
-                  disabled={checkingPublicId}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-sky-500/90 hover:bg-sky-400 text-slate-950 px-4 py-2.5 text-sm sm:text-base font-semibold shadow-[0_16px_40px_rgba(56,189,248,0.9)] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {checkingPublicId ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Mengecek Akun...
-                    </>
-                  ) : (
-                    <>
-                      <Check className="w-4 h-4" />
-                      Cek Akun & Saldo
-                    </>
-                  )}
-                </button>
-              </form>
-            </div>
-
-            {/* Paket & Diskon */}
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6 shadow-[0_20px_55px_rgba(15,23,42,1)]">
-              <div className="flex items-center justify-between gap-3 mb-4">
-                <div>
-                  <p className="text-xs text-slate-400 mb-1">Paket Dipilih</p>
-                  <p className="text-base sm:text-lg font-semibold text-slate-50">
-                    {tierParam.toUpperCase()} •{" "}
-                    <span className="capitalize">{cycleParam}</span>
-                  </p>
-                </div>
+            {/* Saldo Badge (Desktop) */}
+            {user && (
+              <div className="hidden md:flex items-center gap-4 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-sm">
                 <div className="text-right">
-                  <p className="text-[11px] text-slate-400">Order ID</p>
-                  <p className="text-xs font-mono text-slate-200">{orderId}</p>
+                  <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Saldo Tersedia</p>
+                  <p className="text-xl font-bold text-white font-mono">{rupiah(user.balance)}</p>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <StatItem label="Nominal Paket" value={rupiah(nominalRaw)} />
-                <StatItem
-                  label="Diskon"
-                  value={
-                    disc.valid && disc.amount > 0
-                      ? `-${rupiah(disc.amount)} (${disc.label})`
-                      : "Tidak ada"
-                  }
-                />
-              </div>
-
-              <div className="rounded-2xl border border-sky-500/60 bg-gradient-to-r from-sky-500/20 via-sky-500/15 to-indigo-500/20 px-4 py-3 flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs text-sky-100/80 mb-1">
-                    Total Bayar (dari saldo)
-                  </p>
-                  <p className="text-lg sm:text-xl font-semibold text-slate-50">
-                    {rupiah(total)}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={onCopyTotal}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-slate-950/80 border border-sky-400/80 px-3 py-1.5 text-[11px] text-sky-100 hover:bg-slate-900 transition-colors"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Tersalin</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Copy Total</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {/* Voucher */}
-              <div className="mt-4 space-y-2.5">
-                <label className="text-sm font-medium text-slate-200">
-                  Kode Voucher (opsional)
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={voucher}
-                    onChange={(e) => setVoucher(e.target.value)}
-                    placeholder="Masukkan kode voucher"
-                    className="flex-1 rounded-2xl border border-slate-700 bg-slate-950/80 px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/60 outline-none"
-                  />
-                  <div className="hidden sm:flex items-center gap-1.5 rounded-2xl bg-slate-900 border border-slate-700 px-3 py-2 text-[11px] text-slate-300">
-                    <BadgePercent className="w-3.5 h-3.5 text-sky-300" />
-                    <span>Promo tersedia</span>
-                  </div>
-                </div>
-                {disc.valid && (
-                  <p className="text-xs text-emerald-300">
-                    Voucher aktif: {disc.label} (potongan {rupiah(disc.amount)})
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Error / Success */}
-            {balanceError || balanceSuccess ? (
-              <div
-                className={`rounded-2xl border px-4 py-3 text-xs sm:text-sm flex items-start gap-2 ${
-                  balanceError
-                    ? "border-red-200 bg-red-50/10 text-red-200"
-                    : "border-emerald-200 bg-emerald-50/10 text-emerald-200"
-                }`}
-              >
-                {balanceError ? (
-                  <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                ) : (
-                  <Check className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                )}
-                <span>{balanceError || balanceSuccess}</span>
-              </div>
-            ) : null}
-
-            {/* Tombol Bayar */}
-            <button
-              type="button"
-              onClick={handlePayWithBalance}
-              disabled={
-                payingWithBalance ||
-                !user ||
-                !token ||
-                !Number.isFinite(total) ||
-                total <= 0
-              }
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 text-slate-50 px-4 py-3 text-sm sm:text-base font-semibold hover:bg-slate-900 transition-colors shadow-[0_20px_55px_rgba(15,23,42,1)] disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {payingWithBalance ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Memproses Pembayaran...
-                </>
-              ) : (
-                <>
-                  <Wallet className="w-4 h-4" />
-                  Bayar dengan Saldo AstByte
-                  <span className="text-xs opacity-80">
-                    ({rupiah(total)})
-                  </span>
-                </>
-              )}
-            </button>
-
-            <div className="mt-3 flex items-start justify-between gap-2 text-[11px] sm:text-xs text-slate-500">
-              <span>
-                Pembayaran saldo diproses langsung oleh sistem. Pastikan kamu
-                sudah cek Public ID kamu di atas.
-              </span>
-              <a
-                href="/pricing"
-                className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 font-medium transition-colors"
-              >
-                Kembali
-                <ArrowRight className="w-3 h-3" />
-              </a>
-            </div>
-          </div>
-
-          {/* Right */}
-          <div className="space-y-4 sm:space-y-5">
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6">
-              <div className="flex items-center gap-2 mb-3">
-                <Shield className="w-4 h-4 text-sky-300" />
-                <h2 className="text-sm sm:text-base font-semibold text-slate-50">
-                  Info Akun
-                </h2>
-              </div>
-              {user ? (
-                <div className="space-y-2 text-xs sm:text-sm">
-                  <Row label="Nama" value={user.full_name} />
-                  <Row label="Email" value={user.email} />
-                  <Row label="Saldo" value={rupiah(user.balance)} highlight />
-                </div>
-              ) : (
-                <p className="text-xs text-slate-400">
-                  Masukkan Public ID di sebelah kiri untuk menampilkan data
-                  akun & saldo.
-                </p>
-              )}
-            </div>
-
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 sm:p-6">
-              <div className="flex items-center gap-2 mb-3">
-                <BadgeCheck className="w-4 h-4 text-emerald-300" />
-                <h2 className="text-sm sm:text-base font-semibold text-slate-50">
-                  Ringkasan Order
-                </h2>
-              </div>
-              <div className="space-y-2 text-xs sm:text-sm">
-                <Row
-                  label="Paket"
-                  value={`${tierParam.toUpperCase()} (${cycleParam})`}
-                />
-                <Row label="Merchant" value={MERCHANT_NAME} />
-                <Row label="NMID" value={NMID} mono />
-                <Row label="Order ID" value={orderId} mono />
-                <Row label="Nominal Paket" value={rupiah(nominalRaw)} />
-                <Row
-                  label="Diskon"
-                  value={
-                    disc.valid && disc.amount > 0
-                      ? `-${rupiah(disc.amount)} (${disc.label})`
-                      : "-"
-                  }
-                />
-                <Row
-                  label="Total dari Saldo"
-                  value={rupiah(total)}
-                  highlight
-                />
-              </div>
-            </div>
-
-            {!Number.isFinite(amountParam) && (
-              <div className="rounded-2xl border border-amber-200/40 bg-amber-50/10 text-amber-200 p-4 text-xs sm:text-sm">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                  <div>
-                    Nominal tidak terdeteksi dari URL. Sistem menggunakan harga
-                    default paket{" "}
-                    <strong>{tierParam.toUpperCase()}</strong> (
-                    <strong>{cycleParam}</strong>). Untuk nominal spesifik,
-                    pastikan link dari halaman pricing menyertakan parameter{" "}
-                    <code className="mx-1 px-1.5 py-0.5 rounded bg-black/10 font-mono text-[10px]">
-                      amount
-                    </code>
-                    .
-                  </div>
+                <div className={`h-10 w-10 rounded-full flex items-center justify-center ${isBalanceSufficient ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                  {isBalanceSufficient ? <Check className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
                 </div>
               </div>
             )}
           </div>
+        </header>
+
+        <main className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* LEFT COLUMN: FORM */}
+          <div className="lg:col-span-7 space-y-6">
+            
+            {/* Step 1: Identification */}
+            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 sm:p-8 backdrop-blur-md relative overflow-hidden group">
+              <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
+              
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 font-bold border border-slate-700">1</div>
+                  <h2 className="text-lg font-bold text-white">Identifikasi Akun</h2>
+                </div>
+                {user && <BadgeCheck className="w-5 h-5 text-emerald-400" />}
+              </div>
+
+              {!user ? (
+                <form onSubmit={handleCheckPublicId} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-400 mb-2">Masukkan Public ID</label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                      <input
+                        type="text"
+                        value={publicId}
+                        onChange={(e) => setPublicId(e.target.value)}
+                        placeholder="Contoh: 3e02d5cb-xxxx-xxxx..."
+                        className="w-full bg-slate-950 border border-slate-700 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all outline-none font-mono text-sm"
+                      />
+                    </div>
+                    <p className="mt-2 text-xs text-slate-500">Public ID dapat dilihat pada menu Account Center di dashboard utama.</p>
+                  </div>
+                  
+                  <button
+                    type="submit"
+                    disabled={loadingCheck}
+                    className="w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-700 hover:border-slate-600"
+                  >
+                    {loadingCheck ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Cek Ketersediaan Akun'}
+                  </button>
+                </form>
+              ) : (
+                <div className="bg-slate-950/50 border border-slate-800 rounded-2xl p-4 flex items-center justify-between group-hover:border-blue-500/30 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center text-sm font-bold">
+                      {user.full_name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-bold text-white">{user.full_name}</p>
+                      <p className="text-xs text-slate-400 font-mono">{user.email}</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => { setUser(null); setToken(null); }}
+                    className="text-xs text-red-400 hover:text-red-300 font-medium underline"
+                  >
+                    Ganti Akun
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Step 2: Payment Details */}
+            <div className={`bg-slate-900/50 border border-slate-800 rounded-3xl p-6 sm:p-8 backdrop-blur-md relative overflow-hidden transition-opacity duration-500 ${!user ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+              <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
+              
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 font-bold border border-slate-700">2</div>
+                <h2 className="text-lg font-bold text-white">Rincian Pembayaran</h2>
+              </div>
+
+              <div className="space-y-6">
+                {/* Product Info */}
+                <div className="flex justify-between items-center p-4 rounded-2xl bg-slate-950 border border-slate-800">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                      <CreditCard className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-400">Langganan</p>
+                      <p className="text-lg font-bold text-white capitalize">{tierParam} Plan <span className="text-slate-500 text-sm font-normal">({cycleParam})</span></p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-white">{rupiah(nominalRaw)}</p>
+                  </div>
+                </div>
+
+                {/* Voucher Input */}
+                <div>
+                   <label className="block text-sm font-medium text-slate-400 mb-2">Kode Voucher</label>
+                   <div className="relative flex gap-2">
+                     <div className="relative flex-1">
+                        <BadgePercent className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                        <input
+                          type="text"
+                          value={voucher}
+                          onChange={(e) => setVoucher(e.target.value)}
+                          placeholder="Punya kode promo?"
+                          className="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none text-sm uppercase"
+                        />
+                     </div>
+                   </div>
+                   {disc.valid && (
+                     <div className="mt-2 text-xs font-medium text-emerald-400 flex items-center gap-1">
+                       <Check className="w-3 h-3" /> {disc.label} diterapkan (-{rupiah(disc.amount)})
+                     </div>
+                   )}
+                </div>
+
+                {/* Total Calculation */}
+                <div className="border-t border-slate-800 pt-4 space-y-2">
+                   <div className="flex justify-between text-sm text-slate-400">
+                     <span>Subtotal</span>
+                     <span>{rupiah(nominalRaw)}</span>
+                   </div>
+                   {disc.amount > 0 && (
+                     <div className="flex justify-between text-sm text-emerald-400">
+                       <span>Diskon</span>
+                       <span>-{rupiah(disc.amount)}</span>
+                     </div>
+                   )}
+                   <div className="flex justify-between items-center pt-2">
+                     <span className="font-bold text-white">Total Tagihan</span>
+                     <div className="flex items-center gap-2">
+                        <span className="text-2xl font-bold text-white">{rupiah(total)}</span>
+                        <button onClick={handleCopyTotal} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-500 transition-colors">
+                           {copied ? <Check className="w-4 h-4 text-emerald-400"/> : <Copy className="w-4 h-4"/>}
+                        </button>
+                     </div>
+                   </div>
+                </div>
+
+                {/* Status Messages */}
+                {errorMsg && (
+                  <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                    <p className="text-sm text-red-200">{errorMsg}</p>
+                  </div>
+                )}
+                {successMsg && (
+                  <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3">
+                    <Check className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                    <p className="text-sm text-emerald-200">{successMsg}</p>
+                  </div>
+                )}
+
+                {/* Action Button */}
+                <button
+                  onClick={handlePay}
+                  disabled={loadingPay || !isBalanceSufficient}
+                  className={`
+                    w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg
+                    ${isBalanceSufficient 
+                      ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20' 
+                      : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                    }
+                  `}
+                >
+                  {loadingPay ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" /> Memproses...
+                    </>
+                  ) : !isBalanceSufficient ? (
+                    <>
+                      <AlertTriangle className="w-5 h-5" /> Saldo Tidak Cukup
+                    </>
+                  ) : (
+                    <>
+                      Bayar Sekarang <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          {/* RIGHT COLUMN: RECEIPT */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="sticky top-8">
+              <div className="bg-white text-slate-900 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+                {/* Receipt Decoration */}
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500" />
+                <div className="absolute -bottom-3 left-0 w-full h-6 bg-[#0B0F19] [mask-image:linear-gradient(to_right,transparent_0%,#000_50%,transparent_100%),radial-gradient(circle_at_bottom,transparent_6px,#000_7px)] [mask-size:100%_100%,20px_20px] [mask-composite:intersect]" />
+
+                <div className="text-center mb-6">
+                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <QrCode className="w-6 h-6 text-slate-900" />
+                  </div>
+                  <h3 className="text-xl font-bold tracking-tight">INVOICE</h3>
+                  <p className="text-slate-500 text-xs font-mono mt-1">{orderId}</p>
+                </div>
+
+                <div className="space-y-4 border-b-2 border-dashed border-slate-200 pb-6 mb-6">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-500">Merchant</span>
+                    <span className="font-semibold">{MERCHANT_NAME}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-500">Tanggal</span>
+                    <span className="font-semibold">{new Date().toLocaleDateString('id-ID')}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-500">Item</span>
+                    <span className="font-semibold">{tierParam.toUpperCase()} / {cycleParam}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 mb-8">
+                   <div className="flex justify-between text-sm font-medium">
+                      <span>Harga</span>
+                      <span>{rupiah(nominalRaw)}</span>
+                   </div>
+                   {disc.amount > 0 && (
+                     <div className="flex justify-between text-sm text-emerald-600">
+                        <span>Diskon</span>
+                        <span>-{rupiah(disc.amount)}</span>
+                     </div>
+                   )}
+                   <div className="flex justify-between text-xl font-extrabold mt-4 pt-4 border-t border-slate-200">
+                      <span>Total</span>
+                      <span>{rupiah(total)}</span>
+                   </div>
+                </div>
+
+                <div className="bg-slate-50 rounded-xl p-4 text-center">
+                  <p className="text-xs text-slate-500 mb-2">Metode Pembayaran</p>
+                  <div className="flex items-center justify-center gap-2 font-bold text-slate-800">
+                    <Wallet className="w-4 h-4 text-blue-600" />
+                    AstByte Balance
+                  </div>
+                </div>
+
+              </div>
+              
+              {/* Security Badge */}
+              <div className="mt-6 flex items-center justify-center gap-2 text-slate-500 text-xs">
+                <Shield className="w-4 h-4" />
+                <span>Pembayaran Anda aman & terenkripsi 256-bit SSL</span>
+              </div>
+            </div>
+          </div>
+
         </main>
       </div>
-
-      <footer className="text-center text-xs sm:text-sm text-slate-500 py-6 border-t border-slate-800">
-        Powered by <strong>XenzaDigital</strong> — Halaman pembayaran ini
-        dibuat oleh XenzaDigital (Xenza ID)
+      
+      {/* Footer */}
+      <footer className="py-8 text-center border-t border-slate-800 mt-12 bg-slate-950">
+        <p className="text-slate-500 text-sm">
+          &copy; {new Date().getFullYear()} AstByte Technology. All rights reserved.
+        </p>
       </footer>
     </div>
-  );
-}
-
-function StatItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl bg-slate-900 border border-slate-800 p-3">
-      <div className="text-[11px] font-medium text-slate-400 mb-1">
-        {label}
-      </div>
-      <div className="text-sm font-semibold text-slate-50">{value}</div>
-    </div>
-  );
-}
-
-function Row({
-  label,
-  value,
-  mono,
-  highlight,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-  highlight?: boolean;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <div className="text-xs sm:text-sm text-slate-300">{label}</div>
-      <div
-        className={`text-xs sm:text-sm font-semibold ${
-          highlight ? "text-emerald-300" : "text-slate-50"
-        } ${mono ? "font-mono tracking-wider" : ""}`}
-      >
-        {value}
-      </div>
-    </div>
-  );
-}
-
-function QrIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="w-5 h-5 text-sky-300"
-      fill="none"
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.8"
-        d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 4h4v4h-4v-4z"
-      />
-    </svg>
   );
 }

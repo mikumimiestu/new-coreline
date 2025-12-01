@@ -19,6 +19,7 @@ import {
   X,
   Eye,
   EyeOff,
+  LogOut,
 } from 'lucide-react';
 
 const AUTHX_BASE = 'https://authx.astbyte.com';
@@ -39,32 +40,29 @@ interface ProfilePageProps {
 }
 
 export default function ProfilePage({ onBack }: ProfilePageProps) {
-  const { user } = useAuth();
+  const { user } = useAuth(); // Asumsi useAuth juga punya fungsi logout jika perlu
 
   const [authUser, setAuthUser] = useState<any>(null);
   const [subs, setSubs] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Edit State
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [toast, setToast] = useState<string | null>(null);
-
-  // toggle visibility public ID
-  const [showPublicId, setShowPublicId] = useState(false);
-
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
     phone: '',
   });
 
+  // UI State
+  const [copied, setCopied] = useState(false);
+  const [showPublicId, setShowPublicId] = useState(false);
   const [photoError, setPhotoError] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // =============================
-  // LOAD DATA USER + SUBSCRIPTIONS
-  // =============================
+  // ================= LOAD DATA =================
   useEffect(() => {
     const token = localStorage.getItem('authx_token');
     if (!token) {
@@ -74,36 +72,32 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
 
     async function loadData() {
       try {
-        // GET /me
+        // 1. Get User
         const meRes = await fetch(`${AUTHX_BASE}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const meData = await meRes.json();
 
-        if (!meRes.ok) {
-          setLoading(false);
-          return;
+        if (meRes.ok) {
+          setAuthUser(meData.data.user);
+          setFormData({
+            full_name: meData.data.user.full_name,
+            email: meData.data.user.email,
+            phone: meData.data.user.phone || '',
+          });
         }
 
-        setAuthUser(meData.data.user);
-        setFormData({
-          full_name: meData.data.user.full_name,
-          email: meData.data.user.email,
-          phone: meData.data.user.phone || '',
-        });
-
-        // GET /subscriptions/me
+        // 2. Get Subscriptions
         const subRes = await fetch(`${AUTHX_BASE}/api/subscriptions/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         const subData = await subRes.json();
 
         if (subRes.ok && subData?.data?.subscriptions) {
           setSubs(subData.data.subscriptions);
         }
       } catch (e) {
-        console.log('Load error:', e);
+        console.error('Load error:', e);
       } finally {
         setLoading(false);
       }
@@ -112,34 +106,40 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
     loadData();
   }, []);
 
-  // =============================
-  // UPDATE PROFILE
-  // =============================
-  function validate() {
+  // ================= ACTIONS =================
+
+  const showToast = (type: 'success' | 'error', msg: string) => {
+    setToast({ type, msg });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleCopyId = () => {
+    if (!authUser?.public_id) return;
+    navigator.clipboard.writeText(authUser.public_id);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const validate = () => {
     const e: Record<string, string> = {};
-
-    if (!formData.full_name.trim()) e.full_name = 'Nama wajib diisi.';
-    if (!formData.email.includes('@')) e.email = 'Email tidak valid.';
+    if (!formData.full_name.trim()) e.full_name = 'Nama lengkap wajib diisi.';
+    if (!formData.email.includes('@')) e.email = 'Format email tidak valid.';
     if (!formData.phone) e.phone = 'Nomor HP wajib diisi.';
-
     setErrors(e);
     return Object.keys(e).length === 0;
-  }
+  };
 
-  async function handleSave() {
+  const handleSave = async () => {
     if (!validate()) return;
-
-    const token = localStorage.getItem('authx_token');
-    if (!token) return;
-
     setSaving(true);
-
-    const form = new FormData();
-    form.append('full_name', formData.full_name);
-    form.append('email', formData.email);
-    form.append('phone', formData.phone);
+    const token = localStorage.getItem('authx_token');
 
     try {
+      const form = new FormData();
+      form.append('full_name', formData.full_name);
+      form.append('email', formData.email);
+      form.append('phone', formData.phone);
+
       const res = await fetch(`${AUTHX_BASE}/api/account`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` },
@@ -149,61 +149,33 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
       const data = await res.json();
 
       if (!res.ok) {
-        setToast(data.message || 'Gagal memperbarui profil.');
+        showToast('error', data.message || 'Gagal memperbarui profil.');
       } else {
-        setToast('Profil berhasil diperbarui! ✨');
+        showToast('success', 'Profil berhasil diperbarui!');
         setAuthUser(data.data.user);
         setIsEditing(false);
       }
     } catch {
-      setToast('Terjadi kesalahan.');
+      showToast('error', 'Terjadi kesalahan jaringan.');
     } finally {
       setSaving(false);
-      setTimeout(() => setToast(null), 2500);
     }
-  }
+  };
 
-  // =============================
-  // COPY PUBLIC ID
-  // =============================
-  function handleCopyId() {
-    if (!authUser?.public_id) return;
-    navigator.clipboard.writeText(authUser.public_id);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  }
-
-  // toggle public ID visibility
-  function togglePublicIdVisibility() {
-    setShowPublicId((v) => !v);
-  }
-
-  // mask public ID
-  function getMaskedPublicId(id: string) {
+  const getMaskedPublicId = (id: string) => {
     if (!id) return '';
-    if (id.length <= 8) return '•'.repeat(id.length);
-    const firstPart = id.slice(0, 4);
-    const lastPart = id.slice(-4);
-    const middleLength = id.length - 8;
-    return `${firstPart}${'•'.repeat(middleLength)}${lastPart}`;
-  }
+    if (id.length <= 8) return '••••••••';
+    return `${id.slice(0, 4)}••••••••${id.slice(-4)}`;
+  };
 
-  // =============================
-  // LOADING STATE
-  // =============================
+  // ================= RENDER HELPERS =================
+  
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 overflow-x-hidden">
-        <div className="text-center animate-fade-in">
-          <div className="relative mb-4">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="h-20 w-20 rounded-full bg-blue-500/20 animate-ping" />
-            </div>
-            <Loader2 className="relative mx-auto h-12 w-12 animate-spin text-blue-600 dark:text-cyan-400" />
-          </div>
-          <p className="text-base font-medium text-gray-600 dark:text-slate-300">
-            Memuat profil kamu...
-          </p>
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-blue-600 dark:text-blue-400" />
+          <p className="text-sm font-medium text-slate-500 animate-pulse">Memuat profil...</p>
         </div>
       </div>
     );
@@ -211,368 +183,337 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
 
   if (!authUser) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 p-6 overflow-x-hidden">
-        <div className="animate-scale-in max-w-md w-full bg-white/90 dark:bg-slate-900/80 rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10 p-8 text-center backdrop-blur-xl">
-          <div className="mb-6 mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-500 shadow-xl shadow-red-500/30">
-            <X className="h-8 w-8 text-white" />
+      <div className="flex min-h-screen items-center justify-center p-4 bg-slate-50 dark:bg-slate-950">
+        <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+            <X className="h-8 w-8 text-red-600 dark:text-red-400" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-            Belum Login
-          </h1>
-          <p className="text-gray-600 dark:text-slate-300 mb-6">
-            Silakan login terlebih dahulu.
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Akses Ditolak</h2>
+          <p className="mt-2 text-slate-600 dark:text-slate-400 mb-6">
+            Sesi Anda telah berakhir atau data tidak ditemukan.
           </p>
           <button
             onClick={onBack}
-            className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 text-sm font-bold text-white shadow-xl shadow-blue-600/30 transition-all hover:scale-105 hover:shadow-2xl"
+            className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 transition-colors"
           >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-            Kembali
+            Kembali ke Beranda
           </button>
         </div>
       </div>
     );
   }
 
-  // =============================
-  // AVATAR LOGIC
-  // =============================
   const avatarUrl =
     authUser.avatar_url && !photoError
       ? `${AUTHX_BASE}${authUser.avatar_url}`
-      : `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
+      : `https://ui-avatars.com/api/?background=0F172A&color=fff&name=${encodeURIComponent(
           authUser.full_name || 'User'
         )}`;
 
-  const subType = authUser.subscription_type?.toLowerCase();
-
-  // helper: frame style by subscription type
-  const frameClass =
-    subType === 'plus'
-      ? 'from-purple-500 via-pink-500 to-cyan-400'
-      : subType === 'pro'
-      ? 'from-amber-400 via-yellow-500 to-amber-600'
-      : 'from-blue-500 to-cyan-500';
+  const isPro = authUser.subscription_type?.toLowerCase() === 'pro';
+  const isPlus = authUser.subscription_type?.toLowerCase() === 'plus';
+  
+  // Theme color based on sub
+  const accentColor = isPro ? 'text-amber-500' : isPlus ? 'text-purple-500' : 'text-blue-500';
+  const ringColor = isPro ? 'ring-amber-500' : isPlus ? 'ring-purple-500' : 'ring-blue-500';
+  const gradientBg = isPro 
+    ? 'bg-gradient-to-r from-amber-500 to-yellow-500' 
+    : isPlus 
+      ? 'bg-gradient-to-r from-purple-600 to-pink-500' 
+      : 'bg-gradient-to-r from-blue-600 to-cyan-500';
 
   return (
-    <div className="min-h-screen relative pb-10 bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 overflow-x-hidden">
-      {/* Background blobs (now absolute, bukan fixed, supaya aman di mobile) */}
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-[-8rem] right-[-6rem] h-80 w-80 animate-blob rounded-full bg-gradient-to-br from-blue-400/30 to-cyan-400/30 blur-3xl dark:from-blue-500/20 dark:to-cyan-500/20" />
-        <div className="absolute bottom-[-8rem] left-[-6rem] h-80 w-80 animate-blob animation-delay-2000 rounded-full bg-gradient-to-tr from-purple-400/30 to-pink-400/30 blur-3xl dark:from-purple-500/20 dark:to-pink-500/20" />
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-12 transition-colors duration-300">
+      {/* Background Decor */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-400/20 dark:bg-blue-600/10 rounded-full blur-[80px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-400/20 dark:bg-purple-600/10 rounded-full blur-[80px]" />
       </div>
 
-      {/* Top bar */}
-      <div className="animate-slide-down sticky top-0 z-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-md ring-1 ring-black/5 dark:ring-white/10 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto py-3 flex justify-between items-center">
+      {/* Navbar Simple */}
+      <nav className="sticky top-0 z-30 w-full border-b border-white/10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
           <button
             onClick={onBack}
-            className="group flex items-center gap-2 text-gray-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-cyan-400 transition-all font-semibold"
+            className="group flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
           >
-            <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
             Kembali
           </button>
+          <span className="text-sm font-bold text-slate-400 tracking-wider uppercase">Profile</span>
         </div>
-      </div>
+      </nav>
 
-      <div className="relative max-w-4xl mx-auto mt-6 sm:mt-8 px-4 sm:px-6">
-        {/* PROFILE CARD */}
-        <div className="animate-fade-in bg-white/95 dark:bg-slate-900/85 backdrop-blur-xl p-5 sm:p-7 rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10 transition-all hover:shadow-blue-500/20 dark:hover:shadow-cyan-500/20">
-          {/* Header avatar + info */}
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-6 sm:mb-8">
-            {/* Avatar dengan frame baru */}
-            <div className="relative">
-              <div className="relative group">
-                {/* outer glow frame */}
-                <div
-                  className={`absolute inset-[-6px] rounded-3xl bg-gradient-to-r ${frameClass} opacity-60 blur-md group-hover:opacity-90 transition-opacity`}
-                />
-                {/* glass card */}
-                <div className="relative rounded-3xl bg-slate-950/5 dark:bg-white/5 p-1 ring-1 ring-white/30 dark:ring-slate-700 shadow-xl">
-                  <div
-                    className={`rounded-3xl bg-gradient-to-r ${frameClass} p-[2px]`}
-                  >
-                    <div className="rounded-3xl bg-white dark:bg-slate-900 p-2">
-                      <img
-                        src={avatarUrl}
-                        alt="Avatar"
-                        className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover shadow-md transition-transform group-hover:scale-105"
-                        onError={() => setPhotoError(true)}
-                      />
-                    </div>
+      <main className="relative z-10 mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
+        
+        {/* HEADER SECTION: Avatar & Basic Info */}
+        <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-200 dark:border-slate-800 p-6 sm:p-10 animate-fade-in">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            
+            {/* Avatar */}
+            <div className="relative group shrink-0">
+              <div className={`absolute -inset-1 rounded-full ${gradientBg} opacity-75 blur transition duration-500 group-hover:opacity-100`} />
+              <img
+                src={avatarUrl}
+                onError={() => setPhotoError(true)}
+                alt="Profile"
+                className="relative h-32 w-32 rounded-full object-cover ring-4 ring-white dark:ring-slate-900 shadow-2xl"
+              />
+              <div className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-lg text-blue-500 ring-2 ring-white dark:ring-slate-900">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 text-center md:text-left space-y-2">
+              <div className="flex flex-col md:flex-row items-center md:items-start gap-3">
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  {authUser.full_name}
+                  {(isPro || isPlus) && <Sparkles className={`h-6 w-6 ${accentColor}`} />}
+                </h1>
+                
+                {authUser.subscription_status === 'active' && (
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold text-white uppercase tracking-wider shadow-lg ${gradientBg}`}>
+                    {authUser.subscription_type}
+                  </span>
+                )}
+              </div>
+              
+              <p className="text-slate-500 dark:text-slate-400 font-medium flex items-center justify-center md:justify-start gap-2">
+                <Mail className="h-4 w-4" /> {authUser.email}
+              </p>
+
+              <div className="pt-2">
+                <p className="text-xs text-slate-400 uppercase tracking-widest font-semibold mb-1">Public ID</p>
+                <div className="inline-flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 p-1.5 pr-3 ring-1 ring-slate-200 dark:ring-slate-700">
+                  <div className="rounded-lg bg-white dark:bg-slate-900 px-3 py-1.5 font-mono text-sm font-semibold text-slate-700 dark:text-slate-300 min-w-[140px] text-center">
+                    {showPublicId ? authUser.public_id : getMaskedPublicId(authUser.public_id)}
                   </div>
+                  <button 
+                    onClick={() => setShowPublicId(!showPublicId)}
+                    className="p-1.5 text-slate-500 hover:text-blue-500 transition-colors"
+                  >
+                    {showPublicId ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                  <button 
+                    onClick={handleCopyId}
+                    className="p-1.5 text-slate-500 hover:text-blue-500 transition-colors"
+                    title="Copy ID"
+                  >
+                    {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                  </button>
                 </div>
               </div>
-
-              {/* Verified badge */}
-              <div className="absolute -bottom-2 -right-2 flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-green-500 shadow-lg ring-4 ring-white dark:ring-slate-900 z-10">
-                <ShieldCheck className="h-5 w-5 text-white" />
-              </div>
             </div>
-
-            <div className="flex-1 text-center sm:text-left">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white mb-2 flex items-center justify-center sm:justify-start gap-2">
-                {authUser.full_name}
-                <Sparkles className="h-6 w-6 text-cyan-500 animate-pulse" />
-              </h1>
-              <p className="text-gray-600 dark:text-slate-300 flex items-center justify-center sm:justify-start gap-2 mb-3">
-                <Mail className="h-4 w-4" />
-                <span className="break-all">{authUser.email}</span>
-              </p>
-
-              {/* Subscription Badge */}
-              {authUser.subscription_type &&
-                authUser.subscription_status === 'active' && (
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 text-white text-xs sm:text-sm shadow-lg border border-white/10">
-                    <div
-                      className={`flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-r ${frameClass}`}
-                    >
-                      <Crown className="h-3.5 w-3.5 text-white" />
-                    </div>
-                    <span className="uppercase tracking-wide font-semibold">
-                      {authUser.subscription_type}
-                    </span>
-                  </div>
-                )}
-            </div>
-          </div>
-
-          {/* PUBLIC ID CARD */}
-          <div className="animate-fade-in mb-7 p-5 rounded-2xl bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-800 dark:to-slate-700 ring-1 ring-gray-200 dark:ring-slate-600 shadow-inner">
-            <div className="flex items-center gap-2 mb-3">
-              <ShieldCheck className="h-5 w-5 text-blue-600 dark:text-cyan-400" />
-              <p className="text-sm font-bold text-gray-700 dark:text-slate-200">
-                Public ID Astbyte
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:items-center">
-              <code className="flex-1 font-mono text-xs sm:text-sm bg-white dark:bg-slate-900 px-3 sm:px-4 py-2.5 rounded-xl text-gray-800 dark:text-slate-200 font-semibold ring-1 ring-gray-300 dark:ring-slate-600 shadow-sm break-all">
-                {showPublicId
-                  ? authUser.public_id
-                  : getMaskedPublicId(authUser.public_id)}
-              </code>
-
-              <div className="flex items-center gap-2 sm:flex-shrink-0">
-                <button
-                  onClick={togglePublicIdVisibility}
-                  className="group flex items-center justify-center bg-slate-700 hover:bg-slate-800 px-3 py-2 rounded-xl text-white font-semibold shadow-md text-xs sm:text-sm transition-all hover:scale-105"
-                  title={showPublicId ? 'Sembunyikan ID' : 'Tampilkan ID'}
-                >
-                  {showPublicId ? (
-                    <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:scale-110" />
-                  ) : (
-                    <Eye className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:scale-110" />
-                  )}
-                </button>
-
-                <button
-                  onClick={handleCopyId}
-                  className="group flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-3 sm:px-4 py-2 rounded-xl text-white text-xs sm:text-sm font-semibold shadow-lg transition-all hover:scale-105 whitespace-nowrap"
-                  title="Salin Public ID"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="h-4 w-4 sm:h-5 sm:w-5 animate-bounce-in" />
-                      <span className="hidden sm:inline">Disalin!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:scale-110" />
-                      <span className="hidden sm:inline">Salin</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* EDITABLE FIELDS */}
-          <div className="space-y-5">
-            <Field
-              label="Nama Lengkap"
-              icon={<UserIcon className="w-5 h-5" />}
-              value={formData.full_name}
-              editable={isEditing}
-              error={errors.full_name}
-              onChange={(v) => setFormData((f) => ({ ...f, full_name: v }))}
-            />
-
-            <Field
-              label="Email"
-              icon={<Mail className="w-5 h-5" />}
-              value={formData.email}
-              editable={isEditing}
-              error={errors.email}
-              onChange={(v) => setFormData((f) => ({ ...f, email: v }))}
-            />
-
-            <Field
-              label="Nomor HP"
-              icon={<Phone className="w-5 h-5" />}
-              value={formData.phone}
-              editable={isEditing}
-              error={errors.phone}
-              onChange={(v) => setFormData((f) => ({ ...f, phone: v }))}
-            />
           </div>
         </div>
 
-        {/* SUBSCRIPTIONS */}
-        <div className="animate-fade-in mt-6 bg-white/95 dark:bg-slate-900/85 backdrop-blur-xl p-5 sm:p-7 rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
-          <h2 className="text-lg sm:text-xl font-bold mb-5 sm:mb-6 flex items-center gap-3 text-gray-900 dark:text-white">
-            <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg">
-              <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-            </div>
-            Riwayat Langganan
-          </h2>
-
-          {subs.length === 0 ? (
-            <div className="text-center py-10 rounded-2xl bg-gray-50 dark:bg-slate-800/60 ring-1 ring-gray-200 dark:ring-slate-700">
-              <div className="flex h-14 w-14 mx-auto mb-4 items-center justify-center rounded-xl bg-gray-200 dark:bg-slate-700">
-                <CreditCard className="h-7 w-7 text-gray-400 dark:text-slate-500" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* LEFT COL: Personal Info Form */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="rounded-3xl bg-white dark:bg-slate-900 shadow-lg border border-slate-200 dark:border-slate-800 p-6 sm:p-8 animate-slide-in-up">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <UserIcon className="h-5 w-5 text-blue-500" />
+                  Informasi Pribadi
+                </h2>
+                {/* {!isEditing ? (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:bg-blue-500/20 transition-all"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                    Edit Profil
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setIsEditing(false);
+                        setFormData({ // Reset form
+                          full_name: authUser.full_name,
+                          email: authUser.email,
+                          phone: authUser.phone || '',
+                        });
+                        setErrors({});
+                      }}
+                      className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
+                      disabled={saving}
+                    >
+                      Batal
+                    </button>
+                    <button
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed transition-all"
+                    >
+                      {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                      Simpan
+                    </button>
+                  </div>
+                )} */}
               </div>
-              <p className="text-gray-600 dark:text-slate-300 font-medium text-sm sm:text-base">
-                Belum ada subscription.
-              </p>
+
+              <div className="grid gap-5">
+                <Field
+                  label="Nama Lengkap"
+                  icon={<UserIcon className="h-4 w-4" />}
+                  value={formData.full_name}
+                  isEditing={isEditing}
+                  onChange={(v) => setFormData({ ...formData, full_name: v })}
+                  error={errors.full_name}
+                />
+                <Field
+                  label="Alamat Email"
+                  icon={<Mail className="h-4 w-4" />}
+                  value={formData.email}
+                  isEditing={isEditing}
+                  onChange={(v) => setFormData({ ...formData, email: v })}
+                  error={errors.email}
+                  type="email"
+                />
+                <Field
+                  label="Nomor Telepon"
+                  icon={<Phone className="h-4 w-4" />}
+                  value={formData.phone}
+                  isEditing={isEditing}
+                  onChange={(v) => setFormData({ ...formData, phone: v })}
+                  error={errors.phone}
+                  type="tel"
+                />
+              </div>
             </div>
-          ) : (
-            <div className="space-y-4">
-              {subs.map((s, idx) => (
-                <div
-                  key={s.id}
-                  style={{ animationDelay: `${idx * 80}ms` }}
-                  className="animate-slide-in-up group p-4 sm:p-5 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-slate-800 dark:to-slate-700 rounded-2xl ring-1 ring-gray-200 dark:ring-slate-600 shadow-md transition-all hover:shadow-xl hover:ring-blue-500/50 dark:hover:ring-cyan-400/50"
-                >
-                  <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <Crown className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                        <p className="font-bold text-sm sm:text-base uppercase text-gray-900 dark:text-white">
-                          {s.subscribe_type}
+          </div>
+
+          {/* RIGHT COL: Subscriptions */}
+          <div className="lg:col-span-1">
+            <div className="h-full rounded-3xl bg-white dark:bg-slate-900 shadow-lg border border-slate-200 dark:border-slate-800 p-6 sm:p-8 animate-slide-in-up" style={{ animationDelay: '100ms' }}>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-6">
+                <CreditCard className="h-5 w-5 text-purple-500" />
+                Langganan
+              </h2>
+
+              <div className="space-y-4">
+                {subs.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 py-8 px-4 text-center">
+                    <div className="mb-3 rounded-full bg-slate-100 dark:bg-slate-800 p-3">
+                      <CreditCard className="h-6 w-6 text-slate-400" />
+                    </div>
+                    <p className="text-sm font-medium text-slate-500">Belum ada riwayat langganan.</p>
+                  </div>
+                ) : (
+                  subs.map((sub) => (
+                    <div
+                      key={sub.id}
+                      className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 p-4 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 transition-all hover:shadow-md"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center gap-2">
+                          <Crown className="h-4 w-4 text-amber-500" />
+                          <span className="font-bold text-slate-800 dark:text-slate-100 text-sm uppercase">{sub.subscribe_type}</span>
+                        </div>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                          ACTIVE
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                          <Calendar className="h-3 w-3" />
+                          {sub.start_date} - {sub.end_date}
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                          via {sub.payment_method}
                         </p>
                       </div>
-                      <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-300 flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        {s.period} • {s.payment_method}
-                      </p>
                     </div>
-                    <div className="text-left sm:text-right text-xs sm:text-sm">
-                      <p className="font-semibold text-gray-700 dark:text-slate-200">
-                        {s.start_date}
-                      </p>
-                      <p className="text-gray-500 dark:text-slate-400">
-                        s/d {s.end_date}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+
+      {/* TOAST NOTIFICATION */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-xl bg-slate-900/90 px-4 py-3 text-white shadow-2xl backdrop-blur-md animate-bounce-in">
+          {toast.type === 'success' ? (
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500">
+              <Check className="h-3.5 w-3.5 text-white" />
+            </div>
+          ) : (
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-500">
+              <X className="h-3.5 w-3.5 text-white" />
             </div>
           )}
-        </div>
-      </div>
-
-      {/* TOAST */}
-      {toast && (
-        <div className="animate-bounce-in fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-[90vw] px-4 sm:px-6 py-3 bg-gradient-to-r from-gray-900 to-slate-900 text-white rounded-xl shadow-2xl ring-1 ring-white/10 backdrop-blur-xl">
-          <div className="flex items-center gap-2">
-            <Check className="h-5 w-5 text-emerald-400" />
-            <span className="font-semibold text-sm sm:text-base">{toast}</span>
-          </div>
+          <span className="text-sm font-medium">{toast.msg}</span>
         </div>
       )}
 
-      {/* Custom CSS for animations & globals */}
+      {/* CSS Animations */}
       <style>{`
         @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes slide-down {
-          from { opacity: 0; transform: translateY(-16px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slide-in-up {
-          from { opacity: 0; transform: translateY(16px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes scale-in {
-          from { opacity: 0; transform: scale(0.95); }
+          from { opacity: 0; transform: scale(0.98); }
           to { opacity: 1; transform: scale(1); }
         }
+        @keyframes slide-in-up {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
         @keyframes bounce-in {
-          0% { opacity: 0; transform: scale(0.3); }
-          50% { transform: scale(1.05); }
-          70% { transform: scale(0.97); }
-          100% { opacity: 1; transform: scale(1); }
+          0% { opacity: 0; transform: translate(-50%, 20px) scale(0.9); }
+          50% { transform: translate(-50%, -5px) scale(1.02); }
+          100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
         }
-        @keyframes blob {
-          0%,100% { transform: translate(0,0) scale(1); }
-          33% { transform: translate(24px,-32px) scale(1.1); }
-          66% { transform: translate(-20px,18px) scale(0.9); }
-        }
-
-        .animate-fade-in { animation: fade-in 0.45s ease-out; }
-        .animate-slide-down { animation: slide-down 0.4s ease-out; }
-        .animate-slide-in-up { animation: slide-in-up 0.45s ease-out; }
-        .animate-scale-in { animation: scale-in 0.4s ease-out; }
-        .animate-bounce-in { animation: bounce-in 0.45s cubic-bezier(0.68,-0.55,0.265,1.55); }
-        .animate-blob { animation: blob 8s ease-in-out infinite; }
-        .animation-delay-2000 { animation-delay: 2s; }
-
-        /* Hilangin horizontal scroll global (jaga-jaga) */
-        body {
-          overflow-x: hidden;
-        }
+        .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+        .animate-slide-in-up { animation: slide-in-up 0.5s ease-out forwards; }
+        .animate-bounce-in { animation: bounce-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
       `}</style>
     </div>
   );
 }
 
-function Field({
-  label,
-  icon,
-  value,
-  editable,
-  error,
-  onChange,
-}: {
+// ================= COMPONENT: FIELD =================
+
+interface FieldProps {
   label: string;
-  icon: JSX.Element;
   value: string;
-  editable: boolean;
+  icon: JSX.Element;
+  isEditing: boolean;
+  onChange: (val: string) => void;
   error?: string;
-  onChange: (v: string) => void;
-}) {
+  type?: string;
+}
+
+function Field({ label, value, icon, isEditing, onChange, error, type = 'text' }: FieldProps) {
   return (
-    <div className="animate-fade-in group">
-      <label className="flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-700 dark:text-slate-200 mb-1.5">
-        <span className="text-blue-600 dark:text-cyan-400">{icon}</span>
+    <div className="group">
+      <label className="mb-1.5 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        {icon}
         {label}
       </label>
-      {editable ? (
-        <>
+      
+      {isEditing ? (
+        <div className="relative">
           <input
+            type={type}
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className={`w-full px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl border-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white text-sm sm:text-base font-medium outline-none transition-all ${
-              error
-                ? 'border-red-500 ring-4 ring-red-500/20'
-                : 'border-gray-300 dark:border-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 dark:focus:border-cyan-400 dark:focus:ring-cyan-400/20'
-            }`}
+            className={`w-full rounded-xl border bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-900 placeholder-slate-400 outline-none transition-all focus:ring-2 dark:bg-slate-800 dark:text-white 
+              ${error 
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
+                : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 dark:border-slate-700'
+              }`}
           />
-          {error && (
-            <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 font-semibold flex items-center gap-1">
-              <X className="h-3 w-3" />
-              {error}
-            </p>
-          )}
-        </>
+          {error && <p className="mt-1 text-xs font-semibold text-red-500 flex items-center gap-1"><X className="h-3 w-3"/> {error}</p>}
+        </div>
       ) : (
-        <p className="px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-800 dark:text-slate-200 text-sm sm:text-base font-semibold ring-1 ring-gray-200 dark:ring-slate-700 break-all">
-          {value || '-'}
-        </p>
+        <div className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-200 border border-transparent dark:border-slate-700/50">
+          {value || <span className="text-slate-400 italic">Tidak diatur</span>}
+        </div>
       )}
     </div>
   );

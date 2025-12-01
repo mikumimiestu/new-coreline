@@ -22,11 +22,12 @@ import {
   Crown,
   Lock,
   Download,
+  Heart,
+  Globe,
 } from 'lucide-react';
 
-
 /* ================================
- * Language filter config
+ * Config & Types
  * ================================ */
 type Lang = {
   id: 'python' | 'php' | 'javascript' | 'typescript' | 'ruby' | 'go' | 'mysql' | 'postgresql';
@@ -35,77 +36,29 @@ type Lang = {
   comingSoon?: boolean;
 };
 
-
 const languageData: readonly Lang[] = [
-  {
-    id: 'python',
-    name: 'Python',
-    iconUrl:
-      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-  },
-  {
-    id: 'php',
-    name: 'PHP',
-    iconUrl:
-      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg',
-  },
-  {
-    id: 'javascript',
-    name: 'JavaScript',
-    iconUrl:
-      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
-  },
-  {
-    id: 'typescript',
-    name: 'TypeScript',
-    iconUrl:
-      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
-  },
-  {
-    id: 'ruby',
-    name: 'Ruby',
-    iconUrl:
-      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg',
-  },
-  {
-    id: 'go',
-    name: 'Go',
-    iconUrl:
-      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg',
-    comingSoon: true,
-  },
-  {
-    id: 'mysql',
-    name: 'MySQL',
-    iconUrl:
-      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
-    comingSoon: true,
-  },
-  {
-    id: 'postgresql',
-    name: 'PostgreSQL',
-    iconUrl:
-      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
-    comingSoon: true,
-  },
+  { id: 'python', name: 'Python', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
+  { id: 'php', name: 'PHP', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg' },
+  { id: 'javascript', name: 'JavaScript', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg' },
+  { id: 'typescript', name: 'TypeScript', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
+  { id: 'ruby', name: 'Ruby', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg' },
+  { id: 'go', name: 'Go', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg', comingSoon: true },
+  { id: 'mysql', name: 'MySQL', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg', comingSoon: true },
+  { id: 'postgresql', name: 'PostgreSQL', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg', comingSoon: true },
 ] as const;
-
 
 type Level = 'beginner' | 'intermediate' | 'advanced';
 type SortKey = 'order' | 'title' | 'level';
 type Plan = 'free' | 'pro' | 'plus';
 
-
+/* ================================
+ * Main Component
+ * ================================ */
 export default function Dashboard() {
   const { user, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-
-  useEffect(() => {
-    document.title = 'Dashboard | New Coreline by AstByte';
-  }, []);
-
-
+  // --- States ---
   const [materials, setMaterials] = useState<LearningMaterial[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(() =>
     typeof window !== 'undefined' ? localStorage.getItem('cl_lang') : null
@@ -114,20 +67,69 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState<string | null>(null);
-
-
-  // --- SEARCH ---
   const [searchText, setSearchText] = useState('');
   const [query, setQuery] = useState('');
+  const [sortKey, setSortKey] = useState<SortKey>('order');
+  
+  const drawerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    const t = setTimeout(() => setQuery(searchText), 200);
+    document.title = 'Dashboard | New Coreline by AstByte';
+  }, []);
+
+  // Debounce search
+  useEffect(() => {
+    const t = setTimeout(() => setQuery(searchText), 300);
     return () => clearTimeout(t);
   }, [searchText]);
 
+  // Persist lang
+  useEffect(() => {
+    if (selectedLanguage) localStorage.setItem('cl_lang', selectedLanguage);
+    else localStorage.removeItem('cl_lang');
+  }, [selectedLanguage]);
 
-  const [sortKey, setSortKey] = useState<SortKey>('order');
-  const drawerRef = useRef<HTMLDivElement>(null);
+  // --- Logic Helpers ---
+  const resolveUserType = (): 'student' | 'umum' | 'pro' | 'game' => {
+    const raw = (user as any)?.user_type;
+    return ['student', 'umum', 'pro', 'game'].includes(raw) ? raw : 'student';
+  };
 
+  const getPlanFromUser = (u: any): Plan => {
+    const type = (u?.subscription_type ?? 'free').toString().toLowerCase().trim();
+    if (type === 'plus') return 'plus';
+    if (type === 'pro') return 'pro';
+    return 'free';
+  };
+
+  const userType = resolveUserType();
+  const plan = getPlanFromUser(user);
+  const nextTier = plan === 'free' ? 'Pro' : plan === 'pro' ? 'Plus' : null;
+  const nextHref = '/pricing';
+
+  const userTitle = useMemo(() => {
+    switch (userType) {
+      case 'student': return 'Code Path Student';
+      case 'umum': return 'Jalur Pembelajaran Umum';
+      case 'pro': return 'Akselerasi Profesional';
+      case 'game': return 'Pengembangan Game';
+      default: return 'Dashboard Pembelajaran';
+    }
+  }, [userType]);
+
+  const isModuleLocked = (moduleOrder: number) => {
+    if (moduleOrder <= 2) return false;
+    return plan === 'free';
+  };
+
+  const levelPill = (level: Level) => {
+    const map = {
+      beginner: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20',
+      intermediate: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20',
+      advanced: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20',
+    };
+    return map[level] || 'bg-slate-50 text-slate-700 border-slate-200';
+  };
 
   const levelLabel: Record<Level, string> = {
     beginner: 'Pemula',
@@ -135,739 +137,418 @@ export default function Dashboard() {
     advanced: 'Lanjutan',
   };
 
-
-  const levelPill = (level: Level) => {
-    switch (level) {
-      case 'beginner':
-        return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-200 dark:border-green-900/40';
-      case 'intermediate':
-        return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-200 dark:border-yellow-900/40';
-      case 'advanced':
-        return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-200 dark:border-red-900/40';
-      default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
-    }
-  };
-
-
-  // helper: user_type (dari AuthX optional, default: student)
-  const resolveUserType = (): 'student' | 'umum' | 'pro' | 'game' => {
-    const raw = (user as any)?.user_type;
-    if (raw === 'umum' || raw === 'pro' || raw === 'game' || raw === 'student') {
-      return raw;
-    }
-    return 'student';
-  };
-
-
-  const userTitle = useMemo(() => {
-    const ut = resolveUserType();
-    switch (ut) {
-      case 'student':
-        return 'Code Path Student';
-      case 'umum':
-        return 'Jalur Pembelajaran Umum';
-      case 'pro':
-        return 'Akselerasi Profesional';
-      case 'game':
-        return 'Pengembangan Game';
-      default:
-        return 'Dashboard Pembelajaran';
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
-
-
-  // --- PLAN from subscription (source of truth) ---
-  const getPlanFromUser = (u: any): Plan => {
-    const type = (u?.subscription_type ?? 'free')
-      .toString()
-      .toLowerCase()
-      .trim() as string;
-
-
-    if (type === 'plus') return 'plus';
-    if (type === 'pro') return 'pro';
-    return 'free';
-  };
-
-
-  const plan: Plan = getPlanFromUser(user);
-
-
-  const nextTier = plan === 'free' ? 'Pro' : plan === 'pro' ? 'Plus' : null;
-  const nextHref =
-    plan === 'free'
-      ? '/pricing'
-      : plan === 'pro'
-      ? '/pricing'
-      : undefined;
-
-
-  // --- Helper: Check if module is locked ---
-  const isModuleLocked = (moduleOrder: number): boolean => {
-    // Modul 1 & 2 gratis untuk semua user
-    if (moduleOrder <= 2) return false;
-    
-    // Modul 3+ butuh Pro atau Plus
-    return plan === 'free';
-  };
-
-
-  // --- Helper: Download PDF (Plus only) ---
+  // --- PDF Logic ---
   const downloadModulePDF = async (material: LearningMaterial) => {
     if (plan !== 'plus') {
-      alert('Fitur download PDF hanya tersedia untuk paket Plus!');
+      alert('Fitur ini khusus member Plus!');
       return;
     }
-
     setDownloadingPdf(material.id);
 
     try {
-      // Dynamically import jsPDF and html2canvas
       const { default: jsPDF } = await import('jspdf');
       const html2canvas = (await import('html2canvas')).default;
-
-      // Navigate to material page to capture content
-      navigate(`/materials/${encodeURIComponent(material.id)}`);
       
-      // Wait for page to render
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Navigate to material to ensure content is loaded (in background)
+      // Note: This is a tricky hack. Ideally, fetch content directly.
+      // Assuming 'navigate' works for this flow based on existing code logic.
+      navigate(`/materials/${encodeURIComponent(material.id)}`);
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Find the main content element (adjust selector based on your MaterialPage structure)
-      const element = document.querySelector('.material-content') || document.body;
+      const element = document.querySelector('.material-content');
+      if (!element) throw new Error('Content not found');
 
-      // Generate canvas from HTML
-      const canvas = await html2canvas(element as HTMLElement, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        allowTaint: true,
+      const clone = element.cloneNode(true) as HTMLElement;
+      // Reset styles for clean PDF
+      Object.assign(clone.style, {
+        background: '#fff', padding: '40px', maxWidth: '800px',
+        position: 'absolute', left: '-9999px', top: '0', color: '#000'
       });
+
+      // Fix code blocks for printing
+      clone.querySelectorAll('.pdf-code-block').forEach((el) => {
+        Object.assign((el as HTMLElement).style, { background: '#f8f9fa', border: '1px solid #dee2e6' });
+      });
+      clone.querySelectorAll('*').forEach((el) => {
+         if(el instanceof HTMLElement) el.style.color = 'black'; 
+      });
+
+      document.body.appendChild(clone);
+      const canvas = await html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+      document.body.removeChild(clone);
 
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
-      
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
+      const imgWidth = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
       let heightLeft = imgHeight;
       let position = 0;
 
-      // Add first page
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      heightLeft -= 297;
 
-      // Add additional pages if content is longer
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        heightLeft -= 297;
       }
 
-      // Save PDF
-      const filename = `${material.title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
-      pdf.save(filename);
-
-      // Go back to dashboard
-      navigate('/dashboard');
+      pdf.save(`${material.title.replace(/\s+/g, '_')}.pdf`);
+      navigate('/dashboard'); // Return to dashboard
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Gagal membuat PDF. Silakan coba lagi.');
+      console.error(error);
+      alert('Gagal membuat PDF.');
+      navigate('/dashboard');
     } finally {
       setDownloadingPdf(null);
     }
   };
 
-
-  // --- load materials ---
+  // --- Data Loading ---
   useEffect(() => {
     if (!user) return;
     setLoading(true);
 
-
-    const userType = resolveUserType();
-
-
-    // Gabung semua materials dari kedua sumber
-    const allMaterials: LearningMaterial[] = [
-      ...STUDENT_MATERIALS,
-      ...OTHER_MATERIALS,
-    ];
-
-
+    const allMaterials: LearningMaterial[] = [...STUDENT_MATERIALS, ...OTHER_MATERIALS];
     let list = allMaterials.filter((m) => m.user_type === userType);
-
 
     if (selectedLanguage) {
       list = list.filter((m) => m.language === selectedLanguage);
     }
 
-
     const q = query.trim().toLowerCase();
     if (q) {
-      list = list.filter(
-        (m) =>
-          m.title.toLowerCase().includes(q) ||
-          m.description.toLowerCase().includes(q)
-      );
+      list = list.filter((m) => m.title.toLowerCase().includes(q) || m.description.toLowerCase().includes(q));
     }
-
 
     list.sort((a, b) => {
       if (sortKey === 'order') return a.order - b.order;
       if (sortKey === 'title') return a.title.localeCompare(b.title);
-      if (sortKey === 'level')
-        return levelLabel[a.level as Level].localeCompare(
-          levelLabel[b.level as Level]
-        );
+      if (sortKey === 'level') return levelLabel[a.level as Level].localeCompare(levelLabel[b.level as Level]);
       return 0;
     });
 
-
     setMaterials(list);
-    const timer = setTimeout(() => setLoading(false), 150);
+    const timer = setTimeout(() => setLoading(false), 200);
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, selectedLanguage, query, sortKey]);
 
-
-  // persist selected language
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (selectedLanguage) localStorage.setItem('cl_lang', selectedLanguage);
-      else localStorage.removeItem('cl_lang');
-    }
-  }, [selectedLanguage]);
-
-
-  // Kalau lagi cek token ke authx
+  // --- Auth Checks ---
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="text-center animate-pulse">
-          <Loader2 className="mx-auto h-10 w-10 animate-spin text-blue-600 dark:text-cyan-400" />
-          <p className="mt-3 text-sm text-gray-600 dark:text-slate-300">
-            Memverifikasi sesi Astbyte kamu...
-          </p>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-blue-600 dark:text-cyan-400" />
+        <p className="text-sm font-medium text-slate-500 animate-pulse">Memuat data...</p>
       </div>
     );
   }
 
-
-  // Kalau belum login sama sekali
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 px-4">
-        <div className="max-w-md w-full bg-white/90 dark:bg-slate-900/80 rounded-2xl shadow-xl ring-1 ring-black/5 dark:ring-white/10 p-6 sm:p-8 text-center space-y-4">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-            Kamu belum login
-          </h1>
-          <p className="text-sm text-gray-600 dark:text-slate-300">
-            Silakan login dulu dengan Astbyte Account untuk mengakses Dashboard Coreline.
-          </p>
-          <Link
-            to="/login"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700 focus-visible:ring-4 focus-visible:ring-blue-500/30 transition-transform transform hover:-translate-y-0.5"
-          >
-            Masuk ke Coreline
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 px-4">
+        <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-8 text-center">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Sesi Berakhir</h1>
+          <p className="text-slate-600 dark:text-slate-400 mb-6">Silakan login kembali untuk mengakses materi.</p>
+          <Link to="/login" className="block w-full rounded-xl bg-blue-600 py-3 text-sm font-bold text-white hover:bg-blue-700 transition">
+            Masuk Sekarang
           </Link>
         </div>
       </div>
     );
   }
 
-
   if (showProfile) return <ProfilePage onBack={() => setShowProfile(false)} />;
 
-
   /* ================================
-   * Components
+   * Sub-Components (Internal)
    * ================================ */
-
-
-  const LanguageSidebar = ({ mode = 'desktop' }: { mode?: 'desktop' | 'mobile' }) => {
-    const isDesktop = mode === 'desktop';
-
-
-    return (
-      <aside
-        className={[
-          'p-5 sm:p-6',
-          'flex flex-col',
-          isDesktop
-            ? 'bg-white/80 dark:bg-slate-900/70 shadow-xl lg:shadow-none lg:rounded-xl ring-1 ring-black/5 dark:ring-white/10 lg:sticky lg:top-[82px] rounded-2xl'
-            : 'bg-transparent shadow-none ring-0 rounded-none',
-        ].join(' ')}
-      >
-        {isDesktop && (
-          <h3 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-            <Languages className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
-            Jalur Bahasa
-          </h3>
-        )}
-
-
-        {!isDesktop && (
-          <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
-            <Languages className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
-            Pilih Bahasa
-          </h3>
-        )}
-
-
-        <div className="flex flex-col gap-3">
-          {languageData.map((lang) => {
-            const isActive = selectedLanguage === lang.id;
-            const disabled = !!lang.comingSoon;
-
-
-            return (
-              <button
-                key={lang.id}
-                onClick={() => {
-                  if (!disabled) setSelectedLanguage(isActive ? null : lang.id);
-                  setIsSidebarOpen(false);
-                }}
-                disabled={disabled}
-                className={[
-                  'group flex items-center gap-4 p-3.5 rounded-xl transition-all text-left w-full ring-1 ring-black/5 dark:ring-white/10',
-                  'transform duration-200',
-                  isActive
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25 scale-[1.02]'
-                    : 'bg-gray-50/80 dark:bg-slate-800/70 text-gray-700 dark:text-slate-200 hover:bg-blue-50/80 hover:text-blue-700 dark:hover:bg-slate-800 hover:-translate-y-0.5',
-                  disabled ? 'opacity-60 cursor-not-allowed hover:translate-y-0' : 'cursor-pointer',
-                ].join(' ')}
-                title={disabled ? `${lang.name} — Coming Soon` : lang.name}
-              >
-                <div className="h-8 w-8 rounded-lg bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center">
-                  <img
-                    src={lang.iconUrl}
-                    alt=""
-                    className="h-6 w-6 object-contain"
-                  />
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="font-semibold text-sm sm:text-base">
-                    {lang.name}
-                  </span>
-                  {lang.comingSoon && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
-                      <Lock className="w-3 h-3" />
-                      Coming&nbsp;Soon
-                    </span>
-                  )}
-                </div>
-              </button>
-            );
-          })}
-
-
-          {selectedLanguage && (
-            <button
-              onClick={() => setSelectedLanguage(null)}
-              className="flex items-center justify-center gap-2 mt-2 py-2 text-xs sm:text-sm text-gray-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 transition"
-            >
-              <X className="w-4 h-4" />
-              Reset Filter
-            </button>
-          )}
-        </div>
-      </aside>
-    );
-  };
-
-
-  const UpgradeBanner = () => {
-    if (plan === 'plus') {
-      return (
-        <div className="mt-4 rounded-xl ring-1 ring-emerald-200/60 dark:ring-emerald-800/40 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 dark:from-emerald-900/10 dark:via-slate-900 dark:to-emerald-900/10 p-4 sm:p-5 transition-all duration-300 hover:shadow-md">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            <p className="text-sm sm:text-base font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
-              <PartyPopper className="w-5 h-5" />
-              Selamat! Kamu di paket{' '}
-              <span className="underline decoration-emerald-400 decoration-2">
-                Plus
-              </span>
-              {' '}— Download PDF tersedia!
-            </p>
-          </div>
-        </div>
-      );
-    }
-
-
-    return (
-      <div className="mt-4 rounded-xl ring-1 ring-black/5 dark:ring-white/10 bg-gradient-to-r from-amber-50 via-white to-amber-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 p-4 sm:p-5 transition-all duration-300 hover:shadow-md">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-          <p className="text-sm sm:text-base font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-2">
-            <Crown className="w-5 h-5" />
-            Upgrade ke{' '}
-            <span className="underline decoration-amber-400 decoration-2">
-              {nextTier}
-            </span>{' '}
-            untuk akses penuh semua path & modul premium.
-          </p>
-          {nextTier && nextHref && (
-            <Link
-              to={nextHref}
-              className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 transition-transform transform hover:-translate-y-0.5"
-            >
-              Ke {nextTier}
-            </Link>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-
-  const Toolbar = () => (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between flex-wrap">
-        <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            placeholder="Cari materi (judul/deskripsi)"
-            autoComplete="off"
-            spellCheck={false}
-            className="w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 pl-10 pr-4 py-2.5 text-sm text-gray-800 dark:text-white outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 transition-all"
-          />
-        </div>
-
-
-        <div className="flex items-center gap-2 justify-end">
-          <div className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2">
-            <Filter className="h-4 w-4 text-gray-400" />
-            <select
-              value={sortKey}
-              onChange={(e) => setSortKey(e.target.value as SortKey)}
-              className="bg-transparent text-xs sm:text-sm text-gray-800 dark:text-white outline-none"
-            >
-              <option value="order">Urutan Modul</option>
-              <option value="title">Judul A-Z</option>
-              <option value="level">Level</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-
-      <UpgradeBanner />
+  const Sidebar = ({ mobile }: { mobile?: boolean }) => (
+    <div className={`flex flex-col gap-3 ${mobile ? '' : 'sticky top-24'}`}>
+      {!mobile && (
+        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+          <Languages className="w-5 h-5 text-blue-600" />
+          Filter Bahasa
+        </h3>
+      )}
+      {languageData.map((lang) => {
+        const active = selectedLanguage === lang.id;
+        return (
+          <button
+            key={lang.id}
+            disabled={!!lang.comingSoon}
+            onClick={() => {
+              if (!lang.comingSoon) {
+                setSelectedLanguage(active ? null : lang.id);
+                if (mobile) setIsSidebarOpen(false);
+              }
+            }}
+            className={`
+              group relative flex items-center gap-3 p-3 rounded-xl border text-left transition-all
+              ${active 
+                ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/30' 
+                : 'bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}
+              ${lang.comingSoon ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:-translate-y-0.5'}
+            `}
+          >
+            <img src={lang.iconUrl} alt={lang.name} className="h-6 w-6 object-contain" />
+            <span className="font-semibold text-sm flex-1">{lang.name}</span>
+            {lang.comingSoon && <Lock className="w-3 h-3 text-slate-400" />}
+          </button>
+        );
+      })}
+      {selectedLanguage && (
+        <button 
+          onClick={() => setSelectedLanguage(null)} 
+          className="mt-2 text-xs font-semibold text-red-500 hover:text-red-600 flex items-center justify-center gap-1"
+        >
+          <X className="w-3 h-3" /> Reset Filter
+        </button>
+      )}
     </div>
   );
 
-
-  const userType = resolveUserType();
-
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 flex flex-col">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/70 backdrop-blur ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center justify-between gap-3">
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0B0F19] font-sans">
+      
+      {/* NAVBAR */}
+      <nav className="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-3">
-              <a href="/" className="block h-8 w-8">
-                <img
-                  src="/icon.png"
-                  alt="coreline logo"
-                  className="h-8 w-8 object-contain"
-                />
-              </a>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
-                  <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
-                    Coreline
-                  </h1>
-                  <a href="https://www.astbyte.com">
-                    <span className="text-[9px] uppercase tracking-wide font-semibold text-blue-500 bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 rounded-full">
-                      by AstByte
-                    </span>
-                  </a>
+              <Link to="/" className="flex items-center gap-2 group">
+                <div className="h-9 w-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-blue-500/30 shadow-lg group-hover:scale-105 transition-transform">
+                  C
                 </div>
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-300">
-                  Hai, {user.full_name || user.email || 'User'} 👋
-                </p>
-              </div>
+                <div className="hidden sm:block">
+                  <h1 className="text-lg font-bold text-slate-900 dark:text-white leading-none">Coreline</h1>
+                  <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Learning</span>
+                </div>
+              </Link>
             </div>
 
-
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="hidden md:flex flex-col items-end mr-2">
+                <span className="text-sm font-bold text-slate-800 dark:text-white">{user.full_name}</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
+                  {plan === 'free' ? 'Starter Plan' : `${plan} Plan`}
+                </span>
+              </div>
+              
               {userType === 'student' && (
                 <button
                   onClick={() => setIsSidebarOpen(true)}
-                  className="p-2 lg:hidden text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition"
-                  title="Filter Bahasa"
+                  className="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
                 >
                   <Menu className="w-5 h-5" />
                 </button>
               )}
 
-
               <button
                 onClick={() => setShowProfile(true)}
-                className="flex items-center gap-2 px-3 py-2 text-gray-800 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition text-sm"
+                className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
                 title="Profil"
               >
-                <UserIcon className="w-4 h-4" />
-                <span className="hidden md:inline">Profil</span>
+                <UserIcon className="w-5 h-5" />
               </button>
+
               <button
                 onClick={logout}
-                className="flex items-center gap-2 px-3 py-2 bg-red-500 text-white hover:bg-red-600 rounded-lg transition text-sm font-semibold"
+                className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                 title="Keluar"
               >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden md:inline">Keluar</span>
+                <LogOut className="w-5 h-5" />
               </button>
             </div>
           </div>
         </div>
       </nav>
 
-
-      {/* Mobile Sidebar Drawer */}
-      {isSidebarOpen && userType === 'student' && (
+      {/* MOBILE DRAWER */}
+      {isSidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
-            onClick={() => setIsSidebarOpen(false)}
-          />
-          <div
-            ref={drawerRef}
-            className="absolute left-0 top-0 h-full w-full max-w-sm bg-white dark:bg-slate-900 shadow-2xl flex flex-col transform transition-transform duration-300 ease-out"
-          >
-            <div className="flex justify-between items-center px-5 pt-5 pb-3 border-b border-gray-200/70 dark:border-slate-800">
-              <h2 className="text-lg font-bold text-gray-800 dark:text-white">
-                Filter Bahasa
-              </h2>
-              <button
-                onClick={() => setIsSidebarOpen(false)}
-                className="p-1.5 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg"
-                aria-label="Tutup Sidebar"
-              >
-                <X className="w-5 h-5" />
-              </button>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setIsSidebarOpen(false)} />
+          <div className="absolute left-0 top-0 h-full w-4/5 max-w-xs bg-white dark:bg-slate-900 shadow-2xl p-6 overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Menu</h2>
+              <button onClick={() => setIsSidebarOpen(false)}><X className="w-6 h-6 text-slate-500" /></button>
             </div>
-
-
-            {/* konten scrollable */}
-            <div className="flex-1 overflow-y-auto px-5 pb-6">
-              <LanguageSidebar mode="mobile" />
-            </div>
+            <Sidebar mobile />
           </div>
         </div>
       )}
 
-
-      {/* Main */}
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10 flex-1">
-        <div className="mb-6 sm:mb-8 rounded-2xl bg-white/80 dark:bg-slate-900/70 ring-1 ring-black/5 dark:ring-white/10 p-6 sm:p-8 shadow-sm transition-all duration-300">
-          <div className="flex flex-col gap-2">
+      {/* MAIN CONTENT */}
+      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {/* HEADER & TOOLBAR */}
+        <div className="mb-8 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-blue-800 dark:text-cyan-300 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">
                 {userTitle}
-              </h2>
-              <p className="text-gray-600 dark:text-slate-300 text-sm sm:text-base mt-1">
-                Akses materi dan lanjutkan perjalanan coding kamu hari ini. 🚀
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400 text-lg">
+                Selamat datang kembali, mari lanjutkan progressmu.
               </p>
             </div>
-            <Toolbar />
+            
+            {/* Upgrade Banner Small */}
+            {plan !== 'plus' && (
+              <div className="hidden md:flex items-center gap-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 px-4 py-2 rounded-xl border border-amber-200 dark:border-amber-800/50">
+                <Crown className="w-5 h-5 text-amber-600 dark:text-amber-500" />
+                <div className="text-sm">
+                  <span className="font-bold text-amber-800 dark:text-amber-400">Upgrade Plan?</span>
+                  <Link to={nextHref} className="ml-2 text-amber-600 dark:text-amber-500 underline hover:text-amber-700">Lihat Harga</Link>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Search & Sort */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                placeholder="Cari materi pembelajaran..."
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition-shadow shadow-sm"
+              />
+            </div>
+            <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 shadow-sm">
+              <Filter className="w-4 h-4 text-slate-400" />
+              <select
+                value={sortKey}
+                onChange={(e) => setSortKey(e.target.value as SortKey)}
+                className="bg-transparent outline-none text-sm font-medium text-slate-700 dark:text-slate-200 cursor-pointer"
+              >
+                <option value="order">Urutan Modul</option>
+                <option value="title">Judul (A-Z)</option>
+                <option value="level">Tingkat Kesulitan</option>
+              </select>
+            </div>
           </div>
         </div>
 
-
-        <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-start">
-          {/* Sidebar Desktop */}
-          <div className="hidden lg:col-span-3 lg:block">
-            <LanguageSidebar mode="desktop" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* SIDEBAR (Desktop) */}
+          <div className="hidden lg:block lg:col-span-3">
+             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm sticky top-24">
+               <Sidebar />
+             </div>
           </div>
 
-
-          {/* Content */}
-          <div
-            className={
-              userType === 'student' ? 'lg:col-span-9 space-y-4' : 'lg:col-span-12 space-y-4'
-            }
-          >
-            <div className="flex flex-wrap items-center gap-3 mb-3 sm:mb-4">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-cyan-400" />
-                <h3 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-                  Materi Tersedia
-                </h3>
-              </div>
-              {selectedLanguage && (
-                <span className="text-xs sm:text-sm font-semibold px-3 py-1 bg-blue-100 text-blue-700 dark:bg-cyan-900/40 dark:text-cyan-200 rounded-full">
-                  Filter: {selectedLanguage.toUpperCase()}
-                </span>
-              )}
-              <span className="text-xs sm:text-sm text-gray-500 dark:text-slate-400">
-                {materials.length} modul siap dipelajari
+          {/* MATERIAL GRID */}
+          <div className={userType === 'student' ? 'lg:col-span-9' : 'lg:col-span-12'}>
+            
+            {/* Filter Status Badge */}
+            <div className="flex items-center gap-2 mb-6">
+              <BookOpen className="w-5 h-5 text-slate-400" />
+              <h2 className="text-lg font-bold text-slate-800 dark:text-white">Daftar Modul</h2>
+              <span className="ml-auto text-sm font-semibold text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+                {materials.length} Materi
               </span>
             </div>
 
-
             {loading ? (
-              <div className="text-center py-12 sm:py-16 rounded-2xl bg-white/70 dark:bg-slate-900/60 ring-1 ring-black/5 dark:ring-white/10">
-                <Loader2 className="inline-block animate-spin h-10 w-10 text-blue-600 dark:text-cyan-400" />
-                <p className="mt-4 text-gray-600 dark:text-slate-300 text-base sm:text-lg font-medium">
-                  Memuat materi pembelajaran...
-                </p>
-              </div>
+               <div className="py-20 text-center">
+                 <Loader2 className="w-10 h-10 animate-spin text-blue-500 mx-auto mb-4" />
+                 <p className="text-slate-500">Menyiapkan materi...</p>
+               </div>
             ) : materials.length === 0 ? (
-              <div className="rounded-2xl bg-white/70 dark:bg-slate-900/60 p-10 sm:p-12 text-center ring-2 ring-dashed ring-gray-200 dark:ring-slate-700">
-                <BookOpen className="w-14 h-14 sm:w-16 sm:h-16 text-gray-400 dark:text-slate-500 mx-auto mb-4" />
-                <p className="text-base sm:text-lg text-gray-700 dark:text-slate-300 font-medium">
-                  {userType === 'student' && !selectedLanguage
-                    ? 'Pilih bahasa pemrograman dari filter untuk memulai.'
-                    : 'Belum ada materi yang sesuai dengan profil Anda atau filter yang dipilih.'}
-                </p>
-              </div>
+               <div className="bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-12 text-center">
+                 <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                   <Search className="w-8 h-8 text-slate-400" />
+                 </div>
+                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Tidak ditemukan</h3>
+                 <p className="text-slate-500">Coba ubah filter bahasa atau kata kunci pencarian.</p>
+               </div>
             ) : (
-              <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {materials.map((m, index) => {
+              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                {materials.map((m, idx) => {
                   const locked = isModuleLocked(m.order);
                   const isDownloading = downloadingPdf === m.id;
 
-                  return locked ? (
-                    // Locked Module Card
-                    <div
+                  return (
+                    <div 
                       key={m.id}
-                      className="group relative block rounded-2xl bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 shadow-md ring-1 ring-black/5 dark:ring-white/10"
-                      style={{
-                        animation: `fadeInUp 0.35s ease-out both`,
-                        animationDelay: `${index * 40}ms`,
-                      }}
+                      className={`group relative flex flex-col rounded-2xl bg-white dark:bg-slate-900 border transition-all duration-300
+                        ${locked 
+                          ? 'border-slate-200 dark:border-slate-800 overflow-hidden' 
+                          : 'border-slate-200 dark:border-slate-800 hover:border-blue-500/50 hover:shadow-xl hover:-translate-y-1'
+                        }
+                      `}
+                      style={{ animation: `fadeInUp 0.4s ease-out forwards`, animationDelay: `${idx * 50}ms`, opacity: 0 }}
                     >
-                      {/* Blurred Content */}
-                      <div className="blur-[3px] select-none pointer-events-none">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="mb-2 flex items-center gap-3">
-                              <div className="h-8 w-8 rounded-xl bg-blue-50 dark:bg-cyan-900/20 flex items-center justify-center">
-                                <Award className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-cyan-400" />
-                              </div>
-                              <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-snug">
-                                {m.order}. {m.title}
-                              </h4>
-                            </div>
-                            <p className="ml-0 sm:ml-1 text-sm sm:text-[15px] text-gray-600 dark:text-slate-300 mb-3 line-clamp-3">
-                              {m.description}
-                            </p>
-                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                              <span
-                                className={`text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold border ${levelPill(
-                                  m.level as Level
-                                )}`}
-                              >
-                                {levelLabel[m.level as Level]}
-                              </span>
-                              {m.language && (
-                                <span className="text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-slate-200 border border-gray-300 dark:border-slate-700">
-                                  {m.language.toUpperCase()}
-                                </span>
-                              )}
-                            </div>
+                      {/* CARD CONTENT */}
+                      <div className={`p-6 flex-1 ${locked ? 'blur-[2px] opacity-60 pointer-events-none' : ''}`}>
+                        <div className="flex justify-between items-start mb-4">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${locked ? 'bg-slate-100 dark:bg-slate-800' : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'}`}>
+                             <Award className="w-5 h-5" />
                           </div>
-                          <ChevronRight className="mt-1 h-5 w-5 text-blue-400 dark:text-cyan-300 flex-shrink-0" />
+                          <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${levelPill(m.level as Level)}`}>
+                            {levelLabel[m.level as Level]}
+                          </span>
                         </div>
+                        
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 line-clamp-2 min-h-[3.5rem]">
+                          {m.order}. {m.title}
+                        </h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 mb-4">
+                          {m.description}
+                        </p>
+
+                        {m.language && (
+                           <div className="flex items-center gap-2">
+                             <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                             <span className="text-xs font-semibold text-slate-500 uppercase">{m.language}</span>
+                           </div>
+                        )}
                       </div>
 
-                      {/* Lock Overlay */}
-                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-slate-900/60 via-slate-800/50 to-slate-900/60 dark:from-slate-950/80 dark:via-slate-900/70 dark:to-slate-950/80 flex items-center justify-center">
-                        <div className="text-center p-4 z-10">
-                          <Lock className="w-10 h-10 sm:w-12 sm:h-12 text-amber-400 dark:text-amber-300 mx-auto mb-2 drop-shadow-lg" />
-                          <p className="text-sm font-bold text-white mb-1">
-                            Modul Premium
-                          </p>
-                          <p className="text-xs text-gray-200 dark:text-gray-300 mb-3">
-                            Upgrade ke Pro/Plus untuk akses
-                          </p>
-                          <Link
-                            to="/pricing"
-                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-500 text-white text-sm font-semibold rounded-lg hover:bg-amber-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                          >
-                            <Crown className="w-4 h-4" />
-                            Upgrade Sekarang
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    // Unlocked Module Card
-                    <div
-                      key={m.id}
-                      className="group relative block rounded-2xl bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 shadow-md ring-1 ring-black/5 dark:ring-white/10 transition-all duration-300 hover:shadow-xl hover:ring-blue-500/30 dark:hover:ring-cyan-400/30"
-                      style={{
-                        animation: `fadeInUp 0.35s ease-out both`,
-                        animationDelay: `${index * 40}ms`,
-                      }}
-                    >
-                      <Link
-                        to={`/materials/${encodeURIComponent(m.id)}`}
-                        className="block"
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="mb-2 flex items-center gap-3">
-                              <div className="h-8 w-8 rounded-xl bg-blue-50 dark:bg-cyan-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <Award className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-cyan-400" />
-                              </div>
-                              <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-snug">
-                                {m.order}. {m.title}
-                              </h4>
-                            </div>
-                            <p className="ml-0 sm:ml-1 text-sm sm:text-[15px] text-gray-600 dark:text-slate-300 mb-3 line-clamp-3">
-                              {m.description}
-                            </p>
-                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                              <span
-                                className={`text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold border ${levelPill(
-                                  m.level as Level
-                                )}`}
+                      {/* CARD FOOTER / ACTION */}
+                      {!locked && (
+                         <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 rounded-b-2xl mt-auto">
+                            <div className="flex gap-2">
+                              <Link 
+                                to={`/materials/${encodeURIComponent(m.id)}`}
+                                className="flex-1 inline-flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors"
                               >
-                                {levelLabel[m.level as Level]}
-                              </span>
-                              {m.language && (
-                                <span className="text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-slate-200 border border-gray-300 dark:border-slate-700">
-                                  {m.language.toUpperCase()}
-                                </span>
+                                Mulai Belajar <ChevronRight className="w-4 h-4" />
+                              </Link>
+                              
+                              {plan === 'plus' && (
+                                <button
+                                  onClick={() => downloadModulePDF(m)}
+                                  disabled={isDownloading}
+                                  className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-blue-600 rounded-xl hover:border-blue-300 transition-colors"
+                                  title="Download PDF"
+                                >
+                                  {isDownloading ? <Loader2 className="w-5 h-5 animate-spin"/> : <Download className="w-5 h-5"/>}
+                                </button>
                               )}
                             </div>
-                          </div>
-                          <ChevronRight className="mt-1 h-5 w-5 text-blue-400 dark:text-cyan-300 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
-                        </div>
-                      </Link>
+                         </div>
+                      )}
 
-                      {/* Download PDF Button (Plus Only) */}
-                      {plan === 'plus' && (
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            downloadModulePDF(m);
-                          }}
-                          disabled={isDownloading}
-                          className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-emerald-500 text-white text-xs font-semibold rounded-lg hover:bg-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Download sebagai PDF (Plus Feature)"
-                        >
-                          {isDownloading ? (
-                            <>
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                              Generating PDF...
-                            </>
-                          ) : (
-                            <>
-                              <Download className="w-3.5 h-3.5" />
-                              Download PDF
-                            </>
-                          )}
-                        </button>
+                      {/* LOCK OVERLAY */}
+                      {locked && (
+                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/40 dark:bg-black/40 backdrop-blur-[1px]">
+                           <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-2xl text-center border border-slate-200 dark:border-slate-700 max-w-[80%]">
+                             <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                               <Lock className="w-6 h-6" />
+                             </div>
+                             <h4 className="font-bold text-slate-900 dark:text-white mb-1">Premium</h4>
+                             <p className="text-xs text-slate-500 mb-4">Upgrade untuk membuka.</p>
+                             <Link to="/pricing" className="inline-block px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg transition-colors">
+                               Upgrade
+                             </Link>
+                           </div>
+                        </div>
                       )}
                     </div>
                   );
@@ -878,22 +559,25 @@ export default function Dashboard() {
         </div>
       </main>
 
+      {/* FOOTER & COPYRIGHT */}
+      <footer className="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 py-8">
+        <div className="container mx-auto px-4 sm:px-6 text-center">
+          <p className="text-xs text-slate-400">
+            &copy; {new Date().getFullYear()} Astral Byte Technology (AstByte). All rights reserved.
+          </p>
+           <div className="flex items-center justify-center gap-4 text-slate-400 text-sm mb-2">
+            <p className='hover:text-blue-500 transition-colors'>v.2.0</p>
+          </div>
+        </div>
+      </footer>
 
-      {/* Simple keyframe for fadeInUp */}
+      {/* Custom Styles */}
       <style>{`
         @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translate3d(0, 10px, 0);
-          }
-          to {
-            opacity: 1;
-            transform: translate3d(0, 0, 0);
-          }
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        .animate-fade-in {
-          animation: fadeInUp 0.25s ease-out;
-        }
+        .animate-fade-in { animation: fadeInUp 0.3s ease-out forwards; }
       `}</style>
     </div>
   );

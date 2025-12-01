@@ -6,6 +6,7 @@ import PricingPage from "./components/Pricing";
 import MaterialPage from "./pages/MaterialPage";
 import ManualQRISPage from "./components/Pay";
 import PromoPage from "./components/Promo";
+import ComingSoonPage from "./components/ComingSoon";
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -37,6 +38,9 @@ function AppContent() {
 
       {/* Halaman promo */}
       <Route path="/promo" element={<PromoPage />} />
+
+      {/* Halaman segera hadir */}
+      <Route path="/coming-soon" element={<ComingSoonPage />} />
 
       {/* Optional placeholder lama (boleh hapus kalau nggak dipakai) */}
       <Route path="/checkout/pro" element={<div className="p-8">Checkout Pro (placeholder)</div>} />
