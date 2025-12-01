@@ -1,6 +1,6 @@
 // src/pages/Dashboard.tsx
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import type { LearningMaterial } from '../types/learning';
 import { MOCK_MATERIALS as STUDENT_MATERIALS } from '../data/mockData';
@@ -21,7 +21,9 @@ import {
   PartyPopper,
   Crown,
   Lock,
+  Download,
 } from 'lucide-react';
+
 
 /* ================================
  * Language filter config
@@ -32,6 +34,7 @@ type Lang = {
   iconUrl: string;
   comingSoon?: boolean;
 };
+
 
 const languageData: readonly Lang[] = [
   {
@@ -87,16 +90,21 @@ const languageData: readonly Lang[] = [
   },
 ] as const;
 
+
 type Level = 'beginner' | 'intermediate' | 'advanced';
 type SortKey = 'order' | 'title' | 'level';
 type Plan = 'free' | 'pro' | 'plus';
 
+
 export default function Dashboard() {
   const { user, logout, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     document.title = 'Dashboard | New Coreline by AstByte';
   }, []);
+
 
   const [materials, setMaterials] = useState<LearningMaterial[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(() =>
@@ -105,6 +113,8 @@ export default function Dashboard() {
   const [showProfile, setShowProfile] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState<string | null>(null);
+
 
   // --- SEARCH ---
   const [searchText, setSearchText] = useState('');
@@ -114,14 +124,17 @@ export default function Dashboard() {
     return () => clearTimeout(t);
   }, [searchText]);
 
+
   const [sortKey, setSortKey] = useState<SortKey>('order');
   const drawerRef = useRef<HTMLDivElement>(null);
+
 
   const levelLabel: Record<Level, string> = {
     beginner: 'Pemula',
     intermediate: 'Menengah',
     advanced: 'Lanjutan',
   };
+
 
   const levelPill = (level: Level) => {
     switch (level) {
@@ -136,6 +149,7 @@ export default function Dashboard() {
     }
   };
 
+
   // helper: user_type (dari AuthX optional, default: student)
   const resolveUserType = (): 'student' | 'umum' | 'pro' | 'game' => {
     const raw = (user as any)?.user_type;
@@ -144,6 +158,7 @@ export default function Dashboard() {
     }
     return 'student';
   };
+
 
   const userTitle = useMemo(() => {
     const ut = resolveUserType();
@@ -162,6 +177,7 @@ export default function Dashboard() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+
   // --- PLAN from subscription (source of truth) ---
   const getPlanFromUser = (u: any): Plan => {
     const type = (u?.subscription_type ?? 'free')
@@ -169,12 +185,15 @@ export default function Dashboard() {
       .toLowerCase()
       .trim() as string;
 
+
     if (type === 'plus') return 'plus';
     if (type === 'pro') return 'pro';
     return 'free';
   };
 
+
   const plan: Plan = getPlanFromUser(user);
+
 
   const nextTier = plan === 'free' ? 'Pro' : plan === 'pro' ? 'Plus' : null;
   const nextHref =
@@ -184,12 +203,92 @@ export default function Dashboard() {
       ? '/pricing'
       : undefined;
 
+
+  // --- Helper: Check if module is locked ---
+  const isModuleLocked = (moduleOrder: number): boolean => {
+    // Modul 1 & 2 gratis untuk semua user
+    if (moduleOrder <= 2) return false;
+    
+    // Modul 3+ butuh Pro atau Plus
+    return plan === 'free';
+  };
+
+
+  // --- Helper: Download PDF (Plus only) ---
+  const downloadModulePDF = async (material: LearningMaterial) => {
+    if (plan !== 'plus') {
+      alert('Fitur download PDF hanya tersedia untuk paket Plus!');
+      return;
+    }
+
+    setDownloadingPdf(material.id);
+
+    try {
+      // Dynamically import jsPDF and html2canvas
+      const { default: jsPDF } = await import('jspdf');
+      const html2canvas = (await import('html2canvas')).default;
+
+      // Navigate to material page to capture content
+      navigate(`/materials/${encodeURIComponent(material.id)}`);
+      
+      // Wait for page to render
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Find the main content element (adjust selector based on your MaterialPage structure)
+      const element = document.querySelector('.material-content') || document.body;
+
+      // Generate canvas from HTML
+      const canvas = await html2canvas(element as HTMLElement, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        allowTaint: true,
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // Add first page
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Add additional pages if content is longer
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Save PDF
+      const filename = `${material.title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+      pdf.save(filename);
+
+      // Go back to dashboard
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Gagal membuat PDF. Silakan coba lagi.');
+    } finally {
+      setDownloadingPdf(null);
+    }
+  };
+
+
   // --- load materials ---
   useEffect(() => {
     if (!user) return;
     setLoading(true);
 
+
     const userType = resolveUserType();
+
 
     // Gabung semua materials dari kedua sumber
     const allMaterials: LearningMaterial[] = [
@@ -197,11 +296,14 @@ export default function Dashboard() {
       ...OTHER_MATERIALS,
     ];
 
+
     let list = allMaterials.filter((m) => m.user_type === userType);
+
 
     if (selectedLanguage) {
       list = list.filter((m) => m.language === selectedLanguage);
     }
+
 
     const q = query.trim().toLowerCase();
     if (q) {
@@ -211,6 +313,7 @@ export default function Dashboard() {
           m.description.toLowerCase().includes(q)
       );
     }
+
 
     list.sort((a, b) => {
       if (sortKey === 'order') return a.order - b.order;
@@ -222,11 +325,13 @@ export default function Dashboard() {
       return 0;
     });
 
+
     setMaterials(list);
     const timer = setTimeout(() => setLoading(false), 150);
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, selectedLanguage, query, sortKey]);
+
 
   // persist selected language
   useEffect(() => {
@@ -235,6 +340,7 @@ export default function Dashboard() {
       else localStorage.removeItem('cl_lang');
     }
   }, [selectedLanguage]);
+
 
   // Kalau lagi cek token ke authx
   if (authLoading) {
@@ -249,6 +355,7 @@ export default function Dashboard() {
       </div>
     );
   }
+
 
   // Kalau belum login sama sekali
   if (!user) {
@@ -272,14 +379,18 @@ export default function Dashboard() {
     );
   }
 
+
   if (showProfile) return <ProfilePage onBack={() => setShowProfile(false)} />;
+
 
   /* ================================
    * Components
    * ================================ */
 
+
   const LanguageSidebar = ({ mode = 'desktop' }: { mode?: 'desktop' | 'mobile' }) => {
     const isDesktop = mode === 'desktop';
+
 
     return (
       <aside
@@ -298,6 +409,7 @@ export default function Dashboard() {
           </h3>
         )}
 
+
         {!isDesktop && (
           <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
             <Languages className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
@@ -305,10 +417,12 @@ export default function Dashboard() {
           </h3>
         )}
 
+
         <div className="flex flex-col gap-3">
           {languageData.map((lang) => {
             const isActive = selectedLanguage === lang.id;
             const disabled = !!lang.comingSoon;
+
 
             return (
               <button
@@ -350,6 +464,7 @@ export default function Dashboard() {
             );
           })}
 
+
           {selectedLanguage && (
             <button
               onClick={() => setSelectedLanguage(null)}
@@ -364,6 +479,7 @@ export default function Dashboard() {
     );
   };
 
+
   const UpgradeBanner = () => {
     if (plan === 'plus') {
       return (
@@ -375,11 +491,13 @@ export default function Dashboard() {
               <span className="underline decoration-emerald-400 decoration-2">
                 Plus
               </span>
+              {' '}— Download PDF tersedia!
             </p>
           </div>
         </div>
       );
     }
+
 
     return (
       <div className="mt-4 rounded-xl ring-1 ring-black/5 dark:ring-white/10 bg-gradient-to-r from-amber-50 via-white to-amber-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800 p-4 sm:p-5 transition-all duration-300 hover:shadow-md">
@@ -405,6 +523,7 @@ export default function Dashboard() {
     );
   };
 
+
   const Toolbar = () => (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between flex-wrap">
@@ -419,6 +538,7 @@ export default function Dashboard() {
             className="w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 pl-10 pr-4 py-2.5 text-sm text-gray-800 dark:text-white outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 transition-all"
           />
         </div>
+
 
         <div className="flex items-center gap-2 justify-end">
           <div className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 px-3 py-2">
@@ -436,11 +556,14 @@ export default function Dashboard() {
         </div>
       </div>
 
+
       <UpgradeBanner />
     </div>
   );
 
+
   const userType = resolveUserType();
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 flex flex-col">
@@ -473,6 +596,7 @@ export default function Dashboard() {
               </div>
             </div>
 
+
             <div className="flex items-center gap-2">
               {userType === 'student' && (
                 <button
@@ -483,6 +607,7 @@ export default function Dashboard() {
                   <Menu className="w-5 h-5" />
                 </button>
               )}
+
 
               <button
                 onClick={() => setShowProfile(true)}
@@ -504,6 +629,7 @@ export default function Dashboard() {
           </div>
         </div>
       </nav>
+
 
       {/* Mobile Sidebar Drawer */}
       {isSidebarOpen && userType === 'student' && (
@@ -529,6 +655,7 @@ export default function Dashboard() {
               </button>
             </div>
 
+
             {/* konten scrollable */}
             <div className="flex-1 overflow-y-auto px-5 pb-6">
               <LanguageSidebar mode="mobile" />
@@ -536,6 +663,7 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
 
       {/* Main */}
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10 flex-1">
@@ -553,11 +681,13 @@ export default function Dashboard() {
           </div>
         </div>
 
+
         <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-start">
           {/* Sidebar Desktop */}
           <div className="hidden lg:col-span-3 lg:block">
             <LanguageSidebar mode="desktop" />
           </div>
+
 
           {/* Content */}
           <div
@@ -582,6 +712,7 @@ export default function Dashboard() {
               </span>
             </div>
 
+
             {loading ? (
               <div className="text-center py-12 sm:py-16 rounded-2xl bg-white/70 dark:bg-slate-900/60 ring-1 ring-black/5 dark:ring-white/10">
                 <Loader2 className="inline-block animate-spin h-10 w-10 text-blue-600 dark:text-cyan-400" />
@@ -600,53 +731,153 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {materials.map((m, index) => (
-                  <Link
-                    key={m.id}
-                    to={`/materials/${encodeURIComponent(m.id)}`}
-                    className="group block rounded-2xl bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 shadow-md ring-1 ring-black/5 dark:ring-white/10 transition-all duration-300 hover:shadow-xl hover:ring-blue-500/30 dark:hover:ring-cyan-400/30 transform hover:-translate-y-1"
-                    style={{
-                      animation: `fadeInUp 0.35s ease-out both`,
-                      animationDelay: `${index * 40}ms`,
-                    }}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="mb-2 flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-xl bg-blue-50 dark:bg-cyan-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <Award className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-cyan-400" />
+                {materials.map((m, index) => {
+                  const locked = isModuleLocked(m.order);
+                  const isDownloading = downloadingPdf === m.id;
+
+                  return locked ? (
+                    // Locked Module Card
+                    <div
+                      key={m.id}
+                      className="group relative block rounded-2xl bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 shadow-md ring-1 ring-black/5 dark:ring-white/10"
+                      style={{
+                        animation: `fadeInUp 0.35s ease-out both`,
+                        animationDelay: `${index * 40}ms`,
+                      }}
+                    >
+                      {/* Blurred Content */}
+                      <div className="blur-[3px] select-none pointer-events-none">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="mb-2 flex items-center gap-3">
+                              <div className="h-8 w-8 rounded-xl bg-blue-50 dark:bg-cyan-900/20 flex items-center justify-center">
+                                <Award className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-cyan-400" />
+                              </div>
+                              <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-snug">
+                                {m.order}. {m.title}
+                              </h4>
+                            </div>
+                            <p className="ml-0 sm:ml-1 text-sm sm:text-[15px] text-gray-600 dark:text-slate-300 mb-3 line-clamp-3">
+                              {m.description}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                              <span
+                                className={`text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold border ${levelPill(
+                                  m.level as Level
+                                )}`}
+                              >
+                                {levelLabel[m.level as Level]}
+                              </span>
+                              {m.language && (
+                                <span className="text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-slate-200 border border-gray-300 dark:border-slate-700">
+                                  {m.language.toUpperCase()}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-snug">
-                            {m.order}. {m.title}
-                          </h4>
-                        </div>
-                        <p className="ml-0 sm:ml-1 text-sm sm:text-[15px] text-gray-600 dark:text-slate-300 mb-3 line-clamp-3">
-                          {m.description}
-                        </p>
-                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                          <span
-                            className={`text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold border ${levelPill(
-                              m.level as Level
-                            )}`}
-                          >
-                            {levelLabel[m.level as Level]}
-                          </span>
-                          {m.language && (
-                            <span className="text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-slate-200 border border-gray-300 dark:border-slate-700">
-                              {m.language.toUpperCase()}
-                            </span>
-                          )}
+                          <ChevronRight className="mt-1 h-5 w-5 text-blue-400 dark:text-cyan-300 flex-shrink-0" />
                         </div>
                       </div>
-                      <ChevronRight className="mt-1 h-5 w-5 text-blue-400 dark:text-cyan-300 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+
+                      {/* Lock Overlay */}
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-slate-900/60 via-slate-800/50 to-slate-900/60 dark:from-slate-950/80 dark:via-slate-900/70 dark:to-slate-950/80 flex items-center justify-center">
+                        <div className="text-center p-4 z-10">
+                          <Lock className="w-10 h-10 sm:w-12 sm:h-12 text-amber-400 dark:text-amber-300 mx-auto mb-2 drop-shadow-lg" />
+                          <p className="text-sm font-bold text-white mb-1">
+                            Modul Premium
+                          </p>
+                          <p className="text-xs text-gray-200 dark:text-gray-300 mb-3">
+                            Upgrade ke Pro/Plus untuk akses
+                          </p>
+                          <Link
+                            to="/pricing"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-500 text-white text-sm font-semibold rounded-lg hover:bg-amber-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                          >
+                            <Crown className="w-4 h-4" />
+                            Upgrade Sekarang
+                          </Link>
+                        </div>
+                      </div>
                     </div>
-                  </Link>
-                ))}
+                  ) : (
+                    // Unlocked Module Card
+                    <div
+                      key={m.id}
+                      className="group relative block rounded-2xl bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 shadow-md ring-1 ring-black/5 dark:ring-white/10 transition-all duration-300 hover:shadow-xl hover:ring-blue-500/30 dark:hover:ring-cyan-400/30"
+                      style={{
+                        animation: `fadeInUp 0.35s ease-out both`,
+                        animationDelay: `${index * 40}ms`,
+                      }}
+                    >
+                      <Link
+                        to={`/materials/${encodeURIComponent(m.id)}`}
+                        className="block"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="mb-2 flex items-center gap-3">
+                              <div className="h-8 w-8 rounded-xl bg-blue-50 dark:bg-cyan-900/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <Award className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-cyan-400" />
+                              </div>
+                              <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-snug">
+                                {m.order}. {m.title}
+                              </h4>
+                            </div>
+                            <p className="ml-0 sm:ml-1 text-sm sm:text-[15px] text-gray-600 dark:text-slate-300 mb-3 line-clamp-3">
+                              {m.description}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                              <span
+                                className={`text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold border ${levelPill(
+                                  m.level as Level
+                                )}`}
+                              >
+                                {levelLabel[m.level as Level]}
+                              </span>
+                              {m.language && (
+                                <span className="text-[11px] sm:text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-slate-200 border border-gray-300 dark:border-slate-700">
+                                  {m.language.toUpperCase()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <ChevronRight className="mt-1 h-5 w-5 text-blue-400 dark:text-cyan-300 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </Link>
+
+                      {/* Download PDF Button (Plus Only) */}
+                      {plan === 'plus' && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            downloadModulePDF(m);
+                          }}
+                          disabled={isDownloading}
+                          className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-emerald-500 text-white text-xs font-semibold rounded-lg hover:bg-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Download sebagai PDF (Plus Feature)"
+                        >
+                          {isDownloading ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              Generating PDF...
+                            </>
+                          ) : (
+                            <>
+                              <Download className="w-3.5 h-3.5" />
+                              Download PDF
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
         </div>
       </main>
+
 
       {/* Simple keyframe for fadeInUp */}
       <style>{`
