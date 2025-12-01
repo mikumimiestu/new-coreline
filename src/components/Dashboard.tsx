@@ -2,7 +2,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LearningMaterial, MOCK_MATERIALS } from '../data/mockData';
+import type { LearningMaterial } from '../types/learning';
+import { MOCK_MATERIALS as STUDENT_MATERIALS } from '../data/mockData';
+import { MOCK_MATERIALS as OTHER_MATERIALS } from '../data/otherData';
 import ProfilePage from './ProfilePage';
 import {
   LogOut,
@@ -25,7 +27,7 @@ import {
  * Language filter config
  * ================================ */
 type Lang = {
-  id: 'python' | 'php' | 'javascript' | 'typescript' | 'ruby';
+  id: 'python' | 'php' | 'javascript' | 'typescript' | 'ruby' | 'go' | 'mysql' | 'postgresql';
   name: string;
   iconUrl: string;
   comingSoon?: boolean;
@@ -55,13 +57,32 @@ const languageData: readonly Lang[] = [
     name: 'TypeScript',
     iconUrl:
       'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
-    comingSoon: true,
   },
   {
     id: 'ruby',
     name: 'Ruby',
     iconUrl:
       'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg',
+  },
+  {
+    id: 'go',
+    name: 'Go',
+    iconUrl:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg',
+    comingSoon: true,
+  },
+  {
+    id: 'mysql',
+    name: 'MySQL',
+    iconUrl:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
+    comingSoon: true,
+  },
+  {
+    id: 'postgresql',
+    name: 'PostgreSQL',
+    iconUrl:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
     comingSoon: true,
   },
 ] as const;
@@ -138,6 +159,7 @@ export default function Dashboard() {
       default:
         return 'Dashboard Pembelajaran';
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // --- PLAN from subscription (source of truth) ---
@@ -169,9 +191,17 @@ export default function Dashboard() {
 
     const userType = resolveUserType();
 
-    let list = MOCK_MATERIALS.filter((m) => m.user_type === userType);
+    // Gabung semua materials dari kedua sumber
+    const allMaterials: LearningMaterial[] = [
+      ...STUDENT_MATERIALS,
+      ...OTHER_MATERIALS,
+    ];
 
-    if (selectedLanguage) list = list.filter((m) => m.language === selectedLanguage);
+    let list = allMaterials.filter((m) => m.user_type === userType);
+
+    if (selectedLanguage) {
+      list = list.filter((m) => m.language === selectedLanguage);
+    }
 
     const q = query.trim().toLowerCase();
     if (q) {
@@ -186,13 +216,16 @@ export default function Dashboard() {
       if (sortKey === 'order') return a.order - b.order;
       if (sortKey === 'title') return a.title.localeCompare(b.title);
       if (sortKey === 'level')
-        return levelLabel[a.level as Level].localeCompare(levelLabel[b.level as Level]);
+        return levelLabel[a.level as Level].localeCompare(
+          levelLabel[b.level as Level]
+        );
       return 0;
     });
 
     setMaterials(list);
     const timer = setTimeout(() => setLoading(false), 150);
     return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, selectedLanguage, query, sortKey]);
 
   // persist selected language
@@ -416,13 +449,13 @@ export default function Dashboard() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-                <a href="/" className="block h-8 w-8">
-                  <img
-                    src="/icon.png"
-                    alt="coreline logo"
-                    className="h-8 w-8 object-contain"
-                  />
-                </a>
+              <a href="/" className="block h-8 w-8">
+                <img
+                  src="/icon.png"
+                  alt="coreline logo"
+                  className="h-8 w-8 object-contain"
+                />
+              </a>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
                   <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
@@ -615,7 +648,7 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* Simple keyframe for fadeInUp (inline, supaya ga perlu edit Tailwind config) */}
+      {/* Simple keyframe for fadeInUp */}
       <style>{`
         @keyframes fadeInUp {
           from {

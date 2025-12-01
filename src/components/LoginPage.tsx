@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   Lock,
   AlertCircle,
@@ -8,10 +8,13 @@ import {
   Clock,
   ArrowRight,
   Sparkles,
+  Shield,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const AUTHX_BASE = 'https://authx.astbyte.com';
+const RECAPTCHA_SITE_KEY = '6LcHoB0sAAAAAGwuOnnHNhKOHBfdai_JbmB0118Z';
 
 export default function LoginPage() {
   const [mode, setMode] = useState<'email' | 'publicId'>('email');
@@ -21,15 +24,30 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
   const { login } = useAuth();
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const waHref =
     'https://api.whatsapp.com/send/?phone=6285183209494&text=Halo+AstByte%2C+saya+ingin+mendapatkan+informasi+tentang+Coreline.&type=phone_number&app_absent=0';
 
+  const onRecaptchaChange = (token: string | null) => {
+    setRecaptchaToken(token);
+    if (error && error.includes('reCAPTCHA')) {
+      setError('');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validate reCAPTCHA
+    if (!recaptchaToken) {
+      setError('Mohon centang "I\'m not a robot" terlebih dahulu.');
+      return;
+    }
 
     try {
       let url = '';
@@ -58,6 +76,9 @@ export default function LoginPage() {
 
       setLoading(true);
 
+      // Add reCAPTCHA token to request body
+      body.recaptcha_token = recaptchaToken;
+
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -80,12 +101,18 @@ export default function LoginPage() {
             : 'Login dengan Public ID gagal (mungkin endpoint belum tersedia di authx).';
 
         setError(backendMessage || fallback);
+        
+        // Reset reCAPTCHA on error
+        recaptchaRef.current?.reset();
+        setRecaptchaToken(null);
         return;
       }
 
       const token = data?.data?.token;
       if (!token) {
         setError('Token tidak ditemukan dari server authx.');
+        recaptchaRef.current?.reset();
+        setRecaptchaToken(null);
         return;
       }
 
@@ -94,6 +121,8 @@ export default function LoginPage() {
       const ok = await login(token);
       if (!ok) {
         setError('Login berhasil di Astbyte, tapi gagal di aplikasi.');
+        recaptchaRef.current?.reset();
+        setRecaptchaToken(null);
         return;
       }
 
@@ -104,6 +133,9 @@ export default function LoginPage() {
     } catch (err) {
       console.error(err);
       setError('Terjadi kesalahan. Silakan coba lagi.');
+      // Reset reCAPTCHA on error
+      recaptchaRef.current?.reset();
+      setRecaptchaToken(null);
     } finally {
       setLoading(false);
     }
@@ -293,6 +325,16 @@ export default function LoginPage() {
                     </div>
                   )}
 
+                  {/* reCAPTCHA v2 Checkbox */}
+                  <div className="flex justify-center">
+                    <ReCAPTCHA
+                      ref={recaptchaRef}
+                      sitekey={RECAPTCHA_SITE_KEY}
+                      onChange={onRecaptchaChange}
+                      theme="light"
+                    />
+                  </div>
+
                   {error && (
                     <div
                       className="animate-shake flex items-start gap-3 rounded-xl border-2 border-red-200 bg-red-50/90 p-4 text-red-700 shadow-lg dark:border-red-900/40 dark:bg-red-900/30 dark:text-red-200"
@@ -305,7 +347,7 @@ export default function LoginPage() {
 
                   <button
                     type="submit"
-                    disabled={loading || isSuccess}
+                    disabled={loading || isSuccess || !recaptchaToken}
                     className="group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 px-4 py-3.5 text-base font-bold text-white shadow-xl shadow-blue-600/30 outline-none transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-600/40 focus-visible:ring-4 focus-visible:ring-blue-500/40 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100 dark:from-cyan-600 dark:to-blue-600 dark:shadow-cyan-600/30 dark:hover:shadow-cyan-600/40"
                   >
                     <span className="absolute inset-0 h-full w-full bg-gradient-to-r from-cyan-600 to-blue-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -328,6 +370,12 @@ export default function LoginPage() {
                       )}
                     </span>
                   </button>
+
+                  {/* reCAPTCHA Badge Info */}
+                  <div className="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-slate-400">
+                    <Shield className="h-3.5 w-3.5" />
+                    <span>Protected by Google reCAPTCHA</span>
+                  </div>
 
                   <p className="text-center text-xs text-gray-500 dark:text-slate-400">
                     Belum punya Astbyte Account?{' '}
@@ -368,9 +416,8 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Right: Enhanced Info card with animations */}
+            {/* Right: Enhanced Info card - SAME AS BEFORE */}
             <div className="animate-slide-in-right group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-cyan-600 to-blue-700 p-6 text-white shadow-2xl ring-1 ring-black/5 transition-all duration-500 hover:shadow-blue-500/40 dark:from-cyan-700 dark:via-blue-700 dark:to-cyan-800 dark:hover:shadow-cyan-500/40 md:p-8">
-              {/* Animated gradient overlay */}
               <div className="pointer-events-none absolute inset-0 opacity-30">
                 <div className="absolute top-0 right-0 h-64 w-64 animate-pulse rounded-full bg-gradient-to-br from-white/20 to-transparent blur-3xl" />
                 <div className="absolute bottom-0 left-0 h-64 w-64 animate-pulse rounded-full bg-gradient-to-tr from-white/20 to-transparent blur-3xl animation-delay-2000" />
@@ -480,7 +527,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Custom CSS for animations */}
+      {/* Custom CSS for animations - SAME AS BEFORE */}
       <style>{`
         @keyframes fade-in-down {
           from {

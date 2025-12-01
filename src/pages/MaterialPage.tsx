@@ -1,14 +1,21 @@
 import { useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { MOCK_MATERIALS } from '../data/mockData';
+import type { LearningMaterial } from '../types/learning';
+import { MOCK_MATERIALS as STUDENT_MATERIALS } from '../data/mockData';
+import { MOCK_MATERIALS as OTHER_MATERIALS } from '../data/otherData';
 import { ArrowLeft, BookOpen } from 'lucide-react';
 import MaterialContent from '../components/MaterialContent';
+
+const ALL_MATERIALS: LearningMaterial[] = [
+  ...STUDENT_MATERIALS,
+  ...OTHER_MATERIALS,
+];
 
 export default function MaterialPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const material = MOCK_MATERIALS.find((m) => m.id === id);
+  const material = ALL_MATERIALS.find((m) => m.id === id);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -34,7 +41,10 @@ export default function MaterialPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
       <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/70 backdrop-blur ring-1 ring-black/5 dark:ring-white/10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-cyan-300 hover:underline">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-cyan-300 hover:underline"
+          >
             <ArrowLeft className="w-4 h-4" /> Kembali
           </Link>
           <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200">
