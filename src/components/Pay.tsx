@@ -37,6 +37,7 @@ const VOUCHERS: Record<string, { type: 'percent' | 'fixed'; value: number; note?
   ASTBYTEJAYA25: { type: 'percent', value: 15, note: 'Diskon 15%' },
   HARUSCORELINE: { type: 'fixed', value: 70000, note: 'Potongan Rp70.000' },
   MABA2025: { type: 'fixed', value: 50000, note: 'Promo Mahasiswa Baru' },
+  DESCERIA: { type: 'percent', value: 20, note: 'Diskon Akhir Tahun 20%' },
 };
 
 /* =========================================
@@ -232,19 +233,19 @@ export default function ManualQRISPage() {
   const isBalanceSufficient = user ? user.balance >= total : false;
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-slate-100 font-sans selection:bg-sky-500/30">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-200 dark:selection:bg-blue-900/50 transition-colors duration-300">
       
-      {/* Background Ambience */}
+      {/* Background Ambience (Dual Mode) */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-[20%] -left-[10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px]" />
-        <div className="absolute top-[20%] -right-[10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px]" />
+        <div className="absolute -top-[20%] -left-[10%] w-[600px] h-[600px] bg-blue-200/40 dark:bg-blue-600/10 rounded-full blur-[100px] transition-colors duration-500" />
+        <div className="absolute top-[20%] -right-[10%] w-[500px] h-[500px] bg-purple-200/40 dark:bg-purple-600/10 rounded-full blur-[100px] transition-colors duration-500" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-10">
         
         {/* HEADER */}
         <header className="mb-10">
-          <a href="/pricing" className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors text-sm font-medium">
+          <a href="/pricing" className="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 mb-6 transition-colors text-sm font-medium">
             <ArrowLeft className="w-4 h-4" /> Kembali ke Pilihan Paket
           </a>
           
@@ -254,23 +255,23 @@ export default function ManualQRISPage() {
                 <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
                   <Wallet className="w-5 h-5 text-white" />
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                  AstByte Pay
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                  AxiPay
                 </h1>
               </div>
-              <p className="text-slate-400 max-w-lg">
+              <p className="text-slate-600 dark:text-slate-400 max-w-lg">
                 Gunakan saldo akun AstByte Anda untuk berlangganan layanan Coreline secara instan tanpa biaya admin.
               </p>
             </div>
 
             {/* Saldo Badge (Desktop) */}
             {user && (
-              <div className="hidden md:flex items-center gap-4 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-sm">
+              <div className="hidden md:flex items-center gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 backdrop-blur-sm">
                 <div className="text-right">
-                  <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Saldo Tersedia</p>
-                  <p className="text-xl font-bold text-white font-mono">{rupiah(user.balance)}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Saldo Tersedia</p>
+                  <p className="text-xl font-bold text-slate-900 dark:text-white font-mono">{rupiah(user.balance)}</p>
                 </div>
-                <div className={`h-10 w-10 rounded-full flex items-center justify-center ${isBalanceSufficient ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                <div className={`h-10 w-10 rounded-full flex items-center justify-center border ${isBalanceSufficient ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-red-50 text-red-600 border-red-100 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'}`}>
                   {isBalanceSufficient ? <Check className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
                 </div>
               </div>
@@ -284,56 +285,56 @@ export default function ManualQRISPage() {
           <div className="lg:col-span-7 space-y-6">
             
             {/* Step 1: Identification */}
-            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 sm:p-8 backdrop-blur-md relative overflow-hidden group">
+            <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm backdrop-blur-md relative overflow-hidden group">
               <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
               
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 font-bold border border-slate-700">1</div>
-                  <h2 className="text-lg font-bold text-white">Identifikasi Akun</h2>
+                  <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700">1</div>
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Identifikasi Akun</h2>
                 </div>
-                {user && <BadgeCheck className="w-5 h-5 text-emerald-400" />}
+                {user && <BadgeCheck className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />}
               </div>
 
               {!user ? (
                 <form onSubmit={handleCheckPublicId} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-400 mb-2">Masukkan Public ID</label>
+                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Masukkan Public ID</label>
                     <div className="relative">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
                       <input
                         type="text"
                         value={publicId}
                         onChange={(e) => setPublicId(e.target.value)}
                         placeholder="Contoh: 3e02d5cb-xxxx-xxxx..."
-                        className="w-full bg-slate-950 border border-slate-700 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all outline-none font-mono text-sm"
+                        className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl py-3.5 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all outline-none font-mono text-sm shadow-inner"
                       />
                     </div>
-                    <p className="mt-2 text-xs text-slate-500">Public ID dapat dilihat pada menu Account Center di dashboard utama.</p>
+                    <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">Public ID dapat dilihat pada menu Account Center di dashboard utama.</p>
                   </div>
                   
                   <button
                     type="submit"
                     disabled={loadingCheck}
-                    className="w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-700 hover:border-slate-600"
+                    className="w-full bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg border border-transparent dark:border-slate-700"
                   >
                     {loadingCheck ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Cek Ketersediaan Akun'}
                   </button>
                 </form>
               ) : (
-                <div className="bg-slate-950/50 border border-slate-800 rounded-2xl p-4 flex items-center justify-between group-hover:border-blue-500/30 transition-colors">
+                <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex items-center justify-between group-hover:border-blue-300 dark:group-hover:border-blue-700 transition-colors">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center text-sm font-bold">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center text-sm font-bold text-white">
                       {user.full_name.charAt(0)}
                     </div>
                     <div>
-                      <p className="font-bold text-white">{user.full_name}</p>
-                      <p className="text-xs text-slate-400 font-mono">{user.email}</p>
+                      <p className="font-bold text-slate-900 dark:text-white">{user.full_name}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">{user.email}</p>
                     </div>
                   </div>
                   <button 
                     onClick={() => { setUser(null); setToken(null); }}
-                    className="text-xs text-red-400 hover:text-red-300 font-medium underline"
+                    className="text-xs text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 font-medium underline"
                   >
                     Ganti Akun
                   </button>
@@ -342,71 +343,71 @@ export default function ManualQRISPage() {
             </div>
 
             {/* Step 2: Payment Details */}
-            <div className={`bg-slate-900/50 border border-slate-800 rounded-3xl p-6 sm:p-8 backdrop-blur-md relative overflow-hidden transition-opacity duration-500 ${!user ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+            <div className={`bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm backdrop-blur-md relative overflow-hidden transition-opacity duration-500 ${!user ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
               <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
               
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 font-bold border border-slate-700">2</div>
-                <h2 className="text-lg font-bold text-white">Rincian Pembayaran</h2>
+                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700">2</div>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Rincian Pembayaran</h2>
               </div>
 
               <div className="space-y-6">
                 {/* Product Info */}
-                <div className="flex justify-between items-center p-4 rounded-2xl bg-slate-950 border border-slate-800">
+                <div className="flex justify-between items-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-500/20 rounded-lg text-blue-600 dark:text-blue-400">
                       <CreditCard className="w-6 h-6" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-400">Langganan</p>
-                      <p className="text-lg font-bold text-white capitalize">{tierParam} Plan <span className="text-slate-500 text-sm font-normal">({cycleParam})</span></p>
+                      <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Langganan</p>
+                      <p className="text-lg font-bold text-slate-900 dark:text-white capitalize">{tierParam} Plan <span className="text-slate-500 dark:text-slate-500 text-sm font-normal">({cycleParam})</span></p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold text-white">{rupiah(nominalRaw)}</p>
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">{rupiah(nominalRaw)}</p>
                   </div>
                 </div>
 
                 {/* Voucher Input */}
                 <div>
-                   <label className="block text-sm font-medium text-slate-400 mb-2">Kode Voucher</label>
+                   <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Kode Voucher</label>
                    <div className="relative flex gap-2">
                      <div className="relative flex-1">
-                        <BadgePercent className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                        <BadgePercent className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
                         <input
                           type="text"
                           value={voucher}
                           onChange={(e) => setVoucher(e.target.value)}
                           placeholder="Punya kode promo?"
-                          className="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none text-sm uppercase"
+                          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl py-3 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none text-sm uppercase shadow-inner"
                         />
                      </div>
                    </div>
                    {disc.valid && (
-                     <div className="mt-2 text-xs font-medium text-emerald-400 flex items-center gap-1">
+                     <div className="mt-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                        <Check className="w-3 h-3" /> {disc.label} diterapkan (-{rupiah(disc.amount)})
                      </div>
                    )}
                 </div>
 
                 {/* Total Calculation */}
-                <div className="border-t border-slate-800 pt-4 space-y-2">
-                   <div className="flex justify-between text-sm text-slate-400">
+                <div className="border-t border-slate-200 dark:border-slate-800 pt-4 space-y-2">
+                   <div className="flex justify-between text-sm text-slate-500 dark:text-slate-400">
                      <span>Subtotal</span>
                      <span>{rupiah(nominalRaw)}</span>
                    </div>
                    {disc.amount > 0 && (
-                     <div className="flex justify-between text-sm text-emerald-400">
+                     <div className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400">
                        <span>Diskon</span>
                        <span>-{rupiah(disc.amount)}</span>
                      </div>
                    )}
                    <div className="flex justify-between items-center pt-2">
-                     <span className="font-bold text-white">Total Tagihan</span>
+                     <span className="font-bold text-slate-900 dark:text-white">Total Tagihan</span>
                      <div className="flex items-center gap-2">
-                        <span className="text-2xl font-bold text-white">{rupiah(total)}</span>
-                        <button onClick={handleCopyTotal} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-500 transition-colors">
-                           {copied ? <Check className="w-4 h-4 text-emerald-400"/> : <Copy className="w-4 h-4"/>}
+                        <span className="text-2xl font-bold text-slate-900 dark:text-white">{rupiah(total)}</span>
+                        <button onClick={handleCopyTotal} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400 transition-colors">
+                           {copied ? <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400"/> : <Copy className="w-4 h-4"/>}
                         </button>
                      </div>
                    </div>
@@ -414,15 +415,15 @@ export default function ManualQRISPage() {
 
                 {/* Status Messages */}
                 {errorMsg && (
-                  <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3">
-                    <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
-                    <p className="text-sm text-red-200">{errorMsg}</p>
+                  <div className="p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0" />
+                    <p className="text-sm text-red-700 dark:text-red-200">{errorMsg}</p>
                   </div>
                 )}
                 {successMsg && (
-                  <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3">
-                    <Check className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                    <p className="text-sm text-emerald-200">{successMsg}</p>
+                  <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 flex items-start gap-3">
+                    <Check className="w-5 h-5 text-emerald-500 dark:text-emerald-400 flex-shrink-0" />
+                    <p className="text-sm text-emerald-700 dark:text-emerald-200">{successMsg}</p>
                   </div>
                 )}
 
@@ -433,8 +434,8 @@ export default function ManualQRISPage() {
                   className={`
                     w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg
                     ${isBalanceSufficient 
-                      ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20' 
-                      : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                      ? 'bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-white shadow-blue-600/20' 
+                      : 'bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed border border-transparent dark:border-slate-700'
                     }
                   `}
                 >
@@ -460,55 +461,55 @@ export default function ManualQRISPage() {
           {/* RIGHT COLUMN: RECEIPT */}
           <div className="lg:col-span-5 space-y-6">
             <div className="sticky top-8">
-              <div className="bg-white text-slate-900 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-2xl shadow-slate-200/50 dark:shadow-black/50 relative overflow-hidden border border-slate-100 dark:border-slate-800">
                 {/* Receipt Decoration */}
                 <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500" />
-                <div className="absolute -bottom-3 left-0 w-full h-6 bg-[#0B0F19] [mask-image:linear-gradient(to_right,transparent_0%,#000_50%,transparent_100%),radial-gradient(circle_at_bottom,transparent_6px,#000_7px)] [mask-size:100%_100%,20px_20px] [mask-composite:intersect]" />
+                <div className="absolute -bottom-3 left-0 w-full h-6 bg-slate-50 dark:bg-[#0B0F19] [mask-image:linear-gradient(to_right,transparent_0%,#000_50%,transparent_100%),radial-gradient(circle_at_bottom,transparent_6px,#000_7px)] [mask-size:100%_100%,20px_20px] [mask-composite:intersect]" />
 
                 <div className="text-center mb-6">
-                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <QrCode className="w-6 h-6 text-slate-900" />
+                  <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <QrCode className="w-6 h-6 text-slate-900 dark:text-white" />
                   </div>
-                  <h3 className="text-xl font-bold tracking-tight">INVOICE</h3>
-                  <p className="text-slate-500 text-xs font-mono mt-1">{orderId}</p>
+                  <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">INVOICE</h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs font-mono mt-1">{orderId}</p>
                 </div>
 
-                <div className="space-y-4 border-b-2 border-dashed border-slate-200 pb-6 mb-6">
+                <div className="space-y-4 border-b-2 border-dashed border-slate-200 dark:border-slate-700 pb-6 mb-6">
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Merchant</span>
-                    <span className="font-semibold">{MERCHANT_NAME}</span>
+                    <span className="text-slate-500 dark:text-slate-400">Merchant</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">{MERCHANT_NAME}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Tanggal</span>
-                    <span className="font-semibold">{new Date().toLocaleDateString('id-ID')}</span>
+                    <span className="text-slate-500 dark:text-slate-400">Tanggal</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">{new Date().toLocaleDateString('id-ID')}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Item</span>
-                    <span className="font-semibold">{tierParam.toUpperCase()} / {cycleParam}</span>
+                    <span className="text-slate-500 dark:text-slate-400">Item</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">{tierParam.toUpperCase()} / {cycleParam}</span>
                   </div>
                 </div>
 
                 <div className="space-y-2 mb-8">
-                   <div className="flex justify-between text-sm font-medium">
+                   <div className="flex justify-between text-sm font-medium text-slate-600 dark:text-slate-300">
                       <span>Harga</span>
                       <span>{rupiah(nominalRaw)}</span>
                    </div>
                    {disc.amount > 0 && (
-                     <div className="flex justify-between text-sm text-emerald-600">
+                     <div className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400">
                         <span>Diskon</span>
                         <span>-{rupiah(disc.amount)}</span>
                      </div>
                    )}
-                   <div className="flex justify-between text-xl font-extrabold mt-4 pt-4 border-t border-slate-200">
+                   <div className="flex justify-between text-xl font-extrabold mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
                       <span>Total</span>
                       <span>{rupiah(total)}</span>
                    </div>
                 </div>
 
-                <div className="bg-slate-50 rounded-xl p-4 text-center">
-                  <p className="text-xs text-slate-500 mb-2">Metode Pembayaran</p>
-                  <div className="flex items-center justify-center gap-2 font-bold text-slate-800">
-                    <Wallet className="w-4 h-4 text-blue-600" />
+                <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 text-center border border-slate-100 dark:border-slate-700">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Metode Pembayaran</p>
+                  <div className="flex items-center justify-center gap-2 font-bold text-slate-800 dark:text-white">
+                    <Wallet className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                     AstByte Balance
                   </div>
                 </div>
@@ -516,9 +517,9 @@ export default function ManualQRISPage() {
               </div>
               
               {/* Security Badge */}
-              <div className="mt-6 flex items-center justify-center gap-2 text-slate-500 text-xs">
+              <div className="mt-6 flex items-center justify-center gap-2 text-slate-400 dark:text-slate-500 text-xs">
                 <Shield className="w-4 h-4" />
-                <span>Pembayaran Anda aman & terenkripsi 256-bit SSL</span>
+                <span>Pembayaran Anda aman</span>
               </div>
             </div>
           </div>
@@ -527,8 +528,8 @@ export default function ManualQRISPage() {
       </div>
       
       {/* Footer */}
-      <footer className="py-8 text-center border-t border-slate-800 mt-12 bg-slate-950">
-        <p className="text-slate-500 text-sm">
+      <footer className="py-8 text-center border-t border-slate-200 dark:border-slate-800 mt-12 bg-white dark:bg-slate-950">
+        <p className="text-slate-500 dark:text-slate-400 text-sm">
           &copy; {new Date().getFullYear()} AstByte Technology. All rights reserved.
         </p>
       </footer>

@@ -10,6 +10,7 @@ import {
   BadgeCheck,
   HelpCircle,
   Star,
+  Code2, 
 } from "lucide-react";
 
 /**
@@ -75,13 +76,12 @@ export default function PricingPage() {
       yearly: 0,
       popular: false,
       features: [
-        { label: "Akses materi dasar (bahasa pemrograman pilihan)", ok: true },
-        { label: "Progress & penyimpanan lokal", ok: true },
-        { label: "Kuis & evaluasi berkala", ok: false },
-        { label: "Mode offline (tertentu)", ok: false },
-        { label: "Mentoring prioritas", ok: false },
+        { label: "Akses pengenalan materi", ok: true },
+        { label: "Progress & penyimpanan lokal", ok: false },
+        { label: "Mode offline (download materi)", ok: false },
+        { label: "Akses Source Code Project", ok: false },
         { label: "Modul premium & proyek nyata", ok: false },
-        { label: "Sertifikat terverifikasi Coreline", ok: false },
+        { label: "Sertifikat terverifikasi", ok: false },
       ],
     },
     {
@@ -89,34 +89,33 @@ export default function PricingPage() {
       name: "Pro",
       tagline: "Level up dengan modul premium & sertifikat",
       icon: <Zap className="w-5 h-5" />,
-      monthly: 25000,
-      yearly: 240000, // ~20% off
+      monthly: 20000,
+      yearly: 192000, // Diskon 20% dari (20rb x 12)
       popular: true,
       features: [
         { label: "Semua di Student", ok: true },
-        { label: "Modul penjelasan lengkap & studi kasus nyata", ok: true },
-        { label: "Progress cloud sync multi-device", ok: true },
+        { label: "Modul materi lengkap", ok: true },
+        { label: "Akses Quiz & Latihan", ok: true },
         { label: "Sertifikat terverifikasi Coreline", ok: true },
-        { label: "Mentoring grup (2×/bulan)", ok: false },
-        { label: "Job-ready project & review portofolio", ok: false },
-        { label: "Mentoring prioritas 1:1", ok: false },
+        { label: "Real project & review portofolio", ok: false },
+        { label: "Akses Source Code Project", ok: false },
       ],
     },
     {
       id: "plus",
       name: "Plus",
-      tagline: "Pendampingan 1:1 & jalur karier intensif",
+      tagline: "Akses penuh ke semua resource & kode",
       icon: <Crown className="w-5 h-5" />,
-      monthly: 149000,
-      yearly: 1440000,
+      monthly: 68000,
+      yearly: 650000, // Diskon ~20% dari (68rb x 12)
       popular: false,
       features: [
         { label: "Semua di Pro", ok: true },
-        { label: "Mentoring prioritas 1:1 (4×/bulan)", ok: true },
-        { label: "Kelas live mingguan + rekaman", ok: true },
-        { label: "Bimbingan karier & simulasi interview", ok: true },
-        { label: "Rekomendasi kerja & network industri", ok: true },
-        { label: "SLAs dukungan < 24 jam", ok: true },
+        { label: "Mentoring prioritas 1:1 (Chat)", ok: true },
+        { label: "Akses Source Code & Asset Project", ok: true },
+        { label: "Dukungan prioritas", ok: true },
+        { label: "Template portofolio profesional", ok: true },
+        { label: "Free (1) website portofolio" , ok: true}
       ],
     },
   ] as const;
@@ -127,13 +126,35 @@ export default function PricingPage() {
       a: "Bisa. Upgrade/downgrade kapan pun; tagihan akan disesuaikan secara prorata tergantung metode pembayaran Anda.",
     },
     {
-      q: "Apakah ada diskon untuk pelajar?",
-      a: "Ya, Student gratis. Untuk Pro/Plus kadang ada promo musiman—pantau pengumuman kami.",
+      q: "Apa itu Akses Source Code di paket Plus?",
+      a: "Di paket Plus, Anda akan mendapatkan beberapa source code untuk dipelajari. Ini berguna untuk memahami struktur codingan yang baik dan rapi.",
     },
     {
       q: "Bagaimana sertifikat diterbitkan?",
-      a: "Sertifikat otomatis keluar saat progres materi mencapai 100% di aplikasi Coreline Anda.",
+      a: "Sertifikat otomatis keluar saat progres materi mencapai 100% di aplikasi Coreline Anda (Khusus Pro & Plus).",
     },
+  ];
+
+  // Data Testimoni yang berbeda-beda
+  const testimonials = [
+    {
+      id: 1,
+      text: "Materinya enak simple, enak di ikuti, proyeknya relevan. Lulus Pro langsung dapet sertifikat buat portfolio.",
+      author: "Ruby",
+      role: "Alumni Coreline Pro"
+    },
+    {
+      id: 2,
+      text: "Akses source code di paket Plus sangat membantu saya memahami struktur codingan yang rapi. Worth every penny!",
+      author: "Dimas",
+      role: "Member Coreline Plus"
+    },
+    {
+      id: 3,
+      text: "Awalnya ragu, tapi fitur template portofolio-nya bikin saya lebih pede buat apply freelance. Makasih AstByte!",
+      author: "Sarah",
+      role: "Frontend Developer"
+    }
   ];
 
   return (
@@ -276,11 +297,6 @@ export default function PricingPage() {
                   : "Gabung Plus"}
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
               </a>
-
-              <div className="mt-4 flex items-center gap-2 text-[12px] text-slate-500 dark:text-slate-400">
-                <Shield className="w-4 h-4" /> Garansi 7 hari uang kembali
-                (syarat berlaku)
-              </div>
             </div>
           ))}
         </div>
@@ -321,21 +337,21 @@ export default function PricingPage() {
             <tbody>
               {[
                 ["Materi dasar", true, true, true],
-                ["Modul premium", false, true, true],
+                ["Modul premium & Kuis", false, true, true],
                 ["Sertifikat otomatis", false, true, true],
-                ["Cloud sync", false, true, true],
-                ["Mentoring grup", false, true, true],
-                ["Mentoring 1:1", false, false, true],
-                ["Bimbingan karier", false, false, true],
-                ["Kelas live", false, false, true],
+                ["Mentoring 1:1 (Chat)", false, false, true],
+                ["Akses Source Code Project", false, false, true], // Pengganti Kelas Live
                 ["Dukungan prioritas", false, false, true],
+                ["Template portofolio profesional", false, false, true],
+                ["Free (1) website portofolio", false, false, true],
               ].map((row, i) => (
                 <tr
                   key={i}
                   className="border-t border-slate-100 dark:border-slate-800"
                 >
-                  <td className="py-3 pl-5 pr-3 text-slate-800 dark:text-slate-200">
-                    {row[0] as string}
+                  <td className="py-3 pl-5 pr-3 text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                     {row[0] === "Akses Source Code Project" && <Code2 className="w-4 h-4 text-amber-500"/>}
+                     {row[0] as string}
                   </td>
                   {[1, 2, 3].map((col) => (
                     <td key={col} className="py-3 px-3">
@@ -366,17 +382,16 @@ export default function PricingPage() {
               <BadgeCheck className="w-5 h-5 text-emerald-500" /> Cerita Sukses
             </h3>
             <div className="mt-4 space-y-5">
-              {[1, 2, 3].map((i) => (
+              {testimonials.map((t) => (
                 <blockquote
-                  key={i}
+                  key={t.id}
                   className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-4"
                 >
                   <p className="text-[15px] text-slate-700 dark:text-slate-300">
-                    “Materinya enak diikuti, proyeknya relevan. Lulus Pro
-                    langsung dapet sertifikat—kepake buat apply kerja!”
+                    “{t.text}”
                   </p>
-                  <footer className="mt-2 text-xs text-slate-500">
-                    — Alumni Coreline Pro #{i}
+                  <footer className="mt-2 text-xs text-slate-500 font-medium">
+                    — {t.author} | <span className="text-sky-600 dark:text-sky-400">{t.role}</span>
                   </footer>
                 </blockquote>
               ))}

@@ -18,12 +18,11 @@ import {
   Loader2,
   Search,
   Filter,
-  PartyPopper,
   Crown,
   Lock,
   Download,
-  Heart,
-  Globe,
+  CheckCircle,
+  FileText
 } from 'lucide-react';
 
 /* ================================
@@ -63,19 +62,41 @@ export default function Dashboard() {
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(() =>
     typeof window !== 'undefined' ? localStorage.getItem('cl_lang') : null
   );
+  
+  // State untuk Progress
+  const [progressMap, setProgressMap] = useState<Record<string, number>>({});
+
   const [showProfile, setShowProfile] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState<string | null>(null);
+  const [generatingCert, setGeneratingCert] = useState(false);
+  
   const [searchText, setSearchText] = useState('');
   const [query, setQuery] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('order');
   
-  const drawerRef = useRef<HTMLDivElement>(null);
-
+  // Update Title
   useEffect(() => {
     document.title = 'Dashboard | New Coreline by AstByte';
   }, []);
+
+  // --- Load Progress Unik Berdasarkan User ID ---
+  useEffect(() => {
+    if (user) {
+      const userId = (user as any).id || (user as any).email || 'unknown_user';
+      const storageKey = `cl_progress_${userId}`;
+      
+      const savedProgress = localStorage.getItem(storageKey);
+      if (savedProgress) {
+        setProgressMap(JSON.parse(savedProgress));
+      } else {
+        setProgressMap({});
+      }
+    } else {
+      setProgressMap({});
+    }
+  }, [user]);
 
   // Debounce search
   useEffect(() => {
@@ -107,6 +128,9 @@ export default function Dashboard() {
   const nextTier = plan === 'free' ? 'Pro' : plan === 'pro' ? 'Plus' : null;
   const nextHref = '/pricing';
 
+  // Helper boolean for premium features
+  const isPremium = ['pro', 'plus'].includes(plan);
+
   const userTitle = useMemo(() => {
     switch (userType) {
       case 'student': return 'Code Path Student';
@@ -137,7 +161,194 @@ export default function Dashboard() {
     advanced: 'Lanjutan',
   };
 
-  // --- PDF Logic ---
+  // --- Save Progress Unik Berdasarkan User ID ---
+  const toggleModuleCompletion = (materialId: string) => {
+    if (!isPremium || !user) return;
+
+    const userId = (user as any).id || (user as any).email || 'unknown_user';
+    const storageKey = `cl_progress_${userId}`;
+
+    setProgressMap(prev => {
+      const current = prev[materialId] || 0;
+      const newProgress = current === 100 ? 0 : 100;
+      const newState = { ...prev, [materialId]: newProgress };
+      localStorage.setItem(storageKey, JSON.stringify(newState));
+      return newState;
+    });
+  };
+
+  const getProgress = (id: string) => progressMap[id] || 0;
+
+  // Check eligibility for certificate
+  const checkCertificateEligibility = () => {
+    if (!selectedLanguage) return false;
+    if (materials.length === 0) return false;
+    if (!isPremium) return false;
+
+    // All displayed materials (filtered by lang) must be 100%
+    const allCompleted = materials.every(m => (progressMap[m.id] || 0) === 100);
+    return allCompleted;
+  };
+
+  /* ================================
+   * PROFESSIONAL CERTIFICATE GENERATOR
+   * ================================ */
+  const generateCertificate = async () => {
+    if (!selectedLanguage || !user || !isPremium) return;
+    setGeneratingCert(true);
+
+    try {
+      const { default: jsPDF } = await import('jspdf');
+      
+      // Init Doc: A4 Landscape
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const width = doc.internal.pageSize.getWidth();
+      const height = doc.internal.pageSize.getHeight();
+      const centerX = width / 2;
+
+      // --- COLORS ---
+      const goldColor = [197, 160, 89]; // Elegant Gold
+      const navyColor = [10, 25, 47];   // Deep Navy
+      const darkGrey = [60, 60, 60];
+
+      // --- BACKGROUND & FRAME ---
+      
+      // 1. Cream Background (Paper feel)
+      doc.setFillColor(252, 250, 245);
+      doc.rect(0, 0, width, height, 'F');
+
+      // 2. Outer Navy Border
+      doc.setDrawColor(navyColor[0], navyColor[1], navyColor[2]);
+      doc.setLineWidth(2);
+      doc.rect(10, 10, width - 20, height - 20);
+
+      // 3. Inner Gold Thick Border
+      doc.setDrawColor(goldColor[0], goldColor[1], goldColor[2]);
+      doc.setLineWidth(1.5);
+      doc.rect(13, 13, width - 26, height - 26);
+
+      // 4. Corner Ornaments (Simple geometric corners)
+      const cornerSize = 15;
+      doc.setFillColor(navyColor[0], navyColor[1], navyColor[2]);
+      // Top-Left
+      doc.triangle(10, 10, 10 + cornerSize, 10, 10, 10 + cornerSize, 'F');
+      // Top-Right
+      doc.triangle(width - 10, 10, width - 10 - cornerSize, 10, width - 10, 10 + cornerSize, 'F');
+      // Bottom-Left
+      doc.triangle(10, height - 10, 10, height - 10 - cornerSize, 10 + cornerSize, height - 10, 'F');
+      // Bottom-Right
+      doc.triangle(width - 10, height - 10, width - 10, height - 10 - cornerSize, width - 10 - cornerSize, height - 10, 'F');
+
+      // --- TEXT CONTENT ---
+
+      // Header: "CERTIFICATE"
+      doc.setFont('times', 'bold');
+      doc.setTextColor(goldColor[0], goldColor[1], goldColor[2]);
+      doc.setFontSize(44);
+      doc.text('CERTIFICATE', centerX, 50, { align: 'center' });
+
+      // Sub-Header: "OF ACHIEVEMENT"
+      doc.setFont('times', 'normal');
+      doc.setFontSize(14);
+      doc.setCharSpace(3); // Spacing antar huruf agar elegan
+      doc.text('OF ACHIEVEMENT', centerX, 60, { align: 'center' });
+
+      // Separator Line (Decorative)
+      doc.setDrawColor(navyColor[0], navyColor[1], navyColor[2]);
+      doc.setLineWidth(0.5);
+      doc.line(centerX - 40, 68, centerX + 40, 68);
+      
+      // "Proudly Presented To"
+      doc.setFont('times', 'italic');
+      doc.setTextColor(darkGrey[0], darkGrey[1], darkGrey[2]);
+      doc.setFontSize(14);
+      doc.setCharSpace(0);
+      doc.text('This certificate is proudly presented to', centerX, 85, { align: 'center' });
+
+      // USER NAME (The Star of the Show)
+      doc.setFont('times', 'bolditalic');
+      doc.setTextColor(navyColor[0], navyColor[1], navyColor[2]); // Navy Blue Name
+      doc.setFontSize(40);
+      doc.text(user.full_name || 'Student Name', centerX, 105, { align: 'center' });
+
+      // "For successfully completing..."
+      doc.setFont('times', 'normal');
+      doc.setTextColor(darkGrey[0], darkGrey[1], darkGrey[2]);
+      doc.setFontSize(12);
+      doc.text('For successfully completing the professional course curriculum in:', centerX, 120, { align: 'center' });
+
+      // COURSE / LANGUAGE NAME
+      const langName = languageData.find(l => l.id === selectedLanguage)?.name || selectedLanguage?.toUpperCase();
+      doc.setFont('times', 'bold');
+      doc.setTextColor(goldColor[0], goldColor[1], goldColor[2]);
+      doc.setFontSize(28);
+      doc.text(`${langName} MASTERY`, centerX, 135, { align: 'center' });
+
+      // --- FOOTER SECTION ---
+
+      const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      const certId = `ID: CL-${selectedLanguage?.toUpperCase()}-${Math.floor(Math.random() * 90000) + 10000}`;
+
+      // Date Section (Left)
+      doc.setFont('times', 'normal');
+      doc.setTextColor(darkGrey[0], darkGrey[1], darkGrey[2]);
+      doc.setFontSize(12);
+      doc.text('Date Issued', 60, 160, { align: 'center' });
+      doc.text(dateStr, 60, 170, { align: 'center' });
+      doc.setDrawColor(goldColor[0], goldColor[1], goldColor[2]);
+      doc.line(40, 163, 80, 163); // Line under label
+
+      // Signature Section (Right)
+      doc.text('Director of Education', width - 60, 160, { align: 'center' });
+      
+      // Fake Signature (Script-like using italic)
+      doc.setFont('times', 'italic');
+      doc.setFontSize(20);
+      doc.setTextColor(navyColor[0], navyColor[1], navyColor[2]);
+      doc.text('Astral Byte Technlogy (AstByte)', width - 60, 172, { align: 'center' }); // Simulated signature
+      doc.setDrawColor(goldColor[0], goldColor[1], goldColor[2]);
+      doc.line(width - 80, 163, width - 40, 163);
+
+      // --- SEAL (Stempel) ---
+      // Draw a seal in bottom center
+      doc.setFillColor(goldColor[0], goldColor[1], goldColor[2]);
+      doc.circle(centerX, 165, 12, 'F'); // Outer Gold Circle
+      doc.setFillColor(255, 255, 255);
+      doc.circle(centerX, 165, 10, 'F'); // Inner White Circle
+      doc.setFillColor(goldColor[0], goldColor[1], goldColor[2]);
+      doc.circle(centerX, 165, 8, 'F'); // Inner Gold Dot
+      
+      // Text inside Seal (Mock)
+      doc.setFontSize(6);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.text('VERIFIED', centerX, 166, { align: 'center' });
+
+      // --- CERTIFICATE ID ---
+      doc.setFont('courier', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(150, 150, 150);
+      doc.text(certId, centerX, 185, { align: 'center' });
+      doc.text('Verify at: astbyte.com', centerX, 189, { align: 'center' });
+
+      // Save
+      doc.save(`Certificate_${langName}_${user.full_name}.pdf`);
+
+    } catch (err) {
+      console.error(err);
+      alert("Gagal membuat sertifikat. Silakan coba lagi.");
+    } finally {
+      setGeneratingCert(false);
+    }
+  };
+
+
+  // --- PDF Module Logic ---
   const downloadModulePDF = async (material: LearningMaterial) => {
     if (plan !== 'plus') {
       alert('Fitur ini khusus member Plus!');
@@ -149,9 +360,6 @@ export default function Dashboard() {
       const { default: jsPDF } = await import('jspdf');
       const html2canvas = (await import('html2canvas')).default;
       
-      // Navigate to material to ensure content is loaded (in background)
-      // Note: This is a tricky hack. Ideally, fetch content directly.
-      // Assuming 'navigate' works for this flow based on existing code logic.
       navigate(`/materials/${encodeURIComponent(material.id)}`);
       await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -159,13 +367,11 @@ export default function Dashboard() {
       if (!element) throw new Error('Content not found');
 
       const clone = element.cloneNode(true) as HTMLElement;
-      // Reset styles for clean PDF
       Object.assign(clone.style, {
         background: '#fff', padding: '40px', maxWidth: '800px',
         position: 'absolute', left: '-9999px', top: '0', color: '#000'
       });
 
-      // Fix code blocks for printing
       clone.querySelectorAll('.pdf-code-block').forEach((el) => {
         Object.assign((el as HTMLElement).style, { background: '#f8f9fa', border: '1px solid #dee2e6' });
       });
@@ -196,7 +402,7 @@ export default function Dashboard() {
       }
 
       pdf.save(`${material.title.replace(/\s+/g, '_')}.pdf`);
-      navigate('/dashboard'); // Return to dashboard
+      navigate('/dashboard');
     } catch (error) {
       console.error(error);
       alert('Gagal membuat PDF.');
@@ -396,7 +602,7 @@ export default function Dashboard() {
             </div>
             
             {/* Upgrade Banner Small */}
-            {plan !== 'plus' && (
+            {!isPremium && (
               <div className="hidden md:flex items-center gap-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 px-4 py-2 rounded-xl border border-amber-200 dark:border-amber-800/50">
                 <Crown className="w-5 h-5 text-amber-600 dark:text-amber-500" />
                 <div className="text-sm">
@@ -445,6 +651,31 @@ export default function Dashboard() {
           {/* MATERIAL GRID */}
           <div className={userType === 'student' ? 'lg:col-span-9' : 'lg:col-span-12'}>
             
+            {/* CERTIFICATE BANNER (Visible if eligible) */}
+            {checkCertificateEligibility() && (
+              <div className="mb-6 p-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white/20 rounded-full">
+                    <Award className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Selamat! Anda Lulus.</h2>
+                    <p className="text-blue-100 text-sm">
+                      Anda telah menyelesaikan semua modul {languageData.find(l => l.id === selectedLanguage)?.name}.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={generateCertificate}
+                  disabled={generatingCert}
+                  className="px-6 py-3 bg-white text-blue-600 rounded-xl font-bold shadow-sm hover:bg-blue-50 transition-colors flex items-center gap-2 disabled:opacity-70"
+                >
+                  {generatingCert ? <Loader2 className="w-5 h-5 animate-spin"/> : <FileText className="w-5 h-5"/>}
+                  {generatingCert ? 'Membuat...' : 'Klaim Sertifikat'}
+                </button>
+              </div>
+            )}
+
             {/* Filter Status Badge */}
             <div className="flex items-center gap-2 mb-6">
               <BookOpen className="w-5 h-5 text-slate-400" />
@@ -472,6 +703,10 @@ export default function Dashboard() {
                 {materials.map((m, idx) => {
                   const locked = isModuleLocked(m.order);
                   const isDownloading = downloadingPdf === m.id;
+                  
+                  // Progress Logic: Only for Pro/Plus
+                  const progress = isPremium ? getProgress(m.id) : 0;
+                  const isCompleted = isPremium && progress === 100;
 
                   return (
                     <div 
@@ -487,8 +722,8 @@ export default function Dashboard() {
                       {/* CARD CONTENT */}
                       <div className={`p-6 flex-1 ${locked ? 'blur-[2px] opacity-60 pointer-events-none' : ''}`}>
                         <div className="flex justify-between items-start mb-4">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${locked ? 'bg-slate-100 dark:bg-slate-800' : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'}`}>
-                             <Award className="w-5 h-5" />
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${locked ? 'bg-slate-100 dark:bg-slate-800' : isCompleted ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'}`}>
+                             {isCompleted ? <CheckCircle className="w-5 h-5"/> : <Award className="w-5 h-5" />}
                           </div>
                           <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${levelPill(m.level as Level)}`}>
                             {levelLabel[m.level as Level]}
@@ -502,6 +737,24 @@ export default function Dashboard() {
                           {m.description}
                         </p>
 
+                        {/* PROGRESS BAR (Only visible for Pro/Plus) */}
+                        {isPremium && (
+                          <div className="mb-4">
+                            <div className="flex justify-between text-xs font-semibold mb-1">
+                               <span className={isCompleted ? 'text-green-600' : 'text-slate-500'}>
+                                 {isCompleted ? 'Selesai' : 'Progress'}
+                               </span>
+                               <span className="text-slate-700 dark:text-slate-300">{progress}%</span>
+                            </div>
+                            <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                               <div 
+                                 className={`h-full transition-all duration-500 ${isCompleted ? 'bg-green-500' : 'bg-blue-500'}`} 
+                                 style={{ width: `${progress}%` }}
+                               />
+                            </div>
+                          </div>
+                        )}
+
                         {m.language && (
                            <div className="flex items-center gap-2">
                              <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600"></span>
@@ -513,12 +766,12 @@ export default function Dashboard() {
                       {/* CARD FOOTER / ACTION */}
                       {!locked && (
                          <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 rounded-b-2xl mt-auto">
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 mb-2">
                               <Link 
                                 to={`/materials/${encodeURIComponent(m.id)}`}
                                 className="flex-1 inline-flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors"
                               >
-                                Mulai Belajar <ChevronRight className="w-4 h-4" />
+                                {isCompleted ? 'Ulangi' : 'Mulai'} <ChevronRight className="w-4 h-4" />
                               </Link>
                               
                               {plan === 'plus' && (
@@ -532,6 +785,16 @@ export default function Dashboard() {
                                 </button>
                               )}
                             </div>
+                            
+                            {/* TOMBOL PROGRESS (Only visible for Pro/Plus) */}
+                            {isPremium && (
+                              <button 
+                                 onClick={() => toggleModuleCompletion(m.id)}
+                                 className={`w-full text-xs font-medium py-1.5 rounded-lg border transition-colors ${isCompleted ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' : 'bg-white text-slate-500 border-slate-200 hover:text-blue-600'}`}
+                              >
+                                 {isCompleted ? 'Tandai Belum Selesai' : 'Tandai Selesai (Demo)'}
+                              </button>
+                            )}
                          </div>
                       )}
 
@@ -566,7 +829,7 @@ export default function Dashboard() {
             &copy; {new Date().getFullYear()} Astral Byte Technology (AstByte). All rights reserved.
           </p>
            <div className="flex items-center justify-center gap-4 text-slate-400 text-sm mb-2">
-            <p className='hover:text-blue-500 transition-colors'>v.2.0</p>
+            <p className='hover:text-blue-500 transition-colors text-xs'>v.2.4</p>
           </div>
         </div>
       </footer>
