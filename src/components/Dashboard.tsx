@@ -7,31 +7,17 @@ import { MOCK_MATERIALS as STUDENT_MATERIALS } from '../data/mockData';
 import { MOCK_MATERIALS as OTHER_MATERIALS } from '../data/otherData';
 import ProfilePage from './ProfilePage';
 import {
-  LogOut,
-  BookOpen,
-  Award,
-  ChevronRight,
-  X,
-  User as UserIcon,
-  Menu,
-  Languages,
-  Loader2,
-  Search,
-  Filter,
-  Crown,
-  Lock,
-  Download,
-  CheckCircle,
-  FileText,
-  RefreshCw // Ikon baru untuk indikator sync
+  LogOut, BookOpen, Award, ChevronRight, X, User as UserIcon,
+  Menu, Languages, Loader2, Search, Filter, Crown, Lock,
+  Download, CheckCircle, FileText, RefreshCw, Bug
 } from 'lucide-react';
 
-/* ================================
- * Config & Types
- * ================================ */
-// URL Backend Anda (Pastikan sesuai dengan yang berjalan)
+// KONFIGURASI API
 const API_BASE = 'https://authx.astbyte.com';
 
+/* ================================
+ * Helper & Config
+ * ================================ */
 type Lang = {
   id: 'python' | 'php' | 'javascript' | 'typescript' | 'ruby' | 'go' | 'mysql' | 'postgresql';
   name: string;
@@ -54,106 +40,128 @@ type Level = 'beginner' | 'intermediate' | 'advanced';
 type SortKey = 'order' | 'title' | 'level';
 type Plan = 'free' | 'pro' | 'plus';
 
-/* ================================
- * Main Component
- * ================================ */
 export default function Dashboard() {
-  // Pastikan useAuth mengembalikan token JWT juga
-  // Jika context Anda belum return token, Anda bisa ambil dari localStorage sementara: localStorage.getItem('astbyte_token')
-  const { user, logout, loading: authLoading } = useAuth(); 
+  const { user, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // --- States ---
+  // State
   const [materials, setMaterials] = useState<LearningMaterial[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(() =>
     typeof window !== 'undefined' ? localStorage.getItem('cl_lang') : null
   );
   
-  // State Progress & Sync
   const [progressMap, setProgressMap] = useState<Record<string, number>>({});
   const [isSyncing, setIsSyncing] = useState(false);
+  const [debugLog, setDebugLog] = useState<string>("Inisialisasi...");
 
   const [showProfile, setShowProfile] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState<string | null>(null);
   const [generatingCert, setGeneratingCert] = useState(false);
-  
   const [searchText, setSearchText] = useState('');
   const [query, setQuery] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('order');
   
   useEffect(() => {
-    document.title = 'Dashboard | New Coreline by AstByte';
+    document.title = 'Dashboard | New Coreline';
   }, []);
 
-  // --- 1. LOAD PROGRESS DARI SERVER (FIXED) ---
-  useEffect(() => {
-    let isMounted = true;
+  // ============================================
+  // 1. FETCH PROGRESS (DENGAN ANTI-CACHE)
+  // ============================================
+  const fetchProgressFromServer = async () => {
+    if (!user) return;
+    setIsSyncing(true);
+    setDebugLog("Mengambil data...");
 
-    const fetchProgress = async () => {
-      if (!user) return;
-
-      // 1. Coba ambil token dari Context, kalau kosong ambil dari Storage
-      // Ini penting karena kadang context butuh waktu milidetik untuk load
-      const tokenToUse = localStorage.getItem('astbyte_token'); 
-
-      if (!tokenToUse) {
-        console.warn("Token tidak ditemukan, memuat data lokal saja.");
+    const token = localStorage.getItem('astbyte_token');
+    if (!token) {
+        setDebugLog("Token tidak ditemukan di localStorage!");
+        setIsSyncing(false);
         return;
-      }
+    }
 
-      try {
-        console.log("Mengambil progress dari server...");
-        const response = await fetch(`${API_BASE}/api/learning/progress`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${tokenToUse}`,
-            'Content-Type': 'application/json'
-          }
+    try {
+        // Tambahkan timestamp (?t=...) agar browser TIDAK menyimpan cache
+        const url = `${API_BASE}/api/learning/progress?t=${new Date().getTime()}`;
+        
+        const res = await fetch(url, {
+            method: 'GET',
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
         });
 
-        if (response.ok) {
-          const result = await response.json();
-          if (result.status === 'success' && isMounted) {
-            console.log("Data diterima dari server:", result.data);
+        const json = await res.json();
+        
+        if (res.ok && json.status === 'success') {
+            const data = json.data || {};
+            setProgressMap(data);
+            setDebugLog(`Sukses ambil data: ${JSON.stringify(data)}`);
             
-            // Prioritaskan data Server.
-            // Data server menimpa data lokal karena server adalah "Single Source of Truth"
-            const serverData = result.data || {};
-            
-            // Update State
-            setProgressMap(serverData);
-            
-            // Update Cache Lokal (Agar nanti pas buka lagi lebih cepat)
+            // Backup ke local
             const userId = (user as any).id || (user as any).email;
-            localStorage.setItem(`cl_progress_${userId}`, JSON.stringify(serverData));
-          }
+            localStorage.setItem(`cl_progress_${userId}`, JSON.stringify(data));
         } else {
-          console.error("Gagal fetch:", response.status);
+            setDebugLog(`Gagal API: ${json.message}`);
         }
-      } catch (error) {
-        console.error("Network Error saat fetch progress:", error);
-      }
-    };
+    } catch (err: any) {
+        setDebugLog(`Error Fetch: ${err.message}`);
+    } finally {
+        setIsSyncing(false);
+    }
+  };
 
-    // Jalankan fungsi fetch
-    fetchProgress();
-
-    return () => { isMounted = false; };
-  }, [user]); // Kita hapus dependency lain agar fokus jalan saat User Ready
-
-  // Debounce search
+  // Panggil saat pertama kali load
   useEffect(() => {
-    const t = setTimeout(() => setQuery(searchText), 300);
-    return () => clearTimeout(t);
-  }, [searchText]);
+    if(user) fetchProgressFromServer();
+  }, [user]);
 
-  // Persist lang
-  useEffect(() => {
-    if (selectedLanguage) localStorage.setItem('cl_lang', selectedLanguage);
-    else localStorage.removeItem('cl_lang');
-  }, [selectedLanguage]);
+  // ============================================
+  // 2. UPDATE PROGRESS
+  // ============================================
+  const toggleModuleCompletion = async (materialId: string) => {
+    const userId = (user as any).id || (user as any).email;
+    const isPremium = ['pro', 'plus'].includes((user as any)?.subscription_type?.toLowerCase() || 'free');
+
+    if (!isPremium) return;
+
+    // A. Optimistic Update
+    const currentVal = progressMap[materialId] || 0;
+    const newVal = currentVal === 100 ? 0 : 100;
+    
+    setProgressMap(prev => ({ ...prev, [materialId]: newVal }));
+
+    // B. Server Sync
+    const token = localStorage.getItem('astbyte_token');
+    if (token) {
+        setIsSyncing(true);
+        try {
+            const res = await fetch(`${API_BASE}/api/learning/progress`, {
+                method: 'POST',
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ material_id: materialId, progress: newVal })
+            });
+            
+            if (!res.ok) {
+                const err = await res.json();
+                console.error(err);
+                alert("Gagal menyimpan ke server!");
+            } else {
+                setDebugLog(`Saved: ID=${materialId} Val=${newVal}`);
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsSyncing(false);
+        }
+    }
+  };
 
   // --- Logic Helpers ---
   const resolveUserType = (): 'student' | 'umum' | 'pro' | 'game' => {
@@ -171,8 +179,6 @@ export default function Dashboard() {
   const userType = resolveUserType();
   const plan = getPlanFromUser(user);
   const nextHref = '/pricing';
-
-  // Helper boolean for premium features
   const isPremium = ['pro', 'plus'].includes(plan);
 
   const userTitle = useMemo(() => {
@@ -205,208 +211,17 @@ export default function Dashboard() {
     advanced: 'Lanjutan',
   };
 
-  // --- 2. UPDATE PROGRESS KE SERVER ---
-  const toggleModuleCompletion = async (materialId: string) => {
-    if (!isPremium || !user) return;
-
-    // A. Optimistic Update (Update UI duluan biar cepat)
-    const currentProgress = progressMap[materialId] || 0;
-    const newProgress = currentProgress === 100 ? 0 : 100;
-    
-    setProgressMap(prev => ({
-      ...prev,
-      [materialId]: newProgress
-    }));
-
-    // B. Kirim ke Server
-    setIsSyncing(true);
-    const token = localStorage.getItem('astbyte_token');
-    
-    if (token) {
-      try {
-        await fetch(`${API_BASE}/api/learning/progress`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            material_id: materialId,
-            progress: newProgress
-          })
-        });
-        
-        // Update Local Cache juga untuk backup
-        const userId = (user as any).id || (user as any).email;
-        const storageKey = `cl_progress_${userId}`;
-        const currentCache = JSON.parse(localStorage.getItem(storageKey) || '{}');
-        localStorage.setItem(storageKey, JSON.stringify({ ...currentCache, [materialId]: newProgress }));
-
-      } catch (err) {
-        console.error("Gagal sync ke server:", err);
-        // Optional: Revert UI jika gagal total, tapi biasanya dibiarkan saja untuk retry nanti
-      } finally {
-        setIsSyncing(false);
-      }
-    }
-  };
-
-  const getProgress = (id: string) => progressMap[id] || 0;
-
-  // Check eligibility for certificate
   const checkCertificateEligibility = () => {
     if (!selectedLanguage) return false;
     if (materials.length === 0) return false;
     if (!isPremium) return false;
-
-    // All displayed materials (filtered by lang) must be 100%
     const allCompleted = materials.every(m => (progressMap[m.id] || 0) === 100);
     return allCompleted;
   };
 
-  // --- Certificate Generator (Client Side PDF) ---
-  const generateCertificate = async () => {
-    if (!selectedLanguage || !user || !isPremium) return;
-    setGeneratingCert(true);
-
-    try {
-      const { default: jsPDF } = await import('jspdf');
-      
-      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-      const width = doc.internal.pageSize.getWidth();
-      const height = doc.internal.pageSize.getHeight();
-      const centerX = width / 2;
-
-      // Colors
-      const goldColor: [number, number, number] = [197, 160, 89];
-      const navyColor: [number, number, number] = [10, 25, 47];
-      const darkGrey: [number, number, number] = [60, 60, 60];
-
-      // Background
-      doc.setFillColor(252, 250, 245);
-      doc.rect(0, 0, width, height, 'F');
-
-      // Borders
-      doc.setDrawColor(...navyColor);
-      doc.setLineWidth(2);
-      doc.rect(10, 10, width - 20, height - 20);
-
-      doc.setDrawColor(...goldColor);
-      doc.setLineWidth(1.5);
-      doc.rect(13, 13, width - 26, height - 26);
-
-      // Text
-      doc.setFont('times', 'bold');
-      doc.setTextColor(...goldColor);
-      doc.setFontSize(44);
-      doc.text('CERTIFICATE', centerX, 50, { align: 'center' });
-
-      doc.setFont('times', 'normal');
-      doc.setFontSize(14);
-      doc.setCharSpace(3);
-      doc.text('OF ACHIEVEMENT', centerX, 60, { align: 'center' });
-
-      // User
-      doc.setFont('times', 'bolditalic');
-      doc.setTextColor(...navyColor);
-      doc.setFontSize(40);
-      doc.setCharSpace(0);
-      doc.text(user.full_name || 'Student Name', centerX, 105, { align: 'center' });
-
-      // Course
-      doc.setFont('times', 'normal');
-      doc.setTextColor(...darkGrey);
-      doc.setFontSize(12);
-      doc.text('For successfully completing the professional course curriculum in:', centerX, 120, { align: 'center' });
-
-      const langName = languageData.find(l => l.id === selectedLanguage)?.name || selectedLanguage?.toUpperCase();
-      doc.setFont('times', 'bold');
-      doc.setTextColor(...goldColor);
-      doc.setFontSize(28);
-      doc.text(`${langName} MASTERY`, centerX, 135, { align: 'center' });
-
-      // Footer
-      const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-      doc.setFont('times', 'normal');
-      doc.setTextColor(...darkGrey);
-      doc.setFontSize(12);
-      doc.text('Date Issued: ' + dateStr, 60, 160, { align: 'center' });
-      doc.text('Authorized by AstByte Technology', width - 60, 160, { align: 'center' });
-
-      doc.save(`Certificate_${langName}_${user.full_name}.pdf`);
-
-    } catch (err) {
-      console.error(err);
-      alert("Gagal membuat sertifikat");
-    } finally {
-      setGeneratingCert(false);
-    }
-  };
-
-
-  // --- PDF Module Logic ---
-  const downloadModulePDF = async (material: LearningMaterial) => {
-    if (plan !== 'plus') {
-      alert('Fitur ini khusus member Plus!');
-      return;
-    }
-    setDownloadingPdf(material.id);
-
-    try {
-      const { default: jsPDF } = await import('jspdf');
-      const html2canvas = (await import('html2canvas')).default;
-      
-      navigate(`/materials/${encodeURIComponent(material.id)}`);
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      const element = document.querySelector('.material-content');
-      if (!element) throw new Error('Content not found');
-
-      const clone = element.cloneNode(true) as HTMLElement;
-      Object.assign(clone.style, {
-        background: '#fff', padding: '40px', maxWidth: '800px',
-        position: 'absolute', left: '-9999px', top: '0', color: '#000'
-      });
-
-      clone.querySelectorAll('.pdf-code-block').forEach((el) => {
-        Object.assign((el as HTMLElement).style, { background: '#f8f9fa', border: '1px solid #dee2e6' });
-      });
-      clone.querySelectorAll('*').forEach((el) => {
-         if(el instanceof HTMLElement) el.style.color = 'black'; 
-      });
-
-      document.body.appendChild(clone);
-      const canvas = await html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-      document.body.removeChild(clone);
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= 297;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= 297;
-      }
-
-      pdf.save(`${material.title.replace(/\s+/g, '_')}.pdf`);
-      navigate('/dashboard');
-    } catch (error) {
-      console.error(error);
-      alert('Gagal membuat PDF.');
-      navigate('/dashboard');
-    } finally {
-      setDownloadingPdf(null);
-    }
-  };
+  // --- Certificate Generator (Stub) ---
+  const generateCertificate = async () => { alert("Generate Certificate Clicked"); };
+  const downloadModulePDF = async (material: LearningMaterial) => { alert("Download PDF Clicked"); };
 
   // --- Data Loading ---
   useEffect(() => {
@@ -435,37 +250,24 @@ export default function Dashboard() {
     setMaterials(list);
     const timer = setTimeout(() => setLoading(false), 200);
     return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, selectedLanguage, query, sortKey]);
 
-  // --- Auth Checks ---
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-blue-600 dark:text-cyan-400" />
-        <p className="text-sm font-medium text-slate-500 animate-pulse">Memuat data...</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const t = setTimeout(() => setQuery(searchText), 300);
+    return () => clearTimeout(t);
+  }, [searchText]);
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 px-4">
-        <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-8 text-center">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Sesi Berakhir</h1>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">Silakan login kembali untuk mengakses materi.</p>
-          <Link to="/login" className="block w-full rounded-xl bg-blue-600 py-3 text-sm font-bold text-white hover:bg-blue-700 transition">
-            Masuk Sekarang
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (selectedLanguage) localStorage.setItem('cl_lang', selectedLanguage);
+    else localStorage.removeItem('cl_lang');
+  }, [selectedLanguage]);
 
+  if (authLoading) return <div className="p-10 text-center">Loading User...</div>;
+  if (!user) return <div className="p-10 text-center">Please Login</div>;
   if (showProfile) return <ProfilePage onBack={() => setShowProfile(false)} />;
 
   /* ================================
-   * Sub-Components (Internal)
+   * Sub-Components
    * ================================ */
   const Sidebar = ({ mobile }: { mobile?: boolean }) => (
     <div className={`flex flex-col gap-3 ${mobile ? '' : 'sticky top-24'}`}>
@@ -513,17 +315,25 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0B0F19] font-sans">
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0B0F19] font-sans pb-20">
       
-      {/* NAVBAR */}
+      {/* --- DEBUG BOX (HAPUS NANTI JIKA SUDAH FIX) --- */}
+      <div className="fixed bottom-0 left-0 right-0 bg-black/90 text-green-400 p-2 text-xs font-mono z-50 overflow-auto max-h-32 border-t border-green-800">
+        <div className="flex justify-between mb-1">
+            <strong>DEBUG CONSOLE:</strong>
+            <button onClick={fetchProgressFromServer} className="bg-green-700 text-white px-2 rounded hover:bg-green-600">FORCE SYNC</button>
+        </div>
+        <div>{debugLog}</div>
+        <div className="mt-1 text-white/50">User ID: {(user as any).id} | Plan: {plan}</div>
+      </div>
+      {/* ------------------------------------------------ */}
+
       <nav className="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-3">
               <Link to="/" className="flex items-center gap-2 group">
-                <div className="h-9 w-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-blue-500/30 shadow-lg group-hover:scale-105 transition-transform">
-                  C
-                </div>
+                <div className="h-9 w-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-blue-500/30 shadow-lg group-hover:scale-105 transition-transform">C</div>
                 <div className="hidden sm:block">
                   <h1 className="text-lg font-bold text-slate-900 dark:text-white leading-none">Coreline</h1>
                   <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Learning</span>
@@ -532,15 +342,11 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center gap-2 sm:gap-4">
-              
-              {/* Indikator Sync */}
-              {isSyncing && (
-                <div className="hidden md:flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full animate-pulse">
-                  <RefreshCw className="w-3 h-3 animate-spin" />
-                  Syncing...
-                </div>
-              )}
-
+               {isSyncing && (
+                 <div className="hidden md:flex items-center gap-1 text-xs text-blue-500 animate-pulse font-bold">
+                   <RefreshCw className="w-3 h-3 animate-spin" /> SYNCING...
+                 </div>
+               )}
               <div className="hidden md:flex flex-col items-end mr-2">
                 <span className="text-sm font-bold text-slate-800 dark:text-white">{user.full_name}</span>
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
@@ -549,27 +355,14 @@ export default function Dashboard() {
               </div>
               
               {userType === 'student' && (
-                <button
-                  onClick={() => setIsSidebarOpen(true)}
-                  className="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
-                >
+                <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 text-slate-600 dark:text-slate-300">
                   <Menu className="w-5 h-5" />
                 </button>
               )}
-
-              <button
-                onClick={() => setShowProfile(true)}
-                className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                title="Profil"
-              >
+              <button onClick={() => setShowProfile(true)} className="p-2 text-slate-600 dark:text-slate-300">
                 <UserIcon className="w-5 h-5" />
               </button>
-
-              <button
-                onClick={logout}
-                className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                title="Keluar"
-              >
+              <button onClick={logout} className="p-2 text-red-500">
                 <LogOut className="w-5 h-5" />
               </button>
             </div>
@@ -577,7 +370,6 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      {/* MOBILE DRAWER */}
       {isSidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setIsSidebarOpen(false)} />
@@ -591,10 +383,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* MAIN CONTENT */}
       <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* HEADER & TOOLBAR */}
         <div className="mb-8 space-y-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
@@ -605,8 +394,6 @@ export default function Dashboard() {
                 Selamat datang kembali, mari lanjutkan progressmu.
               </p>
             </div>
-            
-            {/* Upgrade Banner Small */}
             {!isPremium && (
               <div className="hidden md:flex items-center gap-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 px-4 py-2 rounded-xl border border-amber-200 dark:border-amber-800/50">
                 <Crown className="w-5 h-5 text-amber-600 dark:text-amber-500" />
@@ -618,24 +405,14 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Search & Sort */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                placeholder="Cari materi pembelajaran..."
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition-shadow shadow-sm"
-              />
+              <input value={searchText} onChange={(e) => setSearchText(e.target.value)} placeholder="Cari materi..." className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition-shadow shadow-sm" />
             </div>
             <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 shadow-sm">
               <Filter className="w-4 h-4 text-slate-400" />
-              <select
-                value={sortKey}
-                onChange={(e) => setSortKey(e.target.value as SortKey)}
-                className="bg-transparent outline-none text-sm font-medium text-slate-700 dark:text-slate-200 cursor-pointer"
-              >
+              <select value={sortKey} onChange={(e) => setSortKey(e.target.value as SortKey)} className="bg-transparent outline-none text-sm font-medium text-slate-700 dark:text-slate-200 cursor-pointer">
                 <option value="order">Urutan Modul</option>
                 <option value="title">Judul (A-Z)</option>
                 <option value="level">Tingkat Kesulitan</option>
@@ -645,18 +422,14 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* SIDEBAR (Desktop) */}
           <div className="hidden lg:block lg:col-span-3">
              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm sticky top-24">
                <Sidebar />
              </div>
           </div>
 
-          {/* MATERIAL GRID */}
           <div className={userType === 'student' ? 'lg:col-span-9' : 'lg:col-span-12'}>
             
-            {/* CERTIFICATE BANNER (Visible if eligible) */}
             {checkCertificateEligibility() && (
               <div className="mb-6 p-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in">
                 <div className="flex items-center gap-4">
@@ -681,7 +454,6 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Filter Status Badge */}
             <div className="flex items-center gap-2 mb-6">
               <BookOpen className="w-5 h-5 text-slate-400" />
               <h2 className="text-lg font-bold text-slate-800 dark:text-white">Daftar Modul</h2>
@@ -691,15 +463,10 @@ export default function Dashboard() {
             </div>
 
             {loading ? (
-               <div className="py-20 text-center">
-                 <Loader2 className="w-10 h-10 animate-spin text-blue-500 mx-auto mb-4" />
-                 <p className="text-slate-500">Menyiapkan materi...</p>
-               </div>
+               <div className="py-20 text-center"><Loader2 className="w-10 h-10 animate-spin text-blue-500 mx-auto mb-4" /><p className="text-slate-500">Menyiapkan materi...</p></div>
             ) : materials.length === 0 ? (
                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-12 text-center">
-                 <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                   <Search className="w-8 h-8 text-slate-400" />
-                 </div>
+                 <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4"><Search className="w-8 h-8 text-slate-400" /></div>
                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Tidak ditemukan</h3>
                  <p className="text-slate-500">Coba ubah filter bahasa atau kata kunci pencarian.</p>
                </div>
@@ -708,9 +475,7 @@ export default function Dashboard() {
                 {materials.map((m, idx) => {
                   const locked = isModuleLocked(m.order);
                   const isDownloading = downloadingPdf === m.id;
-                  
-                  // Progress Logic: Only for Pro/Plus
-                  const progress = isPremium ? getProgress(m.id) : 0;
+                  const progress = isPremium ? (progressMap[m.id] || 0) : 0;
                   const isCompleted = isPremium && progress === 100;
 
                   return (
@@ -724,7 +489,6 @@ export default function Dashboard() {
                       `}
                       style={{ animation: `fadeInUp 0.4s ease-out forwards`, animationDelay: `${idx * 50}ms`, opacity: 0 }}
                     >
-                      {/* CARD CONTENT */}
                       <div className={`p-6 flex-1 ${locked ? 'blur-[2px] opacity-60 pointer-events-none' : ''}`}>
                         <div className="flex justify-between items-start mb-4">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${locked ? 'bg-slate-100 dark:bg-slate-800' : isCompleted ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'}`}>
@@ -735,27 +499,17 @@ export default function Dashboard() {
                           </span>
                         </div>
                         
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 line-clamp-2 min-h-[3.5rem]">
-                          {m.order}. {m.title}
-                        </h3>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 mb-4">
-                          {m.description}
-                        </p>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 line-clamp-2 min-h-[3.5rem]">{m.order}. {m.title}</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 mb-4">{m.description}</p>
 
-                        {/* PROGRESS BAR (Only visible for Pro/Plus) */}
                         {isPremium && (
                           <div className="mb-4">
                             <div className="flex justify-between text-xs font-semibold mb-1">
-                               <span className={isCompleted ? 'text-green-600' : 'text-slate-500'}>
-                                 {isCompleted ? 'Selesai' : 'Progress'}
-                               </span>
+                               <span className={isCompleted ? 'text-green-600' : 'text-slate-500'}>{isCompleted ? 'Selesai' : 'Progress'}</span>
                                <span className="text-slate-700 dark:text-slate-300">{progress}%</span>
                             </div>
                             <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                               <div 
-                                 className={`h-full transition-all duration-500 ${isCompleted ? 'bg-green-500' : 'bg-blue-500'}`} 
-                                 style={{ width: `${progress}%` }}
-                               />
+                               <div className={`h-full transition-all duration-500 ${isCompleted ? 'bg-green-500' : 'bg-blue-500'}`} style={{ width: `${progress}%` }} />
                             </div>
                           </div>
                         )}
@@ -766,55 +520,43 @@ export default function Dashboard() {
                              <span className="text-xs font-semibold text-slate-500 uppercase">{m.language}</span>
                            </div>
                         )}
+                        
+                        {/* ID Debugger - Muncul jika isSyncing */}
+                        <div className="mt-1 text-[10px] text-slate-300">ID: {m.id}</div>
                       </div>
 
-                      {/* CARD FOOTER / ACTION */}
                       {!locked && (
                          <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 rounded-b-2xl mt-auto">
                             <div className="flex gap-2 mb-2">
-                              <Link 
-                                to={`/materials/${encodeURIComponent(m.id)}`}
-                                className="flex-1 inline-flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors"
-                              >
+                              <Link to={`/materials/${encodeURIComponent(m.id)}`} className="flex-1 inline-flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">
                                 {isCompleted ? 'Ulangi' : 'Mulai'} <ChevronRight className="w-4 h-4" />
                               </Link>
                               
                               {plan === 'plus' && (
-                                <button
-                                  onClick={() => downloadModulePDF(m)}
-                                  disabled={isDownloading}
-                                  className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-blue-600 rounded-xl hover:border-blue-300 transition-colors"
-                                  title="Download PDF"
-                                >
+                                <button onClick={() => downloadModulePDF(m)} disabled={isDownloading} className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-blue-600 rounded-xl hover:border-blue-300 transition-colors">
                                   {isDownloading ? <Loader2 className="w-5 h-5 animate-spin"/> : <Download className="w-5 h-5"/>}
                                 </button>
                               )}
                             </div>
                             
-                            {/* TOMBOL PROGRESS (Only visible for Pro/Plus) */}
                             {isPremium && (
                               <button 
                                  onClick={() => toggleModuleCompletion(m.id)}
                                  className={`w-full text-xs font-medium py-1.5 rounded-lg border transition-colors ${isCompleted ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' : 'bg-white text-slate-500 border-slate-200 hover:text-blue-600'}`}
                               >
-                                 {isCompleted ? 'Tandai Belum Selesai' : 'Tandai Selesai (Simpan ke Server)'}
+                                 {isCompleted ? 'Tandai Belum Selesai' : 'Tandai Selesai (Sync)'}
                               </button>
                             )}
                          </div>
                       )}
 
-                      {/* LOCK OVERLAY */}
                       {locked && (
                         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/40 dark:bg-black/40 backdrop-blur-[1px]">
                            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-2xl text-center border border-slate-200 dark:border-slate-700 max-w-[80%]">
-                             <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                               <Lock className="w-6 h-6" />
-                             </div>
+                             <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3"><Lock className="w-6 h-6" /></div>
                              <h4 className="font-bold text-slate-900 dark:text-white mb-1">Premium</h4>
                              <p className="text-xs text-slate-500 mb-4">Upgrade untuk membuka.</p>
-                             <Link to="/pricing" className="inline-block px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg transition-colors">
-                               Upgrade
-                             </Link>
+                             <Link to="/pricing" className="inline-block px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg transition-colors">Upgrade</Link>
                            </div>
                         </div>
                       )}
@@ -827,24 +569,14 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* FOOTER & COPYRIGHT */}
       <footer className="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 py-8">
         <div className="container mx-auto px-4 sm:px-6 text-center">
-          <p className="text-xs text-slate-400">
-            &copy; {new Date().getFullYear()} Astral Byte Technology (AstByte). All rights reserved.
-          </p>
-           <div className="flex items-center justify-center gap-4 text-slate-400 text-sm mb-2">
-            <p className='hover:text-blue-500 transition-colors text-xs'>v.2.5 (Sync)</p>
-          </div>
+          <p className="text-xs text-slate-400">&copy; {new Date().getFullYear()} AstByte.</p>
         </div>
       </footer>
 
-      {/* Custom Styles */}
       <style>{`
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeInUp 0.3s ease-out forwards; }
       `}</style>
     </div>
