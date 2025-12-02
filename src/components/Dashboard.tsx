@@ -87,46 +87,61 @@ export default function Dashboard() {
     document.title = 'Dashboard | New Coreline by AstByte';
   }, []);
 
-  // --- 1. LOAD PROGRESS DARI SERVER ---
+  // --- 1. LOAD PROGRESS DARI SERVER (FIXED) ---
   useEffect(() => {
+    let isMounted = true;
+
     const fetchProgress = async () => {
       if (!user) return;
 
-      // Ambil token (asumsi tersimpan di localStorage dari login sebelumnya)
-      const token = localStorage.getItem('astbyte_token');
-      if (!token) return;
+      // 1. Coba ambil token dari Context, kalau kosong ambil dari Storage
+      // Ini penting karena kadang context butuh waktu milidetik untuk load
+      const tokenToUse = localStorage.getItem('astbyte_token'); 
+
+      if (!tokenToUse) {
+        console.warn("Token tidak ditemukan, memuat data lokal saja.");
+        return;
+      }
 
       try {
+        console.log("Mengambil progress dari server...");
         const response = await fetch(`${API_BASE}/api/learning/progress`, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': `Bearer ${tokenToUse}`,
             'Content-Type': 'application/json'
           }
         });
 
         if (response.ok) {
           const result = await response.json();
-          if (result.status === 'success') {
-            // Update state dengan data dari server
-            setProgressMap(result.data || {});
+          if (result.status === 'success' && isMounted) {
+            console.log("Data diterima dari server:", result.data);
             
-            // Opsional: Simpan cache ke local storage user ini
+            // Prioritaskan data Server.
+            // Data server menimpa data lokal karena server adalah "Single Source of Truth"
+            const serverData = result.data || {};
+            
+            // Update State
+            setProgressMap(serverData);
+            
+            // Update Cache Lokal (Agar nanti pas buka lagi lebih cepat)
             const userId = (user as any).id || (user as any).email;
-            localStorage.setItem(`cl_progress_${userId}`, JSON.stringify(result.data));
+            localStorage.setItem(`cl_progress_${userId}`, JSON.stringify(serverData));
           }
+        } else {
+          console.error("Gagal fetch:", response.status);
         }
       } catch (error) {
-        console.error("Gagal mengambil progress dari server:", error);
-        // Fallback: Coba load dari local storage jika offline
-        const userId = (user as any).id || (user as any).email;
-        const cached = localStorage.getItem(`cl_progress_${userId}`);
-        if (cached) setProgressMap(JSON.parse(cached));
+        console.error("Network Error saat fetch progress:", error);
       }
     };
 
+    // Jalankan fungsi fetch
     fetchProgress();
-  }, [user]);
+
+    return () => { isMounted = false; };
+  }, [user]); // Kita hapus dependency lain agar fokus jalan saat User Ready
 
   // Debounce search
   useEffect(() => {
