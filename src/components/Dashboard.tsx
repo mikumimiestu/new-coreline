@@ -247,53 +247,136 @@ export default function Dashboard() {
   const generateCertificate = async () => {
     if (!selectedLanguage || !user || !isPremium) return;
     setGeneratingCert(true);
+
     try {
       const { default: jsPDF } = await import('jspdf');
+      // Format A4 Landscape
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      
       const width = doc.internal.pageSize.getWidth();
       const height = doc.internal.pageSize.getHeight();
-      const centerX = width / 2;
-      const goldColor: [number, number, number] = [197, 160, 89];
-      const navyColor: [number, number, number] = [10, 25, 47];
-      const darkGrey: [number, number, number] = [60, 60, 60];
+      
+      // Modern Color Palette
+      const colors = {
+        navy: [10, 25, 47] as [number, number, number], // Deep Navy
+        gold: [197, 160, 89] as [number, number, number], // Muted Gold
+        white: [255, 255, 255] as [number, number, number],
+        lightGrey: [240, 240, 240] as [number, number, number],
+        darkGrey: [50, 50, 50] as [number, number, number],
+        textGrey: [100, 100, 100] as [number, number, number]
+      };
 
-      doc.setFillColor(252, 250, 245);
+      // 1. Background Clean
+      doc.setFillColor(...colors.white);
       doc.rect(0, 0, width, height, 'F');
-      doc.setDrawColor(...navyColor);
-      doc.setLineWidth(2);
-      doc.rect(10, 10, width - 20, height - 20);
-      doc.setDrawColor(...goldColor);
-      doc.setLineWidth(1.5);
-      doc.rect(13, 13, width - 26, height - 26);
-      doc.setFont('times', 'bold');
-      doc.setTextColor(...goldColor);
-      doc.setFontSize(44);
-      doc.text('CERTIFICATE', centerX, 50, { align: 'center' });
-      doc.setFont('times', 'normal');
-      doc.setFontSize(14);
-      doc.setCharSpace(3);
-      doc.text('OF ACHIEVEMENT', centerX, 60, { align: 'center' });
-      doc.setFont('times', 'bolditalic');
-      doc.setTextColor(...navyColor);
-      doc.setFontSize(40);
+
+      // 2. Desain Geometris Modern (Aksen Kiri & Kanan)
+      // Blok Navy di Kiri
+      doc.setFillColor(...colors.navy);
+      doc.rect(0, 0, 15, height, 'F'); 
+
+      // Segitiga Emas di Pojok Kanan Atas
+      doc.setFillColor(...colors.gold);
+      doc.triangle(width, 0, width - 60, 0, width, 60, 'F');
+      
+      // Aksen Garis Bawah
+      doc.setDrawColor(...colors.navy);
+      doc.setLineWidth(1);
+      doc.line(25, height - 20, width - 25, height - 20);
+
+      // --- KONTEN ---
+      
+      const centerX = (width + 15) / 2; // Center offset karena ada sidebar kiri 15mm
+
+      // HEADER: Company Name (Kecil di atas)
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...colors.textGrey);
+      doc.setFontSize(10);
+      doc.text('ASTRAL BYTE TECHNOLOGY', 25, 20);
+
+      // TITLE: CERTIFICATE
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...colors.navy);
+      doc.setFontSize(50);
+      doc.setCharSpace(2); // Huruf agak renggang biar elegan
+      doc.text('CERTIFICATE', centerX, 60, { align: 'center' });
+
+      // SUBTITLE: OF ACHIEVEMENT
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...colors.gold);
+      doc.setFontSize(16);
+      doc.setCharSpace(4);
+      doc.text('OF ACHIEVEMENT', centerX, 70, { align: 'center' });
+
+      // NAMA USER
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...colors.darkGrey);
+      doc.setFontSize(36);
       doc.setCharSpace(0);
-      doc.text(user.full_name || 'Student Name', centerX, 105, { align: 'center' });
-      doc.setFont('times', 'normal');
-      doc.setTextColor(...darkGrey);
+      const userName = user.full_name || 'Student Name';
+      doc.text(userName, centerX, 100, { align: 'center' });
+
+      // GARIS DI BAWAH NAMA (Pemisah)
+      doc.setDrawColor(...colors.gold);
+      doc.setLineWidth(0.5);
+      doc.line(centerX - 40, 105, centerX + 40, 105);
+
+      // BODY TEXT
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...colors.textGrey);
       doc.setFontSize(12);
-      doc.text('For successfully completing the professional course curriculum in:', centerX, 120, { align: 'center' });
+      doc.text('This certificate is proudly presented to the above mentioned for', centerX, 118, { align: 'center' });
+      doc.text('successfully demonstrating professional mastery in:', centerX, 124, { align: 'center' });
+
+      // NAMA KURSUS (LANGUAGE)
       const langName = languageData.find(l => l.id === selectedLanguage)?.name || selectedLanguage?.toUpperCase();
-      doc.setFont('times', 'bold');
-      doc.setTextColor(...goldColor);
-      doc.setFontSize(28);
-      doc.text(`${langName} MASTERY`, centerX, 135, { align: 'center' });
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...colors.navy);
+      doc.setFontSize(24);
+      doc.text(`${langName} PROGRAMMING`, centerX, 140, { align: 'center' });
+
+      // --- FOOTER & SIGNATURE ---
+      
       const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-      doc.setFont('times', 'normal');
-      doc.setTextColor(...darkGrey);
+      // Generate Fake ID
+      const certID = `ID: ABT-${Math.floor(100000 + Math.random() * 900000)}-${new Date().getFullYear()}`;
+
+      const bottomY = 165;
+      
+      // Kolom Kiri: Tanggal
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...colors.textGrey);
+      doc.setFontSize(10);
+      doc.text('Date Issued', 50, bottomY);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...colors.darkGrey);
       doc.setFontSize(12);
-      doc.text('Date Issued: ' + dateStr, 60, 160, { align: 'center' });
-      doc.text('Authorized by AstByte Technology', width - 60, 160, { align: 'center' });
-      doc.save(`Certificate_${langName}_${user.full_name}.pdf`);
+      doc.text(dateStr, 50, bottomY + 7);
+
+      // Kolom Kanan: Tanda Tangan (Simulasi)
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...colors.textGrey);
+      doc.setFontSize(10);
+      doc.text('Authorized Signature', width - 60, bottomY, { align: 'center' });
+      
+      // Garis Tanda Tangan
+      doc.setDrawColor(...colors.navy);
+      doc.line(width - 80, bottomY + 5, width - 40, bottomY + 5);
+      
+      doc.setFont('helvetica', 'bolditalic'); // Simulasi tanda tangan
+      doc.setTextColor(...colors.navy);
+      doc.setFontSize(14);
+      doc.text('AstByte Team', width - 60, bottomY - 2, { align: 'center' });
+
+      // CERTIFICATE ID (Pojok Kiri Bawah - Kecil)
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(150, 150, 150);
+      doc.setFontSize(8);
+      doc.text(certID, 25, height - 10);
+
+      // Simpan
+      doc.save(`Certificate_${langName}_${user.full_name.replace(/\s+/g, '_')}.pdf`);
+
     } catch (err) {
       console.error(err);
       alert("Gagal membuat sertifikat");
@@ -301,7 +384,7 @@ export default function Dashboard() {
       setGeneratingCert(false);
     }
   };
-
+  
   // --- PDF Module Logic ---
   const downloadModulePDF = async (material: LearningMaterial) => {
     if (plan !== 'plus') {
