@@ -1,5 +1,5 @@
 // src/pages/Dashboard.tsx
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import type { LearningMaterial } from '../types/learning';
@@ -22,12 +22,16 @@ import {
   Lock,
   Download,
   CheckCircle,
-  FileText
+  FileText,
+  RefreshCw // Ikon baru untuk indikator sync
 } from 'lucide-react';
 
 /* ================================
  * Config & Types
  * ================================ */
+// URL Backend Anda (Pastikan sesuai dengan yang berjalan)
+const API_BASE = 'https://authx.astbyte.com';
+
 type Lang = {
   id: 'python' | 'php' | 'javascript' | 'typescript' | 'ruby' | 'go' | 'mysql' | 'postgresql';
   name: string;
@@ -54,7 +58,9 @@ type Plan = 'free' | 'pro' | 'plus';
  * Main Component
  * ================================ */
 export default function Dashboard() {
-  const { user, logout, loading: authLoading } = useAuth();
+  // Pastikan useAuth mengembalikan token JWT juga
+  // Jika context Anda belum return token, Anda bisa ambil dari localStorage sementara: localStorage.getItem('astbyte_token')
+  const { user, logout, loading: authLoading } = useAuth(); 
   const navigate = useNavigate();
 
   // --- States ---
@@ -63,8 +69,9 @@ export default function Dashboard() {
     typeof window !== 'undefined' ? localStorage.getItem('cl_lang') : null
   );
   
-  // State untuk Progress
+  // State Progress & Sync
   const [progressMap, setProgressMap] = useState<Record<string, number>>({});
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const [showProfile, setShowProfile] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -76,26 +83,49 @@ export default function Dashboard() {
   const [query, setQuery] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('order');
   
-  // Update Title
   useEffect(() => {
     document.title = 'Dashboard | New Coreline by AstByte';
   }, []);
 
-  // --- Load Progress Unik Berdasarkan User ID ---
+  // --- 1. LOAD PROGRESS DARI SERVER ---
   useEffect(() => {
-    if (user) {
-      const userId = (user as any).id || (user as any).email || 'unknown_user';
-      const storageKey = `cl_progress_${userId}`;
-      
-      const savedProgress = localStorage.getItem(storageKey);
-      if (savedProgress) {
-        setProgressMap(JSON.parse(savedProgress));
-      } else {
-        setProgressMap({});
+    const fetchProgress = async () => {
+      if (!user) return;
+
+      // Ambil token (asumsi tersimpan di localStorage dari login sebelumnya)
+      const token = localStorage.getItem('astbyte_token');
+      if (!token) return;
+
+      try {
+        const response = await fetch(`${API_BASE}/api/learning/progress`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.status === 'success') {
+            // Update state dengan data dari server
+            setProgressMap(result.data || {});
+            
+            // Opsional: Simpan cache ke local storage user ini
+            const userId = (user as any).id || (user as any).email;
+            localStorage.setItem(`cl_progress_${userId}`, JSON.stringify(result.data));
+          }
+        }
+      } catch (error) {
+        console.error("Gagal mengambil progress dari server:", error);
+        // Fallback: Coba load dari local storage jika offline
+        const userId = (user as any).id || (user as any).email;
+        const cached = localStorage.getItem(`cl_progress_${userId}`);
+        if (cached) setProgressMap(JSON.parse(cached));
       }
-    } else {
-      setProgressMap({});
-    }
+    };
+
+    fetchProgress();
   }, [user]);
 
   // Debounce search
@@ -125,7 +155,6 @@ export default function Dashboard() {
 
   const userType = resolveUserType();
   const plan = getPlanFromUser(user);
-  const nextTier = plan === 'free' ? 'Pro' : plan === 'pro' ? 'Plus' : null;
   const nextHref = '/pricing';
 
   // Helper boolean for premium features
@@ -161,20 +190,50 @@ export default function Dashboard() {
     advanced: 'Lanjutan',
   };
 
-  // --- Save Progress Unik Berdasarkan User ID ---
-  const toggleModuleCompletion = (materialId: string) => {
+  // --- 2. UPDATE PROGRESS KE SERVER ---
+  const toggleModuleCompletion = async (materialId: string) => {
     if (!isPremium || !user) return;
 
-    const userId = (user as any).id || (user as any).email || 'unknown_user';
-    const storageKey = `cl_progress_${userId}`;
+    // A. Optimistic Update (Update UI duluan biar cepat)
+    const currentProgress = progressMap[materialId] || 0;
+    const newProgress = currentProgress === 100 ? 0 : 100;
+    
+    setProgressMap(prev => ({
+      ...prev,
+      [materialId]: newProgress
+    }));
 
-    setProgressMap(prev => {
-      const current = prev[materialId] || 0;
-      const newProgress = current === 100 ? 0 : 100;
-      const newState = { ...prev, [materialId]: newProgress };
-      localStorage.setItem(storageKey, JSON.stringify(newState));
-      return newState;
-    });
+    // B. Kirim ke Server
+    setIsSyncing(true);
+    const token = localStorage.getItem('astbyte_token');
+    
+    if (token) {
+      try {
+        await fetch(`${API_BASE}/api/learning/progress`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            material_id: materialId,
+            progress: newProgress
+          })
+        });
+        
+        // Update Local Cache juga untuk backup
+        const userId = (user as any).id || (user as any).email;
+        const storageKey = `cl_progress_${userId}`;
+        const currentCache = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        localStorage.setItem(storageKey, JSON.stringify({ ...currentCache, [materialId]: newProgress }));
+
+      } catch (err) {
+        console.error("Gagal sync ke server:", err);
+        // Optional: Revert UI jika gagal total, tapi biasanya dibiarkan saja untuk retry nanti
+      } finally {
+        setIsSyncing(false);
+      }
+    }
   };
 
   const getProgress = (id: string) => progressMap[id] || 0;
@@ -190,9 +249,7 @@ export default function Dashboard() {
     return allCompleted;
   };
 
-  /* ================================
-   * PROFESSIONAL CERTIFICATE GENERATOR
-   * ================================ */
+  // --- Certificate Generator (Client Side PDF) ---
   const generateCertificate = async () => {
     if (!selectedLanguage || !user || !isPremium) return;
     setGeneratingCert(true);
@@ -200,148 +257,72 @@ export default function Dashboard() {
     try {
       const { default: jsPDF } = await import('jspdf');
       
-      // Init Doc: A4 Landscape
-      const doc = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4'
-      });
-
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       const width = doc.internal.pageSize.getWidth();
       const height = doc.internal.pageSize.getHeight();
       const centerX = width / 2;
 
-      // --- COLORS ---
-      const goldColor = [197, 160, 89]; // Elegant Gold
-      const navyColor = [10, 25, 47];   // Deep Navy
-      const darkGrey = [60, 60, 60];
+      // Colors
+      const goldColor: [number, number, number] = [197, 160, 89];
+      const navyColor: [number, number, number] = [10, 25, 47];
+      const darkGrey: [number, number, number] = [60, 60, 60];
 
-      // --- BACKGROUND & FRAME ---
-      
-      // 1. Cream Background (Paper feel)
+      // Background
       doc.setFillColor(252, 250, 245);
       doc.rect(0, 0, width, height, 'F');
 
-      // 2. Outer Navy Border
-      doc.setDrawColor(navyColor[0], navyColor[1], navyColor[2]);
+      // Borders
+      doc.setDrawColor(...navyColor);
       doc.setLineWidth(2);
       doc.rect(10, 10, width - 20, height - 20);
 
-      // 3. Inner Gold Thick Border
-      doc.setDrawColor(goldColor[0], goldColor[1], goldColor[2]);
+      doc.setDrawColor(...goldColor);
       doc.setLineWidth(1.5);
       doc.rect(13, 13, width - 26, height - 26);
 
-      // 4. Corner Ornaments (Simple geometric corners)
-      const cornerSize = 15;
-      doc.setFillColor(navyColor[0], navyColor[1], navyColor[2]);
-      // Top-Left
-      doc.triangle(10, 10, 10 + cornerSize, 10, 10, 10 + cornerSize, 'F');
-      // Top-Right
-      doc.triangle(width - 10, 10, width - 10 - cornerSize, 10, width - 10, 10 + cornerSize, 'F');
-      // Bottom-Left
-      doc.triangle(10, height - 10, 10, height - 10 - cornerSize, 10 + cornerSize, height - 10, 'F');
-      // Bottom-Right
-      doc.triangle(width - 10, height - 10, width - 10, height - 10 - cornerSize, width - 10 - cornerSize, height - 10, 'F');
-
-      // --- TEXT CONTENT ---
-
-      // Header: "CERTIFICATE"
+      // Text
       doc.setFont('times', 'bold');
-      doc.setTextColor(goldColor[0], goldColor[1], goldColor[2]);
+      doc.setTextColor(...goldColor);
       doc.setFontSize(44);
       doc.text('CERTIFICATE', centerX, 50, { align: 'center' });
 
-      // Sub-Header: "OF ACHIEVEMENT"
       doc.setFont('times', 'normal');
       doc.setFontSize(14);
-      doc.setCharSpace(3); // Spacing antar huruf agar elegan
+      doc.setCharSpace(3);
       doc.text('OF ACHIEVEMENT', centerX, 60, { align: 'center' });
 
-      // Separator Line (Decorative)
-      doc.setDrawColor(navyColor[0], navyColor[1], navyColor[2]);
-      doc.setLineWidth(0.5);
-      doc.line(centerX - 40, 68, centerX + 40, 68);
-      
-      // "Proudly Presented To"
-      doc.setFont('times', 'italic');
-      doc.setTextColor(darkGrey[0], darkGrey[1], darkGrey[2]);
-      doc.setFontSize(14);
-      doc.setCharSpace(0);
-      doc.text('This certificate is proudly presented to', centerX, 85, { align: 'center' });
-
-      // USER NAME (The Star of the Show)
+      // User
       doc.setFont('times', 'bolditalic');
-      doc.setTextColor(navyColor[0], navyColor[1], navyColor[2]); // Navy Blue Name
+      doc.setTextColor(...navyColor);
       doc.setFontSize(40);
+      doc.setCharSpace(0);
       doc.text(user.full_name || 'Student Name', centerX, 105, { align: 'center' });
 
-      // "For successfully completing..."
+      // Course
       doc.setFont('times', 'normal');
-      doc.setTextColor(darkGrey[0], darkGrey[1], darkGrey[2]);
+      doc.setTextColor(...darkGrey);
       doc.setFontSize(12);
       doc.text('For successfully completing the professional course curriculum in:', centerX, 120, { align: 'center' });
 
-      // COURSE / LANGUAGE NAME
       const langName = languageData.find(l => l.id === selectedLanguage)?.name || selectedLanguage?.toUpperCase();
       doc.setFont('times', 'bold');
-      doc.setTextColor(goldColor[0], goldColor[1], goldColor[2]);
+      doc.setTextColor(...goldColor);
       doc.setFontSize(28);
       doc.text(`${langName} MASTERY`, centerX, 135, { align: 'center' });
 
-      // --- FOOTER SECTION ---
-
+      // Footer
       const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-      const certId = `ID: CL-${selectedLanguage?.toUpperCase()}-${Math.floor(Math.random() * 90000) + 10000}`;
-
-      // Date Section (Left)
       doc.setFont('times', 'normal');
-      doc.setTextColor(darkGrey[0], darkGrey[1], darkGrey[2]);
+      doc.setTextColor(...darkGrey);
       doc.setFontSize(12);
-      doc.text('Date Issued', 60, 160, { align: 'center' });
-      doc.text(dateStr, 60, 170, { align: 'center' });
-      doc.setDrawColor(goldColor[0], goldColor[1], goldColor[2]);
-      doc.line(40, 163, 80, 163); // Line under label
+      doc.text('Date Issued: ' + dateStr, 60, 160, { align: 'center' });
+      doc.text('Authorized by AstByte Technology', width - 60, 160, { align: 'center' });
 
-      // Signature Section (Right)
-      doc.text('Director of Education', width - 60, 160, { align: 'center' });
-      
-      // Fake Signature (Script-like using italic)
-      doc.setFont('times', 'italic');
-      doc.setFontSize(20);
-      doc.setTextColor(navyColor[0], navyColor[1], navyColor[2]);
-      doc.text('Astral Byte Technlogy (AstByte)', width - 60, 172, { align: 'center' }); // Simulated signature
-      doc.setDrawColor(goldColor[0], goldColor[1], goldColor[2]);
-      doc.line(width - 80, 163, width - 40, 163);
-
-      // --- SEAL (Stempel) ---
-      // Draw a seal in bottom center
-      doc.setFillColor(goldColor[0], goldColor[1], goldColor[2]);
-      doc.circle(centerX, 165, 12, 'F'); // Outer Gold Circle
-      doc.setFillColor(255, 255, 255);
-      doc.circle(centerX, 165, 10, 'F'); // Inner White Circle
-      doc.setFillColor(goldColor[0], goldColor[1], goldColor[2]);
-      doc.circle(centerX, 165, 8, 'F'); // Inner Gold Dot
-      
-      // Text inside Seal (Mock)
-      doc.setFontSize(6);
-      doc.setTextColor(255, 255, 255);
-      doc.setFont('helvetica', 'bold');
-      doc.text('VERIFIED', centerX, 166, { align: 'center' });
-
-      // --- CERTIFICATE ID ---
-      doc.setFont('courier', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(150, 150, 150);
-      doc.text(certId, centerX, 185, { align: 'center' });
-      doc.text('Verify at: astbyte.com', centerX, 189, { align: 'center' });
-
-      // Save
       doc.save(`Certificate_${langName}_${user.full_name}.pdf`);
 
     } catch (err) {
       console.error(err);
-      alert("Gagal membuat sertifikat. Silakan coba lagi.");
+      alert("Gagal membuat sertifikat");
     } finally {
       setGeneratingCert(false);
     }
@@ -536,6 +517,15 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center gap-2 sm:gap-4">
+              
+              {/* Indikator Sync */}
+              {isSyncing && (
+                <div className="hidden md:flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full animate-pulse">
+                  <RefreshCw className="w-3 h-3 animate-spin" />
+                  Syncing...
+                </div>
+              )}
+
               <div className="hidden md:flex flex-col items-end mr-2">
                 <span className="text-sm font-bold text-slate-800 dark:text-white">{user.full_name}</span>
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
@@ -792,7 +782,7 @@ export default function Dashboard() {
                                  onClick={() => toggleModuleCompletion(m.id)}
                                  className={`w-full text-xs font-medium py-1.5 rounded-lg border transition-colors ${isCompleted ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' : 'bg-white text-slate-500 border-slate-200 hover:text-blue-600'}`}
                               >
-                                 {isCompleted ? 'Tandai Belum Selesai' : 'Tandai Selesai (Demo)'}
+                                 {isCompleted ? 'Tandai Belum Selesai' : 'Tandai Selesai (Simpan ke Server)'}
                               </button>
                             )}
                          </div>
@@ -829,7 +819,7 @@ export default function Dashboard() {
             &copy; {new Date().getFullYear()} Astral Byte Technology (AstByte). All rights reserved.
           </p>
            <div className="flex items-center justify-center gap-4 text-slate-400 text-sm mb-2">
-            <p className='hover:text-blue-500 transition-colors text-xs'>v.2.4</p>
+            <p className='hover:text-blue-500 transition-colors text-xs'>v.2.5 (Sync)</p>
           </div>
         </div>
       </footer>
