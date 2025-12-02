@@ -8,6 +8,9 @@ import {
 
 const AUTHX_BASE = 'https://authx.astbyte.com';
 
+// KITA SAMAKAN KEY-NYA SUPAYA SINKRON DENGAN DASHBOARD
+const TOKEN_KEY = 'astbyte_token'; 
+
 export interface AuthUser {
   public_id: string;
   full_name: string;
@@ -27,14 +30,14 @@ export interface AuthUser {
   subscription_start?: string | null;
   subscription_end?: string | null;
   subscription_status?: 'active' | 'expired' | 'inactive';
+  
+  // Opsional: simpan token di object user juga untuk backup akses
+  token?: string; 
 }
 
 interface AuthContextType {
   user: AuthUser | null;
-  /**
-   * Login pakai token dari authx.astbyte.com
-   * return true kalau berhasil load /me, false kalau gagal
-   */
+  token: string | null; // TAMBAHAN: Kita ekspos token biar bisa dipakai Dashboard
   login: (token: string) => Promise<boolean>;
   logout: () => void;
   loading: boolean;
@@ -60,17 +63,13 @@ async function fetchMe(token: string): Promise<AuthUser | null> {
     const user = data?.data?.user;
     if (!user) return null;
 
-    // Normalisasi info subscription (kalau backend sudah kirim)
-    const subscription_type = (user.subscription_type ??
-      'free') as 'free' | 'pro' | 'plus';
-    const subscription_period = (user.subscription_period ??
-      null) as 'monthly' | 'yearly' | null;
+    // Normalisasi info subscription
+    const subscription_type = (user.subscription_type ?? 'free') as 'free' | 'pro' | 'plus';
+    const subscription_period = (user.subscription_period ?? null) as 'monthly' | 'yearly' | null;
     const subscription_start = (user.subscription_start ?? null) as string | null;
     const subscription_end = (user.subscription_end ?? null) as string | null;
-    const subscription_status = (user.subscription_status ??
-      'inactive') as 'active' | 'expired' | 'inactive';
+    const subscription_status = (user.subscription_status ?? 'inactive') as 'active' | 'expired' | 'inactive';
 
-    // Normalisasi minimal ke shape AuthUser
     const authUser: AuthUser = {
       public_id: user.public_id,
       full_name: user.full_name || user.name || 'Pengguna Astbyte',
@@ -81,15 +80,13 @@ async function fetchMe(token: string): Promise<AuthUser | null> {
       phone_verified: user.phone_verified,
       created_at: user.created_at,
       updated_at: user.updated_at,
-
       subscription_type,
       subscription_period,
       subscription_start,
       subscription_end,
       subscription_status,
+      token: token // Kita selipkan token di sini
     };
-
-    console.log('[AuthContext] /me user ==> ', authUser);
 
     return authUser;
   } catch (err) {
@@ -100,6 +97,7 @@ async function fetchMe(token: string): Promise<AuthUser | null> {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [token, setToken] = useState<string | null>(null); // State untuk Token
   const [loading, setLoading] = useState(true);
 
   // Auto-login dari token yang tersimpan
@@ -107,20 +105,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
 
     const init = async () => {
-      const token = localStorage.getItem('authx_token');
-      if (!token) {
+      // Ganti key jadi TOKEN_KEY ('astbyte_token')
+      const storedToken = localStorage.getItem(TOKEN_KEY); 
+      
+      if (!storedToken) {
         setLoading(false);
         return;
       }
 
-      const me = await fetchMe(token);
+      const me = await fetchMe(storedToken);
       if (!cancelled) {
         if (me) {
           setUser(me);
+          setToken(storedToken); // Set state token
         } else {
-          // token invalid → bersihkan
-          localStorage.removeItem('authx_token');
+          // Token invalid → bersihkan
+          localStorage.removeItem(TOKEN_KEY);
           setUser(null);
+          setToken(null);
         }
         setLoading(false);
       }
@@ -133,16 +135,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Login: terima token dari halaman login
-  const login = async (token: string): Promise<boolean> => {
+  const login = async (newToken: string): Promise<boolean> => {
     try {
-      const me = await fetchMe(token);
+      const me = await fetchMe(newToken);
       if (!me) {
         return false;
       }
 
       setUser(me);
-      localStorage.setItem('authx_token', token);
+      setToken(newToken);
+      localStorage.setItem(TOKEN_KEY, newToken); // Simpan dengan key yang benar
       return true;
     } catch (error) {
       console.error('Login error:', error);
@@ -152,13 +154,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('authx_token');
-    // kalau mau auto-redirect:
+    setToken(null);
+    localStorage.removeItem(TOKEN_KEY); // Hapus key yang benar
     // window.location.href = '/login';
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    // Kita passing 'token' juga ke provider
+    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
