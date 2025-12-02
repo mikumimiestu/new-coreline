@@ -1,4 +1,3 @@
-// src/pages/Dashboard.tsx
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,29 +6,14 @@ import { MOCK_MATERIALS as STUDENT_MATERIALS } from '../data/mockData';
 import { MOCK_MATERIALS as OTHER_MATERIALS } from '../data/otherData';
 import ProfilePage from './ProfilePage';
 import {
-  LogOut,
-  BookOpen,
-  Award,
-  ChevronRight,
-  X,
-  User as UserIcon,
-  Menu,
-  Languages,
-  Loader2,
-  Search,
-  Filter,
-  Crown,
-  Lock,
-  Download,
-  CheckCircle,
-  FileText,
-  RefreshCw // Ikon baru untuk indikator sync
+  LogOut, BookOpen, Award, ChevronRight, X, User as UserIcon,
+  Menu, Languages, Loader2, Search, Filter, Crown, Lock,
+  Download, CheckCircle, FileText, RefreshCw
 } from 'lucide-react';
 
 /* ================================
  * Config & Types
  * ================================ */
-// URL Backend Anda (Pastikan sesuai dengan yang berjalan)
 const API_BASE = 'https://authx.astbyte.com';
 
 type Lang = {
@@ -58,20 +42,21 @@ type Plan = 'free' | 'pro' | 'plus';
  * Main Component
  * ================================ */
 export default function Dashboard() {
-  // Pastikan useAuth mengembalikan token JWT juga
-  // Jika context Anda belum return token, Anda bisa ambil dari localStorage sementara: localStorage.getItem('astbyte_token')
+  // CATATAN: Token Login (JWT) tetap butuh disimpan di localstorage/cookie browser 
+  // sebagai "Kunci" identitas user. Tapi DATA PROGRESS-nya kita ambil murni server.
   const { user, logout, loading: authLoading } = useAuth(); 
   const navigate = useNavigate();
 
   // --- States ---
   const [materials, setMaterials] = useState<LearningMaterial[]>([]);
+  // Filter bahasa boleh disimpan di local biar user gak capek filter ulang
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(() =>
     typeof window !== 'undefined' ? localStorage.getItem('cl_lang') : null
   );
   
-  // State Progress & Sync
   const [progressMap, setProgressMap] = useState<Record<string, number>>({});
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isFetchingProgress, setIsFetchingProgress] = useState(true); // Loading state khusus progress
 
   const [showProfile, setShowProfile] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -87,61 +72,55 @@ export default function Dashboard() {
     document.title = 'Dashboard | New Coreline by AstByte';
   }, []);
 
-  // --- 1. LOAD PROGRESS DARI SERVER (FIXED) ---
+  // --- 1. LOAD PROGRESS (Murni Database / Server Side) ---
   useEffect(() => {
     let isMounted = true;
 
-    const fetchProgress = async () => {
+    const fetchProgressFromServer = async () => {
       if (!user) return;
+      
+      // Ambil Token auth (Kunci masuk)
+      // Kita coba ambil dari berbagai sumber agar di HP terbaca
+      let token = localStorage.getItem('astbyte_token');
+      if (!token && (user as any).token) token = (user as any).token;
 
-      // 1. Coba ambil token dari Context, kalau kosong ambil dari Storage
-      // Ini penting karena kadang context butuh waktu milidetik untuk load
-      const tokenToUse = localStorage.getItem('astbyte_token'); 
-
-      if (!tokenToUse) {
-        console.warn("Token tidak ditemukan, memuat data lokal saja.");
+      if (!token) {
+        console.warn("Belum ada token auth, menunggu login...");
         return;
       }
 
       try {
-        console.log("Mengambil progress dari server...");
+        setIsFetchingProgress(true);
         const response = await fetch(`${API_BASE}/api/learning/progress`, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${tokenToUse}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
 
         if (response.ok) {
           const result = await response.json();
-          if (result.status === 'success' && isMounted) {
-            console.log("Data diterima dari server:", result.data);
-            
-            // Prioritaskan data Server.
-            // Data server menimpa data lokal karena server adalah "Single Source of Truth"
-            const serverData = result.data || {};
-            
-            // Update State
-            setProgressMap(serverData);
-            
-            // Update Cache Lokal (Agar nanti pas buka lagi lebih cepat)
-            const userId = (user as any).id || (user as any).email;
-            localStorage.setItem(`cl_progress_${userId}`, JSON.stringify(serverData));
+          if (isMounted) {
+            // Langsung pakai data dari database, abaikan data lokal
+            const dbData = result.data || {};
+            console.log("Database Sync OK:", dbData);
+            setProgressMap(dbData);
           }
         } else {
-          console.error("Gagal fetch:", response.status);
+            console.error("Gagal ambil data database:", response.status);
         }
       } catch (error) {
-        console.error("Network Error saat fetch progress:", error);
+        console.error("Koneksi Database Error:", error);
+      } finally {
+        if (isMounted) setIsFetchingProgress(false);
       }
     };
 
-    // Jalankan fungsi fetch
-    fetchProgress();
+    fetchProgressFromServer();
 
     return () => { isMounted = false; };
-  }, [user]); // Kita hapus dependency lain agar fokus jalan saat User Ready
+  }, [user]); // Re-fetch cuma kalau user berubah (login)
 
   // Debounce search
   useEffect(() => {
@@ -149,7 +128,7 @@ export default function Dashboard() {
     return () => clearTimeout(t);
   }, [searchText]);
 
-  // Persist lang
+  // Persist lang selection only
   useEffect(() => {
     if (selectedLanguage) localStorage.setItem('cl_lang', selectedLanguage);
     else localStorage.removeItem('cl_lang');
@@ -171,8 +150,6 @@ export default function Dashboard() {
   const userType = resolveUserType();
   const plan = getPlanFromUser(user);
   const nextHref = '/pricing';
-
-  // Helper boolean for premium features
   const isPremium = ['pro', 'plus'].includes(plan);
 
   const userTitle = useMemo(() => {
@@ -205,49 +182,53 @@ export default function Dashboard() {
     advanced: 'Lanjutan',
   };
 
-  // --- 2. UPDATE PROGRESS KE SERVER ---
+  // --- 2. UPDATE PROGRESS KE SERVER (Revised) ---
   const toggleModuleCompletion = async (materialId: string) => {
     if (!isPremium || !user) return;
 
-    // A. Optimistic Update (Update UI duluan biar cepat)
+    // Ambil Token
+    let token = localStorage.getItem('astbyte_token');
+    if (!token && (user as any).token) token = (user as any).token;
+
+    if (!token) {
+        alert("Sesi habis, silakan login ulang.");
+        return;
+    }
+
     const currentProgress = progressMap[materialId] || 0;
     const newProgress = currentProgress === 100 ? 0 : 100;
     
-    setProgressMap(prev => ({
-      ...prev,
-      [materialId]: newProgress
-    }));
+    // Optimistic Update (Update UI biar user ngerasa cepet)
+    // TAPI tidak kita simpan ke localStorage, cuma state sementara
+    setProgressMap(prev => ({ ...prev, [materialId]: newProgress }));
 
-    // B. Kirim ke Server
     setIsSyncing(true);
-    const token = localStorage.getItem('astbyte_token');
-    
-    if (token) {
-      try {
-        await fetch(`${API_BASE}/api/learning/progress`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            material_id: materialId,
-            progress: newProgress
-          })
-        });
-        
-        // Update Local Cache juga untuk backup
-        const userId = (user as any).id || (user as any).email;
-        const storageKey = `cl_progress_${userId}`;
-        const currentCache = JSON.parse(localStorage.getItem(storageKey) || '{}');
-        localStorage.setItem(storageKey, JSON.stringify({ ...currentCache, [materialId]: newProgress }));
 
-      } catch (err) {
-        console.error("Gagal sync ke server:", err);
-        // Optional: Revert UI jika gagal total, tapi biasanya dibiarkan saja untuk retry nanti
-      } finally {
-        setIsSyncing(false);
+    try {
+      const response = await fetch(`${API_BASE}/api/learning/progress`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          material_id: materialId,
+          progress: newProgress
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error("Gagal update database");
       }
+      // Sukses? Kita tidak perlu ngapa-ngapain karena state UI sudah update
+      // Dan data di database sudah tersimpan.
+    } catch (err) {
+      console.error("Gagal sync ke server:", err);
+      // Revert UI jika gagal (Kembalikan ke status sebelumnya)
+      alert("Gagal menyimpan ke database. Cek koneksi internet.");
+      setProgressMap(prev => ({ ...prev, [materialId]: currentProgress }));
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -258,8 +239,6 @@ export default function Dashboard() {
     if (!selectedLanguage) return false;
     if (materials.length === 0) return false;
     if (!isPremium) return false;
-
-    // All displayed materials (filtered by lang) must be 100%
     const allCompleted = materials.every(m => (progressMap[m.id] || 0) === 100);
     return allCompleted;
   };
@@ -268,73 +247,53 @@ export default function Dashboard() {
   const generateCertificate = async () => {
     if (!selectedLanguage || !user || !isPremium) return;
     setGeneratingCert(true);
-
     try {
       const { default: jsPDF } = await import('jspdf');
-      
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       const width = doc.internal.pageSize.getWidth();
       const height = doc.internal.pageSize.getHeight();
       const centerX = width / 2;
-
-      // Colors
       const goldColor: [number, number, number] = [197, 160, 89];
       const navyColor: [number, number, number] = [10, 25, 47];
       const darkGrey: [number, number, number] = [60, 60, 60];
 
-      // Background
       doc.setFillColor(252, 250, 245);
       doc.rect(0, 0, width, height, 'F');
-
-      // Borders
       doc.setDrawColor(...navyColor);
       doc.setLineWidth(2);
       doc.rect(10, 10, width - 20, height - 20);
-
       doc.setDrawColor(...goldColor);
       doc.setLineWidth(1.5);
       doc.rect(13, 13, width - 26, height - 26);
-
-      // Text
       doc.setFont('times', 'bold');
       doc.setTextColor(...goldColor);
       doc.setFontSize(44);
       doc.text('CERTIFICATE', centerX, 50, { align: 'center' });
-
       doc.setFont('times', 'normal');
       doc.setFontSize(14);
       doc.setCharSpace(3);
       doc.text('OF ACHIEVEMENT', centerX, 60, { align: 'center' });
-
-      // User
       doc.setFont('times', 'bolditalic');
       doc.setTextColor(...navyColor);
       doc.setFontSize(40);
       doc.setCharSpace(0);
       doc.text(user.full_name || 'Student Name', centerX, 105, { align: 'center' });
-
-      // Course
       doc.setFont('times', 'normal');
       doc.setTextColor(...darkGrey);
       doc.setFontSize(12);
       doc.text('For successfully completing the professional course curriculum in:', centerX, 120, { align: 'center' });
-
       const langName = languageData.find(l => l.id === selectedLanguage)?.name || selectedLanguage?.toUpperCase();
       doc.setFont('times', 'bold');
       doc.setTextColor(...goldColor);
       doc.setFontSize(28);
       doc.text(`${langName} MASTERY`, centerX, 135, { align: 'center' });
-
-      // Footer
       const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
       doc.setFont('times', 'normal');
       doc.setTextColor(...darkGrey);
       doc.setFontSize(12);
       doc.text('Date Issued: ' + dateStr, 60, 160, { align: 'center' });
       doc.text('Authorized by AstByte Technology', width - 60, 160, { align: 'center' });
-
       doc.save(`Certificate_${langName}_${user.full_name}.pdf`);
-
     } catch (err) {
       console.error(err);
       alert("Gagal membuat sertifikat");
@@ -343,7 +302,6 @@ export default function Dashboard() {
     }
   };
 
-
   // --- PDF Module Logic ---
   const downloadModulePDF = async (material: LearningMaterial) => {
     if (plan !== 'plus') {
@@ -351,52 +309,41 @@ export default function Dashboard() {
       return;
     }
     setDownloadingPdf(material.id);
-
     try {
       const { default: jsPDF } = await import('jspdf');
       const html2canvas = (await import('html2canvas')).default;
-      
       navigate(`/materials/${encodeURIComponent(material.id)}`);
       await new Promise(resolve => setTimeout(resolve, 2000));
-
       const element = document.querySelector('.material-content');
       if (!element) throw new Error('Content not found');
-
       const clone = element.cloneNode(true) as HTMLElement;
       Object.assign(clone.style, {
         background: '#fff', padding: '40px', maxWidth: '800px',
         position: 'absolute', left: '-9999px', top: '0', color: '#000'
       });
-
       clone.querySelectorAll('.pdf-code-block').forEach((el) => {
         Object.assign((el as HTMLElement).style, { background: '#f8f9fa', border: '1px solid #dee2e6' });
       });
       clone.querySelectorAll('*').forEach((el) => {
          if(el instanceof HTMLElement) el.style.color = 'black'; 
       });
-
       document.body.appendChild(clone);
       const canvas = await html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
       document.body.removeChild(clone);
-
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const imgWidth = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
       let heightLeft = imgHeight;
       let position = 0;
-
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= 297;
-
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= 297;
       }
-
       pdf.save(`${material.title.replace(/\s+/g, '_')}.pdf`);
       navigate('/dashboard');
     } catch (error) {
@@ -412,30 +359,24 @@ export default function Dashboard() {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-
     const allMaterials: LearningMaterial[] = [...STUDENT_MATERIALS, ...OTHER_MATERIALS];
     let list = allMaterials.filter((m) => m.user_type === userType);
-
     if (selectedLanguage) {
       list = list.filter((m) => m.language === selectedLanguage);
     }
-
     const q = query.trim().toLowerCase();
     if (q) {
       list = list.filter((m) => m.title.toLowerCase().includes(q) || m.description.toLowerCase().includes(q));
     }
-
     list.sort((a, b) => {
       if (sortKey === 'order') return a.order - b.order;
       if (sortKey === 'title') return a.title.localeCompare(b.title);
       if (sortKey === 'level') return levelLabel[a.level as Level].localeCompare(levelLabel[b.level as Level]);
       return 0;
     });
-
     setMaterials(list);
     const timer = setTimeout(() => setLoading(false), 200);
     return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, selectedLanguage, query, sortKey]);
 
   // --- Auth Checks ---
@@ -521,9 +462,7 @@ export default function Dashboard() {
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-3">
               <Link to="/" className="flex items-center gap-2 group">
-                <div className="h-9 w-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-blue-500/30 shadow-lg group-hover:scale-105 transition-transform">
-                  C
-                </div>
+                <div className="h-9 w-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-blue-500/30 shadow-lg group-hover:scale-105 transition-transform">C</div>
                 <div className="hidden sm:block">
                   <h1 className="text-lg font-bold text-slate-900 dark:text-white leading-none">Coreline</h1>
                   <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Learning</span>
@@ -532,12 +471,10 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center gap-2 sm:gap-4">
-              
-              {/* Indikator Sync */}
               {isSyncing && (
                 <div className="hidden md:flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full animate-pulse">
                   <RefreshCw className="w-3 h-3 animate-spin" />
-                  Syncing...
+                  Saving...
                 </div>
               )}
 
@@ -557,19 +494,10 @@ export default function Dashboard() {
                 </button>
               )}
 
-              <button
-                onClick={() => setShowProfile(true)}
-                className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                title="Profil"
-              >
+              <button onClick={() => setShowProfile(true)} className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
                 <UserIcon className="w-5 h-5" />
               </button>
-
-              <button
-                onClick={logout}
-                className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                title="Keluar"
-              >
+              <button onClick={logout} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
                 <LogOut className="w-5 h-5" />
               </button>
             </div>
@@ -605,8 +533,6 @@ export default function Dashboard() {
                 Selamat datang kembali, mari lanjutkan progressmu.
               </p>
             </div>
-            
-            {/* Upgrade Banner Small */}
             {!isPremium && (
               <div className="hidden md:flex items-center gap-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 px-4 py-2 rounded-xl border border-amber-200 dark:border-amber-800/50">
                 <Crown className="w-5 h-5 text-amber-600 dark:text-amber-500" />
@@ -656,7 +582,6 @@ export default function Dashboard() {
           {/* MATERIAL GRID */}
           <div className={userType === 'student' ? 'lg:col-span-9' : 'lg:col-span-12'}>
             
-            {/* CERTIFICATE BANNER (Visible if eligible) */}
             {checkCertificateEligibility() && (
               <div className="mb-6 p-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in">
                 <div className="flex items-center gap-4">
@@ -681,7 +606,6 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Filter Status Badge */}
             <div className="flex items-center gap-2 mb-6">
               <BookOpen className="w-5 h-5 text-slate-400" />
               <h2 className="text-lg font-bold text-slate-800 dark:text-white">Daftar Modul</h2>
@@ -709,7 +633,7 @@ export default function Dashboard() {
                   const locked = isModuleLocked(m.order);
                   const isDownloading = downloadingPdf === m.id;
                   
-                  // Progress Logic: Only for Pro/Plus
+                  // Progress Logic: Murni dari State (yang didapat dari DB)
                   const progress = isPremium ? getProgress(m.id) : 0;
                   const isCompleted = isPremium && progress === 100;
 
@@ -724,7 +648,6 @@ export default function Dashboard() {
                       `}
                       style={{ animation: `fadeInUp 0.4s ease-out forwards`, animationDelay: `${idx * 50}ms`, opacity: 0 }}
                     >
-                      {/* CARD CONTENT */}
                       <div className={`p-6 flex-1 ${locked ? 'blur-[2px] opacity-60 pointer-events-none' : ''}`}>
                         <div className="flex justify-between items-start mb-4">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${locked ? 'bg-slate-100 dark:bg-slate-800' : isCompleted ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'}`}>
@@ -742,20 +665,23 @@ export default function Dashboard() {
                           {m.description}
                         </p>
 
-                        {/* PROGRESS BAR (Only visible for Pro/Plus) */}
                         {isPremium && (
                           <div className="mb-4">
                             <div className="flex justify-between text-xs font-semibold mb-1">
                                <span className={isCompleted ? 'text-green-600' : 'text-slate-500'}>
-                                 {isCompleted ? 'Selesai' : 'Progress'}
+                                 {isFetchingProgress ? 'Syncing DB...' : isCompleted ? 'Selesai' : 'Progress'}
                                </span>
                                <span className="text-slate-700 dark:text-slate-300">{progress}%</span>
                             </div>
                             <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                               <div 
-                                 className={`h-full transition-all duration-500 ${isCompleted ? 'bg-green-500' : 'bg-blue-500'}`} 
-                                 style={{ width: `${progress}%` }}
-                               />
+                               {isFetchingProgress ? (
+                                   <div className="h-full bg-blue-400/50 animate-pulse w-full"></div>
+                               ) : (
+                                   <div 
+                                     className={`h-full transition-all duration-500 ${isCompleted ? 'bg-green-500' : 'bg-blue-500'}`} 
+                                     style={{ width: `${progress}%` }}
+                                   />
+                               )}
                             </div>
                           </div>
                         )}
@@ -768,10 +694,9 @@ export default function Dashboard() {
                         )}
                       </div>
 
-                      {/* CARD FOOTER / ACTION */}
                       {!locked && (
-                         <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 rounded-b-2xl mt-auto">
-                            <div className="flex gap-2 mb-2">
+                          <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 rounded-b-2xl mt-auto">
+                             <div className="flex gap-2 mb-2">
                               <Link 
                                 to={`/materials/${encodeURIComponent(m.id)}`}
                                 className="flex-1 inline-flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors"
@@ -789,21 +714,19 @@ export default function Dashboard() {
                                   {isDownloading ? <Loader2 className="w-5 h-5 animate-spin"/> : <Download className="w-5 h-5"/>}
                                 </button>
                               )}
-                            </div>
-                            
-                            {/* TOMBOL PROGRESS (Only visible for Pro/Plus) */}
-                            {isPremium && (
-                              <button 
-                                 onClick={() => toggleModuleCompletion(m.id)}
-                                 className={`w-full text-xs font-medium py-1.5 rounded-lg border transition-colors ${isCompleted ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' : 'bg-white text-slate-500 border-slate-200 hover:text-blue-600'}`}
-                              >
-                                 {isCompleted ? 'Tandai Belum Selesai' : 'Tandai Selesai (Simpan ke Server)'}
-                              </button>
-                            )}
-                         </div>
+                             </div>
+                             
+                             {isPremium && (
+                               <button 
+                                  onClick={() => toggleModuleCompletion(m.id)}
+                                  className={`w-full text-xs font-medium py-1.5 rounded-lg border transition-colors ${isCompleted ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' : 'bg-white text-slate-500 border-slate-200 hover:text-blue-600'}`}
+                               >
+                                  {isCompleted ? 'Tandai Belum Selesai' : 'Tandai Selesai (Simpan ke Server)'}
+                               </button>
+                             )}
+                          </div>
                       )}
 
-                      {/* LOCK OVERLAY */}
                       {locked && (
                         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/40 dark:bg-black/40 backdrop-blur-[1px]">
                            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-2xl text-center border border-slate-200 dark:border-slate-700 max-w-[80%]">
@@ -827,19 +750,17 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* FOOTER & COPYRIGHT */}
       <footer className="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 py-8">
         <div className="container mx-auto px-4 sm:px-6 text-center">
           <p className="text-xs text-slate-400">
             &copy; {new Date().getFullYear()} Astral Byte Technology (AstByte). All rights reserved.
           </p>
            <div className="flex items-center justify-center gap-4 text-slate-400 text-sm mb-2">
-            <p className='hover:text-blue-500 transition-colors text-xs'>v.2.5 (Sync)</p>
+            <p className='hover:text-blue-500 transition-colors text-xs'>v.2.6 (Database Only)</p>
           </div>
         </div>
       </footer>
 
-      {/* Custom Styles */}
       <style>{`
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(20px); }
