@@ -794,7 +794,7 @@ export default function Dashboard() {
                  <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                    <BookLock className="w-8 h-8 text-slate-400" />
                  </div>
-                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Materi ini sedang dalam diperbarui.</h3>
+                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Materi ini sedang diperbarui.</h3>
                  <p className="text-slate-500">Kami lagi merapikan konten untuk hasil yang lebih baik.</p>
                </div>
             ) : (
