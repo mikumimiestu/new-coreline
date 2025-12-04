@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import type { LearningMaterial } from '../types/learning';
@@ -39,24 +39,111 @@ type SortKey = 'order' | 'title' | 'level';
 type Plan = 'free' | 'pro' | 'plus';
 
 /* ================================
+ * AdModal Component (OPTIMIZED)
+ * ================================ */
+interface AdModalProps {
+  onClose: () => void;
+}
+
+const AdModal = ({ onClose }: AdModalProps) => {
+  const [countdown, setCountdown] = useState(5); // State dipindah ke sini agar Dashboard tidak re-render
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Logic Countdown
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown((prev) => prev - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown]);
+
+  // Logic Autoplay
+  useEffect(() => {
+    if (videoRef.current) {
+      // Mute diperlukan browser modern agar autoplay berjalan mulus
+      videoRef.current.muted = false; 
+      videoRef.current.play().catch(err => {
+        console.log('Autoplay prevented, trying muted:', err);
+        if(videoRef.current) {
+            videoRef.current.muted = true;
+            videoRef.current.play();
+        }
+      });
+    }
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 pt-8">
+    <div className="relative w-full max-w-md mx-auto">
+        
+        {/* Countdown Badge */}
+        <div className="absolute top-4 left-2 z-50 bg-black/60 backdrop-blur-md rounded-full px-4 py-2 border border-white/10 shadow-lg pointer-events-none">
+          <span className="text-white font-bold font-mono text-lg">
+            Iklan {countdown > 0 ? `(${countdown}s)` : ''}
+          </span>
+        </div>
+
+        {/* Close Button - Muncul saat countdown 0 */}
+        {countdown === 0 && (
+          <button 
+            onClick={onClose}
+            className="absolute top-3 right-2 md:top-4 md:-right-16 z-50 p-3 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all border border-white/20 group shadow-[0_0_20px_rgba(220,38,38,0.5)] animate-bounce-in"
+          >
+            <X className="w-6 h-6 group-hover:scale-110 transition-transform" />
+            <span className="sr-only">Tutup Iklan</span>
+          </button>
+        )}
+
+        {/* Video Container */}
+        <div className="relative w-full bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
+          <video 
+            ref={videoRef}
+            autoPlay 
+            playsInline
+            loop // <--- PENTING: Agar video tidak berhenti saat selesai
+            className="w-full h-auto max-h-[80vh] object-contain mx-auto"
+          >
+            <source src="/adds/desceria2025.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        
+        <p className="mt-4 text-slate-400 text-sm font-medium text-center">
+          {countdown > 0 
+            ? "Bebas iklan dengan berlangganan Pro atau Plus!" 
+            : "Bebas iklan dengan berlangganan Pro atau Plus!"}
+        </p>
+      </div>
+      
+      <style>{`
+        @keyframes bounceIn {
+          0% { transform: scale(0.3); opacity: 0; }
+          50% { transform: scale(1.05); opacity: 1; }
+          70% { transform: scale(0.9); }
+          100% { transform: scale(1); }
+        }
+        .animate-bounce-in { animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+      `}</style>
+    </div>
+  );
+};
+
+/* ================================
  * Main Component
  * ================================ */
 export default function Dashboard() {
-  // CATATAN: Token Login (JWT) tetap butuh disimpan di localstorage/cookie browser 
-  // sebagai "Kunci" identitas user. Tapi DATA PROGRESS-nya kita ambil murni server.
   const { user, logout, loading: authLoading } = useAuth(); 
   const navigate = useNavigate();
 
   // --- States ---
   const [materials, setMaterials] = useState<LearningMaterial[]>([]);
-  // Filter bahasa boleh disimpan di local biar user gak capek filter ulang
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(() =>
     typeof window !== 'undefined' ? localStorage.getItem('cl_lang') : null
   );
   
   const [progressMap, setProgressMap] = useState<Record<string, number>>({});
   const [isSyncing, setIsSyncing] = useState(false);
-  const [isFetchingProgress, setIsFetchingProgress] = useState(true); // Loading state khusus progress
+  const [isFetchingProgress, setIsFetchingProgress] = useState(true);
 
   const [showProfile, setShowProfile] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -68,19 +155,21 @@ export default function Dashboard() {
   const [query, setQuery] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('order');
   
+  // --- AD MODAL STATES (Simpler now) ---
+  const [showAdModal, setShowAdModal] = useState(false);
+  const [pendingMaterialId, setPendingMaterialId] = useState<string | null>(null);
+
   useEffect(() => {
     document.title = 'Dashboard | New Coreline by AstByte';
   }, []);
 
-  // --- 1. LOAD PROGRESS (Murni Database / Server Side) ---
+  // --- 1. LOAD PROGRESS ---
   useEffect(() => {
     let isMounted = true;
 
     const fetchProgressFromServer = async () => {
       if (!user) return;
       
-      // Ambil Token auth (Kunci masuk)
-      // Kita coba ambil dari berbagai sumber agar di HP terbaca
       let token = localStorage.getItem('astbyte_token');
       if (!token && (user as any).token) token = (user as any).token;
 
@@ -102,13 +191,9 @@ export default function Dashboard() {
         if (response.ok) {
           const result = await response.json();
           if (isMounted) {
-            // Langsung pakai data dari database, abaikan data lokal
             const dbData = result.data || {};
-            console.log("Database Sync OK:", dbData);
             setProgressMap(dbData);
           }
-        } else {
-            console.error("Gagal ambil data database:", response.status);
         }
       } catch (error) {
         console.error("Koneksi Database Error:", error);
@@ -118,17 +203,14 @@ export default function Dashboard() {
     };
 
     fetchProgressFromServer();
-
     return () => { isMounted = false; };
-  }, [user]); // Re-fetch cuma kalau user berubah (login)
+  }, [user]);
 
-  // Debounce search
   useEffect(() => {
     const t = setTimeout(() => setQuery(searchText), 300);
     return () => clearTimeout(t);
   }, [searchText]);
 
-  // Persist lang selection only
   useEffect(() => {
     if (selectedLanguage) localStorage.setItem('cl_lang', selectedLanguage);
     else localStorage.removeItem('cl_lang');
@@ -182,11 +264,30 @@ export default function Dashboard() {
     advanced: 'Lanjutan',
   };
 
-  // --- 2. UPDATE PROGRESS KE SERVER (Revised) ---
+  // --- HANDLE TOMBOL MULAI ---
+  const handleStartModule = (materialId: string) => {
+    if (isPremium) {
+      navigate(`/materials/${encodeURIComponent(materialId)}`);
+    } else {
+      setPendingMaterialId(materialId);
+      setShowAdModal(true);
+      // Countdown sekarang diatur di dalam AdModal sendiri
+    }
+  };
+
+  // --- CLOSE AD MODAL ---
+  const closeAdModal = () => {
+    setShowAdModal(false);
+    if (pendingMaterialId) {
+      navigate(`/materials/${encodeURIComponent(pendingMaterialId)}`);
+      setPendingMaterialId(null);
+    }
+  };
+
+  // --- 2. UPDATE PROGRESS KE SERVER ---
   const toggleModuleCompletion = async (materialId: string) => {
     if (!isPremium || !user) return;
 
-    // Ambil Token
     let token = localStorage.getItem('astbyte_token');
     if (!token && (user as any).token) token = (user as any).token;
 
@@ -198,10 +299,7 @@ export default function Dashboard() {
     const currentProgress = progressMap[materialId] || 0;
     const newProgress = currentProgress === 100 ? 0 : 100;
     
-    // Optimistic Update (Update UI biar user ngerasa cepet)
-    // TAPI tidak kita simpan ke localStorage, cuma state sementara
     setProgressMap(prev => ({ ...prev, [materialId]: newProgress }));
-
     setIsSyncing(true);
 
     try {
@@ -217,15 +315,10 @@ export default function Dashboard() {
         })
       });
       
-      if (!response.ok) {
-        throw new Error("Gagal update database");
-      }
-      // Sukses? Kita tidak perlu ngapa-ngapain karena state UI sudah update
-      // Dan data di database sudah tersimpan.
+      if (!response.ok) throw new Error("Gagal update database");
     } catch (err) {
       console.error("Gagal sync ke server:", err);
-      // Revert UI jika gagal (Kembalikan ke status sebelumnya)
-      alert("Gagal menyimpan ke database. Cek koneksi internet.");
+      alert("Gagal menyimpan ke database.");
       setProgressMap(prev => ({ ...prev, [materialId]: currentProgress }));
     } finally {
       setIsSyncing(false);
@@ -234,7 +327,6 @@ export default function Dashboard() {
 
   const getProgress = (id: string) => progressMap[id] || 0;
 
-  // Check eligibility for certificate
   const checkCertificateEligibility = () => {
     if (!selectedLanguage) return false;
     if (materials.length === 0) return false;
@@ -243,72 +335,57 @@ export default function Dashboard() {
     return allCompleted;
   };
 
-  // --- Certificate Generator (Client Side PDF) ---
+  // --- Certificate Generator ---
   const generateCertificate = async () => {
     if (!selectedLanguage || !user || !isPremium) return;
     setGeneratingCert(true);
 
     try {
       const { default: jsPDF } = await import('jspdf');
-      // Format A4 Landscape
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       
       const width = doc.internal.pageSize.getWidth();
       const height = doc.internal.pageSize.getHeight();
       
-      // Modern Color Palette
       const colors = {
-        navy: [10, 25, 47] as [number, number, number], // Deep Navy
-        gold: [197, 160, 89] as [number, number, number], // Muted Gold
+        navy: [10, 25, 47] as [number, number, number],
+        gold: [197, 160, 89] as [number, number, number],
         white: [255, 255, 255] as [number, number, number],
         lightGrey: [240, 240, 240] as [number, number, number],
         darkGrey: [50, 50, 50] as [number, number, number],
         textGrey: [100, 100, 100] as [number, number, number]
       };
 
-      // 1. Background Clean
       doc.setFillColor(...colors.white);
       doc.rect(0, 0, width, height, 'F');
-
-      // 2. Desain Geometris Modern (Aksen Kiri & Kanan)
-      // Blok Navy di Kiri
       doc.setFillColor(...colors.navy);
       doc.rect(0, 0, 15, height, 'F'); 
-
-      // Segitiga Emas di Pojok Kanan Atas
       doc.setFillColor(...colors.gold);
       doc.triangle(width, 0, width - 60, 0, width, 60, 'F');
       
-      // Aksen Garis Bawah
       doc.setDrawColor(...colors.navy);
       doc.setLineWidth(1);
       doc.line(25, height - 20, width - 25, height - 20);
 
-      // --- KONTEN ---
-      
-      const centerX = (width + 15) / 2; // Center offset karena ada sidebar kiri 15mm
+      const centerX = (width + 15) / 2;
 
-      // HEADER: Company Name (Kecil di atas)
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...colors.textGrey);
       doc.setFontSize(10);
       doc.text('ASTRAL BYTE TECHNOLOGY', 25, 20);
 
-      // TITLE: CERTIFICATE
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...colors.navy);
       doc.setFontSize(50);
-      doc.setCharSpace(2); // Huruf agak renggang biar elegan
+      doc.setCharSpace(2);
       doc.text('CERTIFICATE', centerX, 60, { align: 'center' });
 
-      // SUBTITLE: OF ACHIEVEMENT
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(...colors.gold);
       doc.setFontSize(16);
       doc.setCharSpace(4);
       doc.text('OF ACHIEVEMENT', centerX, 70, { align: 'center' });
 
-      // NAMA USER
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...colors.darkGrey);
       doc.setFontSize(36);
@@ -316,34 +393,27 @@ export default function Dashboard() {
       const userName = user.full_name || 'Student Name';
       doc.text(userName, centerX, 100, { align: 'center' });
 
-      // GARIS DI BAWAH NAMA (Pemisah)
       doc.setDrawColor(...colors.gold);
       doc.setLineWidth(0.5);
       doc.line(centerX - 40, 105, centerX + 40, 105);
 
-      // BODY TEXT
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(...colors.textGrey);
       doc.setFontSize(12);
       doc.text('This certificate is proudly presented to the above mentioned for', centerX, 118, { align: 'center' });
       doc.text('successfully demonstrating professional mastery in:', centerX, 124, { align: 'center' });
 
-      // NAMA KURSUS (LANGUAGE)
       const langName = languageData.find(l => l.id === selectedLanguage)?.name || selectedLanguage?.toUpperCase();
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...colors.navy);
       doc.setFontSize(24);
       doc.text(`${langName} PROGRAMMING`, centerX, 140, { align: 'center' });
 
-      // --- FOOTER & SIGNATURE ---
-      
       const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-      // Generate Fake ID
       const certID = `ID: ABT-${Math.floor(100000 + Math.random() * 900000)}-${new Date().getFullYear()}`;
 
       const bottomY = 165;
       
-      // Kolom Kiri: Tanggal
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(...colors.textGrey);
       doc.setFontSize(10);
@@ -353,28 +423,24 @@ export default function Dashboard() {
       doc.setFontSize(12);
       doc.text(dateStr, 50, bottomY + 7);
 
-      // Kolom Kanan: Tanda Tangan (Simulasi)
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(...colors.textGrey);
       doc.setFontSize(10);
       doc.text('Authorized Signature', width - 60, bottomY, { align: 'center' });
       
-      // Garis Tanda Tangan
       doc.setDrawColor(...colors.navy);
       doc.line(width - 80, bottomY + 5, width - 40, bottomY + 5);
       
-      doc.setFont('helvetica', 'bolditalic'); // Simulasi tanda tangan
+      doc.setFont('helvetica', 'bolditalic');
       doc.setTextColor(...colors.navy);
       doc.setFontSize(14);
       doc.text('AstByte Team', width - 60, bottomY - 2, { align: 'center' });
 
-      // CERTIFICATE ID (Pojok Kiri Bawah - Kecil)
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(150, 150, 150);
       doc.setFontSize(8);
       doc.text(certID, 25, height - 10);
 
-      // Simpan
       doc.save(`Certificate_${langName}_${user.full_name.replace(/\s+/g, '_')}.pdf`);
 
     } catch (err) {
@@ -489,7 +555,7 @@ export default function Dashboard() {
   if (showProfile) return <ProfilePage onBack={() => setShowProfile(false)} />;
 
   /* ================================
-   * Sub-Components (Internal)
+   * Sub-Components
    * ================================ */
   const Sidebar = ({ mobile }: { mobile?: boolean }) => (
     <div className={`flex flex-col gap-3 ${mobile ? '' : 'sticky top-24'}`}>
@@ -539,6 +605,11 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0B0F19] font-sans">
       
+      {/* AD MODAL (Tanpa props countdown) */}
+      {showAdModal && (
+        <AdModal onClose={closeAdModal} />
+      )}
+
       {/* NAVBAR */}
       <nav className="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -716,7 +787,6 @@ export default function Dashboard() {
                   const locked = isModuleLocked(m.order);
                   const isDownloading = downloadingPdf === m.id;
                   
-                  // Progress Logic: Murni dari State (yang didapat dari DB)
                   const progress = isPremium ? getProgress(m.id) : 0;
                   const isCompleted = isPremium && progress === 100;
 
@@ -780,12 +850,12 @@ export default function Dashboard() {
                       {!locked && (
                           <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 rounded-b-2xl mt-auto">
                              <div className="flex gap-2 mb-2">
-                              <Link 
-                                to={`/materials/${encodeURIComponent(m.id)}`}
+                              <button 
+                                onClick={() => handleStartModule(m.id)}
                                 className="flex-1 inline-flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors"
                               >
                                 {isCompleted ? 'Ulangi' : 'Mulai'} <ChevronRight className="w-4 h-4" />
-                              </Link>
+                              </button>
                               
                               {plan === 'plus' && (
                                 <button
