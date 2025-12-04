@@ -3,12 +3,18 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import type { LearningMaterial } from '../types/learning';
 import { MOCK_MATERIALS as STUDENT_MATERIALS } from '../data/mockData';
 import { MOCK_MATERIALS as OTHER_MATERIALS } from '../data/otherData';
+import { MOCK_MATERIALS as PYTHON_MATERIALS } from '../data/pythonData';
+import { MOCK_MATERIALS as GO_MATERIALS } from '../data/golangData';
+import { MOCK_MATERIALS as MYSQL_MATERIALS } from '../data/mysqlData';
 import { ArrowLeft, BookOpen } from 'lucide-react';
 import MaterialContent from '../components/MaterialContent';
 
 const ALL_MATERIALS: LearningMaterial[] = [
   ...STUDENT_MATERIALS,
   ...OTHER_MATERIALS,
+  ...PYTHON_MATERIALS,
+  ...GO_MATERIALS,
+  ...MYSQL_MATERIALS
 ];
 
 export default function MaterialPage() {

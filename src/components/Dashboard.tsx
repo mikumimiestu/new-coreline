@@ -2,13 +2,17 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import type { LearningMaterial } from '../types/learning';
-import { MOCK_MATERIALS as STUDENT_MATERIALS } from '../data/mockData';
+// import { MOCK_MATERIALS as STUDENT_MATERIALS } from '../data/mockData';
 import { MOCK_MATERIALS as OTHER_MATERIALS } from '../data/otherData';
+import { MOCK_MATERIALS as PYTHON_MATERIALS } from '../data/pythonData';
+import { MOCK_MATERIALS as GO_MATERIALS } from '../data/golangData';
+import { MOCK_MATERIALS as  MYSQL_MATERIALS } from '../data/mysqlData';
 import ProfilePage from './ProfilePage';
 import {
   LogOut, BookOpen, Award, ChevronRight, X, User as UserIcon,
   Menu, Languages, Loader2, Search, Filter, Crown, Lock,
-  Download, CheckCircle, FileText, RefreshCw
+  Download, CheckCircle, FileText, RefreshCw,
+  BookLock, AlertTriangle
 } from 'lucide-react';
 
 /* ================================
@@ -17,8 +21,8 @@ import {
 const API_BASE = 'https://authx.astbyte.com';
 
 type Lang = {
-  id: 'python' | 'php' | 'javascript' | 'typescript' | 'ruby' | 'go' | 'mysql' | 'postgresql';
-  name: string;
+  id: 'python' | 'php' | 'javascript' | 'typescript' | 'ruby' | 'go' | 'sql' | 'postgresql' | 'java' | 'swift' | 'dart';
+  name: string | JSX.Element;
   iconUrl: string;
   comingSoon?: boolean;
 };
@@ -26,12 +30,24 @@ type Lang = {
 const languageData: readonly Lang[] = [
   { id: 'python', name: 'Python', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
   { id: 'php', name: 'PHP', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg' },
-  { id: 'javascript', name: 'JavaScript', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg' },
-  { id: 'typescript', name: 'TypeScript', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
-  { id: 'ruby', name: 'Ruby', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg' },
-  { id: 'go', name: 'Go', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg', comingSoon: true },
-  { id: 'mysql', name: 'MySQL', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg', comingSoon: true },
+  { id: 'javascript', name: (<div className="flex items-center gap-1">
+      JavaScript
+      <AlertTriangle className="w-4 h-4 text-yellow-500" />
+    </div>), iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg'},
+  { id: 'typescript', name: (<div className="flex items-center gap-1">
+      TypeScript
+      <AlertTriangle className="w-4 h-4 text-yellow-500" />
+    </div>), iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
+  { id: 'ruby', name: (<div className="flex items-center gap-1">
+      JavaScript
+      <AlertTriangle className="w-4 h-4 text-yellow-500" />
+    </div>), iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg' },
+  { id: 'go', name: 'Go', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg' },
+  { id: 'sql', name: 'MySQL', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg'},
   { id: 'postgresql', name: 'PostgreSQL', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg', comingSoon: true },
+  { id: 'java', name: 'Java', iconUrl: 'https://www.svgrepo.com/show/452234/java.svg', comingSoon: true },
+  { id: 'swift', name: 'Swift', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/swift/swift-original.svg', comingSoon: true },
+  { id: 'dart', name: 'Dart', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dart/dart-original.svg', comingSoon: true },
 ] as const;
 
 type Level = 'beginner' | 'intermediate' | 'advanced';
@@ -508,7 +524,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    const allMaterials: LearningMaterial[] = [...STUDENT_MATERIALS, ...OTHER_MATERIALS];
+    const allMaterials: LearningMaterial[] = [...OTHER_MATERIALS, ...PYTHON_MATERIALS, ...GO_MATERIALS, ...MYSQL_MATERIALS];
     let list = allMaterials.filter((m) => m.user_type === userType);
     if (selectedLanguage) {
       list = list.filter((m) => m.language === selectedLanguage);
@@ -776,10 +792,10 @@ export default function Dashboard() {
             ) : materials.length === 0 ? (
                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-12 text-center">
                  <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                   <Search className="w-8 h-8 text-slate-400" />
+                   <BookLock className="w-8 h-8 text-slate-400" />
                  </div>
-                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Tidak ditemukan</h3>
-                 <p className="text-slate-500">Coba ubah filter bahasa atau kata kunci pencarian.</p>
+                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Materi ini sedang dalam diperbarui.</h3>
+                 <p className="text-slate-500">Kami lagi merapikan konten untuk hasil yang lebih baik.</p>
                </div>
             ) : (
               <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
@@ -874,7 +890,7 @@ export default function Dashboard() {
                                   onClick={() => toggleModuleCompletion(m.id)}
                                   className={`w-full text-xs font-medium py-1.5 rounded-lg border transition-colors ${isCompleted ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' : 'bg-white text-slate-500 border-slate-200 hover:text-blue-600'}`}
                                >
-                                  {isCompleted ? 'Tandai Belum Selesai' : 'Tandai Selesai (Simpan ke Server)'}
+                                  {isCompleted ? 'Tandai Belum Selesai' : 'Tandai Selesai (Sync)'}
                                </button>
                              )}
                           </div>

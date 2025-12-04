@@ -78,9 +78,9 @@ export default function PricingPage() {
       features: [
         { label: "Akses pengenalan materi", ok: true },
         { label: "Progress & penyimpanan lokal", ok: false },
+        { label: "No ads", ok: false },
         { label: "Mode offline (download materi)", ok: false },
         { label: "Akses Source Code Project", ok: false },
-        { label: "Modul premium & proyek nyata", ok: false },
         { label: "Sertifikat terverifikasi", ok: false },
       ],
     },
@@ -339,6 +339,7 @@ export default function PricingPage() {
                 ["Materi dasar", true, true, true],
                 ["Modul premium & Kuis", false, true, true],
                 ["Sertifikat otomatis", false, true, true],
+                ["No ads", false, true, true],
                 ["Mentoring 1:1 (Chat)", false, false, true],
                 ["Akses Source Code Project", false, false, true], // Pengganti Kelas Live
                 ["Dukungan prioritas", false, false, true],
