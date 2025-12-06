@@ -932,7 +932,7 @@ export default function Dashboard() {
             &copy; {new Date().getFullYear()} Astral Byte Technology (AstByte). All rights reserved.
           </p>
            <div className="flex items-center justify-center gap-4 text-slate-400 text-sm mb-2">
-            <p className='hover:text-blue-500 transition-colors text-xs'>v.1.12.25.4</p>
+            <p className='hover:text-blue-500 transition-colors text-xs'>v1.12.25.4</p>
           </div>
         </div>
       </footer>
