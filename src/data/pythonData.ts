@@ -37,93 +37,60 @@ export const MOCK_MATERIALS: LearningMaterial[] = [
     id: 'py-01',
     user_type: 'student',
     language: 'python',
-    title: 'Pengenalan Python (Apa itu & Sejarah)',
-    description: 'Definisi, ekosistem, sejarah Python, dan instalasi dasar.',
+    title: 'Pengenalan Python & Lingkungan Kerja',
+    description: 'Filosofi Python, Instalasi, Virtual Environment (venv), dan Cara Kerja Interpreter.',
     content: `# 🐍 Pengenalan Python
 
 ## Apa itu Python?
-Python adalah bahasa pemrograman **high-level**, **interpreted**, dan **multi-paradigm** (mendukung prosedural, OOP, dan fungsional).
-Filosofi utamanya adalah **readability** (keterbacaan kode) dan **developer productivity** (produktivitas pengembang).
+Python adalah bahasa pemrograman **High-level**, **Interpreted**, dan **General-purpose**.
+Terkenal dengan filosofi *"Readability counts"* (Keterbacaan itu penting). Kode Python seringkali terlihat seperti Bahasa Inggris sederhana.
 
-> "Python is powerful... and fast; plays well with others; runs everywhere; is friendly & easy to learn; is Open."
-
-**Karakteristik Utama:**
-- **Sintaks Sederhana:** Mirip bahasa Inggris, mengurangi "boilerplate code".
-- **Interpreted:** Kode dieksekusi baris per baris, memudahkan debugging.
-- **Dynamic Typing:** Tidak perlu mendeklarasikan tipe data variabel secara eksplisit (misal: \`int x\`).
-- **Batteries Included:** Memiliki standard library yang sangat lengkap.
+**Kenapa Python Populer?**
+1.  **Data Science & AI:** (Pandas, NumPy, PyTorch).
+2.  **Web Backend:** (Django, FastAPI).
+3.  **Automation/Scripting:** (Bot, Scraping).
 
 ---
 
-## 🕰️ Sejarah Singkat
-Python dibuat oleh **Guido van Rossum** di CWI (Belanda) sebagai proyek hobi saat liburan Natal.
+## 🛠️ Lingkungan Kerja (Wajib Tahu!)
+Pemula sering salah karena menginstal library secara global. **Gunakan Virtual Environment** agar project tidak saling bentrok.
 
-| Tahun | Versi/Event | Fitur Kunci |
-|:---:|:---|:---|
-| 1991 | **Python 0.9.0** | Rilis publik pertama (Functions, classes, lists, dicts). |
-| 2000 | **Python 2.0** | List comprehensions, Garbage collection. |
-| 2008 | **Python 3.0** | *Breaking change* besar-besaran untuk membereskan inkonsistensi (Unicode default). |
-| 2020 | **Python 2 EOL** | Python 2 resmi dimatikan. Semua industri pindah ke Python 3. |
-| 2024+ | **Python 3.12+** | Peningkatan performa signifikan, error message yang lebih manusiawi. |
+### 1. Membuat Virtual Environment (Venv)
+\`\`\`bash
+# Mac/Linux
+python3 -m venv .venv
+source .venv/bin/activate
 
----
+# Windows
+python -m venv .venv
+.venv\\Scripts\\activate
+\`\`\`
+*Tanda sukses: Di terminal muncul tulisan (.venv).*
 
-## 💡 Mengapa Python Mendominasi Industri?
-1. **Data Science & AI:** De-facto standard (NumPy, Pandas, PyTorch).
-2. **Web Development:** Framework cepat dan aman (Django, FastAPI).
-3. **Automation:** Scripting untuk DevOps, bot, dan scraping sangat mudah.
-4. **Cross-Platform:** Berjalan di Windows, Mac, Linux, hingga Raspberry Pi.
-
----
-
-## 💻 Mari Mencoba Coding!
-
-### 1. Hello World
-\`\`\`python
-# Fungsi print() digunakan untuk menampilkan output ke layar
-print("Halo, selamat datang di dunia Python!")
+### 2. Struktur Project Modern
+\`\`\`text
+my_project/
+├── .venv/            # Folder environment (JANGAN DI-EDIT)
+├── src/              # Kode sumber
+│   └── main.py
+├── requirements.txt  # Daftar library
+└── README.md
 \`\`\`
 
-### 2. Input & Output Interaktif
+## 💻 Program Pertama
 \`\`\`python
-# Mengambil input dari user (selalu bertipe string)
-nama = input("Masukkan nama Anda: ")
+# print() adalah fungsi bawaan untuk output
+print("Hello World!") 
 
-# f-string (Python 3.6+) untuk menyisipkan variabel ke string
-print(f"Senang bertemu denganmu, {nama}!")
+# Indentasi (Spasi) sangat krusial di Python!
+if True:
+    print("Ini menjorok ke dalam (4 spasi)")
+    # print("Ini error jika spasinya tidak pas")
 \`\`\`
-
----
-
-## 🧠 Konsep Dasar Sintaks
-
-### Variabel & Tipe Data Dasar
-Python menentukan tipe data secara otomatis saat *runtime*.
-\`\`\`python
-umur = 21           # Integer (bilangan bulat)
-tinggi = 170.5      # Float (desimal)
-nama = "Zaki"       # String (teks)
-is_student = True   # Boolean (True/False)
-hobi = ["Coding", "Gaming"] # List (daftar)
-\`\`\`
-
-### Indentasi itu Wajib!
-Tidak seperti C++ atau Java yang menggunakan \`{}\`, Python menggunakan **spasi/indentasi** untuk blok kode.
-\`\`\`python
-if umur >= 18:
-    print("Sudah Dewasa")  # Baris ini menjorok ke dalam (4 spasi)
-    print("Boleh membuat KTP")
-else:
-    print("Belum Dewasa")
-\`\`\`
-
----
 
 ## 🎯 Outcome Modul
-Setelah modul ini, Anda diharapkan:
-1. Mengerti filosofi "Zen of Python".
-2. Bisa menginstal Python dan menjalankannya di terminal.
-3. Memahami perbedaan mendasar Python dengan bahasa lain (seperti C/Java).
+- Bisa membuat isolasi project dengan \`venv\`.
+- Mengerti bahwa Python menggunakan **Indentasi** sebagai pengganti \`{}\` (kurung kurawal).
 `,
     level: 'beginner',
     order: 1,
@@ -133,90 +100,56 @@ Setelah modul ini, Anda diharapkan:
     id: 'py-02',
     user_type: 'student',
     language: 'python',
-    title: 'Lingkungan Kerja & Best Practices',
-    description: 'Virtual Environment, PEP 8, Type Hinting, dan Modern Syntax.',
-    content: `# Lingkungan Kerja & Standar Kode
+    title: 'Variabel, Tipe Data & Type Hinting',
+    description: 'Dynamic Typing vs Static Type Hints, f-strings, dan Input User.',
+    content: `# Variabel & Modern Python
 
-## 1. Virtual Environment (Wajib!)
-Mengapa butuh ini? Agar library antar project tidak bentrok (misal: Project A butuh Django 3, Project B butuh Django 5).
-
-**Cara Membuat & Aktivasi:**
-\`\`\`bash
-# 1. Buat folder environment bernama .venv
-python -m venv .venv
-
-# 2. Aktivasi
-# Windows:
-.venv\\Scripts\\activate
-# Mac/Linux:
-source .venv/bin/activate
-
-# 3. Cek apakah sudah aktif (biasanya ada tanda (.venv) di terminal)
-which python  # atau 'where python' di windows
-\`\`\`
-
-## 2. Struktur Proyek Modern
-Jangan menaruh semua kode di satu folder sembarangan. Gunakan \`pyproject.toml\` sebagai standar konfigurasi modern.
-
-\`\`\`toml
-# pyproject.toml (Pengganti requirements.txt & setup.py lama)
-[project]
-name = "aplikasi_saya"
-version = "0.1.0"
-dependencies = [
-    "requests",
-    "pandas"
-]
-requires-python = ">=3.10"
-\`\`\`
-
-## 3. Type Hinting & Anotasi
-Python tetap *dynamic*, tapi *type hints* membantu editor (VS Code) mendeteksi bug lebih awal.
+## 1. Variabel & Tipe Data
+Python itu *Dynamic Typing* (tipe data ditentukan otomatis), TAPI di industri modern kita menggunakan **Type Hints** agar kode lebih aman dan jelas.
 
 \`\`\`python
-# Tanpa Type Hint (Bisa error kalau 'a' bukan angka)
-def tambah_lama(a, b):
-    return a + b
+# Cara Lama (Tanpa Type Hint)
+nama = "Budi"
+umur = 20
 
-# Dengan Type Hint (Jelas dan aman)
-def tambah_baru(a: int, b: int) -> int:
-    return a + b
+# Cara Modern (Type Hints - Python 3.6+)
+# Variable: tipe = nilai
+nama_lengkap: str = "Budi Santoso"
+usia: int = 25
+tinggi_badan: float = 170.5
+is_active: bool = True
 
-hasil: int = tambah_baru(10, 5)
+# List dengan tipe spesifik
+hobi: list[str] = ["Coding", "Gaming"] 
 \`\`\`
+*Catatan: Type hint di Python tidak memaksakan error saat runtime, tapi sangat membantu editor (VS Code) mendeteksi bug.*
 
-## 4. Modern Control Flow
-### Match Case (Switch Case ala Python 3.10+)
+## 2. F-Strings (Format String)
+Lupakan \`%\` atau \`.format()\`. Gunakan **f-string**.
+
 \`\`\`python
-status = 404
+item = "Laptop"
+harga = 5000000
 
-match status:
-    case 200:
-        print("Sukses!")
-    case 404:
-        print("Tidak ditemukan")
-    case 500 | 501 | 502:
-        print("Server Error")
-    case _:
-        print("Status tidak dikenal")
+# Praktis dan Cepat
+print(f"Harga {item} adalah Rp {harga:,}") 
+# Output: Harga Laptop adalah Rp 5,000,000
 \`\`\`
 
-## 5. Menjaga Kualitas Kode (Linting & Formatting)
-Kode yang rapi adalah kode yang profesional. Gunakan tools ini:
-- **Ruff**: Linter ultra-cepat (menggantikan Flake8/Isort).
-- **Black**: Formatter kode otomatis (tidak perlu debat soal spasi).
-- **Mypy**: Pengecek tipe data statis.
+## 3. Input User
+\`\`\`python
+# Input selalu menghasilkan STRING
+angka_input = input("Masukkan angka: ") 
 
-\`\`\`bash
-pip install ruff black mypy
-ruff check .   # Cek error style
-black .        # Rapikan kode otomatis
+# Harus dikonversi (Casting) jika ingin dihitung
+angka_asli = int(angka_input)
+print(f"Hasil kali dua: {angka_asli * 2}")
 \`\`\`
 
-## Outcome Modul
-- Mampu mensetup environment yang terisolasi.
-- Menulis kode yang "Clean" sesuai standar PEP 8.
-- Menggunakan fitur modern Python 3.10+.
+## 🎯 Outcome Modul
+- Terbiasa menulis kode dengan **Type Hints**.
+- Selalu menggunakan **f-string** untuk menggabungkan teks.
+- Paham konsep *Casting* tipe data.
 `,
     level: 'beginner',
     order: 2,
@@ -226,63 +159,70 @@ black .        # Rapikan kode otomatis
     id: 'py-03',
     user_type: 'student',
     language: 'python',
-    title: 'Struktur Data & Algoritma Pythonic',
-    description: 'List, Dict, Set, Tuple, List Comprehension, dan Big-O.',
-    content: `# Struktur Data & Algoritma
+    title: 'Kontrol Alur: Logic & Loops',
+    description: 'If-Elif-Else, Match Case (Switch), For Loops, dan Walrus Operator.',
+    content: `# Logic & Loops
 
-## 1. Empat Sekawan (Built-in Collections)
-
-| Tipe | Sintaks | Sifat | Kegunaan Utama |
-|:---|:---:|:---|:---|
-| **List** | \`[1, 2]\` | Mutable, Terurut | Data berurutan, tumpukan (stack). |
-| **Tuple** | \`(1, 2)\` | Immutable, Terurut | Data fix (koordinat, config). Lebih hemat memori. |
-| **Dict** | \`{"a": 1}\` | Mutable, Key-Value | Lookup data cepat (Hash Map). |
-| **Set** | \`{1, 2}\` | Mutable, Unik | Menghapus duplikat, operasi himpunan. |
-
-### Contoh Penggunaan:
+## 1. Percabangan (If - Elif - Else)
 \`\`\`python
-# List Operation
-users = ["Miku", "Luka"]
-users.append("Rin")  # Tambah belakang
+nilai = 85
 
-# Dictionary Access
-data = {"id": 1, "score": 90}
-# Gunakan .get() agar tidak error jika key tidak ada
-email = data.get("email", "default@mail.com")
-
-# Set untuk Unique
-angka = [1, 2, 2, 3, 3, 3]
-unik = set(angka) # Hasil: {1, 2, 3}
+if nilai >= 90:
+    print("Grade A")
+elif nilai >= 75:
+    print("Grade B")
+else:
+    print("Grade C")
 \`\`\`
 
-## 2. Comprehensions (Fitur "Sakti" Python)
-Cara menyingkat pembuatan list/dict dalam satu baris.
+## 2. Match Case (Python 3.10+)
+Pengganti *Switch Case* yang sangat powerful.
 
 \`\`\`python
-# Cara Biasa (Panjang)
-kuadrat = []
-for x in range(10):
-    if x % 2 == 0:
-        kuadrat.append(x * x)
+status = 404
 
-# List Comprehension (Pythonic)
-# [output FOR item IN iterable IF condition]
-kuadrat = [x * x for x in range(10) if x % 2 == 0]
+match status:
+    case 200:
+        print("Success")
+    case 400 | 404: # Bisa multiple conditions
+        print("Client Error")
+    case 500:
+        print("Server Error")
+    case _: # Default case
+        print("Unknown Status")
 \`\`\`
 
-## 3. Kompleksitas Waktu (Big-O)
-Penting untuk performa aplikasi besar.
+## 3. Walrus Operator (:=)
+Melakukan assignment (pemberian nilai) di dalam ekspresi if/while.
+\`\`\`python
+# Tanpa Walrus
+data = input("Masukkan data: ")
+if len(data) > 0:
+    print(f"Data diterima: {data}")
 
-- **O(1) - Constant:** Cepat sekali. Contoh: Akses index list \`arr[5]\`, Cek key dict \`"id" in user\`.
-- **O(N) - Linear:** Semakin banyak data, semakin lambat. Contoh: \`for loop\`, \`x in list\`.
+# Dengan Walrus (Lebih ringkas)
+if (n := len(input("Masukkan data: "))) > 0:
+    print(f"Data diterima, panjang karakter: {n}")
+\`\`\`
 
-> **Tips:** Jika sering mencari data ("apakah user X ada?"), ubah List menjadi **Set** atau **Dict** agar pencarian menjadi O(1).
+## 4. Loops (Perulangan)
+\`\`\`python
+# For Loop (Range)
+for i in range(5): # 0 s/d 4
+    print(i)
 
-## Outcome Modul
-- Tidak salah memilih struktur data (misal: jangan pakai List untuk pencarian jutaan data).
-- Bisa menulis kode one-liner yang mudah dibaca (*comprehension*).
+# While Loop
+counter = 0
+while counter < 3:
+    print("Jalan...")
+    counter += 1
+\`\`\`
+
+## 🎯 Outcome Modul
+- Bisa menggunakan **Match Case** untuk logika kompleks.
+- Mengenal **Walrus Operator** untuk kode yang lebih efisien.
 `,
-    level: 'intermediate',
+    level: 'beginner',
     order: 3,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -290,65 +230,64 @@ Penting untuk performa aplikasi besar.
     id: 'py-04',
     user_type: 'student',
     language: 'python',
-    title: 'Functional Programming & Iterators',
-    description: 'Decorator, Generator, Context Manager, dan Lambda.',
-    content: `# Teknik Lanjut Python
+    title: 'Struktur Data: List, Dict, Set, Tuple',
+    description: 'Perbedaan Mutability, Dictionary Methods, dan List Comprehension.',
+    content: `# Struktur Data Python
 
-## 1. Decorator
-Fungsi yang "membungkus" fungsi lain untuk menambah fitur tanpa mengubah kode aslinya (misal: logging, autentikasi, timing).
-
-\`\`\`python
-from functools import wraps
-
-def proteksi_admin(fungsi_asli):
-    @wraps(fungsi_asli)
-    def wrapper(user_role):
-        if user_role != "admin":
-            print("⛔ Akses Ditolak!")
-            return
-        return fungsi_asli(user_role)
-    return wrapper
-
-@proteksi_admin
-def hapus_database(role):
-    print("✅ Database dihapus.")
-
-hapus_database("guest") # Output: Akses Ditolak
-hapus_database("admin") # Output: Database dihapus
-\`\`\`
-
-## 2. Generator & Yield
-Menghemat memori dengan menghasilkan data "satu per satu" (lazy evaluation), bukan menyimpannya sekaligus di memori (seperti List).
+## 1. Empat Tipe Koleksi Utama
+| Tipe | Sintaks | Sifat | Kegunaan |
+|:---|:---:|:---|:---|
+| **List** | \`[]\` | Mutable (Bisa ubah) | Data berurutan, tumpukan. |
+| **Tuple** | \`()\` | Immutable (Tetap) | Koordinat, Config statis. |
+| **Set** | \`{}\` | Unik, Unordered | Menghapus duplikat. |
+| **Dict** | \`{:}\` | Key-Value | Menyimpan data objek/JSON. |
 
 \`\`\`python
-# Fungsi Generator
-def generate_angka_besar(n):
-    for i in range(n):
-        yield i  # "Pause" fungsi dan kembalikan nilai
+# List
+users = ["Andi", "Budi"]
+users.append("Caca") 
 
-# Penggunaan (Hemat RAM meski n = 1 milyar)
-for angka in generate_angka_besar(1000000):
-    pass # Proses angka satu per satu
+# Tuple (Aman dari perubahan tidak sengaja)
+koordinat = (10, 20)
+# koordinat[0] = 50 # ❌ Error!
+
+# Set (Operasi Himpunan)
+angka = {1, 2, 2, 3} 
+print(angka) # {1, 2, 3} -> Duplikat hilang otomatis
 \`\`\`
 
-## 3. Context Manager (with statement)
-Mengelola resource (file, database, network) agar otomatis ditutup meskipun terjadi error.
+## 2. Dictionary (Sangat Penting)
+\`\`\`python
+mhs = {"nama": "Dino", "nilai": 90}
+
+# Akses Aman (.get) -> Mencegah error jika key tidak ada
+print(mhs.get("alamat", "Tidak Diketahui")) 
+
+# Iterasi Key & Value
+for k, v in mhs.items():
+    print(f"{k}: {v}")
+\`\`\`
+
+## 3. List Comprehension (Pythonic Way)
+Fitur "Sakti" Python untuk membuat list dalam satu baris.
 
 \`\`\`python
-# Cara Manual (Rawan Lupa Close)
-f = open("data.txt", "w")
-f.write("halo")
-f.close()
+angka = [1, 2, 3, 4, 5]
 
-# Cara Pythonic (With Statement)
-with open("data.txt", "w") as f:
-    f.write("halo")
-# File otomatis tertutup di sini, bahkan jika error.
+# Cara Biasa
+kuadrat = []
+for x in angka:
+    if x % 2 == 0:
+        kuadrat.append(x**2)
+
+# Cara Pythonic (One Liner)
+# [hasil for item in iterable if kondisi]
+kuadrat = [x**2 for x in angka if x % 2 == 0]
 \`\`\`
 
-## Outcome Modul
-- Memahami cara kerja framework (seperti route \`@app.get\` di FastAPI yang merupakan decorator).
-- Menulis kode yang efisien memori dengan Generator.
+## 🎯 Outcome Modul
+- Tidak tertukar antara List dan Tuple.
+- Bisa menyingkat loop 5 baris menjadi 1 baris dengan **Comprehension**.
 `,
     level: 'intermediate',
     order: 4,
@@ -358,65 +297,60 @@ with open("data.txt", "w") as f:
     id: 'py-05',
     user_type: 'student',
     language: 'python',
-    title: 'OOP Lanjutan & Arsitektur',
-    description: 'Dataclasses, SOLID Principles, dan Design Patterns.',
-    content: `# Object-Oriented Programming (OOP) Modern
+    title: 'Functions & Modules',
+    description: 'Definisi fungsi, *args **kwargs, Lambda, dan Import modules.',
+    content: `# Fungsi & Modularitas
 
-## 1. Dataclasses (Python 3.7+)
-Membuat class untuk menyimpan data tanpa perlu menulis \`__init__\`, \`__repr__\`, dll secara manual.
-
+## 1. Fungsi Dasar & Return Hint
 \`\`\`python
-from dataclasses import dataclass
-
-@dataclass
-class Product:
-    name: str
-    price: int
-    stock: int = 0
-
-    def total_value(self) -> int:
-        return self.price * self.stock
-
-p1 = Product("Laptop", 15000000, 2)
-print(p1) # Output: Product(name='Laptop', price=15000000, stock=2)
+def hitung_luas(panjang: int, lebar: int) -> int:
+    """Ini adalah Docstring (dokumentasi fungsi)."""
+    return panjang * lebar
 \`\`\`
 
-## 2. Prinsip SOLID
-Panduan agar kode OOP mudah dimaintenance.
-
-- **S (Single Responsibility):** Satu class hanya mengurus satu hal.
-- **O (Open/Closed):** Terbuka untuk ekstensi, tertutup untuk modifikasi.
-- **L (Liskov Substitution):** Subclass harus bisa menggantikan Parent-nya tanpa error.
-- **I (Interface Segregation):** Jangan memaksa client mengimplementasikan method yang tidak dipakai.
-- **D (Dependency Inversion):** Bergantung pada abstraksi, bukan detail konkret.
-
-## 3. Design Patterns Sederhana
-### Strategy Pattern (Mengganti algoritma saat runtime)
-Berguna misal untuk metode pembayaran yang berbeda-beda.
-
+## 2. Args & Kwargs (Parameter Fleksibel)
 \`\`\`python
-from typing import Protocol
+# *args: Menerima banyak argumen sebagai Tuple
+def jumlahkan(*angka):
+    return sum(angka)
 
-class PaymentStrategy(Protocol):
-    def pay(self, amount: int): ...
+print(jumlahkan(10, 20, 30)) # 60
 
-class OVO:
-    def pay(self, amount: int): print(f"Bayar {amount} pakai OVO")
+# **kwargs: Menerima banyak argumen keyword sebagai Dictionary
+def cetak_profil(**data):
+    for k, v in data.items():
+        print(f"{k}: {v}")
 
-class Gopay:
-    def pay(self, amount: int): print(f"Bayar {amount} pakai Gopay")
-
-def checkout(strategy: PaymentStrategy, total: int):
-    strategy.pay(total)
-
-checkout(OVO(), 50000)
+cetak_profil(nama="Budi", umur=20, hobi="Lari")
 \`\`\`
 
-## Outcome Modul
-- Mampu mendesain struktur class yang rapi dan skalabel.
-- Mengurangi *boilerplate code* menggunakan Dataclasses.
+## 3. Lambda (Fungsi Anonim)
+Fungsi kecil satu baris, biasanya untuk sorting atau filter.
+\`\`\`python
+data = [(1, "B"), (3, "A"), (2, "C")]
+
+# Sort berdasarkan elemen kedua (Huruf)
+data.sort(key=lambda x: x[1]) 
+# Hasil: [(3, "A"), (1, "B"), (2, "C")]
+\`\`\`
+
+## 4. Modules
+Memecah kode ke file lain.
+\`\`\`python
+# matematika.py
+def tambah(a, b): return a + b
+
+# main.py
+import matematika as mtk
+# atau
+from matematika import tambah
+\`\`\`
+
+## 🎯 Outcome Modul
+- Bisa membuat fungsi yang menerima input tak terbatas (*args).
+- Mengerti penggunaan Lambda untuk operasi singkat.
 `,
-    level: 'advanced',
+    level: 'intermediate',
     order: 5,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -424,63 +358,49 @@ checkout(OVO(), 50000)
     id: 'py-06',
     user_type: 'student',
     language: 'python',
-    title: 'Testing, Debugging & Packaging',
-    description: 'Unit Testing dengan Pytest, Error Handling, dan Packaging.',
-    content: `# Software Quality Assurance
+    title: 'OOP Modern: Classes & Dataclasses',
+    description: 'Konsep OOP, Constructor, Inheritance, dan @dataclass.',
+    content: `# Object Oriented Programming (OOP)
 
-## 1. Error Handling (Try-Except)
-Jangan biarkan aplikasi crash. Tangkap error spesifik.
+## 1. Class Standard
+\`\`\`python
+class Kucing:
+    # Constructor
+    def __init__(self, nama: str, warna: str):
+        self.nama = nama    # Property/Attribute
+        self.warna = warna
+    
+    # Method (Fungsi dalam class)
+    def meong(self):
+        return f"{self.nama} berkata: Meong!"
+
+tom = Kucing("Tom", "Abu-abu")
+print(tom.meong())
+\`\`\`
+
+## 2. Dataclasses (Python 3.7+)
+Membuat class data jauh lebih singkat tanpa perlu menulis \`__init__\` manual. Sangat disukai di industri modern.
 
 \`\`\`python
-import logging
+from dataclasses import dataclass
 
-try:
-    hasil = 10 / 0
-except ZeroDivisionError:
-    logging.error("Tidak bisa membagi dengan nol!")
-except Exception as e:
-    logging.critical(f"Error tidak dikenal: {e}")
-finally:
-    print("Blok ini selalu dijalankan (cleanup).")
+@dataclass
+class Produk:
+    nama: str
+    harga: int
+    stok: int = 0 # Default value
+
+    def total_aset(self) -> int:
+        return self.harga * self.stok
+
+p1 = Produk("Laptop", 10000000, 5)
+print(p1) 
+# Output otomatis rapi: Produk(nama='Laptop', harga=10000000, stok=5)
 \`\`\`
 
-## 2. Unit Testing (Pytest)
-Testing memastikan fitur lama tidak rusak saat Anda menambah fitur baru.
-Standar industri menggunakan **Pytest** daripada \`unittest\` bawaan karena lebih simpel.
-
-\`\`\`python
-# file: test_math.py
-from my_app import tambah
-
-def test_tambah_positif():
-    assert tambah(2, 3) == 5
-
-def test_tambah_negatif():
-    assert tambah(-1, -1) == -2
-\`\`\`
-
-Jalankan di terminal:
-\`\`\`bash
-pytest -v
-\`\`\`
-
-## 3. Packaging
-Mengemas kode agar bisa diinstall orang lain (\`pip install package-mu\`).
-Struktur folder standar:
-\`\`\`
-my_project/
-├── src/
-│   └── mypackage/
-│       ├── __init__.py
-│       └── main.py
-├── tests/
-├── pyproject.toml
-└── README.md
-\`\`\`
-
-## Outcome Modul
-- Tidak takut refactoring kode karena ada Test.
-- Mampu membuat log error yang berguna untuk debugging.
+## 🎯 Outcome Modul
+- Paham konsep \`self\`.
+- Beralih menggunakan **@dataclass** untuk objek penyimpan data sederhana.
 `,
     level: 'advanced',
     order: 6,
@@ -490,52 +410,49 @@ my_project/
     id: 'py-07',
     user_type: 'student',
     language: 'python',
-    title: 'Concurrency: Asyncio & Multithreading',
-    description: 'Menangani proses berat (I/O Bound vs CPU Bound).',
-    content: `# Concurrency & Parallelism
+    title: 'Error Handling & File Handling',
+    description: 'Try-Except, Finally, Raise, dan Context Manager (with open).',
+    content: `# Error & File Handling
 
-## Kapan pakai apa?
-Python punya keterbatasan **GIL (Global Interpreter Lock)**, jadi pahami ini:
-
-1. **I/O Bound (Network/Disk):** Gunakan **Asyncio** atau **Threading**.
-   - Contoh: Request ke API, query DB, baca file.
-2. **CPU Bound (Perhitungan Berat):** Gunakan **Multiprocessing**.
-   - Contoh: Image processing, enkripsi video, machine learning.
-
-## 1. Asyncio (Modern Way)
-Sangat populer di Web Framework modern (FastAPI).
+## 1. Menangani Error (Try-Except)
+Mencegah program crash saat ada kesalahan.
 
 \`\`\`python
-import asyncio
-
-async def ambil_data(id):
-    print(f"Mengambil data {id}...")
-    await asyncio.sleep(1) # Simulasi delay IO
-    print(f"Data {id} selesai.")
-    return f"Item {id}"
-
-async def main():
-    # Jalankan 3 tugas sekaligus (concurrent)
-    hasil = await asyncio.gather(
-        ambil_data(1),
-        ambil_data(2),
-        ambil_data(3)
-    )
-    print(hasil)
-
-asyncio.run(main())
+try:
+    angka = int(input("Bagi 10 dengan: "))
+    hasil = 10 / angka
+    print(f"Hasil: {hasil}")
+except ValueError:
+    print("❌ Masukkan angka saja!")
+except ZeroDivisionError:
+    print("❌ Tidak bisa membagi dengan nol!")
+except Exception as e:
+    print(f"❌ Error tidak dikenal: {e}")
+finally:
+    print("Program selesai (selalu dijalankan).")
 \`\`\`
 
-## 2. Profiling
-Jangan asal optimasi ("premature optimization"). Ukur dulu mana yang lambat.
-\`\`\`bash
-# Melihat fungsi mana yang memakan waktu paling lama
-python -m cProfile -s time script_saya.py
+## 2. File Handling (Context Manager)
+Gunakan \`with\` agar file otomatis ditutup.
+
+\`\`\`python
+# Menulis File
+with open("catatan.txt", "w") as f:
+    f.write("Baris pertama\n")
+    f.write("Baris kedua")
+
+# Membaca File
+try:
+    with open("catatan.txt", "r") as f:
+        isi = f.read()
+        print(isi)
+except FileNotFoundError:
+    print("File tidak ditemukan!")
 \`\`\`
 
-## Outcome Modul
-- Bisa membuat aplikasi web yang mampu menangani ribuan request (Async).
-- Memahami mengapa Python kadang disebut "lambat" dan cara mengatasinya.
+## 🎯 Outcome Modul
+- Program lebih *robust* (tahan banting) terhadap input user yang salah.
+- Bisa membaca dan menulis file teks dengan aman.
 `,
     level: 'advanced',
     order: 7,
@@ -545,60 +462,205 @@ python -m cProfile -s time script_saya.py
     id: 'py-08',
     user_type: 'student',
     language: 'python',
-    title: 'Final Project & Kesiapan Industri',
-    description: 'FastAPI, Pandas Basics, Security, dan CI/CD.',
-    content: `# Puncak Pembelajaran: Real World Python
+    title: 'Libraries Wajib: Requests & JSON',
+    description: 'Berinteraksi dengan API eksternal dan format JSON.',
+    content: `# Bekerja dengan Data Eksternal
 
-## 1. Web API dengan FastAPI
-Framework tercepat saat ini. Gabungan fitur modern Python (Async + Type Hint).
+Di dunia nyata, Python sering dipakai untuk memanggil API.
+
+## 1. JSON (JavaScript Object Notation)
+Format pertukaran data standar.
 
 \`\`\`python
-from fastapi import FastAPI
-from pydantic import BaseModel
+import json
 
-app = FastAPI()
+data_dict = {"nama": "Ali", "hobi": ["Bola", "Code"]}
 
-class Item(BaseModel):
-    nama: str
-    harga: int
+# Dict -> JSON String (Serialization)
+json_str = json.dumps(data_dict) 
 
-@app.post("/items/")
-async def create_item(item: Item):
-    return {"message": f"Barang {item.nama} disimpan", "pajak": item.harga * 0.1}
+# JSON String -> Dict (Deserialization)
+data_asli = json.loads(json_str)
 \`\`\`
 
-## 2. Intro Data Analysis (Pandas)
-Skill wajib meskipun anda Backend Engineer.
+## 2. Requests (Panggil API)
+*Note: Perlu install \`pip install requests\`*
+
 \`\`\`python
-import pandas as pd
+# Pseudo-code (karena tidak bisa run pip di sini)
+import requests
 
-data = {"Nama": ["Ali", "Budi"], "Gaji": [5000, 7000]}
-df = pd.DataFrame(data)
+response = requests.get("https://api.github.com/users/google")
 
-# Filter data mudah
-orang_kaya = df[df["Gaji"] > 6000]
-print(orang_kaya)
+if response.status_code == 200:
+    data = response.json() # Otomatis jadi Dict
+    print(f"User: {data['login']}")
+else:
+    print("Gagal mengambil data")
 \`\`\`
 
-## 3. CI/CD & Security
-Di industri, kode tidak dideploy manual dari laptop.
-- **CI (Continuous Integration):** Github Actions otomatis menjalankan \`pytest\` dan \`ruff\` setiap kali push.
-- **Security:** Jangan pernah hardcode password/API Key di kodingan! Gunakan **Environment Variables (.env)**.
-
-## 🏆 Final Project Requirements
-Buatlah REST API sederhana untuk **Sistem Manajemen Toko**:
-1.  **Tech:** FastAPI + SQLModel (atau SQLAlchemy).
-2.  **Fitur:** CRUD Barang, Transaksi, dan Auth sederhana (JWT).
-3.  **Code Quality:** Harus lolos linter (\`ruff\`) dan ada Type Hints.
-4.  **Test:** Minimal 2 test case (Success & Fail scenario).
-5.  **Docs:** README.md yang menjelaskan cara install & run.
-
-## Outcome Modul
-- Siap melamar kerja sebagai Junior Python Developer / Backend Engineer.
-- Memiliki portofolio kode yang memenuhi standar industri.
+## 🎯 Outcome Modul
+- Mengerti cara mengubah Dictionary ke JSON dan sebaliknya.
+- Siap untuk mengambil data dari internet (API).
 `,
     level: 'advanced',
     order: 8,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'py-09',
+    user_type: 'student',
+    language: 'python',
+    title: 'Studi Kasus 1: Analisis Data Nilai Siswa',
+    description: 'Latihan List Comprehension, Dict, dan Logika Statistik dasar.',
+    content: `# Studi Kasus 1: Student Grade Analyzer
+
+## 📜 Skenario
+Anda memiliki data nilai siswa yang berantakan (raw data).
+Tugas:
+1.  Filter siswa yang **aktif** saja.
+2.  Hitung **rata-rata nilai** setiap siswa.
+3.  Tentukan status kelulusan (Lulus jika rata-rata >= 75).
+4.  Cari siswa dengan nilai rata-rata tertinggi.
+
+## 💻 Solusi Code
+\`\`\`python
+# Data Mentah (List of Dictionaries)
+students = [
+    {"name": "Andi", "scores": [80, 90, 85], "active": True},
+    {"name": "Budi", "scores": [60, 50, 70], "active": True},
+    {"name": "Cici", "scores": [90, 95, 100], "active": False}, # Tidak aktif
+    {"name": "Dedi", "scores": [70, 75, 74], "active": True},
+]
+
+def analyze_grades(data: list[dict]):
+    results = []
+    
+    # 1. Filter & Process Loop
+    for s in data:
+        if not s["active"]:
+            continue # Skip jika tidak aktif
+            
+        # 2. Hitung Rata-rata
+        avg_score = sum(s["scores"]) / len(s["scores"])
+        
+        # 3. Tentukan Status
+        status = "Lulus" if avg_score >= 75 else "Remedial"
+        
+        # Simpan hasil olahan
+        results.append({
+            "name": s["name"],
+            "average": round(avg_score, 1),
+            "status": status
+        })
+    
+    # 4. Cari Juara (Menggunakan max dengan key lambda)
+    top_student = max(results, key=lambda x: x["average"])
+    
+    return results, top_student
+
+# --- EKSEKUSI ---
+processed_data, champion = analyze_grades(students)
+
+print("--- Laporan Nilai ---")
+for siswa in processed_data:
+    print(f"{siswa['name']}: {siswa['average']} [{siswa['status']}]")
+
+print(f"\n🏆 Juara Kelas: {champion['name']} (Nilai: {champion['average']})")
+\`\`\`
+
+## ✅ Hasil yang Diharapkan
+\`\`\`text
+--- Laporan Nilai ---
+Andi: 85.0 [Lulus]
+Budi: 60.0 [Remedial]
+Dedi: 73.0 [Remedial]
+
+🏆 Juara Kelas: Andi (Nilai: 85.0)
+\`\`\`
+`,
+    level: 'advanced',
+    order: 9,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'py-10',
+    user_type: 'student',
+    language: 'python',
+    title: 'Studi Kasus 2: Sistem ATM Sederhana (OOP)',
+    description: 'Latihan Class, Error Handling, dan Validasi Logika.',
+    content: `# Studi Kasus 2: Simple ATM System
+
+## 📜 Skenario
+Buatlah class \`ATM\` yang mensimulasikan mesin uang.
+Fitur:
+1.  **Cek Saldo**.
+2.  **Deposit (Setor Tunai):** Tidak boleh negatif.
+3.  **Withdraw (Tarik Tunai):** Tidak boleh melebihi saldo dan minimal sisa saldo 50.000.
+4.  Gunakan **Exception Handling** untuk validasi error.
+
+## 💻 Solusi Code
+\`\`\`python
+class InsufficientFundsError(Exception):
+    """Custom Error jika saldo kurang"""
+    pass
+
+class ATM:
+    def __init__(self, owner: str, balance: int = 0):
+        self.owner = owner
+        self.__balance = balance # Private attribute (enkapsulasi)
+
+    def check_balance(self):
+        print(f"Saldo {self.owner}: Rp {self.__balance:,}")
+
+    def deposit(self, amount: int):
+        if amount <= 0:
+            print("❌ Deposit harus lebih dari 0!")
+            return
+        self.__balance += amount
+        print(f"✅ Berhasil setor: Rp {amount:,}")
+
+    def withdraw(self, amount: int):
+        try:
+            if amount <= 0:
+                raise ValueError("Jumlah penarikan tidak valid.")
+            
+            if amount > self.__balance:
+                raise InsufficientFundsError("Saldo tidak mencukupi.")
+            
+            # Aturan bank: sisa minimal 50rb
+            if (self.__balance - amount) < 50000:
+                raise ValueError("Saldo mengendap minimal harus Rp 50.000")
+
+            self.__balance -= amount
+            print(f"✅ Berhasil tarik: Rp {amount:,}")
+            
+        except (ValueError, InsufficientFundsError) as e:
+            print(f"⛔ Transaksi Gagal: {e}")
+
+# --- EKSEKUSI ---
+my_atm = ATM("Raju", 100000) # Saldo awal 100rb
+
+my_atm.check_balance()
+my_atm.deposit(50000)    # Saldo jadi 150rb
+my_atm.withdraw(200000)  # Gagal (Kurang saldo)
+my_atm.withdraw(120000)  # Gagal (Sisa saldo < 50rb. 150-120 = 30)
+my_atm.withdraw(50000)   # Berhasil. Sisa 100rb.
+my_atm.check_balance()
+\`\`\`
+
+## ✅ Hasil yang Diharapkan
+\`\`\`text
+Saldo Raju: Rp 100,000
+✅ Berhasil setor: Rp 50,000
+⛔ Transaksi Gagal: Saldo tidak mencukupi.
+⛔ Transaksi Gagal: Saldo mengendap minimal harus Rp 50.000
+✅ Berhasil tarik: Rp 50,000
+Saldo Raju: Rp 100,000
+\`\`\`
+`,
+    level: 'advanced',
+    order: 10,
     created_at: '2025-01-01T00:00:00Z'
   },
 ];

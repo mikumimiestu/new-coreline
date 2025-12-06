@@ -7,6 +7,10 @@ import { MOCK_MATERIALS as OTHER_MATERIALS } from '../data/otherData';
 import { MOCK_MATERIALS as PYTHON_MATERIALS } from '../data/pythonData';
 import { MOCK_MATERIALS as GO_MATERIALS } from '../data/golangData';
 import { MOCK_MATERIALS as  MYSQL_MATERIALS } from '../data/mysqlData';
+import { MOCK_MATERIALS as  TS_MATERIAL } from '../data/tsData';
+import { MOCK_MATERIALS as  JS_MATERIAL } from '../data/jsData';
+import { MOCK_MATERIALS as  PSQL_MATERIAL } from '../data/posgresData';
+import { MOCK_MATERIALS as  RB_MATERIAL } from '../data/rubyData';
 import ProfilePage from './ProfilePage';
 import {
   LogOut, BookOpen, Award, ChevronRight, X, User as UserIcon,
@@ -28,26 +32,20 @@ type Lang = {
 };
 
 const languageData: readonly Lang[] = [
-  { id: 'python', name: 'Python', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
-  { id: 'php', name: 'PHP', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg' },
-  { id: 'javascript', name: (<div className="flex items-center gap-1">
-      JavaScript
-      <AlertTriangle className="w-4 h-4 text-yellow-500" />
-    </div>), iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg'},
-  { id: 'typescript', name: (<div className="flex items-center gap-1">
-      TypeScript
-      <AlertTriangle className="w-4 h-4 text-yellow-500" />
-    </div>), iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
-  { id: 'ruby', name: (<div className="flex items-center gap-1">
-      JavaScript
-      <AlertTriangle className="w-4 h-4 text-yellow-500" />
-    </div>), iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg' },
-  { id: 'go', name: 'Go', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg' },
+  { id: 'python', name: 'Python (Py 3.10+)', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
+  { id: 'php', name: 'PHP (8.0+)', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg' },
+  { id: 'javascript', name: 'JavaSciprt (ES6+)', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg'},
+  { id: 'typescript', name: 'TypeScript', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
+  { id: 'ruby', name: 'Ruby (Ruby 3+)', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg' },
+  { id: 'go', name: 'Go (Go 1.18+)', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg' },
   { id: 'sql', name: 'MySQL', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg'},
-  { id: 'postgresql', name: 'PostgreSQL', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg', comingSoon: true },
-  { id: 'java', name: 'Java', iconUrl: 'https://www.svgrepo.com/show/452234/java.svg', comingSoon: true },
+  { id: 'postgresql', name: 'PostgreSQL', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg' },
+  { id: 'java', name: 'Java', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg', comingSoon: true },
   { id: 'swift', name: 'Swift', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/swift/swift-original.svg', comingSoon: true },
-  { id: 'dart', name: 'Dart', iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dart/dart-original.svg', comingSoon: true },
+  { id: 'dart', name: (<div className="flex items-center gap-1">
+      Dart
+      <AlertTriangle className="w-4 h-4 text-yellow-500" />
+    </div>), iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dart/dart-original.svg' },
 ] as const;
 
 type Level = 'beginner' | 'intermediate' | 'advanced';
@@ -524,7 +522,16 @@ export default function Dashboard() {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    const allMaterials: LearningMaterial[] = [...OTHER_MATERIALS, ...PYTHON_MATERIALS, ...GO_MATERIALS, ...MYSQL_MATERIALS];
+    const allMaterials: LearningMaterial[] = [
+      ...OTHER_MATERIALS,
+      ...PYTHON_MATERIALS, 
+      ...GO_MATERIALS, 
+      ...MYSQL_MATERIALS, 
+      ...TS_MATERIAL, 
+      ...JS_MATERIAL, 
+      ...PSQL_MATERIAL,
+      ...RB_MATERIAL
+    ];
     let list = allMaterials.filter((m) => m.user_type === userType);
     if (selectedLanguage) {
       list = list.filter((m) => m.language === selectedLanguage);

@@ -6,6 +6,10 @@ import { MOCK_MATERIALS as OTHER_MATERIALS } from '../data/otherData';
 import { MOCK_MATERIALS as PYTHON_MATERIALS } from '../data/pythonData';
 import { MOCK_MATERIALS as GO_MATERIALS } from '../data/golangData';
 import { MOCK_MATERIALS as MYSQL_MATERIALS } from '../data/mysqlData';
+import { MOCK_MATERIALS as  TS_MATERIAL } from '../data/tsData';
+import { MOCK_MATERIALS as  JS_MATERIAL } from '../data/jsData';
+import { MOCK_MATERIALS as  PSQL_MATERIAL } from '../data/posgresData';
+import { MOCK_MATERIALS as  RB_MATERIAL } from '../data/rubyData';
 import { ArrowLeft, BookOpen } from 'lucide-react';
 import MaterialContent from '../components/MaterialContent';
 
@@ -14,7 +18,12 @@ const ALL_MATERIALS: LearningMaterial[] = [
   ...OTHER_MATERIALS,
   ...PYTHON_MATERIALS,
   ...GO_MATERIALS,
-  ...MYSQL_MATERIALS
+  ...MYSQL_MATERIALS,
+  ...TS_MATERIAL,
+  ...JS_MATERIAL,
+  ...PSQL_MATERIAL,
+  ...RB_MATERIAL,
+  
 ];
 
 export default function MaterialPage() {

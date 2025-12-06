@@ -313,7 +313,7 @@ func (u *User) Activate() {
 }
 
 func main() {
-    u := User{ID: 1, Username: "Zaki"}
+    u := User{ID: 1, Username: "Dino"}
     u.Activate() // Otomatis dipass sebagai pointer
     fmt.Println(u.IsActive) // true
 }
@@ -551,7 +551,7 @@ Koneksi ke SQL. Bisa pakai driver raw (\`pgx\`, \`mysql\`) atau ORM (\`GORM\`).
 \`\`\`go
 // Contoh pseudo-code GORM
 db.AutoMigrate(&User{})
-db.Create(&User{Name: "Zaki", Age: 20})
+db.Create(&User{Name: "Dino", Age: 20})
 \`\`\`
 
 ## 3. Standard Project Layout
