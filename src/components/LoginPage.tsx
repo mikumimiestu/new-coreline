@@ -178,12 +178,16 @@ export default function LoginPage() {
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg">
                       <Lock className="h-5 w-5" />
                     </span>
-                    <div>
+                    <div className="space-y-1">
                       <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                         Login ke Akun Anda
                       </h2>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Gunakan Astbyte Account untuk masuk
+                      <span className="flex items-center gap-1">
+                        Gunakan 
+                      <img src="/icon2.png" className="h-4 sm:h-5 w-auto" alt="icon" /> 
+                        Account untuk masuk
+                      </span>
                       </p>
                     </div>
                   </div>
