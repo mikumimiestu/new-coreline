@@ -1,35 +1,4 @@
-import type { LearningMaterial } from '../types/learning';
-
-export interface User {
-  id: string;
-  access_code: string;
-  photo_url?: string;
-  user_type: 'student' | 'umum' | 'pro' | 'game';
-  name: string;
-  username: string;
-  email: string;
-  phone: string | null;
-  subscription_type: 'free' | 'plus' | 'pro';
-  subscription_period: 'monthly' | 'yearly' | null;
-  subscription_start: string | null;
-  subscription_end: string | null;
-  subscription_status: 'active' | 'expired' | 'cancelled';
-  created_at: string;
-  last_login: string;
-}
-export interface Subscription {
-  id: string;
-  user_id: string;
-  subscription_type: 'plus' | 'pro';
-  period: 'monthly' | 'yearly';
-  amount: number;
-  currency: string;
-  status: 'pending' | 'paid' | 'failed' | 'cancelled';
-  start_date: string | null;
-  end_date: string | null;
-  payment_date: string | null;
-  created_at: string;
-}
+import { LearningMaterial } from '../types/learning';
 
 export const MOCK_MATERIALS: LearningMaterial[] = [
   // ==================== PYTHON MATERIALS ====================
@@ -37,60 +6,81 @@ export const MOCK_MATERIALS: LearningMaterial[] = [
     id: 'py-01',
     user_type: 'student',
     language: 'python',
-    title: 'Pengenalan Python & Lingkungan Kerja',
-    description: 'Filosofi Python, Instalasi, Virtual Environment (venv), dan Cara Kerja Interpreter.',
-    content: `# 🐍 Pengenalan Python
+    title: 'Pengenalan Python & Lingkungan Kerja Profesional',
+    description: 'Filosofi Python, Ekosistem, Instalasi, Virtual Environment (venv), dan Deep Dive Interpreter.',
+    content: `# 🐍 Pengenalan Python & Setup Profesional
 
-## Apa itu Python?
-Python adalah bahasa pemrograman **High-level**, **Interpreted**, dan **General-purpose**.
-Terkenal dengan filosofi *"Readability counts"* (Keterbacaan itu penting). Kode Python seringkali terlihat seperti Bahasa Inggris sederhana.
+## Mengapa Belajar Python di 2024/2025?
+Python bukan sekadar bahasa pemrograman; ia adalah ekosistem. Python digunakan oleh raksasa teknologi seperti Google (YouTube), Meta (Instagram), dan NASA. 
 
-**Kenapa Python Populer?**
-1.  **Data Science & AI:** (Pandas, NumPy, PyTorch).
-2.  **Web Backend:** (Django, FastAPI).
-3.  **Automation/Scripting:** (Bot, Scraping).
+**Filosofi Zen of Python (PEP 20):**
+* *Beautiful is better than ugly.*
+* *Explicit is better than implicit.*
+* *Simple is better than complex.*
 
 ---
 
-## 🛠️ Lingkungan Kerja (Wajib Tahu!)
-Pemula sering salah karena menginstal library secara global. **Gunakan Virtual Environment** agar project tidak saling bentrok.
+## 🛠️ Manajemen Lingkungan (Workflow Industri)
+Banyak pemula merusak instalasi Python sistem mereka karena menginstal library secara global. Kita akan menggunakan **Virtual Environments**.
 
-### 1. Membuat Virtual Environment (Venv)
+
+
+### 1. Memasang Python
+Pastikan Anda mengunduh dari [python.org](https://python.org). Cek versi Anda di terminal:
 \`\`\`bash
-# Mac/Linux
-python3 -m venv .venv
-source .venv/bin/activate
+python --version  # Minimal 3.10+ direkomendasikan
+\`\`\`
 
-# Windows
+### 2. Isolasi Proyek dengan Venv
+Virtual environment mengisolasi dependensi antar proyek. Jika Proyek A butuh Django 3 dan Proyek B butuh Django 4, venv adalah solusinya.
+
+\`\`\`bash
+# 1. Buat folder proyek
+mkdir belajar-python && cd belajar-python
+
+# 2. Buat venv
 python -m venv .venv
+
+# 3. Aktivasi
+# Windows:
 .venv\\Scripts\\activate
-\`\`\`
-*Tanda sukses: Di terminal muncul tulisan (.venv).*
-
-### 2. Struktur Project Modern
-\`\`\`text
-my_project/
-├── .venv/            # Folder environment (JANGAN DI-EDIT)
-├── src/              # Kode sumber
-│   └── main.py
-├── requirements.txt  # Daftar library
-└── README.md
+# Mac/Linux:
+source .venv/bin/activate
 \`\`\`
 
-## 💻 Program Pertama
+### 3. Ekosistem pip & requirements.txt
+\`pip\` adalah package manager Python. Untuk mencatat apa saja yang diinstal:
+\`\`\`bash
+pip install requests  # Contoh instal library
+pip freeze > requirements.txt  # Menyimpan daftar library
+\`\`\`
+
+---
+
+## 💻 Eksekusi Kode: Script vs Interactive
+1.  **Interactive (REPL):** Ketik \`python\` di terminal. Bagus untuk tes cepat.
+2.  **Scripting:** Membuat file \`.py\`. Cara standar membangun aplikasi.
+
 \`\`\`python
-# print() adalah fungsi bawaan untuk output
-print("Hello World!") 
+# main.py
+def salam(nama: str):
+    """Fungsi sederhana untuk menyapa."""
+    print(f"Halo, {nama}! Selamat datang di dunia Python.")
 
-# Indentasi (Spasi) sangat krusial di Python!
-if True:
-    print("Ini menjorok ke dalam (4 spasi)")
-    # print("Ini error jika spasinya tidak pas")
+if __name__ == "__main__":
+    salam("Programmer")
 \`\`\`
+
+---
+
+## ✍️ Latihan Modul 1 (15 Menit)
+1.  Buatlah sebuah virtual environment baru bernama \`env_latihan\`.
+2.  Install library \`cowsay\` menggunakan pip.
+3.  Buat file \`app.py\`, import cowsay, dan jalankan \`cowsay.cow('Python itu keren!')\`.
 
 ## 🎯 Outcome Modul
-- Bisa membuat isolasi project dengan \`venv\`.
-- Mengerti bahwa Python menggunakan **Indentasi** sebagai pengganti \`{}\` (kurung kurawal).
+- Memahami beda Python global vs virtual environment.
+- Mampu mengelola library pihak ketiga secara profesional.
 `,
     level: 'beginner',
     order: 1,
@@ -100,56 +90,81 @@ if True:
     id: 'py-02',
     user_type: 'student',
     language: 'python',
-    title: 'Variabel, Tipe Data & Type Hinting',
-    description: 'Dynamic Typing vs Static Type Hints, f-strings, dan Input User.',
-    content: `# Variabel & Modern Python
+    title: 'Data Types & Type Hinting: Menulis Kode Robust',
+    description: 'Eksplorasi tipe data primitif, Dynamic Typing vs Static Typing, dan manipulasi String modern.',
+    content: `# Variabel & Modern Python Typing
 
-## 1. Variabel & Tipe Data
-Python itu *Dynamic Typing* (tipe data ditentukan otomatis), TAPI di industri modern kita menggunakan **Type Hints** agar kode lebih aman dan jelas.
+## 1. Deep Dive: Tipe Data Primitif
+Python memang "dynamic", tapi di baliknya setiap data memiliki tipe yang ketat.
+
+* **int**: Bilangan bulat (tanpa batas ukuran di Python 3!).
+* **float**: Bilangan desimal (presisi ganda).
+* **str**: Teks (Unicode secara default).
+* **bool**: \`True\` atau \`False\`.
+
+---
+
+## 2. Type Hinting (Standar Industri Baru)
+Sejak Python 3.6+, komunitas beralih ke Type Hinting. Mengapa?
+1.  **Auto-complete** di VS Code menjadi lebih akurat.
+2.  **Static Analysis** (menggunakan tool seperti \`mypy\`) untuk menangkap bug sebelum kode dijalankan.
 
 \`\`\`python
-# Cara Lama (Tanpa Type Hint)
+# Cara penulisan: variable_name: type = value
+username: str = "alex_dev"
+login_attempts: int = 3
+is_premium: bool = False
+wallet_balance: float = 150.75
+
+# Type hinting pada koleksi (Python 3.9+)
+daftar_nilai: list[int] = [80, 90, 100]
+konfigurasi: dict[str, str] = {"theme": "dark", "lang": "id"}
+\`\`\`
+
+---
+
+## 3. String Manipulation & F-Strings
+Lupakan cara lama \`"Halo " + nama\`. Python punya **f-strings** yang sangat powerful.
+
+\`\`\`python
 nama = "Budi"
-umur = 20
+skor = 95.5678
 
-# Cara Modern (Type Hints - Python 3.6+)
-# Variable: tipe = nilai
-nama_lengkap: str = "Budi Santoso"
-usia: int = 25
-tinggi_badan: float = 170.5
-is_active: bool = True
+# Format angka: .2f artinya 2 angka di belakang koma
+# Ribuan: {angka:,}
+pesan = f"Halo {nama}, skor akhir Anda adalah {skor:.2f}"
+print(pesan) # Halo Budi, skor akhir Anda adalah 95.57
 
-# List dengan tipe spesifik
-hobi: list[str] = ["Coding", "Gaming"] 
+# Method String yang sering dipakai
+raw_input = "  python_developer  "
+clean_input = raw_input.strip().upper() # "PYTHON_DEVELOPER"
 \`\`\`
-*Catatan: Type hint di Python tidak memaksakan error saat runtime, tapi sangat membantu editor (VS Code) mendeteksi bug.*
 
-## 2. F-Strings (Format String)
-Lupakan \`%\` atau \`.format()\`. Gunakan **f-string**.
+---
+
+## 4. Konversi Data (Type Casting)
+Hati-hati dengan input user! Semua input dari terminal dianggap **String**.
 
 \`\`\`python
-item = "Laptop"
-harga = 5000000
+# Program hitung umur
+tahun_lahir = input("Tahun berapa kamu lahir? ") 
+# Jika input "1995", maka tahun_lahir adalah str "1995"
 
-# Praktis dan Cepat
-print(f"Harga {item} adalah Rp {harga:,}") 
-# Output: Harga Laptop adalah Rp 5,000,000
+umur = 2025 - int(tahun_lahir) # Konversi str -> int
+print(f"Umur kamu: {umur} tahun")
 \`\`\`
 
-## 3. Input User
-\`\`\`python
-# Input selalu menghasilkan STRING
-angka_input = input("Masukkan angka: ") 
+---
 
-# Harus dikonversi (Casting) jika ingin dihitung
-angka_asli = int(angka_input)
-print(f"Hasil kali dua: {angka_asli * 2}")
-\`\`\`
+## ✍️ Latihan Modul 2 (15 Menit)
+Buatlah program "Kalkulator Gaji Sederhana":
+1.  Minta input nama (str), gaji pokok (int), dan jumlah hari lembur (int).
+2.  Setiap hari lembur dibayar 50.000.
+3.  Tampilkan total gaji dengan format ribuan (Contoh: Rp 5,000,000) menggunakan f-string.
 
 ## 🎯 Outcome Modul
-- Terbiasa menulis kode dengan **Type Hints**.
-- Selalu menggunakan **f-string** untuk menggabungkan teks.
-- Paham konsep *Casting* tipe data.
+- Terbiasa menggunakan Type Hinting.
+- Menguasai formatting string untuk laporan data.
 `,
     level: 'beginner',
     order: 2,
@@ -159,68 +174,78 @@ print(f"Hasil kali dua: {angka_asli * 2}")
     id: 'py-03',
     user_type: 'student',
     language: 'python',
-    title: 'Kontrol Alur: Logic & Loops',
-    description: 'If-Elif-Else, Match Case (Switch), For Loops, dan Walrus Operator.',
-    content: `# Logic & Loops
+    title: 'Control Flow: Logika Kompleks & Optimasi Loop',
+    description: 'Menguasai Match Case, Walrus Operator, dan teknik iterasi yang efisien.',
+    content: `# Logic & Loops: Mengatur Alur Program
 
-## 1. Percabangan (If - Elif - Else)
-\`\`\`python
-nilai = 85
-
-if nilai >= 90:
-    print("Grade A")
-elif nilai >= 75:
-    print("Grade B")
-else:
-    print("Grade C")
-\`\`\`
-
-## 2. Match Case (Python 3.10+)
-Pengganti *Switch Case* yang sangat powerful.
+## 1. Percabangan Modern: Match Case
+Di Python 3.10+, kita mendapatkan \`match-case\` yang jauh lebih rapi dibanding \`if-elif\` bertumpuk.
 
 \`\`\`python
-status = 404
-
-match status:
-    case 200:
-        print("Success")
-    case 400 | 404: # Bisa multiple conditions
-        print("Client Error")
-    case 500:
-        print("Server Error")
-    case _: # Default case
-        print("Unknown Status")
+def handle_error(status_code: int):
+    match status_code:
+        case 200:
+            return "OK"
+        case 400 | 404: # Logical OR
+            return "Client Error"
+        case 500:
+            return "Server Error"
+        case _: # Wildcard (default)
+            return "Unknown Code"
 \`\`\`
 
-## 3. Walrus Operator (:=)
-Melakukan assignment (pemberian nilai) di dalam ekspresi if/while.
+---
+
+## 2. Walrus Operator (\`:=\`)
+Operator ini memungkinkan kita memberi nilai ke variabel **di dalam** kondisi \`if\` atau \`while\`. Sangat berguna untuk efisiensi kode.
+
 \`\`\`python
-# Tanpa Walrus
-data = input("Masukkan data: ")
-if len(data) > 0:
-    print(f"Data diterima: {data}")
+# Tanpa Walrus: panggil fungsi len() dua kali
+if len(data := get_api_data()) > 0:
+    print(f"Dapat {len(data)} data")
 
-# Dengan Walrus (Lebih ringkas)
-if (n := len(input("Masukkan data: "))) > 0:
-    print(f"Data diterima, panjang karakter: {n}")
+# Dengan Walrus: simpan hasil len() ke variabel 'n' sekaligus dicek
+if (n := len(get_api_data())) > 0:
+    print(f"Data ditemukan: {n} item")
 \`\`\`
 
-## 4. Loops (Perulangan)
+---
+
+## 3. Iterasi Efisien (Loops)
+Python tidak menggunakan loop gaya C (\`i++\`). Kita melakukan iterasi langsung pada objek.
+
 \`\`\`python
-# For Loop (Range)
-for i in range(5): # 0 s/d 4
-    print(i)
+items = ["Laptop", "Mouse", "Keyboard"]
 
-# While Loop
-counter = 0
-while counter < 3:
-    print("Jalan...")
-    counter += 1
+# Gunakan enumerate untuk mendapatkan index
+for index, item in enumerate(items, start=1):
+    print(f"{index}. {item}")
+
+# Loop pada Dictionary
+prices = {"Laptop": 1000, "Mouse": 50}
+for name, price in prices.items():
+    print(f"{name} seharga")
 \`\`\`
+
+---
+
+## 4. Break, Continue, Pass
+- \`break\`: Berhenti total dari loop.
+- \`continue\`: Lompat ke iterasi berikutnya.
+- \`pass\`: Placeholder (biar kode tidak error saat kosong).
+
+---
+
+## ✍️ Latihan Modul 3 (20 Menit)
+Buatlah program "Login System":
+1.  Tentukan \`correct_password = "admin123"\`.
+2.  Berikan user maksimal 3 kali kesempatan input password.
+3.  Jika benar, tampilkan "Akses Diterima" dan keluar loop (\`break\`).
+4.  Jika salah 3 kali, tampilkan "Akun Terblokir".
 
 ## 🎯 Outcome Modul
-- Bisa menggunakan **Match Case** untuk logika kompleks.
-- Mengenal **Walrus Operator** untuk kode yang lebih efisien.
+- Mampu menyederhanakan logika percabangan.
+- Menggunakan \`enumerate\` untuk pengelolaan index loop yang bersih.
 `,
     level: 'beginner',
     order: 3,
@@ -230,64 +255,75 @@ while counter < 3:
     id: 'py-04',
     user_type: 'student',
     language: 'python',
-    title: 'Struktur Data: List, Dict, Set, Tuple',
-    description: 'Perbedaan Mutability, Dictionary Methods, dan List Comprehension.',
-    content: `# Struktur Data Python
+    title: 'Data Structures Deep Dive & Comprehensions',
+    description: 'Memahami Mutability, Performa Dictionary, dan List Comprehension satu baris.',
+    content: `# Struktur Data & Efisiensi
 
-## 1. Empat Tipe Koleksi Utama
-| Tipe | Sintaks | Sifat | Kegunaan |
-|:---|:---:|:---|:---|
-| **List** | \`[]\` | Mutable (Bisa ubah) | Data berurutan, tumpukan. |
-| **Tuple** | \`()\` | Immutable (Tetap) | Koordinat, Config statis. |
-| **Set** | \`{}\` | Unik, Unordered | Menghapus duplikat. |
-| **Dict** | \`{:}\` | Key-Value | Menyimpan data objek/JSON. |
+
+
+## 1. List vs Tuple: Kapan pakai mana?
+- **List \`[]\`**: Mutable (Bisa diubah). Gunakan jika data akan bertambah/berkurang.
+- **Tuple \`()\`**: Immutable (Tetap). Gunakan untuk data koordinat, konfigurasi, atau data yang tidak boleh berubah secara tidak sengaja (lebih cepat & hemat memori).
 
 \`\`\`python
-# List
-users = ["Andi", "Budi"]
-users.append("Caca") 
-
-# Tuple (Aman dari perubahan tidak sengaja)
-koordinat = (10, 20)
-# koordinat[0] = 50 # ❌ Error!
-
-# Set (Operasi Himpunan)
-angka = {1, 2, 2, 3} 
-print(angka) # {1, 2, 3} -> Duplikat hilang otomatis
+def get_db_config():
+    return ("localhost", 5432, "admin") # Tuple cocok untuk config
 \`\`\`
 
-## 2. Dictionary (Sangat Penting)
+---
+
+## 2. Set: Operasi Himpunan & Unik
+Set \`{}\` sangat cepat untuk mengecek apakah suatu item ada dalam list (O(1) complexity).
+
 \`\`\`python
-mhs = {"nama": "Dino", "nilai": 90}
-
-# Akses Aman (.get) -> Mencegah error jika key tidak ada
-print(mhs.get("alamat", "Tidak Diketahui")) 
-
-# Iterasi Key & Value
-for k, v in mhs.items():
-    print(f"{k}: {v}")
+email_list = ["a@b.com", "c@d.com", "a@b.com"]
+unique_emails = set(email_list) # Menghapus duplikat otomatis
 \`\`\`
 
-## 3. List Comprehension (Pythonic Way)
-Fitur "Sakti" Python untuk membuat list dalam satu baris.
+---
+
+## 3. List Comprehension: "The Pythonic Way"
+Ini adalah cara membuat list baru dari list lama dengan satu baris kode yang elegan.
+
+**Rumus:** \`[hasil for item in iterable if kondisi]\`
 
 \`\`\`python
-angka = [1, 2, 3, 4, 5]
+angka = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-# Cara Biasa
-kuadrat = []
+# Cara Tradisional (5 baris)
+genap = []
 for x in angka:
     if x % 2 == 0:
-        kuadrat.append(x**2)
+        genap.append(x * 2)
 
-# Cara Pythonic (One Liner)
-# [hasil for item in iterable if kondisi]
-kuadrat = [x**2 for x in angka if x % 2 == 0]
+# Cara Comprehension (1 baris)
+genap_cepet = [x * 2 for x in angka if x % 2 == 0]
 \`\`\`
 
+---
+
+## 4. Dictionary: Advanced Methods
+Dictionary adalah tulang punggung Python. Gunakan \`.get()\` untuk menghindari program crash.
+
+\`\`\`python
+user = {"id": 1, "name": "Rian"}
+
+# Buruk: user["email"] -> Akan Error KeyError jika tidak ada
+# Baik:
+email = user.get("email", "tidak@ada.com") # Default value jika key hilang
+\`\`\`
+
+---
+
+## ✍️ Latihan Modul 4 (20 Menit)
+Diberikan list harga produk dalam USD: \`prices_usd = [10, 25, 50, 100]\`.
+1.  Gunakan **List Comprehension** untuk mengubahnya ke IDR (asumsi 1 USD = 15.000).
+2.  Hanya sertakan produk yang harganya setelah dikonversi di atas 500.000.
+3.  Simpan hasilnya dalam sebuah **Set**.
+
 ## 🎯 Outcome Modul
-- Tidak tertukar antara List dan Tuple.
-- Bisa menyingkat loop 5 baris menjadi 1 baris dengan **Comprehension**.
+- Mampu membedakan penggunaan struktur data sesuai kebutuhan performa.
+- Menguasai penulisan kode ringkas dengan Comprehension.
 `,
     level: 'intermediate',
     order: 4,
@@ -297,58 +333,73 @@ kuadrat = [x**2 for x in angka if x % 2 == 0]
     id: 'py-05',
     user_type: 'student',
     language: 'python',
-    title: 'Functions & Modules',
-    description: 'Definisi fungsi, *args **kwargs, Lambda, dan Import modules.',
-    content: `# Fungsi & Modularitas
+    title: 'Functions, Scoping & Lambda Expressions',
+    description: 'Memahami parameter *args, **kwargs, Global vs Local Scope, dan fungsi anonim.',
+    content: `# Functions: Reusability & Modularitas
 
-## 1. Fungsi Dasar & Return Hint
+## 1. Parameter Fleksibel: *args & **kwargs
+Kadang kita tidak tahu berapa banyak argumen yang akan dikirim user.
+
+- **\*args**: Mengumpulkan argumen posisi sebagai **Tuple**.
+- **\*\*kwargs**: Mengumpulkan argumen kata kunci sebagai **Dictionary**.
+
 \`\`\`python
-def hitung_luas(panjang: int, lebar: int) -> int:
-    """Ini adalah Docstring (dokumentasi fungsi)."""
-    return panjang * lebar
+def buat_laporan(judul: str, *nilai: int, **metadata: str):
+    print(f"--- {judul} ---")
+    rata_rata = sum(nilai) / len(nilai)
+    print(f"Rata-rata: {rata_rata}")
+    
+    for key, value in metadata.items():
+        print(f"{key.capitalize()}: {value}")
+
+buat_laporan("Nilai Siswa", 80, 90, 85, guru="Pak Budi", kelas="12-A")
 \`\`\`
 
-## 2. Args & Kwargs (Parameter Fleksibel)
+---
+
+## 2. Memahami Scope (Lingkup Variabel)
+Aturan **LEGB** (Local, Enclosing, Global, Built-in).
+
 \`\`\`python
-# *args: Menerima banyak argumen sebagai Tuple
-def jumlahkan(*angka):
-    return sum(angka)
+total = 0 # Global
 
-print(jumlahkan(10, 20, 30)) # 60
+def tambah(n):
+    global total # Wajib deklarasi jika ingin mengubah variabel global
+    total += n
 
-# **kwargs: Menerima banyak argumen keyword sebagai Dictionary
-def cetak_profil(**data):
-    for k, v in data.items():
-        print(f"{k}: {v}")
+tambah(10)
+print(total) # 10
+\`\`\`
+*Catatan: Penggunaan \`global\` sebaiknya dihindari dalam desain sistem besar karena sulit didebug.*
 
-cetak_profil(nama="Budi", umur=20, hobi="Lari")
+---
+
+## 3. Lambda & Higher-Order Functions
+Lambda adalah fungsi tanpa nama (anonymous) untuk tugas sekali pakai.
+
+\`\`\`python
+# Format: lambda arguments: expression
+tambah_sepuluh = lambda x: x + 10
+print(tambah_sepuluh(5)) # 15
+
+# Contoh nyata: Sorting list of dict
+users = [
+    {"nama": "Zaki", "umur": 25},
+    {"nama": "Abby", "umur": 20}
+]
+users.sort(key=lambda u: u["umur"]) # Urutkan berdasarkan umur
 \`\`\`
 
-## 3. Lambda (Fungsi Anonim)
-Fungsi kecil satu baris, biasanya untuk sorting atau filter.
-\`\`\`python
-data = [(1, "B"), (3, "A"), (2, "C")]
+---
 
-# Sort berdasarkan elemen kedua (Huruf)
-data.sort(key=lambda x: x[1]) 
-# Hasil: [(3, "A"), (1, "B"), (2, "C")]
-\`\`\`
-
-## 4. Modules
-Memecah kode ke file lain.
-\`\`\`python
-# matematika.py
-def tambah(a, b): return a + b
-
-# main.py
-import matematika as mtk
-# atau
-from matematika import tambah
-\`\`\`
+## ✍️ Latihan Modul 5 (20 Menit)
+1.  Buatlah fungsi bernama \`hitung_total_belanja\` yang menerima \`*prices\` (list harga barang).
+2.  Tambahkan parameter keyword \`**diskon\` untuk memproses potongan harga (contoh: \`diskon=0.1\` untuk 10%).
+3.  Gunakan Lambda untuk memformat hasil akhir menjadi string "Total: Rp xxxxx".
 
 ## 🎯 Outcome Modul
-- Bisa membuat fungsi yang menerima input tak terbatas (*args).
-- Mengerti penggunaan Lambda untuk operasi singkat.
+- Mampu mendesain fungsi yang fleksibel.
+- Memahami kapan harus menggunakan lambda dibanding fungsi \`def\`.
 `,
     level: 'intermediate',
     order: 5,
@@ -358,49 +409,80 @@ from matematika import tambah
     id: 'py-06',
     user_type: 'student',
     language: 'python',
-    title: 'OOP Modern: Classes & Dataclasses',
-    description: 'Konsep OOP, Constructor, Inheritance, dan @dataclass.',
-    content: `# Object Oriented Programming (OOP)
+    title: 'OOP Modern: Dari Class Standard ke Dataclasses',
+    description: 'Enkapsulasi, Inheritance, Dunder Methods, dan kemudahan Python Dataclasses.',
+    content: `# Object Oriented Programming (OOP) Modern
 
-## 1. Class Standard
+OOP memungkinkan kita memetakan masalah dunia nyata ke dalam kode.
+
+
+
+## 1. Class Standard & Enkapsulasi
+Gunakan tanda underscore \`__\` untuk membuat variabel "Private".
+
 \`\`\`python
-class Kucing:
-    # Constructor
-    def __init__(self, nama: str, warna: str):
-        self.nama = nama    # Property/Attribute
-        self.warna = warna
-    
-    # Method (Fungsi dalam class)
-    def meong(self):
-        return f"{self.nama} berkata: Meong!"
+class RekeningBank:
+    def __init__(self, pemilik: str, saldo_awal: int):
+        self.pemilik = pemilik
+        self.__saldo = saldo_awal # Private attribute
 
-tom = Kucing("Tom", "Abu-abu")
-print(tom.meong())
+    def cek_saldo(self):
+        return f"Saldo {self.pemilik}: {self.__saldo}"
+
+    def setor(self, jumlah: int):
+        if jumlah > 0:
+            self.__saldo += jumlah
 \`\`\`
 
-## 2. Dataclasses (Python 3.7+)
-Membuat class data jauh lebih singkat tanpa perlu menulis \`__init__\` manual. Sangat disukai di industri modern.
+---
+
+## 2. Dunder Methods (Magic Methods)
+Pernahkah Anda bertanya bagaimana \`print(objek)\` menampilkan teks yang bagus? Itu menggunakan \`__str__\`.
+
+\`\`\`python
+class Buku:
+    def __init__(self, judul, penulis):
+        self.judul = judul
+        self.penulis = penulis
+
+    def __str__(self): # Mengatur tampilan saat di-print
+        return f"'{self.judul}' oleh {self.penulis}"
+
+buku1 = Buku("Laskar Pelangi", "Andrea Hirata")
+print(buku1) # 'Laskar Pelangi' oleh Andrea Hirata
+\`\`\`
+
+---
+
+## 3. Dataclasses (Pythonic & Ringkas)
+Sejak Python 3.7, kita punya \`@dataclass\`. Sangat bagus untuk class yang fungsinya cuma buat "simpan data".
 
 \`\`\`python
 from dataclasses import dataclass
 
 @dataclass
-class Produk:
-    nama: str
-    harga: int
-    stok: int = 0 # Default value
+class User:
+    id: int
+    username: str
+    email: str
+    is_admin: bool = False # Default value
 
-    def total_aset(self) -> int:
-        return self.harga * self.stok
-
-p1 = Produk("Laptop", 10000000, 5)
-print(p1) 
-# Output otomatis rapi: Produk(nama='Laptop', harga=10000000, stok=5)
+# Tidak perlu nulis __init__ lagi!
+u1 = User(1, "rian_dev", "rian@mail.com")
+print(u1) # User(id=1, username='rian_dev', email='rian@mail.com', is_admin=False)
 \`\`\`
 
+---
+
+## ✍️ Latihan Modul 6 (25 Menit)
+1.  Buat class \`Kendaraan\` dengan atribut \`merk\` dan \`tahun\`.
+2.  Buat subclass \`Mobil\` yang mewarisi \`Kendaraan\` dan tambah atribut \`jumlah_pintu\`.
+3.  Implementasikan method \`deskripsi()\` di class \`Mobil\` untuk menampilkan info lengkapnya.
+4.  Coba buat objek mobil dan panggil methodnya.
+
 ## 🎯 Outcome Modul
-- Paham konsep \`self\`.
-- Beralih menggunakan **@dataclass** untuk objek penyimpan data sederhana.
+- Mampu mengorganisir kode ke dalam objek yang terstruktur.
+- Menghemat waktu koding dengan menggunakan Dataclasses.
 `,
     level: 'advanced',
     order: 6,
@@ -410,49 +492,67 @@ print(p1)
     id: 'py-07',
     user_type: 'student',
     language: 'python',
-    title: 'Error Handling & File Handling',
-    description: 'Try-Except, Finally, Raise, dan Context Manager (with open).',
-    content: `# Error & File Handling
+    title: 'Exception Handling & File Operations',
+    description: 'Membangun aplikasi tahan banting (robust) dan manajemen file I/O.',
+    content: `# Penanganan Error & Sistem File
 
-## 1. Menangani Error (Try-Except)
-Mencegah program crash saat ada kesalahan.
+## 1. Try, Except, Else, Finally
+Jangan biarkan program Anda mati hanya karena satu kesalahan kecil.
 
 \`\`\`python
 try:
-    angka = int(input("Bagi 10 dengan: "))
-    hasil = 10 / angka
-    print(f"Hasil: {hasil}")
-except ValueError:
-    print("❌ Masukkan angka saja!")
-except ZeroDivisionError:
-    print("❌ Tidak bisa membagi dengan nol!")
-except Exception as e:
-    print(f"❌ Error tidak dikenal: {e}")
-finally:
-    print("Program selesai (selalu dijalankan).")
-\`\`\`
-
-## 2. File Handling (Context Manager)
-Gunakan \`with\` agar file otomatis ditutup.
-
-\`\`\`python
-# Menulis File
-with open("catatan.txt", "w") as f:
-    f.write("Baris pertama\n")
-    f.write("Baris kedua")
-
-# Membaca File
-try:
-    with open("catatan.txt", "r") as f:
-        isi = f.read()
-        print(isi)
+    with open("config.json", "r") as file:
+        data = file.read()
 except FileNotFoundError:
-    print("File tidak ditemukan!")
+    print("⚠️ File config tidak ditemukan, menggunakan default.")
+except Exception as e:
+    print(f"❌ Terjadi kesalahan fatal: {e}")
+else:
+    print("✅ File berhasil dibaca tanpa error.")
+finally:
+    print("🔄 Proses pembersihan/cleaning selesai.")
 \`\`\`
+
+---
+
+## 2. Context Manager (\`with\` statement)
+Selalu gunakan \`with\` saat membuka file atau koneksi database. Ini memastikan file **otomatis ditutup** meskipun terjadi error di tengah jalan.
+
+\`\`\`python
+# Menulis file (mode 'w' = overwrite, 'a' = append)
+log_data = ["User login", "Upload file", "Logout"]
+
+with open("logs.txt", "w") as f:
+    for line in log_data:
+        f.write(f"{line}\n")
+\`\`\`
+
+---
+
+## 3. Custom Exceptions
+Anda bisa membuat jenis error sendiri untuk logika bisnis Anda.
+
+\`\`\`python
+class UmurTidakValid(Exception):
+    pass
+
+def daftar_sim(umur: int):
+    if umur < 17:
+        raise UmurTidakValid("Belum cukup umur untuk membuat SIM!")
+    return "Pendaftaran diproses."
+\`\`\`
+
+---
+
+## ✍️ Latihan Modul 7 (20 Menit)
+1.  Buatlah sebuah file bernama \`guestbook.txt\` secara manual atau via koding.
+2.  Buat program yang meminta input nama pengunjung terus menerus.
+3.  Simpan setiap nama ke dalam file tersebut (satu nama per baris).
+4.  Gunakan \`try-except\` untuk menangani jika seandainya disk penuh atau file tidak bisa diakses.
 
 ## 🎯 Outcome Modul
-- Program lebih *robust* (tahan banting) terhadap input user yang salah.
-- Bisa membaca dan menulis file teks dengan aman.
+- Program tidak crash saat bertemu input tidak valid.
+- Mampu mengelola data persisten sederhana lewat file teks.
 `,
     level: 'advanced',
     order: 7,
@@ -462,46 +562,76 @@ except FileNotFoundError:
     id: 'py-08',
     user_type: 'student',
     language: 'python',
-    title: 'Libraries Wajib: Requests & JSON',
-    description: 'Berinteraksi dengan API eksternal dan format JSON.',
-    content: `# Bekerja dengan Data Eksternal
+    title: 'Networking & Integration: API with Requests',
+    description: 'Berinteraksi dengan dunia luar: HTTP Requests, JSON Parsing, dan API Integration.',
+    content: `# Python & The Web
 
-Di dunia nyata, Python sering dipakai untuk memanggil API.
+Python adalah bahasa favorit untuk integrasi API dan web scraping.
 
-## 1. JSON (JavaScript Object Notation)
-Format pertukaran data standar.
-
-\`\`\`python
-import json
-
-data_dict = {"nama": "Ali", "hobi": ["Bola", "Code"]}
-
-# Dict -> JSON String (Serialization)
-json_str = json.dumps(data_dict) 
-
-# JSON String -> Dict (Deserialization)
-data_asli = json.loads(json_str)
-\`\`\`
-
-## 2. Requests (Panggil API)
-*Note: Perlu install \`pip install requests\`*
+## 1. Memahami Library \`requests\`
+Library ini adalah standar industri untuk melakukan HTTP calls.
 
 \`\`\`python
-# Pseudo-code (karena tidak bisa run pip di sini)
 import requests
 
-response = requests.get("https://api.github.com/users/google")
+def get_crypto_price(coin: str):
+    url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin}&vs_currencies=idr"
+    
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status() # Raise error jika status 4xx atau 5xx
+        
+        data = response.json() # Parse JSON otomatis jadi Dict
+        return data[coin]["idr"]
+    except requests.exceptions.RequestException as e:
+        return f"Error: {e}"
 
-if response.status_code == 200:
-    data = response.json() # Otomatis jadi Dict
-    print(f"User: {data['login']}")
-else:
-    print("Gagal mengambil data")
+print(f"Harga Bitcoin: Rp {get_crypto_price('bitcoin'):,}")
 \`\`\`
 
+---
+
+## 2. Mengelola JSON yang Kompleks
+Data dari API biasanya bersarang (nested). Gunakan teknik akses dictionary yang aman.
+
+\`\`\`python
+payload = {
+    "status": "success",
+    "data": {
+        "users": [
+            {"id": 1, "name": "Andi"},
+            {"id": 2, "name": "Budi"}
+        ]
+    }
+}
+
+# Mengambil nama user kedua
+nama_user = payload.get("data", {}).get("users", [])[1].get("name")
+\`\`\`
+
+---
+
+## 3. HTTP Methods: POST & Headers
+Saat mengirim data (seperti login atau post artikel), kita menggunakan method POST.
+
+\`\`\`python
+headers = {"Authorization": "Bearer TOKEN_RAHASIA"}
+payload = {"title": "Belajar Python", "body": "Konten materi..."}
+
+res = requests.post("https://api.medium.com/posts", json=payload, headers=headers)
+\`\`\`
+
+---
+
+## ✍️ Latihan Modul 8 (30 Menit)
+1.  Cari API publik gratis (Contoh: JSONPlaceholder atau PokeAPI).
+2.  Buat script Python yang mengambil daftar 10 user pertama.
+3.  Tampilkan hanya nama dan email mereka ke terminal.
+4.  Simpan daftar tersebut ke file \`users_export.json\` menggunakan library \`json\`.
+
 ## 🎯 Outcome Modul
-- Mengerti cara mengubah Dictionary ke JSON dan sebaliknya.
-- Siap untuk mengambil data dari internet (API).
+- Mampu menghubungkan aplikasi Python dengan layanan luar.
+- Paham cara menangani data JSON yang kompleks.
 `,
     level: 'advanced',
     order: 8,
@@ -511,73 +641,67 @@ else:
     id: 'py-09',
     user_type: 'student',
     language: 'python',
-    title: 'Studi Kasus 1: Analisis Data Nilai Siswa',
-    description: 'Latihan List Comprehension, Dict, dan Logika Statistik dasar.',
-    content: `# Studi Kasus 1: Student Grade Analyzer
+    title: 'Studi Kasus 1: Financial Tracker & Analyzer',
+    description: 'Proyek Akhir 1: Mengolah data transaksi, menghitung persentase, dan statistik belanja.',
+    content: `# Project: Personal Financial Tracker
 
-## 📜 Skenario
-Anda memiliki data nilai siswa yang berantakan (raw data).
-Tugas:
-1.  Filter siswa yang **aktif** saja.
-2.  Hitung **rata-rata nilai** setiap siswa.
-3.  Tentukan status kelulusan (Lulus jika rata-rata >= 75).
-4.  Cari siswa dengan nilai rata-rata tertinggi.
+## 📜 Tujuan
+Membangun sistem untuk mencatat pengeluaran, mengkategorikannya, dan memberikan statistik sederhana.
 
-## 💻 Solusi Code
+## 🔧 Fitur yang Akan Dibuat
+1.  **Input Transaksi**: Nama barang, Kategori (Makan, Transport, Hiburan), Harga.
+2.  **Statistik Kategori**: Menjumlahkan total belanja per kategori.
+3.  **Laporan Hemat**: Mencari transaksi termahal dan termurah.
+
+## 💻 Implementasi Kode (Best Practice)
 \`\`\`python
-# Data Mentah (List of Dictionaries)
-students = [
-    {"name": "Andi", "scores": [80, 90, 85], "active": True},
-    {"name": "Budi", "scores": [60, 50, 70], "active": True},
-    {"name": "Cici", "scores": [90, 95, 100], "active": False}, # Tidak aktif
-    {"name": "Dedi", "scores": [70, 75, 74], "active": True},
-]
+from dataclasses import dataclass
+from typing import List
 
-def analyze_grades(data: list[dict]):
-    results = []
-    
-    # 1. Filter & Process Loop
-    for s in data:
-        if not s["active"]:
-            continue # Skip jika tidak aktif
-            
-        # 2. Hitung Rata-rata
-        avg_score = sum(s["scores"]) / len(s["scores"])
-        
-        # 3. Tentukan Status
-        status = "Lulus" if avg_score >= 75 else "Remedial"
-        
-        # Simpan hasil olahan
-        results.append({
-            "name": s["name"],
-            "average": round(avg_score, 1),
-            "status": status
-        })
-    
-    # 4. Cari Juara (Menggunakan max dengan key lambda)
-    top_student = max(results, key=lambda x: x["average"])
-    
-    return results, top_student
+@dataclass
+class Transaction:
+    name: str
+    category: str
+    amount: int
 
-# --- EKSEKUSI ---
-processed_data, champion = analyze_grades(students)
+class FinanceTracker:
+    def __init__(self):
+        self.history: List[Transaction] = []
 
-print("--- Laporan Nilai ---")
-for siswa in processed_data:
-    print(f"{siswa['name']}: {siswa['average']} [{siswa['status']}]")
+    def add_record(self, name: str, category: str, amount: int):
+        new_item = Transaction(name, category, amount)
+        self.history.append(new_item)
 
-print(f"\n🏆 Juara Kelas: {champion['name']} (Nilai: {champion['average']})")
+    def get_total(self) -> int:
+        return sum(t.amount for t in self.history)
+
+    def get_report_by_category(self):
+        report = {}
+        for t in self.history:
+            report[t.category] = report.get(t.category, 0) + t.amount
+        return report
+
+# --- Eksekusi ---
+my_wallet = FinanceTracker()
+my_wallet.add_record("Nasi Padang", "Makan", 25000)
+my_wallet.add_record("Gojek", "Transport", 15000)
+my_wallet.add_record("Steak", "Makan", 150000)
+my_wallet.add_record("Bioskop", "Hiburan", 50000)
+
+print(f"Total Pengeluaran: Rp {my_wallet.get_total():,}")
+print("Detail per Kategori:")
+for cat, total in my_wallet.get_report_by_category().items():
+    print(f"- {cat}: Rp {total:,}")
+
+# List Comprehension untuk cari yang mahal
+mahal = [t.name for t in my_wallet.history if t.amount > 30000]
+print(f"Barang mahal (>30rb): {', '.join(mahal)}")
 \`\`\`
 
-## ✅ Hasil yang Diharapkan
-\`\`\`text
---- Laporan Nilai ---
-Andi: 85.0 [Lulus]
-Budi: 60.0 [Remedial]
-Dedi: 73.0 [Remedial]
+---
 
-🏆 Juara Kelas: Andi (Nilai: 85.0)
-\`\`\`
+## ✍️ Tantangan Pengembangan
+Tambahkan fitur untuk menyimpan data \`history\` ke dalam file CSV agar data tidak hilang saat program ditutup.
 `,
     level: 'advanced',
     order: 9,
@@ -587,77 +711,78 @@ Dedi: 73.0 [Remedial]
     id: 'py-10',
     user_type: 'student',
     language: 'python',
-    title: 'Studi Kasus 2: Sistem ATM Sederhana (OOP)',
-    description: 'Latihan Class, Error Handling, dan Validasi Logika.',
-    content: `# Studi Kasus 2: Simple ATM System
+    title: 'Studi Kasus 2: Library Management System (Full OOP)',
+    description: 'Proyek Akhir 2: Desain sistem manajemen buku dengan Inheritance, Search, dan Stock Control.',
+    content: `# Project: Smart Library System
 
-## 📜 Skenario
-Buatlah class \`ATM\` yang mensimulasikan mesin uang.
-Fitur:
-1.  **Cek Saldo**.
-2.  **Deposit (Setor Tunai):** Tidak boleh negatif.
-3.  **Withdraw (Tarik Tunai):** Tidak boleh melebihi saldo dan minimal sisa saldo 50.000.
-4.  Gunakan **Exception Handling** untuk validasi error.
+## 📜 Tujuan
+Menggabungkan semua konsep: OOP, List Management, Search Logic, dan Validasi.
 
-## 💻 Solusi Code
+## 🔧 Spesifikasi
+1.  **Class Book**: Menyimpan judul, penulis, dan status tersedia/dipinjam.
+2.  **Class Library**: Koleksi buku dengan fitur:
+    * Cari buku berdasarkan judul (case-insensitive).
+    * Peminjaman buku (update status).
+    * Pengembalian buku.
+
+## 💻 Implementasi Kode
 \`\`\`python
-class InsufficientFundsError(Exception):
-    """Custom Error jika saldo kurang"""
-    pass
+class Book:
+    def __init__(self, title: str, author: str):
+        self.title = title
+        self.author = author
+        self.is_loaned = False
 
-class ATM:
-    def __init__(self, owner: str, balance: int = 0):
-        self.owner = owner
-        self.__balance = balance # Private attribute (enkapsulasi)
+    def __str__(self):
+        status = "Dipinjam" if self.is_loaned else "Tersedia"
+        return f"[{status}] {self.title} - {self.author}"
 
-    def check_balance(self):
-        print(f"Saldo {self.owner}: Rp {self.__balance:,}")
+class Library:
+    def __init__(self):
+        self.books: list[Book] = []
 
-    def deposit(self, amount: int):
-        if amount <= 0:
-            print("❌ Deposit harus lebih dari 0!")
-            return
-        self.__balance += amount
-        print(f"✅ Berhasil setor: Rp {amount:,}")
+    def add_book(self, book: Book):
+        self.books.append(book)
 
-    def withdraw(self, amount: int):
-        try:
-            if amount <= 0:
-                raise ValueError("Jumlah penarikan tidak valid.")
-            
-            if amount > self.__balance:
-                raise InsufficientFundsError("Saldo tidak mencukupi.")
-            
-            # Aturan bank: sisa minimal 50rb
-            if (self.__balance - amount) < 50000:
-                raise ValueError("Saldo mengendap minimal harus Rp 50.000")
+    def find_book(self, keyword: str):
+        # Case insensitive search
+        results = [b for b in self.books if keyword.lower() in b.title.lower()]
+        return results
 
-            self.__balance -= amount
-            print(f"✅ Berhasil tarik: Rp {amount:,}")
-            
-        except (ValueError, InsufficientFundsError) as e:
-            print(f"⛔ Transaksi Gagal: {e}")
+    def loan_book(self, title: str):
+        for b in self.books:
+            if b.title.lower() == title.lower():
+                if not b.is_loaned:
+                    b.is_loaned = True
+                    return f"✅ Berhasil meminjam {b.title}"
+                return "❌ Maaf, buku sedang dipinjam orang lain."
+        return "❌ Buku tidak ditemukan."
 
-# --- EKSEKUSI ---
-my_atm = ATM("Raju", 100000) # Saldo awal 100rb
+# --- Simulasi ---
+lib = Library()
+lib.add_book(Book("Python 101", "Guido Van Rossum"))
+lib.add_book(Book("Clean Code", "Robert C. Martin"))
+lib.add_book(Book("The Hobbit", "J.R.R. Tolkien"))
 
-my_atm.check_balance()
-my_atm.deposit(50000)    # Saldo jadi 150rb
-my_atm.withdraw(200000)  # Gagal (Kurang saldo)
-my_atm.withdraw(120000)  # Gagal (Sisa saldo < 50rb. 150-120 = 30)
-my_atm.withdraw(50000)   # Berhasil. Sisa 100rb.
-my_atm.check_balance()
+# 1. Cari buku
+print("Hasil Pencarian 'Python':")
+for b in lib.find_book("python"):
+    print(b)
+
+# 2. Pinjam Buku
+print(f"\n{lib.loan_book('The Hobbit')}")
+print(lib.loan_book('The Hobbit')) # Coba pinjam lagi (harus gagal)
+
+# 3. Laporan Akhir
+print("\nKoleksi Perpustakaan Sekarang:")
+for b in lib.books:
+    print(b)
 \`\`\`
 
-## ✅ Hasil yang Diharapkan
-\`\`\`text
-Saldo Raju: Rp 100,000
-✅ Berhasil setor: Rp 50,000
-⛔ Transaksi Gagal: Saldo tidak mencukupi.
-⛔ Transaksi Gagal: Saldo mengendap minimal harus Rp 50.000
-✅ Berhasil tarik: Rp 50,000
-Saldo Raju: Rp 100,000
-\`\`\`
+---
+
+## 🏆 Kesimpulan Kurikulum
+Selamat! Anda telah menempuh perjalanan dari instalasi hingga membangun sistem OOP yang kompleks. Python adalah perjalanan panjang, langkah selanjutnya adalah memilih spesialisasi: **Data Science (Pandas)**, **Web (Django)**, atau **AI (PyTorch)**.
 `,
     level: 'advanced',
     order: 10,

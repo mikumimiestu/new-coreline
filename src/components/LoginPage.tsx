@@ -9,11 +9,9 @@ import {
   Sparkles,
   Shield,
   Code2,
-  Zap,
   Trophy,
   Users,
   BookOpen,
-  Rocket,
   WifiOffIcon,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -22,6 +20,7 @@ import ReCAPTCHA from 'react-google-recaptcha';
 const RECAPTCHA_SITE_KEY = '6LcHoB0sAAAAAGwuOnnHNhKOHBfdai_JbmB0118Z';
 
 export default function LoginPage() {
+  const [showForm, setShowForm] = useState(false);
   const [mode, setMode] = useState<'email' | 'publicId'>('email');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -170,216 +169,276 @@ export default function LoginPage() {
 
           {/* Main Content */}
           <section className="grid items-start gap-6 md:grid-cols-2 md:gap-8">
-            {/* Left: Login Form - order-1 untuk mobile dan desktop */}
+            {/* Left: Login Form */}
             <div className="animate-slide-in-left order-1">
               <div className="group relative overflow-hidden rounded-2xl bg-white/95 p-6 shadow-xl ring-1 ring-slate-200/50 backdrop-blur-xl transition-all duration-500 hover:shadow-2xl dark:bg-slate-900/95 dark:ring-slate-700/50 md:p-8">
                 <div className="relative z-10">
-                  <div className="mb-6 flex items-center gap-3">
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg">
-                      <Lock className="h-5 w-5" />
-                    </span>
-                    <div className="space-y-1">
-                      <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                        Login ke Akun Anda
-                      </h2>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                      <span className="flex items-center gap-1">
-                        Gunakan 
-                      <img src="/icon2.png" className="h-4 sm:h-5 w-auto" alt="icon" /> 
-                        Account untuk masuk
-                      </span>
-                      </p>
+                  {!showForm ? (
+                    // Step 1: Login Button with Astbyte branding
+                    <div className="animate-fade-in space-y-6">
+                      <div className="mb-6 flex items-center gap-3">
+                        <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg">
+                          <Lock className="h-5 w-5" />
+                        </span>
+                        <div className="space-y-1">
+                          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                            Login ke Akun Anda
+                          </h2>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Masuk untuk melanjutkan ke Coreline
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => setShowForm(true)}
+                        className="group/btn relative inline-flex w-full items-center justify-center gap-3 overflow-hidden rounded-xl border-2 border-slate-200 bg-white px-6 py-4 text-base font-semibold text-slate-900 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:border-blue-300 hover:shadow-xl dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:border-blue-600"
+                      >
+                        <span>Login dengan</span>
+                        <img 
+                          src="/icon2.png" 
+                          alt="Astbyte" 
+                          className="h-8 w-18 transition-transform group-hover/btn:scale-110" 
+                        />
+                      </button>
+
+                      <div className="space-y-3 rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                          Belum punya akun Astbyte?
+                        </p>
+                        <a
+                          href="https://axid.astbyte.com/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+                        >
+                          Daftar Sekarang
+                          <ArrowRight className="h-4 w-4" />
+                        </a>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    // Step 2: Login Form
+                    <>
+                      <div className="mb-6 flex items-center gap-3">
+                        <button
+                          onClick={() => {
+                            setShowForm(false);
+                            setError('');
+                            setUsername('');
+                            setPassword('');
+                            setPublicId('');
+                            recaptchaRef.current?.reset();
+                            setRecaptchaToken(null);
+                          }}
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                        >
+                          ←
+                        </button>
+                        <div className="space-y-1">
+                          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                            Login ke Akun Anda
+                          </h2>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            <span className="flex items-center gap-1">
+                              Gunakan 
+                              <img src="/icon2.png" className="h-4 sm:h-5 w-auto" alt="icon" /> 
+                              Account untuk masuk
+                            </span>
+                          </p>
+                        </div>
+                      </div>
 
-                  {isSuccess && (
-                    <div className="animate-bounce-in mb-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-300">
-                      <Check className="h-5 w-5 flex-shrink-0" />
-                      <span className="text-sm font-medium">
-                        Login berhasil! Redirecting...
-                      </span>
-                    </div>
-                  )}
+                      {isSuccess && (
+                        <div className="animate-bounce-in mb-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-300">
+                          <Check className="h-5 w-5 flex-shrink-0" />
+                          <span className="text-sm font-medium">
+                            Login berhasil! Redirecting...
+                          </span>
+                        </div>
+                      )}
 
-                  {/* Mode Toggle */}
-                  <div className="mb-5 inline-flex w-full rounded-xl bg-slate-100 p-1 text-xs font-medium dark:bg-slate-800">
-                    <button
-                      type="button"
-                      className={`flex-1 rounded-lg px-3 py-2 transition-all duration-200 ${
-                        mode === 'email'
-                          ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white'
-                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                      }`}
-                      onClick={() => {
-                        setMode('email');
-                        setError('');
-                      }}
-                    >
-                      Email & Password
-                    </button>
-                    <button
-                      type="button"
-                      className={`flex-1 rounded-lg px-3 py-2 transition-all duration-200 ${
-                        mode === 'publicId'
-                          ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white'
-                          : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                      }`}
-                      onClick={() => {
-                        setMode('publicId');
-                        setError('');
-                      }}
-                    >
-                      Public ID
-                    </button>
-                  </div>
+                      {/* Mode Toggle */}
+                      <div className="mb-5 inline-flex w-full rounded-xl bg-slate-100 p-1 text-xs font-medium dark:bg-slate-800">
+                        <button
+                          type="button"
+                          className={`flex-1 rounded-lg px-3 py-2 transition-all duration-200 ${
+                            mode === 'email'
+                              ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white'
+                              : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                          }`}
+                          onClick={() => {
+                            setMode('email');
+                            setError('');
+                          }}
+                        >
+                          Email & Password
+                        </button>
+                        <button
+                          type="button"
+                          className={`flex-1 rounded-lg px-3 py-2 transition-all duration-200 ${
+                            mode === 'publicId'
+                              ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white'
+                              : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                          }`}
+                          onClick={() => {
+                            setMode('publicId');
+                            setError('');
+                          }}
+                        >
+                          Public ID
+                        </button>
+                      </div>
 
-                  <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                    {mode === 'email' ? (
-                      <div className="animate-fade-in space-y-4">
-                        <div>
-                          <label
-                            htmlFor="username"
-                            className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200"
-                          >
-                            Username Astbyte
-                          </label>
-                          <div className="group relative flex items-center overflow-hidden rounded-lg border-2 border-slate-300 bg-white px-3 py-2.5 text-sm transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 hover:border-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:focus-within:border-blue-400 dark:hover:border-slate-500">
+                      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                        {mode === 'email' ? (
+                          <div className="animate-fade-in space-y-4">
+                            <div>
+                              <label
+                                htmlFor="username"
+                                className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200"
+                              >
+                                Username Astbyte
+                              </label>
+                              <div className="group relative flex items-center overflow-hidden rounded-lg border-2 border-slate-300 bg-white px-3 py-2.5 text-sm transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 hover:border-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:focus-within:border-blue-400 dark:hover:border-slate-500">
+                                <input
+                                  id="username"
+                                  name="username"
+                                  type="text"
+                                  autoComplete="username"
+                                  value={username}
+                                  onChange={(e) => {
+                                    setUsername(
+                                      e.target.value
+                                        .toLowerCase()
+                                        .replace('@astbyte.com', '')
+                                    );
+                                    if (error) setError('');
+                                  }}
+                                  placeholder="misal: amagi"
+                                  className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400 dark:text-white dark:placeholder:text-slate-500"
+                                />
+                                <span className="ml-2 select-none text-xs text-slate-500 dark:text-slate-400">
+                                  @astbyte.com
+                                </span>
+                              </div>
+                            </div>
+
+                            <div>
+                              <label
+                                htmlFor="password"
+                                className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200"
+                              >
+                                Password
+                              </label>
+                              <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                autoComplete="current-password"
+                                value={password}
+                                onChange={(e) => {
+                                  setPassword(e.target.value);
+                                  if (error) setError('');
+                                }}
+                                placeholder="Masukkan password"
+                                className="w-full rounded-lg border-2 border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition-all placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 dark:hover:border-slate-500 dark:focus:border-blue-400"
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="animate-fade-in">
+                            <label
+                              htmlFor="publicId"
+                              className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200"
+                            >
+                              Public ID Astbyte
+                            </label>
                             <input
-                              id="username"
-                              name="username"
+                              id="publicId"
+                              name="publicId"
                               type="text"
-                              autoComplete="username"
-                              value={username}
+                              value={publicId}
                               onChange={(e) => {
-                                setUsername(
-                                  e.target.value
-                                    .toLowerCase()
-                                    .replace('@astbyte.com', '')
-                                );
+                                setPublicId(e.target.value.trim());
                                 if (error) setError('');
                               }}
-                              placeholder="misal: amagi"
-                              className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400 dark:text-white dark:placeholder:text-slate-500"
+                              placeholder="Contoh: 3f4a6b2c-xxxx-xxxx..."
+                              className="w-full rounded-lg border-2 border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition-all placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 dark:hover:border-slate-500 dark:focus:border-blue-400"
                             />
-                            <span className="ml-2 select-none text-xs text-slate-500 dark:text-slate-400">
-                              @astbyte.com
-                            </span>
+                            <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+                              Public ID bisa kamu lihat di Account Center Astbyte.
+                            </p>
                           </div>
-                        </div>
+                        )}
 
-                        <div>
-                          <label
-                            htmlFor="password"
-                            className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200"
-                          >
-                            Password
-                          </label>
-                          <input
-                            id="password"
-                            name="password"
-                            type="password"
-                            autoComplete="current-password"
-                            value={password}
-                            onChange={(e) => {
-                              setPassword(e.target.value);
-                              if (error) setError('');
-                            }}
-                            placeholder="Masukkan password"
-                            className="w-full rounded-lg border-2 border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition-all placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 dark:hover:border-slate-500 dark:focus:border-blue-400"
+                        {/* reCAPTCHA */}
+                        <div className="flex justify-center py-2">
+                          <ReCAPTCHA
+                            ref={recaptchaRef}
+                            sitekey={RECAPTCHA_SITE_KEY}
+                            onChange={onRecaptchaChange}
+                            theme="light"
                           />
                         </div>
-                      </div>
-                    ) : (
-                      <div className="animate-fade-in">
-                        <label
-                          htmlFor="publicId"
-                          className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200"
+
+                        {error && (
+                          <div
+                            className="animate-shake flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-red-700 dark:border-red-900/40 dark:bg-red-900/30 dark:text-red-200"
+                            role="alert"
+                          >
+                            <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                            <span className="text-xs font-medium">{error}</span>
+                          </div>
+                        )}
+
+                        <button
+                          type="submit"
+                          disabled={loading || isSuccess || !recaptchaToken}
+                          className="group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl focus-visible:ring-2 focus-visible:ring-blue-500/50 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
                         >
-                          Public ID Astbyte
-                        </label>
-                        <input
-                          id="publicId"
-                          name="publicId"
-                          type="text"
-                          value={publicId}
-                          onChange={(e) => {
-                            setPublicId(e.target.value.trim());
-                            if (error) setError('');
-                          }}
-                          placeholder="Contoh: 3f4a6b2c-xxxx-xxxx..."
-                          className="w-full rounded-lg border-2 border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition-all placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 dark:hover:border-slate-500 dark:focus:border-blue-400"
-                        />
-                        <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-                          Public ID bisa kamu lihat di Account Center Astbyte.
+                          {loading ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Memproses...
+                            </>
+                          ) : isSuccess ? (
+                            <>
+                              <Check className="h-4 w-4" />
+                              Berhasil!
+                            </>
+                          ) : (
+                            <>
+                              Masuk
+                              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            </>
+                          )}
+                        </button>
+
+                        <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                          <Shield className="h-3 w-3" />
+                          <span>Protected by reCAPTCHA</span>
+                        </div>
+
+                        <p className="text-center text-xs text-slate-600 dark:text-slate-400">
+                          Belum punya akun?{' '}
+                          <a
+                            href="https://axid.astbyte.com/"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                          >
+                            Daftar di sini
+                          </a>
                         </p>
-                      </div>
-                    )}
-
-                    {/* reCAPTCHA */}
-                    <div className="flex justify-center py-2">
-                      <ReCAPTCHA
-                        ref={recaptchaRef}
-                        sitekey={RECAPTCHA_SITE_KEY}
-                        onChange={onRecaptchaChange}
-                        theme="light"
-                      />
-                    </div>
-
-                    {error && (
-                      <div
-                        className="animate-shake flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-red-700 dark:border-red-900/40 dark:bg-red-900/30 dark:text-red-200"
-                        role="alert"
-                      >
-                        <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                        <span className="text-xs font-medium">{error}</span>
-                      </div>
-                    )}
-
-                    <button
-                      type="submit"
-                      disabled={loading || isSuccess || !recaptchaToken}
-                      className="group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl focus-visible:ring-2 focus-visible:ring-blue-500/50 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Memproses...
-                        </>
-                      ) : isSuccess ? (
-                        <>
-                          <Check className="h-4 w-4" />
-                          Berhasil!
-                        </>
-                      ) : (
-                        <>
-                          Masuk
-                          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                        </>
-                      )}
-                    </button>
-
-                    <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                      <Shield className="h-3 w-3" />
-                      <span>Protected by reCAPTCHA</span>
-                    </div>
-
-                    <p className="text-center text-xs text-slate-600 dark:text-slate-400">
-                      Belum punya akun?{' '}
-                      <a
-                        href="https://axid.astbyte.com/"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
-                      >
-                        Daftar di sini
-                      </a>
-                    </p>
-                  </form>
+                      </form>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Right: Platform Features - order-2 untuk mobile dan desktop */}
+            {/* Right: Platform Features */}
             <div className="animate-slide-in-right order-2">
               <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 p-6 text-white shadow-2xl dark:from-blue-700 dark:via-indigo-700 dark:to-blue-800 md:p-8">
                 <div className="mb-6">
