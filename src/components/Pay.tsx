@@ -252,11 +252,8 @@ export default function ManualQRISPage() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                  <Wallet className="w-5 h-5 text-white" />
-                </div>
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                  AxiPay
+                  <img src="/logos/axipay.png" alt="AxiPay Logo" className='h-22 w-44 ml-[-28px] filter invert hue-rotate-180' />
                 </h1>
               </div>
               <p className="text-slate-600 dark:text-slate-400 max-w-lg">
@@ -510,7 +507,7 @@ export default function ManualQRISPage() {
                   <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Metode Pembayaran</p>
                   <div className="flex items-center justify-center gap-2 font-bold text-slate-800 dark:text-white">
                     <Wallet className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    AstByte Balance
+                    AxiPay
                   </div>
                 </div>
 
