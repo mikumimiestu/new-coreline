@@ -464,6 +464,7 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
       )}
 
       {/* CSS Animations */}
+      {/* CSS Hanya berlaku untuk animasi saja */}
       <style>{`
         @keyframes fade-in {
           from { opacity: 0; transform: scale(0.95); }
