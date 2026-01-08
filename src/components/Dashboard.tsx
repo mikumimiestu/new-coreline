@@ -42,12 +42,14 @@ const languageData: readonly Lang[] = [
     id: 'php', 
     name: 'PHP (8.0+)', 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg',
+    comingSoon: true,
     gradient: 'from-indigo-500 to-purple-500'
   },
   { 
     id: 'javascript', 
     name: 'JavaScript (ES6+)', 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
+    comingSoon: true,
     gradient: 'from-yellow-400 to-orange-500'
   },
   { 
@@ -56,44 +58,48 @@ const languageData: readonly Lang[] = [
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
     gradient: 'from-blue-600 to-cyan-500'
   },
-  { 
-    id: 'ruby', 
-    name: 'Ruby (Ruby 3+)', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg',
-    gradient: 'from-red-600 to-pink-500'
-  },
-  { 
-    id: 'go', 
-    name: 'Go (Go 1.18+)', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg',
-    gradient: 'from-cyan-500 to-blue-600'
-  },
-  { 
-    id: 'sql', 
-    name: 'MySQL', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
-    gradient: 'from-blue-500 to-orange-500'
-  },
+  // { 
+  //   id: 'ruby', 
+  //   name: 'Ruby (Ruby 3+)', 
+  //   iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg',
+  //   comingSoon: true,
+  //   gradient: 'from-red-600 to-pink-500'
+  // },
+  // { 
+  //   id: 'go', 
+  //   name: 'Go (Go 1.18+)', 
+  //   iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg',
+  //   comingSoon: true,
+  //   gradient: 'from-cyan-500 to-blue-600'
+  // },
+  // { 
+  //   id: 'sql', 
+  //   name: 'MySQL', 
+  //   iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
+  //   comingSoon: true,
+  //   gradient: 'from-blue-500 to-orange-500'
+  // },
   { 
     id: 'postgresql', 
     name: 'PostgreSQL', 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
+    comingSoon: true,
     gradient: 'from-blue-600 to-indigo-600'
   },
-  { 
-    id: 'java', 
-    name: 'Java', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg', 
-    comingSoon: true,
-    gradient: 'from-red-600 to-orange-600'
-  },
-  { 
-    id: 'swift', 
-    name: 'Swift', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/swift/swift-original.svg', 
-    comingSoon: true,
-    gradient: 'from-orange-500 to-red-500'
-  },
+  // { 
+  //   id: 'java', 
+  //   name: 'Java', 
+  //   iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg', 
+  //   comingSoon: true,
+  //   gradient: 'from-red-600 to-orange-600'
+  // },
+  // { 
+  //   id: 'swift', 
+  //   name: 'Swift', 
+  //   iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/swift/swift-original.svg', 
+  //   comingSoon: true,
+  //   gradient: 'from-orange-500 to-red-500'
+  // },
   { 
     id: 'dart', 
     name: (<div className="flex items-center gap-1">

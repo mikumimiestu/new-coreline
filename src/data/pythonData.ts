@@ -7,328 +7,447 @@ export const MOCK_MATERIALS: LearningMaterial[] = [
     user_type: 'student',
     language: 'python',
     title: 'Pengenalan Python & Lingkungan Kerja Profesional',
-    description: 'Filosofi Python, Ekosistem, Instalasi, Virtual Environment (venv), dan Deep Dive Interpreter.',
-    content: `# 🐍 Pengenalan Python & Setup Profesional
+    description: 'Filosofi Python, Arsitektur Interpreter, Manajemen Dependensi Modern, dan Standar PEP 8.',
+    content: `# 🐍 Modul 1: Python Deep Dive & Professional Setup
 
-## Mengapa Belajar Python di 2024/2025?
-Python bukan sekadar bahasa pemrograman; ia adalah ekosistem. Python digunakan oleh raksasa teknologi seperti Google (YouTube), Meta (Instagram), dan NASA. 
+## 1. Filosofi & Ekosistem Python
+Python diciptakan oleh **Guido van Rossum** pada 1991. Keunggulannya bukan pada kecepatan eksekusi mentah, melainkan pada **produktivitas pengembang**.
 
-**Filosofi Zen of Python (PEP 20):**
-* *Beautiful is better than ugly.*
-* *Explicit is better than implicit.*
-* *Simple is better than complex.*
+### Zen of Python (PEP 20)
+Python memiliki filosofi desain yang bisa kamu akses dengan mengetik \`import this\` di terminal Python. Tiga poin intinya:
+1. **Readability Counts**: Kode dibaca lebih sering daripada ditulis.
+2. **There should be one—and preferably only one—obvious way to do it**: Menghindari ambiguitas.
+3. **If the implementation is hard to explain, it's a bad idea**: Kesederhanaan adalah kunci.
+
+
 
 ---
 
-## 🛠️ Manajemen Lingkungan (Workflow Industri)
-Banyak pemula merusak instalasi Python sistem mereka karena menginstal library secara global. Kita akan menggunakan **Virtual Environments**.
+## 2. Arsitektur: Bagaimana Python Bekerja?
+Python adalah bahasa **Interpreted**, namun secara teknis ia melalui tahap kompilasi:
+1. **Source Code (.py)**: Kode yang kamu tulis.
+2. **Bytecode (.pyc)**: Kode sumber dikonversi menjadi instruksi tingkat rendah yang dipahami mesin.
+3. **Python Virtual Machine (PVM)**: Interpreter yang membaca bytecode dan menjalankannya di sistem operasi.
 
-
-
-### 1. Memasang Python
-Pastikan Anda mengunduh dari [python.org](https://python.org). Cek versi Anda di terminal:
-\`\`\`bash
-python --version  # Minimal 3.10+ direkomendasikan
-\`\`\`
-
-### 2. Isolasi Proyek dengan Venv
-Virtual environment mengisolasi dependensi antar proyek. Jika Proyek A butuh Django 3 dan Proyek B butuh Django 4, venv adalah solusinya.
-
-\`\`\`bash
-# 1. Buat folder proyek
-mkdir belajar-python && cd belajar-python
-
-# 2. Buat venv
-python -m venv .venv
-
-# 3. Aktivasi
-# Windows:
-.venv\\Scripts\\activate
-# Mac/Linux:
-source .venv/bin/activate
-\`\`\`
-
-### 3. Ekosistem pip & requirements.txt
-\`pip\` adalah package manager Python. Untuk mencatat apa saja yang diinstal:
-\`\`\`bash
-pip install requests  # Contoh instal library
-pip freeze > requirements.txt  # Menyimpan daftar library
-\`\`\`
+> **Note:** Inilah alasan Python bersifat *cross-platform*. Kamu menulis kode sekali, dan PVM di Windows/Linux/Mac yang akan menyesuaikannya.
 
 ---
 
-## 💻 Eksekusi Kode: Script vs Interactive
-1.  **Interactive (REPL):** Ketik \`python\` di terminal. Bagus untuk tes cepat.
-2.  **Scripting:** Membuat file \`.py\`. Cara standar membangun aplikasi.
+## 3. Setup Lingkungan Kerja Profesional (The Right Way)
+Di industri, kita tidak pernah mengandalkan "Global Python". Kita menggunakan isolasi untuk menghindari **Dependency Hell**.
+
+### A. Instalasi & Verifikasi
+Pastikan Python 3.10 atau lebih baru terpasang.
+\`\`\`bash
+python --version
+\`\`\`
+
+### B. Virtual Environments (venv)
+Virtual environment adalah salinan terisolasi dari Python untuk proyek spesifik.
+
+
+**Workflow Eksekusi:**
+1. **Inisialisasi Proyek:**
+   \`\`\`bash
+   mkdir proyek_python && cd proyek_python
+   \`\`\`
+2. **Membuat Lingkungan Terisolasi:**
+   \`\`\`bash
+   # Folder '.venv' adalah standar industri untuk menaruh file environment
+   python -m venv .venv
+   \`\`\`
+3. **Aktivasi (Penting!):**
+   - **Windows:** \`.venv\\Scripts\\activate\`
+   - **macOS/Linux:** \`source .venv/bin/activate\`
+   *Ciri berhasil: Muncul tanda (.venv) di depan prompt terminal.*
+
+---
+
+## 4. Manajemen Paket dengan PIP & Requirements
+\`pip\` (Package Installer for Python) memungkinkan kita mengunduh ribuan library dari **PyPI** (Python Package Index).
+
+**Manajemen Dependensi:**
+* **Install Library:** \`pip install pandas\`
+* **List Library:** \`pip list\`
+* **Freeze (Dokumentasi):** \`pip freeze > requirements.txt\`
+  *Fungsi: Agar rekan tim bisa menginstal library yang sama dengan \`pip install -r requirements.txt\`.*
+
+---
+
+## 5. Menulis Kode Pertama: Scripting & Boilerplate
+Struktur file Python profesional biasanya menggunakan blok \`if __name__ == "__main__":\`. Ini memastikan kode hanya berjalan jika file dieksekusi langsung, bukan saat di-import oleh file lain.
 
 \`\`\`python
-# main.py
-def salam(nama: str):
-    """Fungsi sederhana untuk menyapa."""
-    print(f"Halo, {nama}! Selamat datang di dunia Python.")
+# file: hello.py
+
+def main():
+    # Menggunakan f-string (fitur Python 3.6+) untuk performa & readability
+    user = "Engineer"
+    print(f"Status: System Active. Welcome, {user}.")
 
 if __name__ == "__main__":
-    salam("Programmer")
+    # Titik masuk utama aplikasi
+    main()
 \`\`\`
 
 ---
 
-## ✍️ Latihan Modul 1 (15 Menit)
-1.  Buatlah sebuah virtual environment baru bernama \`env_latihan\`.
-2.  Install library \`cowsay\` menggunakan pip.
-3.  Buat file \`app.py\`, import cowsay, dan jalankan \`cowsay.cow('Python itu keren!')\`.
+## ✍️ Latihan Terstruktur (20 Menit)
+1. **Isolasi**: Buat folder baru \`lab_python\`, buat venv di dalamnya, dan aktifkan.
+2. **Eksperimen PIP**: Install library \`art\`.
+3. **Scripting**: Buat file \`app.py\` yang mencetak nama kamu dalam bentuk ASCII art menggunakan library tersebut.
+4. **Dokumentasi**: Hasilkan file \`requirements.txt\` dari environment tersebut.
 
-## 🎯 Outcome Modul
-- Memahami beda Python global vs virtual environment.
-- Mampu mengelola library pihak ketiga secara profesional.
+## 🎯 Target Kompetensi
+- Mampu menjelaskan alur kerja interpreter Python.
+- Mampu melakukan setup proyek yang bersih dan terisolasi.
+- Memahami standarisasi struktur kode profesional (PEP 8 dasar).
 `,
     level: 'beginner',
     order: 1,
     created_at: '2025-01-01T00:00:00Z'
-  },
+},
   {
     id: 'py-02',
     user_type: 'student',
     language: 'python',
     title: 'Data Types & Type Hinting: Menulis Kode Robust',
-    description: 'Eksplorasi tipe data primitif, Dynamic Typing vs Static Typing, dan manipulasi String modern.',
-    content: `# Variabel & Modern Python Typing
+    description: 'Eksplorasi tipe data primitif, Dynamic Typing vs Static Typing, Memory Reference, dan manipulasi String modern.',
+    content: `# 🏗️ Modul 2: Data Types & Type Hinting (Robust Coding)
 
-## 1. Deep Dive: Tipe Data Primitif
-Python memang "dynamic", tapi di baliknya setiap data memiliki tipe yang ketat.
+## 1. Memahami Variabel & Memory Reference
+Di Python, variabel bukanlah "kotak" yang menyimpan nilai, melainkan **label** yang menunjuk ke sebuah objek di memori.
 
-* **int**: Bilangan bulat (tanpa batas ukuran di Python 3!).
-* **float**: Bilangan desimal (presisi ganda).
-* **str**: Teks (Unicode secara default).
-* **bool**: \`True\` atau \`False\`.
+
+
+### Karakteristik Utama:
+* **Dynamic Typing**: Kamu tidak perlu mendeklarasikan tipe data secara eksplisit (Python akan menebaknya).
+* **Strong Typing**: Python tidak akan mengizinkan operasi antar tipe yang tidak kompatibel (misal: \`5 + "10"\` akan error, berbeda dengan JavaScript).
 
 ---
 
-## 2. Type Hinting (Standar Industri Baru)
-Sejak Python 3.6+, komunitas beralih ke Type Hinting. Mengapa?
-1.  **Auto-complete** di VS Code menjadi lebih akurat.
-2.  **Static Analysis** (menggunakan tool seperti \`mypy\`) untuk menangkap bug sebelum kode dijalankan.
+## 2. Deep Dive: Tipe Data & Immutability
+Python membagi data menjadi dua kategori besar yang krusial untuk dipahami agar tidak terjadi bug saat manipulasi data:
+
+| Tipe Data | Contoh | Sifat | Penjelasan |
+| :--- | :--- | :--- | :--- |
+| **int** | \`10\`, \`-5\` | Immutable | Bilangan bulat tanpa batas (Arbitrary Precision). |
+| **float** | \`3.14\`, \`2.0\` | Immutable | Bilangan desimal (IEEE 754 double precision). |
+| **str** | \`"Python"\` | Immutable | Urutan karakter Unicode. |
+| **bool** | \`True\`, \`False\` | Immutable | Nilai logika (Subclass dari integer: 1 & 0). |
+
+> **Konsep Penting:** **Immutable** berarti nilai objek tersebut tidak bisa diubah setelah dibuat. Jika kamu mengubah string, Python sebenarnya membuat string baru di memori.
+
+---
+
+## 3. Modern Type Hinting (Standar Industri)
+Walaupun Python dinamis, industri (Google, Meta, Netflix) menggunakan **Type Hinting** untuk menjaga kualitas kode di proyek besar.
 
 \`\`\`python
-# Cara penulisan: variable_name: type = value
-username: str = "alex_dev"
-login_attempts: int = 3
-is_premium: bool = False
-wallet_balance: float = 150.75
+from typing import Final, Optional
 
-# Type hinting pada koleksi (Python 3.9+)
-daftar_nilai: list[int] = [80, 90, 100]
-konfigurasi: dict[str, str] = {"theme": "dark", "lang": "id"}
+# Konstanta (Gunakan Final agar nilainya tidak sengaja diubah)
+PI: Final[float] = 3.14159
+
+# Variabel dengan Type Hinting
+username: str = "dian_tech"
+is_active: bool = True
+
+# Type Hinting Koleksi (Python 3.9+)
+tags: list[str] = ["python", "backend", "fastapi"]
+user_profile: dict[str, int] = {"id": 1, "level": 10}
+
+# Optional: Jika variabel boleh bernilai None
+middle_name: Optional[str] = None
+\`\`\`
+*Keuntungan: IDE (VS Code/PyCharm) akan memberikan peringatan jika kamu mencoba memasukkan tipe data yang salah.*
+
+---
+
+## 4. Master String Manipulation & F-Strings
+F-Strings bukan hanya untuk mencetak variabel, tapi juga untuk **ekspresi langsung** dan **formatting**.
+
+\`\`\`python
+# 1. Padding & Alignment
+print(f"|{'Menu':^20}|")  # Tengah (Center)
+print(f"|{'Harga':<20}|") # Rata Kiri
+
+# 2. Number Formatting (Sangat Penting untuk Aplikasi Finansial)
+salary: int = 15500000
+tax_rate: float = 0.11
+total_tax: float = salary * tax_rate
+
+print(f"Gaji Pokok: Rp {salary:,.0f}") # Output: Rp 15,500,000
+print(f"Pajak (11%): Rp {total_tax:,.2f}") # 2 angka di belakang koma
+
+# 3. String Methods Modern
+slug = "  Belajar-Python-Mudah  ".strip().lower().replace("-", " ")
+print(slug) # "belajar python mudah"
 \`\`\`
 
 ---
 
-## 3. String Manipulation & F-Strings
-Lupakan cara lama \`"Halo " + nama\`. Python punya **f-strings** yang sangat powerful.
+## 5. Type Casting & Input Validation
+Karena \`input()\` selalu menghasilkan \`str\`, kita harus melakukan konversi yang aman.
 
 \`\`\`python
-nama = "Budi"
-skor = 95.5678
-
-# Format angka: .2f artinya 2 angka di belakang koma
-# Ribuan: {angka:,}
-pesan = f"Halo {nama}, skor akhir Anda adalah {skor:.2f}"
-print(pesan) # Halo Budi, skor akhir Anda adalah 95.57
-
-# Method String yang sering dipakai
-raw_input = "  python_developer  "
-clean_input = raw_input.strip().upper() # "PYTHON_DEVELOPER"
+try:
+    user_age = int(input("Masukkan umur: "))
+    days_lived = user_age * 365
+    print(f"Anda telah hidup sekitar {days_lived:,} hari.")
+except ValueError:
+    print("Error: Harap masukkan angka yang valid!")
 \`\`\`
 
 ---
 
-## 4. Konversi Data (Type Casting)
-Hati-hati dengan input user! Semua input dari terminal dianggap **String**.
-
-\`\`\`python
-# Program hitung umur
-tahun_lahir = input("Tahun berapa kamu lahir? ") 
-# Jika input "1995", maka tahun_lahir adalah str "1995"
-
-umur = 2025 - int(tahun_lahir) # Konversi str -> int
-print(f"Umur kamu: {umur} tahun")
-\`\`\`
-
----
-
-## ✍️ Latihan Modul 2 (15 Menit)
-Buatlah program "Kalkulator Gaji Sederhana":
-1.  Minta input nama (str), gaji pokok (int), dan jumlah hari lembur (int).
-2.  Setiap hari lembur dibayar 50.000.
-3.  Tampilkan total gaji dengan format ribuan (Contoh: Rp 5,000,000) menggunakan f-string.
+## ✍️ Latihan Modul 2 (20 Menit)
+**Proyek: Sistem Invoice Sederhana**
+1.  Buat variabel dengan Type Hinting untuk: \`nama_produk\`, \`harga_satuan\`, dan \`jumlah_beli\`.
+2.  Hitung \`subtotal\` dan beri diskon 10% jika \`subtotal\` di atas 100.000.
+3.  Tampilkan output dengan format seperti ini:
+    \`\`\`text
+    --- INVOICE ---
+    Produk  : [Nama Produk]
+    Total   : Rp [Harga dengan pemisah ribuan]
+    Diskon  : [Persen Diskon]%
+    AKHIR   : Rp [Total Akhir]
+    ----------------
+    \`\`\`
 
 ## 🎯 Outcome Modul
-- Terbiasa menggunakan Type Hinting.
-- Menguasai formatting string untuk laporan data.
+- Mampu membedakan objek mutable dan immutable.
+- Mampu menulis kode yang "Self-Documenting" dengan Type Hinting.
+- Mahir melakukan formatting data numerik dan teks untuk UI/Laporan.
 `,
     level: 'beginner',
     order: 2,
     created_at: '2025-01-01T00:00:00Z'
-  },
+},
   {
     id: 'py-03',
     user_type: 'student',
     language: 'python',
     title: 'Control Flow: Logika Kompleks & Optimasi Loop',
-    description: 'Menguasai Match Case, Walrus Operator, dan teknik iterasi yang efisien.',
-    content: `# Logic & Loops: Mengatur Alur Program
+    description: 'Menguasai Match Case, Walrus Operator, Short-circuit logic, dan teknik iterasi efisien.',
+    content: `# 🧠 Modul 3: Control Flow & Logic Optimization
 
-## 1. Percabangan Modern: Match Case
-Di Python 3.10+, kita mendapatkan \`match-case\` yang jauh lebih rapi dibanding \`if-elif\` bertumpuk.
+## 1. Alur Logika & Short-Circuit Evaluation
+Sebelum masuk ke sintaks, kamu harus paham bagaimana Python mengevaluasi logika. Python menggunakan **Short-circuiting**: jika hasil akhir sudah bisa ditentukan dari kondisi pertama, kondisi kedua tidak akan diperiksa.
+
+
 
 \`\`\`python
-def handle_error(status_code: int):
-    match status_code:
-        case 200:
-            return "OK"
-        case 400 | 404: # Logical OR
-            return "Client Error"
-        case 500:
-            return "Server Error"
-        case _: # Wildcard (default)
-            return "Unknown Code"
+# Contoh efisiensi: fungsi cek_database() tidak akan dijalankan jika user_id adalah 0
+if user_id != 0 and cek_database(user_id):
+    print("User ditemukan")
 \`\`\`
 
 ---
 
-## 2. Walrus Operator (\`:=\`)
-Operator ini memungkinkan kita memberi nilai ke variabel **di dalam** kondisi \`if\` atau \`while\`. Sangat berguna untuk efisiensi kode.
+## 2. Percabangan Modern: Structural Pattern Matching
+Python 3.10 memperkenalkan \`match-case\`. Ini bukan sekadar \`switch-case\` biasa; ini adalah **Pattern Matching**.
 
 \`\`\`python
-# Tanpa Walrus: panggil fungsi len() dua kali
-if len(data := get_api_data()) > 0:
-    print(f"Dapat {len(data)} data")
-
-# Dengan Walrus: simpan hasil len() ke variabel 'n' sekaligus dicek
-if (n := len(get_api_data())) > 0:
-    print(f"Data ditemukan: {n} item")
+def process_command(command: str):
+    # Pattern matching bisa membedah struktur data
+    match command.split():
+        case ["quit"]:
+            print("Sistem dimatikan...")
+        case ["load", filename]:
+            print(f"Memuat file: {filename}")
+        case ["move", x, y] if int(y) > 0: # Guard condition
+            print(f"Bergerak ke koordinat {x}, {y}")
+        case _:
+            print("Perintah tidak dikenali.")
 \`\`\`
 
 ---
 
-## 3. Iterasi Efisien (Loops)
-Python tidak menggunakan loop gaya C (\`i++\`). Kita melakukan iterasi langsung pada objek.
+## 3. Walrus Operator (\`:=\`): Penugasan dalam Ekspresi
+Resmi hadir di Python 3.8, operator ini sangat berguna untuk menghindari pemanggilan fungsi yang berat berulang kali dalam satu blok kondisi.
 
 \`\`\`python
-items = ["Laptop", "Mouse", "Keyboard"]
-
-# Gunakan enumerate untuk mendapatkan index
-for index, item in enumerate(items, start=1):
-    print(f"{index}. {item}")
-
-# Loop pada Dictionary
-prices = {"Laptop": 1000, "Mouse": 50}
-for name, price in prices.items():
-    print(f"{name} seharga")
+# CASE: Membaca input user sampai mereka mengetik 'exit'
+while (user_input := input("Perintah: ").lower()) != "exit":
+    print(f"Memproses {user_input}...")
 \`\`\`
 
 ---
 
-## 4. Break, Continue, Pass
-- \`break\`: Berhenti total dari loop.
-- \`continue\`: Lompat ke iterasi berikutnya.
-- \`pass\`: Placeholder (biar kode tidak error saat kosong).
+## 4. Iterasi Tingkat Lanjut (Loops)
+Loop di Python dirancang untuk **Readability**. Hindari penggunaan \`range(len(data))\` jika tidak sangat diperlukan.
+
+### A. Enumerate & Zip
+\`\`\`python
+names = ["Alice", "Bob", "Charlie"]
+scores = [85, 92, 78]
+
+# Menggabungkan dua list secara paralel dengan zip()
+for name, score in zip(names, scores):
+    print(f"Siswa: {name} | Nilai: {score}")
+
+# Mendapatkan index dengan enumerate()
+for i, name in enumerate(names, start=1):
+    print(f"Rangking {i}: {name}")
+\`\`\`
+
+### B. List Comprehension (Pythonic Way)
+Cara elegan untuk membuat list baru dari iterasi dalam satu baris.
+\`\`\`python
+angka = [1, 2, 3, 4, 5, 6]
+# Ambil angka genap saja dan kuadratkan
+kuadrat_genap = [x**2 for x in angka if x % 2 == 0] 
+# Output: [4, 16, 36]
+\`\`\`
+
+---
+
+## 5. Control Statement: Break, Continue, Else
+Tahukah kamu? Loop di Python punya blok \`else\`. Blok \`else\` pada loop akan dijalankan **hanya jika** loop selesai secara normal (tidak terkena \`break\`).
+
+\`\`\`python
+for i in range(3):
+    pw = input("Password: ")
+    if pw == "admin":
+        print("Login Berhasil!")
+        break
+else:
+    # Berjalan jika user salah 3x (loop habis tanpa break)
+    print("Kesempatan habis. Akun terkunci.")
+\`\`\`
 
 ---
 
 ## ✍️ Latihan Modul 3 (20 Menit)
-Buatlah program "Login System":
-1.  Tentukan \`correct_password = "admin123"\`.
-2.  Berikan user maksimal 3 kali kesempatan input password.
-3.  Jika benar, tampilkan "Akses Diterima" dan keluar loop (\`break\`).
-4.  Jika salah 3 kali, tampilkan "Akun Terblokir".
+**Proyek: Smart Inventory Monitor**
+1.  Buat list dictionary \`stok_barang = [{"nama": "Monitor", "jumlah": 5}, {"nama": "Mouse", "jumlah": 0}]\`.
+2.  Gunakan loop untuk memeriksa setiap barang.
+3.  Gunakan **Match Case** atau **If-Else** untuk menentukan status:
+    - Jika jumlah > 10: "Stok Aman"
+    - Jika jumlah 1 - 10: "Stok Menipis"
+    - Jika jumlah 0: "Habis Total"
+4.  Tambahkan fitur: Gunakan **List Comprehension** untuk membuat list baru berisi hanya nama barang yang stoknya "Habis Total".
 
 ## 🎯 Outcome Modul
-- Mampu menyederhanakan logika percabangan.
-- Menggunakan \`enumerate\` untuk pengelolaan index loop yang bersih.
+- Mengurangi redundansi kode dengan Walrus Operator.
+- Mampu memproses data koleksi secara paralel menggunakan \`zip\`.
+- Memahami teknik pembuatan list secara instan dengan Comprehension.
 `,
     level: 'beginner',
     order: 3,
     created_at: '2025-01-01T00:00:00Z'
-  },
+},
   {
     id: 'py-04',
     user_type: 'student',
     language: 'python',
     title: 'Data Structures Deep Dive & Comprehensions',
-    description: 'Memahami Mutability, Performa Dictionary, dan List Comprehension satu baris.',
-    content: `# Struktur Data & Efisiensi
+    description: 'Memahami Mutability, Performa Dictionary (O(1)), Slicing, dan Advanced Comprehensions.',
+    content: `# 🏗️ Modul 4: Data Structures Deep Dive (Efficiency First)
+
+## 1. Analisis Struktur Data: Performa & Memori
+Sebagai developer intermediate, kamu harus memilih struktur data bukan hanya berdasarkan fitur, tapi juga efisiensi.
+
+| Struktur | Tipe | Keunggulan | Kasus Penggunaan |
+| :--- | :--- | :--- | :--- |
+| **List** \`[]\` | Mutable | Urutan (Order) terjaga | Daftar transaksi, antrean data. |
+| **Tuple** \`()\` | Immutable | Hemat memori & Cepat | Koordinat GPS, Konfigurasi DB. |
+| **Set** \`{}\` | Mutable | Unik & Cek member kilat | Menghapus duplikat, filter kategori. |
+| **Dict** \`{:}\` | Mutable | Key-Value mapping | Caching, Data JSON, Profil user. |
 
 
 
-## 1. List vs Tuple: Kapan pakai mana?
-- **List \`[]\`**: Mutable (Bisa diubah). Gunakan jika data akan bertambah/berkurang.
-- **Tuple \`()\`**: Immutable (Tetap). Gunakan untuk data koordinat, konfigurasi, atau data yang tidak boleh berubah secara tidak sengaja (lebih cepat & hemat memori).
+---
+
+## 2. Advanced Slicing & Unpacking
+Jangan gunakan loop hanya untuk mengambil sebagian data atau memecah isi list.
 
 \`\`\`python
-def get_db_config():
-    return ("localhost", 5432, "admin") # Tuple cocok untuk config
+data = [100, 200, 300, 400, 500]
+
+# Slicing [start:stop:step]
+top_three = data[:3]    # [100, 200, 300]
+reverse = data[::-1]    # Membalikkan list
+
+# Extended Iterable Unpacking
+head, *middle, tail = data
+# head = 100, middle = [200, 300, 400], tail = 500
 \`\`\`
 
 ---
 
-## 2. Set: Operasi Himpunan & Unik
-Set \`{}\` sangat cepat untuk mengecek apakah suatu item ada dalam list (O(1) complexity).
+## 3. The Power of Sets (O(1) Complexity)
+Mengecek keberadaan member (\`in\`) di **List** butuh waktu lebih lama seiring bertambahnya data (O(n)). Di **Set**, waktunya konstan (O(1)).
 
 \`\`\`python
-email_list = ["a@b.com", "c@d.com", "a@b.com"]
-unique_emails = set(email_list) # Menghapus duplikat otomatis
+# Operasi Himpunan (Set Theory)
+admin_group = {"ali", "budi"}
+editor_group = {"budi", "cici"}
+
+# Siapa yang punya kedua akses? (Intersection)
+both = admin_group & editor_group # {"budi"}
+
+# Gabungkan semua user unik (Union)
+all_users = admin_group | editor_group # {"ali", "budi", "cici"}
 \`\`\`
 
 ---
 
-## 3. List Comprehension: "The Pythonic Way"
-Ini adalah cara membuat list baru dari list lama dengan satu baris kode yang elegan.
+## 4. Master Comprehensions (List & Dict)
+Comprehension bukan sekadar menyingkat kode, tapi juga seringkali lebih cepat secara eksekusi karena dioptimalkan di level C-Python.
 
-**Rumus:** \`[hasil for item in iterable if kondisi]\`
-
+### A. List Comprehension dengan Logika Kompleks
 \`\`\`python
-angka = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+# Rumus: [hasil_true if kondisi else hasil_false for item in iterable]
+scores = [45, 80, 55, 90, 30]
+status = ["LULUS" if s >= 60 else "REMIDIAL" for s in scores]
+\`\`\`
 
-# Cara Tradisional (5 baris)
-genap = []
-for x in angka:
-    if x % 2 == 0:
-        genap.append(x * 2)
-
-# Cara Comprehension (1 baris)
-genap_cepet = [x * 2 for x in angka if x % 2 == 0]
+### B. Dictionary Comprehension
+Mengubah list menjadi mapping secara instan.
+\`\`\`python
+users = [("1", "Admin"), ("2", "Staff")]
+user_dict = {uid: role for uid, role in users}
+# Output: {'1': 'Admin', '2': 'Staff'}
 \`\`\`
 
 ---
 
-## 4. Dictionary: Advanced Methods
-Dictionary adalah tulang punggung Python. Gunakan \`.get()\` untuk menghindari program crash.
+## 5. Dictionary Safe Access & Defaulting
+Menghindari \`KeyError\` adalah tanda kode yang robust.
 
 \`\`\`python
-user = {"id": 1, "name": "Rian"}
+settings = {"theme": "dark"}
 
-# Buruk: user["email"] -> Akan Error KeyError jika tidak ada
-# Baik:
-email = user.get("email", "tidak@ada.com") # Default value jika key hilang
+# 1. Method .get()
+font = settings.get("font", "Arial") # Arial sebagai fallback
+
+# 2. Method .setdefault()
+# Jika key tidak ada, isi dengan nilai default dan kembalikan nilainya
+lang = settings.setdefault("lang", "id") 
 \`\`\`
 
 ---
 
-## ✍️ Latihan Modul 4 (20 Menit)
-Diberikan list harga produk dalam USD: \`prices_usd = [10, 25, 50, 100]\`.
-1.  Gunakan **List Comprehension** untuk mengubahnya ke IDR (asumsi 1 USD = 15.000).
-2.  Hanya sertakan produk yang harganya setelah dikonversi di atas 500.000.
-3.  Simpan hasilnya dalam sebuah **Set**.
+## ✍️ Latihan Modul 4 (25 Menit)
+**Proyek: Data Analyst Mini Tool**
+Kamu memiliki data mentah log masuk user (banyak duplikat):
+\`log_masuk = ["Budi", "Siti", "Budi", "Andi", "Siti", "Andi", "Andi"]\`
+
+1.  Dapatkan daftar **user unik** menggunakan Set.
+2.  Gunakan **Dictionary Comprehension** untuk menghitung panjang karakter dari masing-masing nama unik tersebut (Contoh: \`{"Budi": 4, ...}\`).
+3.  Gunakan **List Comprehension** untuk membuat list baru berisi nama user yang panjangnya lebih dari 4 karakter, ubah semua menjadi **HURUF KAPITAL**.
 
 ## 🎯 Outcome Modul
-- Mampu membedakan penggunaan struktur data sesuai kebutuhan performa.
-- Menguasai penulisan kode ringkas dengan Comprehension.
+- Mampu mengoptimalkan pencarian data menggunakan Set.
+- Mahir memanipulasi list/dict tanpa menggunakan loop konvensional yang panjang.
+- Memahami konsep unpacking untuk manajemen variabel yang lebih clean.
 `,
     level: 'intermediate',
     order: 4,
     created_at: '2025-01-01T00:00:00Z'
-  },
+},
   {
     id: 'py-05',
     user_type: 'student',

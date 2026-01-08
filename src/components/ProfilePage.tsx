@@ -23,6 +23,8 @@ import {
   Award,
   Zap,
   CheckCircle,
+  ExternalLink,
+  AlertCircle,
 } from 'lucide-react';
 
 const AUTHX_BASE = 'https://authx.astbyte.com';
@@ -49,21 +51,13 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
   const [subs, setSubs] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Edit State
-  const [isEditing, setIsEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({
-    full_name: '',
-    email: '',
-    phone: '',
-  });
+  // Modal State
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // UI State
   const [copied, setCopied] = useState(false);
   const [showPublicId, setShowPublicId] = useState(false);
   const [photoError, setPhotoError] = useState(false);
-  const [toast, setToast] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // ================= LOAD DATA =================
   useEffect(() => {
@@ -83,11 +77,6 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
 
         if (meRes.ok) {
           setAuthUser(meData.data.user);
-          setFormData({
-            full_name: meData.data.user.full_name,
-            email: meData.data.user.email,
-            phone: meData.data.user.phone || '',
-          });
         }
 
         // 2. Get Subscriptions
@@ -111,11 +100,6 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
 
   // ================= ACTIONS =================
 
-  const showToast = (type: 'success' | 'error', msg: string) => {
-    setToast({ type, msg });
-    setTimeout(() => setToast(null), 3000);
-  };
-
   const handleCopyId = () => {
     if (!authUser?.public_id) return;
     navigator.clipboard.writeText(authUser.public_id);
@@ -123,52 +107,19 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const validate = () => {
-    const e: Record<string, string> = {};
-    if (!formData.full_name.trim()) e.full_name = 'Nama lengkap wajib diisi.';
-    if (!formData.email.includes('@')) e.email = 'Format email tidak valid.';
-    if (!formData.phone) e.phone = 'Nomor HP wajib diisi.';
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-  const handleSave = async () => {
-    if (!validate()) return;
-    setSaving(true);
-    const token = localStorage.getItem('authx_token');
-
-    try {
-      const form = new FormData();
-      form.append('full_name', formData.full_name);
-      form.append('email', formData.email);
-      form.append('phone', formData.phone);
-
-      const res = await fetch(`${AUTHX_BASE}/api/account`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` },
-        body: form,
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        showToast('error', data.message || 'Gagal memperbarui profil.');
-      } else {
-        showToast('success', 'Profil berhasil diperbarui!');
-        setAuthUser(data.data.user);
-        setIsEditing(false);
-      }
-    } catch {
-      showToast('error', 'Terjadi kesalahan jaringan.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const getMaskedPublicId = (id: string) => {
     if (!id) return '';
     if (id.length <= 8) return '••••••••';
     return `${id.slice(0, 4)}••••••••${id.slice(-4)}`;
+  };
+
+  const handleEditProfile = () => {
+    setShowEditModal(true);
+  };
+
+  const handleRedirectToAXID = () => {
+    window.open('https://axid.astbyte.com', '_blank');
+    setShowEditModal(false);
   };
 
   // ================= RENDER HELPERS =================
@@ -252,11 +203,18 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
               <span className="sm:hidden">Kembali</span>
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <div className="hidden sm:flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl">
                 <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 <span className="text-sm font-black text-slate-900 dark:text-white">Profil Saya</span>
               </div>
+              <button
+                onClick={handleEditProfile}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                <Edit3 className="w-4 h-4" />
+                <span className="hidden sm:inline">Edit Profile</span>
+              </button>
             </div>
           </div>
         </div>
@@ -344,7 +302,7 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* LEFT COL: Personal Info Form */}
+          {/* LEFT COL: Personal Info */}
           <div className="lg:col-span-2 space-y-8">
             <div className="rounded-3xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl border border-slate-200 dark:border-slate-800 p-8 animate-slide-in-up">
               <div className="flex items-center justify-between mb-8">
@@ -360,28 +318,17 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
                 <Field
                   label="Nama Lengkap"
                   icon={<UserIcon className="h-5 w-5" />}
-                  value={formData.full_name}
-                  isEditing={isEditing}
-                  onChange={(v) => setFormData({ ...formData, full_name: v })}
-                  error={errors.full_name}
+                  value={authUser.full_name}
                 />
                 <Field
                   label="Alamat Email"
                   icon={<Mail className="h-5 w-5" />}
-                  value={formData.email}
-                  isEditing={isEditing}
-                  onChange={(v) => setFormData({ ...formData, email: v })}
-                  error={errors.email}
-                  type="email"
+                  value={authUser.email}
                 />
                 <Field
                   label="Nomor Telepon"
                   icon={<Phone className="h-5 w-5" />}
-                  value={formData.phone}
-                  isEditing={isEditing}
-                  onChange={(v) => setFormData({ ...formData, phone: v })}
-                  error={errors.phone}
-                  type="tel"
+                  value={authUser.phone || '-'}
                 />
               </div>
             </div>
@@ -390,14 +337,15 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
           {/* RIGHT COL: Subscriptions */}
           <div className="lg:col-span-1">
             <div className="h-full rounded-3xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl border border-slate-200 dark:border-slate-800 p-8 animate-slide-in-up" style={{ animationDelay: '100ms' }}>
-              <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3 mb-8">
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3 mb-6">
                 <div className="p-3 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl">
                   <CreditCard className="h-6 w-6 text-white" />
                 </div>
                 Langganan
               </h2>
 
-              <div className="space-y-4">
+              {/* Scrollable Container */}
+              <div className="max-h-[500px] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
                 {subs.length === 0 ? (
                   <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 py-12 px-6 text-center bg-slate-50 dark:bg-slate-800/50">
                     <div className="mb-4 rounded-full bg-slate-200 dark:bg-slate-700 p-4">
@@ -426,7 +374,7 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
                         <div className="p-6 space-y-4">
                           <div className="flex justify-between items-start">
                             <div className="flex items-center gap-3">
-                              <div className={`p-2 bg-gradient-to-br ${subGradient} rounded-xl`}>
+                              <div className={`p-2 bg-gradient-to-br ${subGradient} rounded-xl shadow-lg`}>
                                 <Crown className="h-5 w-5 text-white" />
                               </div>
                               <div>
@@ -438,20 +386,21 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
                                 </p>
                               </div>
                             </div>
-                            <span className="text-xs font-black px-3 py-1.5 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                            <span className="text-xs font-black px-3 py-1.5 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 flex items-center gap-1">
+                              <CheckCircle className="h-3 w-3" />
                               ACTIVE
                             </span>
                           </div>
 
                           <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-700">
                             <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                              <Calendar className="h-4 w-4" />
+                              <Calendar className="h-4 w-4 text-blue-500" />
                               <span className="font-semibold">
                                 {sub.start_date} - {sub.end_date}
                               </span>
                             </div>
                             <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                              <CheckCircle className="h-4 w-4" />
+                              <Zap className="h-4 w-4 text-purple-500" />
                               <span className="font-semibold">via {sub.payment_method}</span>
                             </div>
                           </div>
@@ -466,22 +415,50 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
         </div>
       </main>
 
-      {/* TOAST NOTIFICATION */}
-      {toast && (
-        <div className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2 animate-bounce-in">
-          <div className={`flex items-center gap-4 rounded-2xl px-6 py-4 shadow-2xl backdrop-blur-xl border-2 ${
-            toast.type === 'success'
-              ? 'bg-green-500/90 border-green-400 text-white'
-              : 'bg-red-500/90 border-red-400 text-white'
-          }`}>
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
-              {toast.type === 'success' ? (
-                <Check className="h-5 w-5 text-white" />
-              ) : (
+      {/* EDIT PROFILE MODAL */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 shadow-2xl border-2 border-slate-200 dark:border-slate-800 animate-scale-in overflow-hidden">
+            {/* Header */}
+            <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-center">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="absolute top-4 right-4 p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors"
+              >
                 <X className="h-5 w-5 text-white" />
-              )}
+              </button>
+              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                <AlertCircle className="h-10 w-10 text-white" />
+              </div>
+              <h3 className="text-3xl font-black text-white mb-2">Edit Profile</h3>
+              <p className="text-blue-100 text-sm font-semibold">Pemberitahuan Penting</p>
             </div>
-            <span className="text-sm font-bold">{toast.msg}</span>
+
+            {/* Content */}
+            <div className="p-8 space-y-6">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-2xl p-6">
+                <p className="text-slate-700 dark:text-slate-300 text-base leading-relaxed font-medium text-center">
+                  Edit profile hanya dapat dilakukan melalui platform <span className="font-black text-blue-600 dark:text-blue-400">AXID AstByte</span>. Silakan kunjungi halaman AXID untuk mengelola profil Anda.
+                </p>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 px-6 py-4 rounded-xl border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleRedirectToAXID}
+                  className="flex-1 px-6 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                >
+                  <ExternalLink className="h-5 w-5" />
+                  Buka AXID
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -496,14 +473,34 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
           from { opacity: 0; transform: translateY(30px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes bounce-in {
-          0% { opacity: 0; transform: translate(-50%, 20px) scale(0.9); }
-          50% { transform: translate(-50%, -5px) scale(1.05); }
-          100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+        @keyframes scale-in {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
         }
-        .animate-fade-in { animation: fade-in 0.6s ease-out forwards; }
+        .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
         .animate-slide-in-up { animation: slide-in-up 0.6s ease-out forwards; }
-        .animate-bounce-in { animation: bounce-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .animate-scale-in { animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: linear-gradient(to bottom, rgb(147, 51, 234), rgb(219, 39, 119));
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(to bottom, rgb(126, 34, 206), rgb(190, 24, 93));
+        }
+
+        /* Firefox */
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: rgb(147, 51, 234) transparent;
+        }
       `}</style>
     </div>
   );
@@ -515,44 +512,19 @@ interface FieldProps {
   label: string;
   value: string;
   icon: JSX.Element;
-  isEditing: boolean;
-  onChange: (val: string) => void;
-  error?: string;
-  type?: string;
 }
 
-function Field({ label, value, icon, isEditing, onChange, error, type = 'text' }: FieldProps) {
+function Field({ label, value, icon }: FieldProps) {
   return (
     <div className="group">
-      <label className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400">
+      <label className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400">
         <div className="text-blue-600 dark:text-blue-400">{icon}</div>
         {label}
       </label>
 
-      {isEditing ? (
-        <div className="relative">
-          <input
-            type={type}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            className={`w-full rounded-2xl border-2 bg-white dark:bg-slate-800 px-5 py-4 text-base font-semibold text-slate-900 dark:text-white placeholder-slate-400 outline-none transition-all focus:ring-4 shadow-sm
-              ${
-                error
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                  : 'border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20'
-              }`}
-          />
-          {error && (
-            <p className="mt-2 text-xs font-bold text-red-500 flex items-center gap-1.5">
-              <X className="h-3.5 w-3.5" /> {error}
-            </p>
-          )}
-        </div>
-      ) : (
-        <div className="w-full rounded-2xl bg-slate-50 dark:bg-slate-800/50 px-5 py-4 text-base font-bold text-slate-800 dark:text-slate-200 border-2 border-slate-200 dark:border-slate-700">
-          {value || <span className="text-slate-400 italic font-normal">Tidak diatur</span>}
-        </div>
-      )}
+      <div className="w-full rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-800/50 px-6 py-4 text-base font-bold text-slate-800 dark:text-slate-200 border-2 border-slate-200 dark:border-slate-700 shadow-sm">
+        {value || <span className="text-slate-400 italic font-normal">Tidak diatur</span>}
+      </div>
     </div>
   );
 }
