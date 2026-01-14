@@ -973,7 +973,7 @@ export default function Dashboard() {
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
             &copy; {new Date().getFullYear()} Astral Byte Technology (AstByte). All rights reserved.
           </p>
-          <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">v1.12.26.1 (Opsi 4)</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">v1.01.26.14</p>
         </div>
       </footer>
 
