@@ -7,6 +7,7 @@ import MaterialPage from "./pages/MaterialPage";
 import ManualQRISPage from "./components/Pay";
 import PromoPage from "./components/Promo";
 import ComingSoonPage from "./components/ComingSoon";
+import AdLoadingPage from './components/AdLoadingPage';
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -48,6 +49,8 @@ function AppContent() {
 
       {/* Redirect 404 ke / */}
       <Route path="*" element={<Navigate to="/" replace />} />
+
+      <Route path="/ad-loading" element={<AdLoadingPage />} />
     </Routes>
   );
 }

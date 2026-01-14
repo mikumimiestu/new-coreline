@@ -58,27 +58,6 @@ const languageData: readonly Lang[] = [
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
     gradient: 'from-blue-600 to-cyan-500'
   },
-  // { 
-  //   id: 'ruby', 
-  //   name: 'Ruby (Ruby 3+)', 
-  //   iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg',
-  //   comingSoon: true,
-  //   gradient: 'from-red-600 to-pink-500'
-  // },
-  // { 
-  //   id: 'go', 
-  //   name: 'Go (Go 1.18+)', 
-  //   iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg',
-  //   comingSoon: true,
-  //   gradient: 'from-cyan-500 to-blue-600'
-  // },
-  // { 
-  //   id: 'sql', 
-  //   name: 'MySQL', 
-  //   iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
-  //   comingSoon: true,
-  //   gradient: 'from-blue-500 to-orange-500'
-  // },
   { 
     id: 'postgresql', 
     name: 'PostgreSQL', 
@@ -86,20 +65,6 @@ const languageData: readonly Lang[] = [
     comingSoon: true,
     gradient: 'from-blue-600 to-indigo-600'
   },
-  // { 
-  //   id: 'java', 
-  //   name: 'Java', 
-  //   iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg', 
-  //   comingSoon: true,
-  //   gradient: 'from-red-600 to-orange-600'
-  // },
-  // { 
-  //   id: 'swift', 
-  //   name: 'Swift', 
-  //   iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/swift/swift-original.svg', 
-  //   comingSoon: true,
-  //   gradient: 'from-orange-500 to-red-500'
-  // },
   { 
     id: 'dart', 
     name: (<div className="flex items-center gap-1">
@@ -114,132 +79,6 @@ const languageData: readonly Lang[] = [
 type Level = 'beginner' | 'intermediate' | 'advanced';
 type SortKey = 'order' | 'title' | 'level';
 type Plan = 'free' | 'pro' | 'plus';
-
-/* ================================
- * AdModal Component (FULLY FIXED)
- * ================================ */
-interface AdModalProps {
-  onClose: () => void;
-}
-
-const AdModal = ({ onClose }: AdModalProps) => {
-  const [countdown, setCountdown] = useState(5);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown((prev) => prev - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [countdown]);
-
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.muted = false;
-      videoRef.current.play().catch(err => {
-        console.log('Autoplay prevented, trying muted:', err);
-        if (videoRef.current) {
-          videoRef.current.muted = true;
-          videoRef.current.play();
-        }
-      });
-    }
-  }, []);
-
-  // CRITICAL FIX: Prevent body scroll and lock position
-  useEffect(() => {
-    // Save current scroll position
-    const scrollY = window.scrollY;
-    const body = document.body;
-    const html = document.documentElement;
-
-    // Lock body scroll
-    body.style.position = 'fixed';
-    body.style.top = `-${scrollY}px`;
-    body.style.width = '100%';
-    body.style.overflow = 'hidden';
-    html.style.overflow = 'hidden';
-
-    // Cleanup: restore scroll position
-    return () => {
-      body.style.position = '';
-      body.style.top = '';
-      body.style.width = '';
-      body.style.overflow = '';
-      html.style.overflow = '';
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
-
-  return (
-    <div 
-      ref={modalRef}
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 overflow-y-auto"
-      style={{ 
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0
-      }}
-    >
-      <div className="relative w-full max-w-3xl my-auto">
-        
-        {/* Countdown Badge - Responsive positioning */}
-        <div className="absolute -top-12 sm:-top-16 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl px-4 sm:px-6 py-2 sm:py-3 border-2 border-white/20 shadow-2xl pointer-events-none">
-          <span className="text-white font-bold text-sm sm:text-lg flex items-center gap-2">
-            <Zap className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
-            Iklan {countdown > 0 ? `${countdown}s` : 'Selesai'}
-          </span>
-        </div>
-
-        {/* Close Button - Shows after countdown */}
-        {countdown === 0 && (
-          <button
-            onClick={onClose}
-            className="absolute -top-12 sm:-top-16 right-0 sm:-right-4 z-50 p-3 sm:p-4 rounded-full bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white transition-all border-2 border-white/30 shadow-2xl animate-scale-in group"
-          >
-            <X className="w-5 h-5 sm:w-6 sm:h-6 group-hover:rotate-90 transition-transform duration-300" />
-          </button>
-        )}
-
-        {/* Video Container - Fully Responsive */}
-        <div className="relative w-full bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border-2 border-white/10">
-          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}> {/* 16:9 Aspect Ratio */}
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              loop
-              muted={false}
-              className="absolute inset-0 w-full h-full object-contain"
-            >
-              <source src="/adds/desceria2025.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        </div>
-
-        {/* Bottom Text - Responsive */}
-        <p className="mt-4 sm:mt-6 text-center text-slate-300 text-xs sm:text-base font-semibold bg-slate-800/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-700">
-          ✨ Bebas iklan selamanya dengan <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500 font-bold">Pro</span> atau <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 font-bold">Plus</span>!
-        </p>
-      </div>
-
-      <style>{`
-        @keyframes scaleIn {
-          0% { transform: scale(0) rotate(-180deg); opacity: 0; }
-          50% { transform: scale(1.15) rotate(10deg); }
-          100% { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
-        .animate-scale-in { 
-          animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; 
-        }
-      `}</style>
-    </div>
-  );
-};
 
 /* ================================
  * Skeleton Loader Component
@@ -303,9 +142,6 @@ export default function Dashboard() {
   const [searchText, setSearchText] = useState('');
   const [query, setQuery] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('order');
-
-  const [showAdModal, setShowAdModal] = useState(false);
-  const [pendingMaterialId, setPendingMaterialId] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = 'Dashboard | New Coreline by AstByte';
@@ -410,20 +246,14 @@ export default function Dashboard() {
     advanced: 'Lanjutan',
   };
 
+  // OPSI 4: Redirect ke halaman ad interstitial sebelum masuk materi
   const handleStartModule = (materialId: string) => {
     if (isPremium) {
+      // Premium user langsung masuk
       navigate(`/materials/${encodeURIComponent(materialId)}`);
     } else {
-      setPendingMaterialId(materialId);
-      setShowAdModal(true);
-    }
-  };
-
-  const closeAdModal = () => {
-    setShowAdModal(false);
-    if (pendingMaterialId) {
-      navigate(`/materials/${encodeURIComponent(pendingMaterialId)}`);
-      setPendingMaterialId(null);
+      // Free user redirect ke halaman ad dulu
+      navigate(`/ad-loading?next=${encodeURIComponent(materialId)}`);
     }
   };
 
@@ -780,9 +610,6 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-[#0B0F19] dark:via-slate-950 dark:to-slate-900 font-sans">
 
-      {/* AD MODAL - FULLY FIXED */}
-      {showAdModal && <AdModal onClose={closeAdModal} />}
-
       {/* NAVBAR */}
       <nav className="sticky top-0 z-40 w-full border-b border-white/20 dark:border-slate-800/50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-lg">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -869,7 +696,6 @@ export default function Dashboard() {
 
       {/* MAIN CONTENT */}
       <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-10">
-
         <div className="mb-10">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
             <div>
@@ -1142,12 +968,12 @@ export default function Dashboard() {
             <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg">
               C
             </div>
-            <span className="text-lg font-black text-slate-900 dark:text-white">Coreline by <img src="/icon2.png" className="h-6 w-auto mt-1" alt="AstByte" /></span>
+            <span className="text-lg font-black text-slate-900 dark:text-white">Coreline by AstByte</span>
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
             &copy; {new Date().getFullYear()} Astral Byte Technology (AstByte). All rights reserved.
           </p>
-          <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">v1.12.25.5 (latest)</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">v1.12.26.1 (Opsi 4)</p>
         </div>
       </footer>
 
