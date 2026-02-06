@@ -1,7 +1,10 @@
+// src/components/AdLoadingPage.tsx
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CheckCircle, Zap, Clock } from 'lucide-react';
-
+import { 
+  CheckCircle, Zap, Clock, ArrowRight, ShieldCheck,
+  Sparkles, Crown 
+} from 'lucide-react';
 
 export default function AdLoadingPage() {
   const [searchParams] = useSearchParams();
@@ -9,17 +12,13 @@ export default function AdLoadingPage() {
   const [countdown, setCountdown] = useState(10);
   const hasInjected = useRef(false);
 
-
   const nextMaterialId = searchParams.get('next');
 
-
-  // Timer Countdown dengan Auto-Redirect
   useEffect(() => {
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown((prev) => prev - 1), 1000);
       return () => clearTimeout(timer);
     } else {
-      // Auto-redirect saat countdown = 0
       if (nextMaterialId) {
         navigate(`/materials/${encodeURIComponent(nextMaterialId)}`);
       } else {
@@ -28,8 +27,6 @@ export default function AdLoadingPage() {
     }
   }, [countdown, navigate, nextMaterialId]);
 
-
-  // Injeksi Script Adsterra
   useEffect(() => {
     if (!hasInjected.current) {
       const script = document.createElement('script');
@@ -44,8 +41,6 @@ export default function AdLoadingPage() {
       }
     }
 
-
-    // Lock Scroll
     const scrollY = window.scrollY;
     document.body.style.position = 'fixed';
     document.body.style.top = `-${scrollY}px`;
@@ -59,7 +54,6 @@ export default function AdLoadingPage() {
     };
   }, []);
 
-
   const handleContinue = () => {
     if (nextMaterialId) {
       navigate(`/materials/${encodeURIComponent(nextMaterialId)}`);
@@ -68,140 +62,112 @@ export default function AdLoadingPage() {
     }
   };
 
-
-  // Hitung progress percentage (dari 10 ke 0)
   const progress = (countdown / 10) * 100;
-  const circumference = 2 * Math.PI * 80; // radius = 80 (lebih kecil)
+  const circumference = 2 * Math.PI * 65;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 p-4">
-      <div className="relative w-full max-w-3xl my-auto">
+    <div className="fixed inset-5 mt-40 flex items-center justify-center bg-gradient-to-br from-slate-50/95 via-blue-50/90 to-indigo-50/90 dark:from-slate-950/98 dark:via-slate-900/95 dark:to-slate-900/95 p-4">
+      
+      <div className="relative w-full max-w-md">
         
-        {/* Circular Countdown Timer - LEBIH KECIL */}
-        <div className="flex justify-center items-center mb-6">
-          <div className="relative w-48 h-48">
-            {/* SVG Circle Background */}
-            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 180 180">
-              {/* Background Circle */}
+        <div className="flex justify-center mb-8">
+          <div className="relative w-40 h-40 group">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 160 160">
               <circle
-                cx="90"
-                cy="90"
-                r="80"
+                cx="80"
+                cy="80"
+                r="65"
                 fill="none"
-                stroke="rgba(255, 255, 255, 0.1)"
-                strokeWidth="12"
+                stroke="rgba(255,255,255,0.15)"
+                strokeWidth="8"
               />
-              {/* Progress Circle */}
               <circle
-                cx="90"
-                cy="90"
-                r="80"
+                cx="80"
+                cy="80"
+                r="65"
                 fill="none"
                 stroke="url(#gradient)"
-                strokeWidth="12"
+                strokeWidth="8"
                 strokeLinecap="round"
                 strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}
                 className="transition-all duration-1000 ease-linear"
               />
-              {/* Gradient Definition */}
               <defs>
                 <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#3b82f6" />
-                  <stop offset="50%" stopColor="#8b5cf6" />
-                  <stop offset="100%" stopColor="#ec4899" />
+                  <stop offset="0%" stopColor="rgb(59 130 246)" />
+                  <stop offset="50%" stopColor="rgb(139 92 246)" />
+                  <stop offset="100%" stopColor="rgb(236 72 153)" />
                 </linearGradient>
               </defs>
             </svg>
 
-            {/* Countdown Number di Tengah Circle */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <Clock className="w-8 h-8 text-white/40 mb-1" />
-              <div className="text-5xl font-black text-black drop-shadow-2xl">
+            <div className="absolute inset-0 flex flex-col items-center justify-center px-2">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl backdrop-blur border border-white/20 flex items-center justify-center mb-2">
+                <Clock className="w-6 h-6 text-white/80" />
+              </div>
+              <div className="text-4xl font-black bg-gradient-to-r from-slate-900 to-slate-900 bg-clip-text text-transparent drop-shadow-xl">
                 {countdown}
               </div>
-              <div className="text-sm font-semibold text-black mt-1 uppercase tracking-wider">
+              <div className="text-xs font-bold text-slate-700 uppercase tracking-widest mt-1">
                 Detik
               </div>
             </div>
 
-            {/* Pulse Animation Ring */}
-            {countdown > 0 && (
-              <div className="absolute inset-0 rounded-full border-2 border-white/20 animate-ping"></div>
-            )}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400/20 to-purple-400/20 blur-xl opacity-60 animate-pulse" />
           </div>
         </div>
 
-
-        {/* Status Text */}
-        <div className="text-center mb-6">
-          <h2 className="text-black text-2xl font-bold mb-2">
-            {countdown > 0 ? 'Siapkan Materi Belajar' : 'Mengarahkan...'}
+        <div className="text-center mb-8 px-2">
+          <h2 className="text-2xl font-black bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-clip-text text-transparent mb-2 drop-shadow-lg">
+            {countdown > 0 ? '📚 Siap Belajar' : '🚀 Loading...'}
           </h2>
-          <p className="text-black-300 text-base">
-            {countdown > 0 ? 'Halaman akan otomatis terbuka' : 'Mohon tunggu sebentar'}
+          <p className="text-sm text-slate-600 dark:text-slate-400 font-medium max-w-sm mx-auto leading-tight">
+            {countdown > 0 ? 'Auto lanjut dalam' : 'Sedang memproses...'}
           </p>
         </div>
 
-
-        {/* Adsterra Banner Container */}
-        <div className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.8)] border-2 border-white/20 p-6 min-h-[450px] flex items-center justify-center relative">
+        <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200/60 dark:border-slate-800/60 p-6 mb-8 overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500/50 via-purple-500/50 to-pink-500/50 -skew-x-12" />
           
-          {/* Background Placeholder */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 p-8 text-center">
-            <Zap className="w-16 h-16 mb-4 opacity-20 animate-pulse" />
-            <p className="text-sm font-medium opacity-50">Memuat konten sponsor...</p>
-          </div>
-
-
-          {/* KONTAINER IKLAN ADSTERRA */}
-          <div 
-            id="container-6f13d85cf0212ab9aa6a4e87a32c0096" 
-            className="w-full relative z-10 flex justify-center items-center overflow-hidden min-h-[400px]"
-          >
-            {/* Banner iklan akan muncul di sini */}
+          <div className="relative z-10 flex flex-col items-center justify-center min-h-[280px]">
+            <div 
+              id="container-6f13d85cf0212ab9aa6a4e87a32c0096" 
+              className="w-full h-[240px] relative flex justify-center items-center overflow-hidden rounded-xl bg-gradient-to-br from-slate-100/60 to-slate-200/60 dark:from-slate-800/60 dark:to-slate-700/60 border border-slate-200/40 dark:border-slate-700/40 shadow-sm"
+            />
+            
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-slate-400 dark:text-slate-500 pointer-events-none">
+              <Zap className="w-12 h-12 mb-3 opacity-30 animate-pulse" />
+              <p className="text-sm font-medium opacity-60">Loading sponsor...</p>
+            </div>
           </div>
         </div>
 
-
-        {/* Tombol Manual Continue */}
         {countdown === 0 && (
-          <button
-            onClick={handleContinue}
-            className="absolute -top-2 -right-2 sm:-right-4 z-60 px-6 py-3 rounded-full bg-green-600 hover:bg-green-700 text-black shadow-2xl transition-all animate-bounce-in border-2 border-white/20 font-black text-sm"
-          >
-            Lanjut Belajar →
-          </button>
+          <div className="flex justify-center mb-6">
+            <button
+              onClick={handleContinue}
+              className="group relative px-8 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-black text-base shadow-2xl hover:shadow-3xl border border-white/20 hover:border-white/40 hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4 group-hover:scale-110" />
+              <span>Lanjut</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-0 transition-transform duration-700" />
+            </button>
+          </div>
         )}
 
-
-        {/* Support Message */}
-        <div className="mt-8 text-center space-y-3">
-          <p className="text-black text-lg font-bold drop-shadow-lg">
-            🙏 Terima kasih telah mendukung Coreline!
-          </p>
-          <p className="text-black text-sm">
-            Iklan membantu kami menyediakan konten berkualitas secara gratis
-          </p>
-          <div className="inline-block px-4 py-2 bg-white/10 rounded-full border border-white/10 backdrop-blur-sm">
-            <span className="text-xs text-slate-300 uppercase tracking-widest font-bold">Sponsored Content</span>
+        <div className="text-center space-y-2 px-2">
+          <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur px-6 py-2.5 rounded-2xl border border-slate-200/50 shadow-lg">
+            <CheckCircle className="w-5 h-5 text-emerald-500" />
+            <p className="font-bold text-sm text-slate-900 dark:text-white">Terima kasih! ✨</p>
+          </div>
+          <div className="px-4 py-1.5 bg-gradient-to-r from-slate-100/70 to-slate-200/70 dark:from-slate-800/70 dark:to-slate-700/70 rounded-xl border border-slate-200/40 text-xs font-bold text-slate-600 uppercase tracking-wider">
+            Coreline Sponsors
           </div>
         </div>
       </div>
-
-
-      <style>{`
-        @keyframes bounceIn {
-          0% { transform: scale(0); }
-          70% { transform: scale(1.1); }
-          100% { transform: scale(1); }
-        }
-        .animate-bounce-in { 
-          animation: bounceIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; 
-        }
-      `}</style>
     </div>
   );
 }

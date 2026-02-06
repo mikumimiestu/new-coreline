@@ -36,9 +36,9 @@ const DEFAULT_PRICE: Record<Tier, { monthly: number; yearly: number }> = {
 const VOUCHERS: Record<string, { type: 'percent' | 'fixed'; value: number; note?: string }> = {
   // CORELINESATU: { type: 'percent', value: 5, note: 'Diskon 5%' }, // Mulai --/--/2026
   ASTBYTEJAYA26: { type: 'percent', value: 5, note: 'Diskon 5%' }, // Berakhir 30 Desember 2026
-  // HARUSCORELINE: { type: 'fixed', value: 70000, note: 'Potongan Rp70.000' }, // Mulai --/--/2026
+  HARUSCORELINE: { type: 'fixed', value: 70000, note: 'Potongan Rp70.000' }, // Mulai 02/02/2026
   // MABA2026: { type: 'fixed', value: 50000, note: 'Promo Mahasiswa Baru' }, // Mulai --/--/2026
-  JANSTART: { type: 'percent', value: 10, note: 'Diskon Bulan Januari 10%' }, // Berakhir 30/1/2026
+  FEBARU: { type: 'percent', value: 10, note: 'Diskon Bulan Februari 10%' }, // Berakhir 30/2/2026
 };
 
 /* =========================================

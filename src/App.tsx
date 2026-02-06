@@ -30,7 +30,7 @@ function AppContent() {
 
       {/* Halaman materi, bisa diakses siapa pun */}
       <Route path="/materials/:id" element={<MaterialPage />} />
-
+      
       {/* Pricing bisa diakses siapa pun */}
       <Route path="/pricing" element={<PricingPage />} />
 

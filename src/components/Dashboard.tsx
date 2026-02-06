@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import type { LearningMaterial } from '../types/learning';
@@ -13,9 +13,9 @@ import { MOCK_MATERIALS as RB_MATERIAL } from '../data/rubyData';
 import ProfilePage from './ProfilePage';
 import {
   LogOut, BookOpen, Award, ChevronRight, X, User as UserIcon,
-  Menu, Languages, Loader2, Search, Filter, Crown, Lock,
-  Download, CheckCircle, FileText, RefreshCw,
-  BookLock, AlertTriangle, Target, Zap
+  Menu, Loader2, Search, Crown, Lock, Download, CheckCircle,
+  FileText, RefreshCw, AlertTriangle, Target, Zap, TrendingUp,
+  Clock, Star, PlayCircle, Brain, Rocket, Code, Trophy, Flame
 } from 'lucide-react';
 
 /* ================================
@@ -29,91 +29,117 @@ type Lang = {
   iconUrl: string;
   comingSoon?: boolean;
   gradient: string;
+  description: string;
 };
 
 const languageData: readonly Lang[] = [
   { 
     id: 'python', 
-    name: 'Python (Py 3.10+)', 
+    name: 'Python', 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-    gradient: 'from-blue-500 to-yellow-500'
-  },
-  { 
-    id: 'php', 
-    name: 'PHP (8.0+)', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg',
-    comingSoon: true,
-    gradient: 'from-indigo-500 to-purple-500'
-  },
-  { 
-    id: 'javascript', 
-    name: 'JavaScript (ES6+)', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
-    comingSoon: true,
-    gradient: 'from-yellow-400 to-orange-500'
+    gradient: 'from-blue-500 via-blue-600 to-indigo-600',
+    description: 'Backend, AI & Data Science'
   },
   { 
     id: 'typescript', 
     name: 'TypeScript', 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
-    gradient: 'from-blue-600 to-cyan-500'
+    gradient: 'from-blue-600 via-cyan-600 to-blue-700',
+    description: 'Type-safe JavaScript Development'
+  },
+  { 
+    id: 'go', 
+    name: 'Go', 
+    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg',
+    gradient: 'from-cyan-500 via-teal-600 to-cyan-700',
+    description: 'High-performance Systems'
+  },
+  { 
+    id: 'sql', 
+    name: 'MySQL', 
+    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
+    gradient: 'from-orange-500 via-amber-600 to-yellow-600',
+    description: 'Database Management'
+  },
+  { 
+    id: 'ruby', 
+    name: 'Ruby', 
+    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg',
+    gradient: 'from-red-500 via-rose-600 to-red-700',
+    description: 'Web Development with Rails'
   },
   { 
     id: 'postgresql', 
     name: 'PostgreSQL', 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
     comingSoon: true,
-    gradient: 'from-blue-600 to-indigo-600'
+    gradient: 'from-blue-600 via-indigo-700 to-blue-800',
+    description: 'Advanced Database Systems'
+  },
+  { 
+    id: 'javascript', 
+    name: 'JavaScript', 
+    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
+    comingSoon: true,
+    gradient: 'from-yellow-400 via-amber-500 to-orange-500',
+    description: 'Modern Web Development'
+  },
+  { 
+    id: 'php', 
+    name: 'PHP', 
+    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg',
+    comingSoon: true,
+    gradient: 'from-indigo-500 via-purple-600 to-indigo-700',
+    description: 'Server-side Web Programming'
   },
   { 
     id: 'dart', 
-    name: (<div className="flex items-center gap-1">
-      Dart
-      <AlertTriangle className="w-4 h-4 text-yellow-500" />
+    name: (<div className="flex items-center gap-1.5">
+      Dart <AlertTriangle className="w-3.5 h-3.5 text-yellow-400" />
     </div>), 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dart/dart-original.svg',
-    gradient: 'from-blue-400 to-cyan-400'
+    gradient: 'from-blue-400 via-cyan-500 to-teal-500',
+    description: 'Flutter & Mobile Development'
   },
 ] as const;
 
 type Level = 'beginner' | 'intermediate' | 'advanced';
-type SortKey = 'order' | 'title' | 'level';
 type Plan = 'free' | 'pro' | 'plus';
 
 /* ================================
- * Skeleton Loader Component
+ * Skeleton Components
  * ================================ */
-const SkeletonCard = () => (
-  <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 animate-pulse">
-    <div className="flex justify-between items-start mb-4">
-      <div className="w-10 h-10 bg-slate-200 dark:bg-slate-800 rounded-xl"></div>
-      <div className="w-20 h-6 bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
+const SkeletonHeroCard = () => (
+  <div className="rounded-3xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 p-8 animate-pulse">
+    <div className="flex items-start justify-between mb-6">
+      <div>
+        <div className="h-8 bg-slate-300 dark:bg-slate-700 rounded-xl w-48 mb-3"></div>
+        <div className="h-4 bg-slate-300 dark:bg-slate-700 rounded w-32"></div>
+      </div>
+      <div className="w-16 h-16 bg-slate-300 dark:bg-slate-700 rounded-2xl"></div>
     </div>
-    <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded w-3/4 mb-2"></div>
-    <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-full mb-2"></div>
-    <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-5/6 mb-4"></div>
-    <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded-full w-full mb-4"></div>
-    <div className="h-10 bg-slate-200 dark:bg-slate-800 rounded-xl w-full"></div>
+    <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="h-20 bg-slate-300 dark:bg-slate-700 rounded-xl"></div>
+      <div className="h-20 bg-slate-300 dark:bg-slate-700 rounded-xl"></div>
+      <div className="h-20 bg-slate-300 dark:bg-slate-700 rounded-xl"></div>
+    </div>
+    <div className="h-12 bg-slate-300 dark:bg-slate-700 rounded-xl"></div>
   </div>
 );
 
-/* ================================
- * Stats Card Component
- * ================================ */
-interface StatsCardProps {
-  icon: React.ReactNode;
-  label: string;
-  value: string | number;
-  gradient: string;
-}
-
-const StatsCard = ({ icon, label, value, gradient }: StatsCardProps) => (
-  <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradient} p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}>
-    <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-white/10 blur-2xl"></div>
-    <div className="relative">
-      <div className="mb-2">{icon}</div>
-      <p className="text-sm font-medium text-white/80 mb-1">{label}</p>
-      <p className="text-3xl font-bold">{value}</p>
+const SkeletonLanguageCard = () => (
+  <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 animate-pulse">
+    <div className="flex items-center gap-4 mb-4">
+      <div className="w-12 h-12 bg-slate-200 dark:bg-slate-800 rounded-xl"></div>
+      <div className="flex-1">
+        <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded w-24 mb-2"></div>
+        <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded w-32"></div>
+      </div>
+    </div>
+    <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded-full mb-3"></div>
+    <div className="flex justify-between">
+      <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-20"></div>
+      <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-16"></div>
     </div>
   </div>
 );
@@ -126,10 +152,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   const [materials, setMaterials] = useState<LearningMaterial[]>([]);
-  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(() =>
-    typeof window !== 'undefined' ? localStorage.getItem('cl_lang') : null
-  );
-
+  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [progressMap, setProgressMap] = useState<Record<string, number>>({});
   const [isSyncing, setIsSyncing] = useState(false);
   const [isFetchingProgress, setIsFetchingProgress] = useState(true);
@@ -138,13 +161,10 @@ export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState<string | null>(null);
   const [generatingCert, setGeneratingCert] = useState(false);
-
   const [searchText, setSearchText] = useState('');
-  const [query, setQuery] = useState('');
-  const [sortKey, setSortKey] = useState<SortKey>('order');
 
   useEffect(() => {
-    document.title = 'Dashboard | New Coreline by AstByte';
+    document.title = 'Dashboard | Coreline by AstByte';
   }, []);
 
   useEffect(() => {
@@ -189,16 +209,6 @@ export default function Dashboard() {
     return () => { isMounted = false; };
   }, [user]);
 
-  useEffect(() => {
-    const t = setTimeout(() => setQuery(searchText), 300);
-    return () => clearTimeout(t);
-  }, [searchText]);
-
-  useEffect(() => {
-    if (selectedLanguage) localStorage.setItem('cl_lang', selectedLanguage);
-    else localStorage.removeItem('cl_lang');
-  }, [selectedLanguage]);
-
   const resolveUserType = (): 'student' | 'umum' | 'pro' | 'game' => {
     const raw = (user as any)?.user_type;
     return ['student', 'umum', 'pro', 'game'].includes(raw) ? raw : 'student';
@@ -213,48 +223,11 @@ export default function Dashboard() {
 
   const userType = resolveUserType();
   const plan = getPlanFromUser(user);
-  const nextHref = '/pricing';
   const isPremium = ['pro', 'plus'].includes(plan);
-
-  const userTitle = useMemo(() => {
-    switch (userType) {
-      case 'student': return 'Code Path Student';
-      case 'umum': return 'Jalur Pembelajaran Umum';
-      case 'pro': return 'Akselerasi Profesional';
-      case 'game': return 'Pengembangan Game';
-      default: return 'Dashboard Pembelajaran';
-    }
-  }, [userType]);
 
   const isModuleLocked = (moduleOrder: number) => {
     if (moduleOrder <= 2) return false;
     return plan === 'free';
-  };
-
-  const levelPill = (level: Level) => {
-    const map = {
-      beginner: 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-0',
-      intermediate: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0',
-      advanced: 'bg-gradient-to-r from-rose-500 to-pink-500 text-white border-0',
-    };
-    return map[level] || 'bg-slate-100 text-slate-700 border-slate-200';
-  };
-
-  const levelLabel: Record<Level, string> = {
-    beginner: 'Pemula',
-    intermediate: 'Menengah',
-    advanced: 'Lanjutan',
-  };
-
-  // OPSI 4: Redirect ke halaman ad interstitial sebelum masuk materi
-  const handleStartModule = (materialId: string) => {
-    if (isPremium) {
-      // Premium user langsung masuk
-      navigate(`/materials/${encodeURIComponent(materialId)}`);
-    } else {
-      // Free user redirect ke halaman ad dulu
-      navigate(`/ad-loading?next=${encodeURIComponent(materialId)}`);
-    }
   };
 
   const toggleModuleCompletion = async (materialId: string) => {
@@ -299,16 +272,16 @@ export default function Dashboard() {
 
   const getProgress = (id: string) => progressMap[id] || 0;
 
-  const checkCertificateEligibility = () => {
-    if (!selectedLanguage) return false;
-    if (materials.length === 0) return false;
-    if (!isPremium) return false;
-    const allCompleted = materials.every(m => (progressMap[m.id] || 0) === 100);
-    return allCompleted;
+  const handleStartModule = (materialId: string) => {
+    if (isPremium) {
+      navigate(`/materials/${encodeURIComponent(materialId)}`);
+    } else {
+      navigate(`/ad-loading?next=${encodeURIComponent(materialId)}`);
+    }
   };
 
-  const generateCertificate = async () => {
-    if (!selectedLanguage || !user || !isPremium) return;
+  const generateCertificate = async (langId: string) => {
+    if (!user || !isPremium) return;
     setGeneratingCert(true);
 
     try {
@@ -322,7 +295,6 @@ export default function Dashboard() {
         navy: [10, 25, 47] as [number, number, number],
         gold: [197, 160, 89] as [number, number, number],
         white: [255, 255, 255] as [number, number, number],
-        lightGrey: [240, 240, 240] as [number, number, number],
         darkGrey: [50, 50, 50] as [number, number, number],
         textGrey: [100, 100, 100] as [number, number, number]
       };
@@ -343,7 +315,7 @@ export default function Dashboard() {
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...colors.textGrey);
       doc.setFontSize(10);
-      doc.text('ASTRAL BYTE TECHNOLOGY', 25, 20);
+      doc.text('PT. ASTRAL BYTE TECHNOLOGY', 25, 20);
 
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...colors.navy);
@@ -374,7 +346,7 @@ export default function Dashboard() {
       doc.text('This certificate is proudly presented to the above mentioned for', centerX, 118, { align: 'center' });
       doc.text('successfully demonstrating professional mastery in:', centerX, 124, { align: 'center' });
 
-      const langName = languageData.find(l => l.id === selectedLanguage)?.name || selectedLanguage?.toUpperCase();
+      const langName = languageData.find(l => l.id === langId)?.name || langId.toUpperCase();
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...colors.navy);
       doc.setFontSize(24);
@@ -422,61 +394,10 @@ export default function Dashboard() {
     }
   };
 
-  const downloadModulePDF = async (material: LearningMaterial) => {
-    if (plan !== 'plus') {
-      alert('Fitur ini khusus member Plus!');
-      return;
-    }
-    setDownloadingPdf(material.id);
-    try {
-      const { default: jsPDF } = await import('jspdf');
-      const html2canvas = (await import('html2canvas')).default;
-      navigate(`/materials/${encodeURIComponent(material.id)}`);
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      const element = document.querySelector('.material-content');
-      if (!element) throw new Error('Content not found');
-      const clone = element.cloneNode(true) as HTMLElement;
-      Object.assign(clone.style, {
-        background: '#fff', padding: '40px', maxWidth: '800px',
-        position: 'absolute', left: '-9999px', top: '0', color: '#000'
-      });
-      clone.querySelectorAll('.pdf-code-block').forEach((el) => {
-        Object.assign((el as HTMLElement).style, { background: '#f8f9fa', border: '1px solid #dee2e6' });
-      });
-      clone.querySelectorAll('*').forEach((el) => {
-        if (el instanceof HTMLElement) el.style.color = 'black';
-      });
-      document.body.appendChild(clone);
-      const canvas = await html2canvas(clone, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-      document.body.removeChild(clone);
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= 297;
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= 297;
-      }
-      pdf.save(`${material.title.replace(/\s+/g, '_')}.pdf`);
-      navigate('/dashboard');
-    } catch (error) {
-      console.error(error);
-      alert('Gagal membuat PDF.');
-      navigate('/dashboard');
-    } finally {
-      setDownloadingPdf(null);
-    }
-  };
-
   useEffect(() => {
     if (!user) return;
     setLoading(true);
+    
     const allMaterials: LearningMaterial[] = [
       ...OTHER_MATERIALS,
       ...PYTHON_MATERIALS,
@@ -487,34 +408,68 @@ export default function Dashboard() {
       ...PSQL_MATERIAL,
       ...RB_MATERIAL
     ];
+    
     let list = allMaterials.filter((m) => m.user_type === userType);
+    
     if (selectedLanguage) {
       list = list.filter((m) => m.language === selectedLanguage);
     }
-    const q = query.trim().toLowerCase();
+    
+    const q = searchText.trim().toLowerCase();
     if (q) {
-      list = list.filter((m) => m.title.toLowerCase().includes(q) || m.description.toLowerCase().includes(q));
+      list = list.filter((m) => 
+        m.title.toLowerCase().includes(q) || 
+        m.description.toLowerCase().includes(q)
+      );
     }
-    list.sort((a, b) => {
-      if (sortKey === 'order') return a.order - b.order;
-      if (sortKey === 'title') return a.title.localeCompare(b.title);
-      if (sortKey === 'level') return levelLabel[a.level as Level].localeCompare(levelLabel[b.level as Level]);
-      return 0;
-    });
+    
+    list.sort((a, b) => a.order - b.order);
+    
     setMaterials(list);
-    const timer = setTimeout(() => setLoading(false), 200);
+    const timer = setTimeout(() => setLoading(false), 300);
     return () => clearTimeout(timer);
-  }, [user, selectedLanguage, query, sortKey]);
+  }, [user, selectedLanguage, searchText, userType]);
 
-  const stats = useMemo(() => {
-    const total = materials.length;
-    const completed = materials.filter(m => (progressMap[m.id] || 0) === 100).length;
-    const avgProgress = total > 0
-      ? Math.round(materials.reduce((acc, m) => acc + (progressMap[m.id] || 0), 0) / total)
-      : 0;
+  const languageStats = useMemo(() => {
+    const allMaterials: LearningMaterial[] = [
+      ...OTHER_MATERIALS, ...PYTHON_MATERIALS, ...GO_MATERIALS,
+      ...MYSQL_MATERIALS, ...TS_MATERIAL, ...JS_MATERIAL,
+      ...PSQL_MATERIAL, ...RB_MATERIAL
+    ].filter((m) => m.user_type === userType);
 
-    return { total, completed, avgProgress };
-  }, [materials, progressMap]);
+    return languageData.map(lang => {
+      const langMaterials = allMaterials.filter(m => m.language === lang.id);
+      const completed = langMaterials.filter(m => (progressMap[m.id] || 0) === 100).length;
+      const total = langMaterials.length;
+      const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+      
+      return {
+        ...lang,
+        total,
+        completed,
+        progress,
+        isComplete: completed === total && total > 0
+      };
+    });
+  }, [progressMap, userType]);
+
+  const overallStats = useMemo(() => {
+    const allUserMaterials = [
+      ...OTHER_MATERIALS, ...PYTHON_MATERIALS, ...GO_MATERIALS,
+      ...MYSQL_MATERIALS, ...TS_MATERIAL, ...JS_MATERIAL,
+      ...PSQL_MATERIAL, ...RB_MATERIAL
+    ].filter((m) => m.user_type === userType);
+
+    const completed = allUserMaterials.filter(m => (progressMap[m.id] || 0) === 100).length;
+    const inProgress = allUserMaterials.filter(m => {
+      const prog = progressMap[m.id] || 0;
+      return prog > 0 && prog < 100;
+    }).length;
+    const streak = 5; // Could be calculated from actual user activity
+    const totalTime = Math.floor(completed * 2.5); // Rough estimate: 2.5h per completed module
+
+    return { completed, inProgress, streak, totalTime };
+  }, [progressMap, userType]);
 
   if (authLoading) {
     return (
@@ -547,68 +502,8 @@ export default function Dashboard() {
 
   if (showProfile) return <ProfilePage onBack={() => setShowProfile(false)} />;
 
-  const Sidebar = ({ mobile }: { mobile?: boolean }) => (
-    <div className={`flex flex-col gap-3 ${mobile ? '' : 'sticky top-24'}`}>
-      {!mobile && (
-        <div className="mb-4">
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
-            <Languages className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            Filter Bahasa
-          </h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Pilih bahasa pemrograman</p>
-        </div>
-      )}
-      <div className="space-y-2">
-        {languageData.map((lang) => {
-          const active = selectedLanguage === lang.id;
-          return (
-            <button
-              key={lang.id}
-              disabled={!!lang.comingSoon}
-              onClick={() => {
-                if (!lang.comingSoon) {
-                  setSelectedLanguage(active ? null : lang.id);
-                  if (mobile) setIsSidebarOpen(false);
-                }
-              }}
-              className={`
-                group relative flex items-center gap-3 w-full p-4 rounded-xl text-left transition-all duration-300
-                ${active
-                  ? `bg-gradient-to-r ${lang.gradient} text-white shadow-xl scale-105`
-                  : 'bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg'
-                }
-                ${lang.comingSoon ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:-translate-y-1'}
-              `}
-            >
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${active ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-700'}`}>
-                <img src={lang.iconUrl} alt={typeof lang.name === 'string' ? lang.name : 'Language'} className="h-6 w-6 object-contain" />
-              </div>
-              <span className="font-bold text-sm flex-1">{lang.name}</span>
-              {lang.comingSoon && (
-                <div className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold rounded-md">
-                  Soon
-                </div>
-              )}
-              {active && (
-                <CheckCircle className="w-5 h-5 text-white" />
-              )}
-            </button>
-          );
-        })}
-      </div>
-      {selectedLanguage && (
-        <button
-          onClick={() => setSelectedLanguage(null)}
-          className="mt-4 w-full text-sm font-bold text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-500 flex items-center justify-center gap-2 py-3 bg-red-50 dark:bg-red-900/20 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-all"
-        >
-          <X className="w-4 h-4" /> Reset Filter
-        </button>
-      )}
-    </div>
-  );
-
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-[#0B0F19] dark:via-slate-950 dark:to-slate-900 font-sans">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-[#0B0F19] dark:via-slate-950 dark:to-slate-900">
 
       {/* NAVBAR */}
       <nav className="sticky top-0 z-40 w-full border-b border-white/20 dark:border-slate-800/50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-lg">
@@ -635,7 +530,7 @@ export default function Dashboard() {
               {isSyncing && (
                 <div className="hidden md:flex items-center gap-2 text-sm font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-full animate-pulse border border-blue-200 dark:border-blue-800">
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  Menyimpan...
+                  Syncing...
                 </div>
               )}
 
@@ -649,15 +544,6 @@ export default function Dashboard() {
                   {plan === 'free' ? 'Starter' : plan.toUpperCase()}
                 </span>
               </div>
-
-              {userType === 'student' && (
-                <button
-                  onClick={() => setIsSidebarOpen(true)}
-                  className="lg:hidden p-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
-                >
-                  <Menu className="w-6 h-6" />
-                </button>
-              )}
 
               <button
                 onClick={() => setShowProfile(true)}
@@ -676,313 +562,398 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      {/* MOBILE DRAWER */}
-      {isSidebarOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-md animate-fade-in" onClick={() => setIsSidebarOpen(false)} />
-          <div className="absolute left-0 top-0 h-full w-4/5 max-w-sm bg-white dark:bg-slate-900 shadow-2xl overflow-y-auto transform transition-transform duration-300 ease-out">
-            <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 p-6 flex justify-between items-center z-10">
-              <h2 className="text-2xl font-black text-white">Menu</h2>
-              <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
-                <X className="w-7 h-7 text-white" />
-              </button>
-            </div>
-            <div className="p-6">
-              <Sidebar mobile />
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* MAIN CONTENT */}
       <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="mb-10">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
+        
+        {/* Hero Section */}
+        <div className="mb-12">
+          <div className="flex flex-col lg:flex-row items-start justify-between gap-6 mb-8">
             <div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
-                {userTitle}
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-slate-900 dark:text-white mb-4 leading-tight">
+                Hey, <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">{user.full_name.split(' ')[0]}</span> 👋
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 text-lg sm:text-xl font-medium">
-                Selamat datang kembali, <span className="font-bold text-blue-600 dark:text-blue-400">{user.full_name}</span> 👋
+              <p className="text-slate-600 dark:text-slate-400 text-xl font-medium">
+                Lanjutkan perjalanan coding-mu hari ini
               </p>
             </div>
             {!isPremium && (
-              <div className="flex items-center gap-4 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 dark:from-amber-900/20 dark:via-orange-900/20 dark:to-amber-900/20 px-6 py-4 rounded-2xl border-2 border-amber-200 dark:border-amber-800/50 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-center gap-4 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 dark:from-amber-900/20 dark:via-orange-900/20 dark:to-amber-900/20 px-6 py-4 rounded-2xl border-2 border-amber-200 dark:border-amber-800/50 shadow-lg hover:shadow-xl transition-all">
                 <Crown className="w-8 h-8 text-amber-600 dark:text-amber-500 flex-shrink-0" />
                 <div>
                   <span className="block font-black text-amber-900 dark:text-amber-400 text-lg">Upgrade ke Premium!</span>
-                  <Link to={nextHref} className="text-sm text-amber-700 dark:text-amber-500 underline hover:text-amber-800 font-semibold">
-                    Lihat Paket & Harga →
+                  <Link to="/pricing" className="text-sm text-amber-700 dark:text-amber-500 underline hover:text-amber-800 font-semibold">
+                    Lihat Paket →
                   </Link>
                 </div>
               </div>
             )}
           </div>
 
-          {isPremium && selectedLanguage && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-              <StatsCard
-                icon={<BookOpen className="w-8 h-8" />}
-                label="Total Materi"
-                value={stats.total}
-                gradient="from-blue-600 to-cyan-600"
-              />
-              <StatsCard
-                icon={<CheckCircle className="w-8 h-8" />}
-                label="Selesai"
-                value={stats.completed}
-                gradient="from-green-600 to-emerald-600"
-              />
-              <StatsCard
-                icon={<Target className="w-8 h-8" />}
-                label="Rata-rata Progress"
-                value={`${stats.avgProgress}%`}
-                gradient="from-purple-600 to-pink-600"
-              />
+          {/* Quick Stats */}
+          {isPremium && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+              <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl p-4 text-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all">
+                <a 
+                  href="/tutorial" 
+                  className="flex items-center gap-3 mb-2 p-2 rounded-lg hover:bg-white/10 transition-all cursor-pointer"
+                >
+                  <BookOpen className="w-6 h-6" />
+                  <span className="text-sm font-bold opacity-90">Tutorial?</span>
+                </a>
+              </div>
             </div>
           )}
+        </div>
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+        {/* Search Bar */}
+        {selectedLanguage && (
+          <div className="mb-8">
+            <div className="relative max-w-2xl">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
               <input
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 placeholder="Cari materi pembelajaran..."
-                className="w-full pl-12 pr-5 py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 transition-all shadow-sm hover:shadow-md text-base font-medium"
+                className="w-full pl-14 pr-5 py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 transition-all shadow-sm hover:shadow-md text-base font-medium"
               />
             </div>
-            <div className="flex items-center gap-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 shadow-sm hover:shadow-md transition-all">
-              <Filter className="w-5 h-5 text-slate-400 flex-shrink-0" />
-              <select
-                value={sortKey}
-                onChange={(e) => setSortKey(e.target.value as SortKey)}
-                className="bg-transparent outline-none text-base font-bold text-slate-700 dark:text-slate-200 cursor-pointer"
-              >
-                <option value="order">Urutan Modul</option>
-                <option value="title">Judul (A-Z)</option>
-                <option value="level">Tingkat Kesulitan</option>
-              </select>
-            </div>
           </div>
-        </div>
+        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-          <div className="hidden lg:block lg:col-span-3">
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-xl sticky top-24">
-              <Sidebar />
-            </div>
-          </div>
-
-          <div className={userType === 'student' ? 'lg:col-span-9' : 'lg:col-span-12'}>
-
-            {checkCertificateEligibility() && (
-              <div className="mb-8 p-8 rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-6 animate-fade-in relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
-                <div className="flex items-center gap-5 relative z-10">
-                  <div className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl">
-                    <Award className="w-12 h-12 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl sm:text-3xl font-black mb-2">🎉 Selamat! Anda Lulus!</h2>
-                    <p className="text-blue-100 text-base font-medium">
-                      Anda telah menyelesaikan semua modul {languageData.find(l => l.id === selectedLanguage)?.name}.
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={generateCertificate}
-                  disabled={generatingCert}
-                  className="px-8 py-4 bg-white text-blue-600 rounded-2xl font-black text-lg shadow-xl hover:bg-blue-50 transition-all flex items-center gap-3 disabled:opacity-70 hover:scale-105 transform relative z-10"
-                >
-                  {generatingCert ? <Loader2 className="w-6 h-6 animate-spin" /> : <FileText className="w-6 h-6" />}
-                  {generatingCert ? 'Membuat...' : 'Klaim Sertifikat'}
-                </button>
+        {/* Language Selection / Learning Path */}
+        {!selectedLanguage ? (
+          <div>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl shadow-lg">
+                <Code className="w-6 h-6 text-white" />
               </div>
-            )}
-
-            <div className="flex items-center gap-3 mb-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-lg">
-              <div className="p-3 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl">
-                <BookOpen className="w-6 h-6 text-white" />
+              <div>
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white">Pilih Learning Path</h2>
+                <p className="text-slate-600 dark:text-slate-400 font-medium">Mulai perjalanan belajar dengan bahasa pilihanmu</p>
               </div>
-              <h2 className="text-2xl font-black text-slate-900 dark:text-white flex-1">Daftar Modul</h2>
-              <span className="text-base font-black text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-5 py-2 rounded-full border-2 border-slate-200 dark:border-slate-700">
-                {materials.length} Materi
-              </span>
             </div>
 
             {loading ? (
-              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <SkeletonCard key={i} />
+                  <SkeletonLanguageCard key={i} />
+                ))}
+              </div>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {languageStats.map((lang) => {
+                  const showProgress = isPremium && lang.total > 0;
+                  
+                  return (
+                    <button
+                      key={lang.id}
+                      disabled={!!lang.comingSoon}
+                      onClick={() => !lang.comingSoon && setSelectedLanguage(lang.id)}
+                      className={`group relative overflow-hidden rounded-3xl p-6 text-left transition-all duration-300 ${
+                        lang.comingSoon
+                          ? 'opacity-60 cursor-not-allowed bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800'
+                          : 'cursor-pointer bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-2xl hover:-translate-y-2'
+                      }`}
+                    >
+                      {!lang.comingSoon && (
+                        <>
+                          <div className={`absolute inset-0 bg-gradient-to-br ${lang.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/0 to-white/10 dark:from-black/0 dark:to-black/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500"></div>
+                        </>
+                      )}
+                      
+                      <div className="relative z-10">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-14 h-14 rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 ${
+                              lang.comingSoon 
+                                ? 'bg-slate-100 dark:bg-slate-800' 
+                                : `bg-gradient-to-br ${lang.gradient} group-hover:scale-110 group-hover:rotate-6`
+                            }`}>
+                              <img 
+                                src={lang.iconUrl} 
+                                alt={typeof lang.name === 'string' ? lang.name : 'Language'} 
+                                className="h-8 w-8 object-contain" 
+                              />
+                            </div>
+                            <div>
+                              <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1">
+                                {lang.name}
+                              </h3>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                {lang.description}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          {lang.comingSoon && (
+                            <div className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold rounded-lg">
+                              Soon
+                            </div>
+                          )}
+                          
+                          {showProgress && lang.isComplete && (
+                            <div className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-lg flex items-center gap-1">
+                              <CheckCircle className="w-3 h-3" /> Complete
+                            </div>
+                          )}
+                        </div>
+
+                        {showProgress && (
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="font-bold text-slate-700 dark:text-slate-300">
+                                {lang.completed}/{lang.total} modules
+                              </span>
+                              <span className="font-black text-blue-600 dark:text-blue-400">
+                                {lang.progress}%
+                              </span>
+                            </div>
+                            <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full bg-gradient-to-r ${lang.gradient} rounded-full transition-all duration-500`}
+                                style={{ width: `${lang.progress}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        )}
+
+                        {!lang.comingSoon && !showProgress && (
+                          <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+                            <span className="text-sm font-bold text-slate-500 dark:text-slate-400">
+                              {lang.total} modules available
+                            </span>
+                            <ChevronRight className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        )}
+
+                        {showProgress && lang.isComplete && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              generateCertificate(lang.id);
+                            }}
+                            disabled={generatingCert}
+                            className="mt-4 w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                          >
+                            {generatingCert ? (
+                              <><Loader2 className="w-4 h-4 animate-spin" /> Generating...</>
+                            ) : (
+                              <><Award className="w-4 h-4" /> Get Certificate</>
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Module List View */
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setSelectedLanguage(null)}
+                  className="p-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all group"
+                >
+                  <ChevronRight className="w-6 h-6 text-slate-600 dark:text-slate-400 rotate-180 group-hover:-translate-x-1 transition-transform" />
+                </button>
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br ${
+                    languageStats.find(l => l.id === selectedLanguage)?.gradient
+                  } shadow-lg`}>
+                    <img 
+                      src={languageStats.find(l => l.id === selectedLanguage)?.iconUrl} 
+                      alt="Language" 
+                      className="h-7 w-7 object-contain" 
+                    />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white">
+                      {languageStats.find(l => l.id === selectedLanguage)?.name}
+                    </h2>
+                    <p className="text-slate-600 dark:text-slate-400 font-medium">
+                      {materials.length} modules • {languageStats.find(l => l.id === selectedLanguage)?.progress || 0}% complete
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="grid gap-4">
+                {[1, 2, 3].map((i) => (
+                  <SkeletonHeroCard key={i} />
                 ))}
               </div>
             ) : materials.length === 0 ? (
               <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl border-2 border-dashed border-slate-300 dark:border-slate-700 p-16 text-center shadow-xl">
                 <div className="w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <BookLock className="w-12 h-12 text-slate-400" />
+                  <BookOpen className="w-12 h-12 text-slate-400" />
                 </div>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-3">Materi Sedang Diperbarui</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-lg">Kami sedang merapikan konten untuk pengalaman belajar yang lebih baik.</p>
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-3">Tidak ada materi ditemukan</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-lg">Coba kata kunci pencarian yang berbeda</p>
               </div>
             ) : (
-              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="space-y-4">
                 {materials.map((m, idx) => {
                   const locked = isModuleLocked(m.order);
-                  const isDownloading = downloadingPdf === m.id;
                   const progress = isPremium ? getProgress(m.id) : 0;
                   const isCompleted = isPremium && progress === 100;
+                  const isInProgress = isPremium && progress > 0 && progress < 100;
 
                   return (
                     <div
                       key={m.id}
-                      className={`group relative flex flex-col rounded-3xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-2 transition-all duration-300
-                        ${locked
-                          ? 'border-slate-200 dark:border-slate-800'
-                          : 'border-slate-200 dark:border-slate-800 hover:border-blue-500/50 hover:shadow-2xl hover:-translate-y-2 cursor-pointer'
-                        }
-                      `}
-                      style={{ animation: `fadeInUp 0.4s ease-out forwards`, animationDelay: `${idx * 50}ms`, opacity: 0 }}
+                      className={`group relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border-2 transition-all duration-300 ${
+                        locked
+                          ? 'border-slate-200 dark:border-slate-800 opacity-75'
+                          : 'border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-2xl cursor-pointer'
+                      }`}
+                      style={{ animation: `fadeInUp 0.3s ease-out forwards`, animationDelay: `${idx * 50}ms`, opacity: 0 }}
                     >
                       {!locked && (
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-indigo-500/0 group-hover:from-blue-500/5 group-hover:to-indigo-500/5 rounded-3xl transition-all duration-300 pointer-events-none"></div>
-                      )}
-
-                      <div className={`p-6 flex-1 relative z-10 ${locked ? 'blur-[2px] opacity-60 pointer-events-none' : ''}`}>
-                        <div className="flex justify-between items-start mb-5">
-                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-all duration-300 ${
-                            locked ? 'bg-slate-100 dark:bg-slate-800' :
-                            isCompleted ? 'bg-gradient-to-br from-green-500 to-emerald-500 text-white group-hover:scale-110 group-hover:rotate-6' :
-                            'bg-gradient-to-br from-blue-500 to-indigo-500 text-white group-hover:scale-110 group-hover:rotate-6'
-                          }`}>
-                            {isCompleted ? <CheckCircle className="w-7 h-7" /> : <Award className="w-7 h-7" />}
-                          </div>
-                          <span className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider shadow-md ${levelPill(m.level as Level)}`}>
-                            {levelLabel[m.level as Level]}
-                          </span>
-                        </div>
-
-                        <h3 className="text-xl font-black text-slate-900 dark:text-white mb-3 line-clamp-2 min-h-[3.5rem] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                          {m.order}. {m.title}
-                        </h3>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 mb-5 leading-relaxed">
-                          {m.description}
-                        </p>
-
-                        {isPremium && (
-                          <div className="mb-5">
-                            <div className="flex justify-between text-xs font-bold mb-2">
-                              <span className={isCompleted ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}>
-                                {isFetchingProgress ? 'Syncing...' : isCompleted ? '✓ Selesai' : 'Progress'}
-                              </span>
-                              <span className="text-slate-700 dark:text-slate-300">{progress}%</span>
-                            </div>
-                            <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
-                              {isFetchingProgress ? (
-                                <div className="h-full bg-gradient-to-r from-blue-400 to-blue-600 animate-pulse w-full"></div>
-                              ) : (
-                                <div
-                                  className={`h-full transition-all duration-700 ${isCompleted ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'}`}
-                                  style={{ width: `${progress}%` }}
-                                />
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {m.language && (
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500"></div>
-                            <span className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">{m.language}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {!locked && (
-                        <div className="p-5 border-t-2 border-slate-100 dark:border-slate-800 bg-gradient-to-br from-slate-50/50 to-slate-100/50 dark:from-slate-800/30 dark:to-slate-900/30 backdrop-blur-sm rounded-b-3xl mt-auto relative z-10">
-                          <div className="flex gap-3 mb-3">
-                            <button
-                              onClick={() => handleStartModule(m.id)}
-                              className="flex-1 inline-flex justify-center items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-base font-black py-3.5 rounded-2xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                            >
-                              {isCompleted ? 'Ulangi' : 'Mulai Belajar'} <ChevronRight className="w-5 h-5" />
-                            </button>
-
-                            {plan === 'plus' && (
-                              <button
-                                onClick={() => downloadModulePDF(m)}
-                                disabled={isDownloading}
-                                className="px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-blue-600 hover:border-blue-400 rounded-2xl transition-all shadow-md hover:shadow-lg"
-                                title="Download PDF"
-                              >
-                                {isDownloading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Download className="w-6 h-6" />}
-                              </button>
-                            )}
-                          </div>
-
-                          {isPremium && (
-                            <button
-                              onClick={() => toggleModuleCompletion(m.id)}
-                              className={`w-full text-sm font-bold py-2.5 rounded-xl border-2 transition-all ${
-                                isCompleted
-                                  ? 'bg-green-50 text-green-700 border-green-300 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-700'
-                                  : 'bg-white text-slate-600 border-slate-200 hover:text-blue-600 hover:border-blue-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
-                              }`}
-                            >
-                              {isCompleted ? '✓ Tandai Belum Selesai' : 'Tandai Selesai'}
-                            </button>
-                          )}
-                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-indigo-500/0 to-purple-500/0 group-hover:from-blue-500/5 group-hover:via-indigo-500/5 group-hover:to-purple-500/5 transition-all duration-500"></div>
                       )}
 
                       {locked && (
-                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/50 dark:bg-black/50 backdrop-blur-sm rounded-3xl">
-                          <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-2xl text-center border-2 border-slate-200 dark:border-slate-700 max-w-[85%]">
-                            <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                              <Lock className="w-8 h-8" />
-                            </div>
-                            <h4 className="font-black text-xl text-slate-900 dark:text-white mb-2">Premium Content</h4>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">Upgrade untuk membuka materi ini.</p>
-                            <Link
-                              to="/pricing"
-                              className="inline-block px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-sm font-black rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                            >
-                              Upgrade Sekarang
-                            </Link>
-                          </div>
+                        <div className="absolute top-4 right-4 z-20 bg-amber-100 dark:bg-amber-900/30 px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
+                          <Lock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                          <span className="text-xs font-bold text-amber-600 dark:text-amber-400">Premium Only</span>
                         </div>
                       )}
+
+                      {isCompleted && (
+                        <div className="absolute top-4 right-4 z-20 bg-green-100 dark:bg-green-900/30 px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
+                          <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+                          <span className="text-xs font-bold text-green-600 dark:text-green-400">Completed</span>
+                        </div>
+                      )}
+
+                      <div className="relative z-10 p-6">
+                        <div className="flex items-start gap-6">
+                          <div className={`flex-shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black shadow-lg transition-all duration-300 ${
+                            locked ? 'bg-slate-100 dark:bg-slate-800 text-slate-400' :
+                            isCompleted ? 'bg-gradient-to-br from-green-500 to-emerald-500 text-white' :
+                            isInProgress ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white' :
+                            'bg-gradient-to-br from-blue-500 to-indigo-500 text-white group-hover:scale-110 group-hover:rotate-6'
+                          }`}>
+                            {m.order}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-4 mb-3">
+                              <div className="flex-1">
+                                <h3 className={`text-2xl font-black mb-2 ${
+                                  locked ? 'text-slate-500 dark:text-slate-600' : 'text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400'
+                                } transition-colors`}>
+                                  {m.title}
+                                </h3>
+                                <p className={`text-sm leading-relaxed ${
+                                  locked ? 'text-slate-400 dark:text-slate-600' : 'text-slate-600 dark:text-slate-400'
+                                }`}>
+                                  {m.description}
+                                </p>
+                              </div>
+                            </div>
+
+                            {isPremium && !locked && (
+                              <div className="mb-4">
+                                <div className="flex justify-between text-xs font-bold mb-2">
+                                  <span className={isCompleted ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}>
+                                    Progress
+                                  </span>
+                                  <span className="text-slate-700 dark:text-slate-300">{progress}%</span>
+                                </div>
+                                <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                  <div 
+                                    className={`h-full rounded-full transition-all duration-500 ${
+                                      isCompleted ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                                      isInProgress ? 'bg-gradient-to-r from-purple-500 to-pink-500' :
+                                      'bg-gradient-to-r from-blue-500 to-indigo-500'
+                                    }`}
+                                    style={{ width: `${progress}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() => !locked && handleStartModule(m.id)}
+                                disabled={locked}
+                                className={`flex-1 px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+                                  locked
+                                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                                    : isCompleted
+                                    ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 border-2 border-green-200 dark:border-green-800'
+                                    : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl'
+                                }`}
+                              >
+                                {locked ? (
+                                  <><Lock className="w-4 h-4" /> Locked</>
+                                ) : isCompleted ? (
+                                  <><CheckCircle className="w-4 h-4" /> Review</>
+                                ) : isInProgress ? (
+                                  <><PlayCircle className="w-4 h-4" /> Continue Learning</>
+                                ) : (
+                                  <><Rocket className="w-4 h-4" /> Start Learning</>
+                                )}
+                              </button>
+
+                              {isPremium && !locked && (
+                                <button
+                                  onClick={() => toggleModuleCompletion(m.id)}
+                                  className={`px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                                    isCompleted
+                                      ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                      : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30'
+                                  }`}
+                                >
+                                  {isCompleted ? 'Unmark' : 'Mark Done'}
+                                </button>
+                              )}
+
+                              {plan === 'plus' && !locked && (
+                                <button
+                                  onClick={() => {/* Download PDF logic */}}
+                                  disabled={downloadingPdf === m.id}
+                                  className="px-4 py-3 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-xl font-bold text-sm hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all disabled:opacity-50"
+                                >
+                                  {downloadingPdf === m.id ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <Download className="w-4 h-4" />
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   );
                 })}
               </div>
             )}
           </div>
-        </div>
+        )}
       </main>
-
-      <footer className="mt-auto border-t-2 border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl py-10">
-        <div className="container mx-auto px-4 sm:px-6 text-center">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg">
-              C
-            </div>
-            <span className="text-lg font-black text-slate-900 dark:text-white">Coreline by AstByte</span>
-          </div>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
-            &copy; {new Date().getFullYear()} Astral Byte Technology (AstByte). All rights reserved.
-          </p>
-          <p className="text-xs text-slate-400 dark:text-slate-500 font-mono">v1.01.26.14</p>
-        </div>
-      </footer>
 
       <style>{`
         @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
-        .animate-fade-in { animation: fadeInUp 0.5s ease-out forwards; }
       `}</style>
     </div>
   );
