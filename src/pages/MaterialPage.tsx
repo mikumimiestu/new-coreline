@@ -270,20 +270,7 @@ export default function MaterialPage() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-3xl p-6">
-                   <div className="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center mb-4">
-                      <Award className="w-5 h-5 text-amber-500" />
-                   </div>
-                   <h3 className="text-white font-bold mb-2">Unlock Features</h3>
-                   <p className="text-slate-400 text-sm mb-4 leading-relaxed">
-                     Track progress, sertifikat, dan akses penuh dengan akun Premium.
-                   </p>
-                   <Link 
-                      to="/pricing"
-                      className="block w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-center rounded-xl font-bold text-sm transition-all shadow-lg shadow-amber-500/20"
-                    >
-                      Upgrade Plan
-                    </Link>
+                <div>
                 </div>
               )}
             </div>
