@@ -1,18 +1,8 @@
 import { useState, useRef } from 'react';
 import {
-  Lock,
-  AlertCircle,
-  Loader2,
-  Check,
-  MessageCircle,
-  ArrowRight,
-  Sparkles,
-  Shield,
-  Code2,
-  Trophy,
-  Users,
-  BookOpen,
-  WifiOffIcon,
+  Lock, AlertCircle, Loader2, Check, MessageCircle, ArrowRight,
+  Sparkles, Shield, Code2, Trophy, Users, BookOpen, WifiOff,
+  Layout, ChevronLeft
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import ReCAPTCHA from 'react-google-recaptcha';
@@ -33,14 +23,11 @@ export default function LoginPage() {
   const { login } = useAuth();
   const recaptchaRef = useRef<ReCAPTCHA>(null);
 
-  const waHref =
-    'https://api.whatsapp.com/send/?phone=6285183209494&text=Halo+AstByte%2C+saya+ingin+mendapatkan+informasi+tentang+Coreline.&type=phone_number&app_absent=0';
+  const waHref = 'https://api.whatsapp.com/send/?phone=6285183209494&text=Halo+AstByte%2C+saya+ingin+mendapatkan+informasi+tentang+Coreline.&type=phone_number&app_absent=0';
 
   const onRecaptchaChange = (token: string | null) => {
     setRecaptchaToken(token);
-    if (error && error.includes('reCAPTCHA')) {
-      setError('');
-    }
+    if (error && error.includes('reCAPTCHA')) setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,7 +49,6 @@ export default function LoginPage() {
           setError('Username Astbyte dan password wajib diisi.');
           return;
         }
-
         const email = `${trimmedUser}@astbyte.com`;
         url = 'https://authx.astbyte.com/api/auth/login';
         body = { email, password };
@@ -72,7 +58,6 @@ export default function LoginPage() {
           setError('Public ID wajib diisi.');
           return;
         }
-
         url = 'https://authx.astbyte.com/api/auth/login/public-id';
         body = { public_id: trimmedPublicId };
       }
@@ -87,20 +72,11 @@ export default function LoginPage() {
       });
 
       let data: any = null;
-      try {
-        data = await res.json();
-      } catch {
-        data = null;
-      }
+      try { data = await res.json(); } catch { data = null; }
 
       if (!res.ok) {
-        console.log('[AUTHX ERROR]', res.status, data);
         const backendMessage = data?.message;
-        const fallback =
-          mode === 'email'
-            ? 'Login dengan email & password gagal.'
-            : 'Login dengan Public ID gagal (mungkin endpoint belum tersedia di authx).';
-
+        const fallback = mode === 'email' ? 'Login gagal.' : 'ID tidak ditemukan.';
         setError(backendMessage || fallback);
         recaptchaRef.current?.reset();
         setRecaptchaToken(null);
@@ -109,29 +85,24 @@ export default function LoginPage() {
 
       const token = data?.data?.token;
       if (!token) {
-        setError('Token tidak ditemukan dari server authx.');
-        recaptchaRef.current?.reset();
-        setRecaptchaToken(null);
+        setError('Token tidak valid.');
         return;
       }
 
-      localStorage.setItem('authx_token', token);
-
+      localStorage.setItem('astbyte_token', token); // Konsisten nama token dgn page lain
       const ok = await login(token);
+      
       if (!ok) {
-        setError('Login berhasil di Astbyte, tapi gagal di aplikasi.');
-        recaptchaRef.current?.reset();
-        setRecaptchaToken(null);
+        setError('Gagal inisialisasi sesi.');
         return;
       }
 
       setIsSuccess(true);
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 1500);
+      setTimeout(() => { window.location.href = '/'; }, 1500);
+
     } catch (err) {
       console.error(err);
-      setError('Terjadi kesalahan. Silakan coba lagi.');
+      setError('Terjadi kesalahan koneksi.');
       recaptchaRef.current?.reset();
       setRecaptchaToken(null);
     } finally {
@@ -140,525 +111,244 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950">
-      {/* Animated background elements */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-24 -right-24 h-96 w-96 animate-pulse rounded-full bg-gradient-to-br from-blue-400/30 to-indigo-500/20 blur-3xl" />
-        <div className="absolute -bottom-16 -left-16 h-96 w-96 animate-pulse rounded-full bg-gradient-to-tr from-indigo-400/30 to-blue-500/20 blur-3xl animation-delay-2000" />
-        <div className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full bg-gradient-to-r from-cyan-400/10 to-blue-500/10 blur-3xl animation-delay-4000" />
+    <div className="relative min-h-screen overflow-hidden bg-[#0F172A] text-slate-200 font-sans selection:bg-blue-500/30">
+      
+      {/* Background Ambience */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-blue-600/10 blur-[100px] animate-pulse" />
+        <div className="absolute -bottom-16 -left-16 h-96 w-96 rounded-full bg-indigo-600/10 blur-[100px]" />
       </div>
 
-      <div className="relative container mx-auto px-4 py-8 md:py-12">
-        <div className="mx-auto max-w-6xl">
+      <div className="relative container mx-auto px-4 py-8 md:py-12 min-h-screen flex flex-col justify-center">
+        <div className="mx-auto max-w-6xl w-full">
+          
           {/* Header */}
-          <header className="mb-8 text-center md:mb-12">
-            <div className="animate-fade-in-down mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/90 shadow-xl shadow-blue-500/20 ring-1 ring-black/5 backdrop-blur transition-transform duration-500 hover:scale-110 dark:bg-slate-800/80">
-              <img
-                src="/icon.png"
-                alt="coreline logo"
-                className="h-10 w-10 animate-float"
-              />
+          <header className="mb-10 text-center">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 animate-float">
+              <img src="/icon.png" alt="Logo" className="h-8 w-8 brightness-0 invert" />
             </div>
-            <h1 className="animate-fade-in mb-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-white md:text-4xl">
-              Welcome to <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-400">Coreline</span>
+            <h1 className="mb-2 text-3xl font-black tracking-tight text-white md:text-4xl">
+              Welcome to <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Coreline</span>
             </h1>
-            <p className="animate-fade-in-up text-sm text-slate-600 dark:text-slate-300 md:text-base">
-              Platform Pembelajaran Coding Interaktif ✨
+            <p className="text-slate-400 font-medium">
+              Platform Pembelajaran Coding Interaktif by AstByte
             </p>
           </header>
 
-          {/* Main Content */}
-          <section className="grid items-start gap-6 md:grid-cols-2 md:gap-8">
-            {/* Left: Login Form */}
-            <div className="animate-slide-in-left order-1">
-              <div className="group relative overflow-hidden rounded-2xl bg-white/95 p-6 shadow-xl ring-1 ring-slate-200/50 backdrop-blur-xl transition-all duration-500 hover:shadow-2xl dark:bg-slate-900/95 dark:ring-slate-700/50 md:p-8">
-                <div className="relative z-10">
-                  {!showForm ? (
-                    // Step 1: Login Button with Astbyte branding
-                    <div className="animate-fade-in space-y-6">
-                      <div className="mb-6 flex items-center gap-3">
-                        <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg">
-                          <Lock className="h-5 w-5" />
-                        </span>
-                        <div className="space-y-1">
-                          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Login ke Akun Anda
-                          </h2>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Masuk untuk melanjutkan ke Coreline
-                          </p>
-                        </div>
+          {/* Main Layout */}
+          <div className="grid items-stretch gap-6 md:grid-cols-2 md:gap-8 max-w-5xl mx-auto">
+            
+            {/* LEFT: Login Form */}
+            <div className="relative group animate-slide-in-left">
+               {/* Card Glow Border */}
+              <div className="absolute -inset-0.5 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-3xl blur opacity-75 group-hover:opacity-100 transition duration-1000"></div>
+              
+              <div className="relative h-full bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl">
+                {!showForm ? (
+                  // STATE 1: Initial
+                  <div className="h-full flex flex-col justify-center space-y-6 animate-fade-in">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700">
+                        <Lock className="h-6 w-6 text-blue-500" />
                       </div>
-
-                      <button
-                        onClick={() => setShowForm(true)}
-                        className="group/btn relative inline-flex w-full items-center justify-center gap-3 overflow-hidden rounded-xl border-2 border-slate-200 bg-white px-6 py-4 text-base font-semibold text-slate-900 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:border-blue-300 hover:shadow-xl dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:border-blue-600"
-                      >
-                        <span>Login dengan</span>
-                        <img 
-                          src="/icon2.png" 
-                          alt="Astbyte" 
-                          className="h-8 w-18 transition-transform group-hover/btn:scale-110" 
-                        />
-                      </button>
-
-                      <div className="space-y-3 rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
-                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                          Belum punya akun Astbyte?
-                        </p>
-                        <a
-                          href="https://axid.astbyte.com/"
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
-                        >
-                          Daftar Sekarang
-                          <ArrowRight className="h-4 w-4" />
-                        </a>
+                      <div>
+                        <h2 className="text-xl font-bold text-white">Login Account</h2>
+                        <p className="text-sm text-slate-400">Masuk untuk melanjutkan belajar</p>
                       </div>
                     </div>
-                  ) : (
-                    // Step 2: Login Form
-                    <>
-                      <div className="mb-6 flex items-center gap-3">
-                        <button
-                          onClick={() => {
-                            setShowForm(false);
-                            setError('');
-                            setUsername('');
-                            setPassword('');
-                            setPublicId('');
-                            recaptchaRef.current?.reset();
-                            setRecaptchaToken(null);
-                          }}
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
-                        >
-                          ←
-                        </button>
-                        <div className="space-y-1">
-                          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Login ke Akun Anda
-                          </h2>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
-                            <span className="flex items-center gap-1">
-                              Gunakan 
-                              <img src="/icon2.png" className="h-4 sm:h-5 w-auto" alt="icon" /> 
-                              Account untuk masuk
-                            </span>
-                          </p>
-                        </div>
-                      </div>
 
-                      {isSuccess && (
-                        <div className="animate-bounce-in mb-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-300">
-                          <Check className="h-5 w-5 flex-shrink-0" />
-                          <span className="text-sm font-medium">
-                            Login berhasil! Redirecting...
-                          </span>
+                    <div className="py-6">
+                      <button
+                        onClick={() => setShowForm(true)}
+                        className="group relative w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-slate-900 px-6 py-4 rounded-xl font-bold text-base transition-all transform hover:-translate-y-1 shadow-xl shadow-white/5"
+                      >
+                        <span>Login dengan</span>
+                        <img src="/icon2.png" alt="Astbyte" className="h-5 w-auto" />
+                        <ArrowRight className="w-5 h-5 ml-auto opacity-0 group-hover:opacity-100 transition-opacity absolute right-4 text-slate-400" />
+                      </button>
+                    </div>
+
+                    <div className="mt-auto bg-slate-950/50 rounded-xl p-5 border border-slate-800 text-center">
+                      <p className="text-sm font-medium text-slate-400 mb-3">Belum punya akun Astbyte?</p>
+                      <a
+                        href="https://axid.astbyte.com/"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-bold text-sm hover:underline"
+                      >
+                        Daftar Gratis Sekarang <ArrowRight className="h-4 w-4" />
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  // STATE 2: Form Input
+                  <div className="animate-fade-in">
+                    <button
+                      onClick={() => { setShowForm(false); setError(''); }}
+                      className="mb-6 flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-white transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4" /> Kembali
+                    </button>
+
+                    <div className="mb-6">
+                       <h2 className="text-2xl font-black text-white mb-1">Welcome Back!</h2>
+                       <p className="text-slate-400 text-sm">Masukkan kredensial akun AstByte Anda.</p>
+                    </div>
+
+                    {isSuccess && (
+                       <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-3 text-green-400 font-bold text-sm animate-bounce-in">
+                          <Check className="w-5 h-5" /> Login berhasil! Mengalihkan...
+                       </div>
+                    )}
+
+                    {/* Toggle */}
+                    <div className="grid grid-cols-2 gap-2 p-1 bg-slate-950 rounded-xl mb-6 border border-slate-800">
+                      <button
+                        type="button"
+                        onClick={() => { setMode('email'); setError(''); }}
+                        className={`py-2 text-sm font-bold rounded-lg transition-all ${mode === 'email' ? 'bg-slate-800 text-white shadow' : 'text-slate-500 hover:text-slate-300'}`}
+                      >
+                        Email
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setMode('publicId'); setError(''); }}
+                        className={`py-2 text-sm font-bold rounded-lg transition-all ${mode === 'publicId' ? 'bg-slate-800 text-white shadow' : 'text-slate-500 hover:text-slate-300'}`}
+                      >
+                        Public ID
+                      </button>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      {mode === 'email' ? (
+                        <>
+                           <div className="space-y-1.5">
+                              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Username</label>
+                              <div className="relative group">
+                                <input
+                                  type="text"
+                                  value={username}
+                                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace('@astbyte.com', ''))}
+                                  placeholder="username"
+                                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-white placeholder:text-slate-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
+                                />
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-medium">@astbyte.com</span>
+                              </div>
+                           </div>
+                           <div className="space-y-1.5">
+                              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Password</label>
+                              <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="••••••••"
+                                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-white placeholder:text-slate-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
+                              />
+                           </div>
+                        </>
+                      ) : (
+                        <div className="space-y-1.5">
+                           <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Public ID</label>
+                           <input
+                              type="text"
+                              value={publicId}
+                              onChange={(e) => setPublicId(e.target.value)}
+                              placeholder="Contoh: 3f4a6b2c..."
+                              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3.5 text-white placeholder:text-slate-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
+                           />
+                           <p className="text-xs text-slate-500">ID dapat dilihat di pengaturan akun AstByte.</p>
                         </div>
                       )}
 
-                      {/* Mode Toggle */}
-                      <div className="mb-5 inline-flex w-full rounded-xl bg-slate-100 p-1 text-xs font-medium dark:bg-slate-800">
-                        <button
-                          type="button"
-                          className={`flex-1 rounded-lg px-3 py-2 transition-all duration-200 ${
-                            mode === 'email'
-                              ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white'
-                              : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                          }`}
-                          onClick={() => {
-                            setMode('email');
-                            setError('');
-                          }}
-                        >
-                          Email & Password
-                        </button>
-                        <button
-                          type="button"
-                          className={`flex-1 rounded-lg px-3 py-2 transition-all duration-200 ${
-                            mode === 'publicId'
-                              ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white'
-                              : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                          }`}
-                          onClick={() => {
-                            setMode('publicId');
-                            setError('');
-                          }}
-                        >
-                          Public ID
-                        </button>
+                      <div className="flex justify-center pt-2">
+                         <ReCAPTCHA ref={recaptchaRef} sitekey={RECAPTCHA_SITE_KEY} onChange={onRecaptchaChange} theme="dark" />
                       </div>
 
-                      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                        {mode === 'email' ? (
-                          <div className="animate-fade-in space-y-4">
-                            <div>
-                              <label
-                                htmlFor="username"
-                                className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200"
-                              >
-                                Username Astbyte
-                              </label>
-                              <div className="group relative flex items-center overflow-hidden rounded-lg border-2 border-slate-300 bg-white px-3 py-2.5 text-sm transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 hover:border-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:focus-within:border-blue-400 dark:hover:border-slate-500">
-                                <input
-                                  id="username"
-                                  name="username"
-                                  type="text"
-                                  autoComplete="username"
-                                  value={username}
-                                  onChange={(e) => {
-                                    setUsername(
-                                      e.target.value
-                                        .toLowerCase()
-                                        .replace('@astbyte.com', '')
-                                    );
-                                    if (error) setError('');
-                                  }}
-                                  placeholder="misal: amagi"
-                                  className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400 dark:text-white dark:placeholder:text-slate-500"
-                                />
-                                <span className="ml-2 select-none text-xs text-slate-500 dark:text-slate-400">
-                                  @astbyte.com
-                                </span>
-                              </div>
-                            </div>
+                      {error && (
+                         <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 text-red-400 text-sm font-medium animate-shake">
+                            <AlertCircle className="w-5 h-5 shrink-0" />
+                            {error}
+                         </div>
+                      )}
 
-                            <div>
-                              <label
-                                htmlFor="password"
-                                className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200"
-                              >
-                                Password
-                              </label>
-                              <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                autoComplete="current-password"
-                                value={password}
-                                onChange={(e) => {
-                                  setPassword(e.target.value);
-                                  if (error) setError('');
-                                }}
-                                placeholder="Masukkan password"
-                                className="w-full rounded-lg border-2 border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition-all placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 dark:hover:border-slate-500 dark:focus:border-blue-400"
-                              />
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="animate-fade-in">
-                            <label
-                              htmlFor="publicId"
-                              className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200"
-                            >
-                              Public ID Astbyte
-                            </label>
-                            <input
-                              id="publicId"
-                              name="publicId"
-                              type="text"
-                              value={publicId}
-                              onChange={(e) => {
-                                setPublicId(e.target.value.trim());
-                                if (error) setError('');
-                              }}
-                              placeholder="Contoh: 3f4a6b2c-xxxx-xxxx..."
-                              className="w-full rounded-lg border-2 border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition-all placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 dark:hover:border-slate-500 dark:focus:border-blue-400"
-                            />
-                            <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-                              Public ID bisa kamu lihat di Account Center Astbyte.
-                            </p>
-                          </div>
-                        )}
-
-                        {/* reCAPTCHA */}
-                        <div className="flex justify-center py-2">
-                          <ReCAPTCHA
-                            ref={recaptchaRef}
-                            sitekey={RECAPTCHA_SITE_KEY}
-                            onChange={onRecaptchaChange}
-                            theme="light"
-                          />
-                        </div>
-
-                        {error && (
-                          <div
-                            className="animate-shake flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-red-700 dark:border-red-900/40 dark:bg-red-900/30 dark:text-red-200"
-                            role="alert"
-                          >
-                            <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                            <span className="text-xs font-medium">{error}</span>
-                          </div>
-                        )}
-
-                        <button
-                          type="submit"
-                          disabled={loading || isSuccess || !recaptchaToken}
-                          className="group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl focus-visible:ring-2 focus-visible:ring-blue-500/50 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
-                        >
-                          {loading ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              Memproses...
-                            </>
-                          ) : isSuccess ? (
-                            <>
-                              <Check className="h-4 w-4" />
-                              Berhasil!
-                            </>
-                          ) : (
-                            <>
-                              Masuk
-                              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                            </>
-                          )}
-                        </button>
-
-                        <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                          <Shield className="h-3 w-3" />
-                          <span>Protected by reCAPTCHA</span>
-                        </div>
-
-                        <p className="text-center text-xs text-slate-600 dark:text-slate-400">
-                          Belum punya akun?{' '}
-                          <a
-                            href="https://axid.astbyte.com/"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
-                          >
-                            Daftar di sini
-                          </a>
-                        </p>
-                      </form>
-                    </>
-                  )}
-                </div>
+                      <button
+                        type="submit"
+                        disabled={loading || isSuccess || !recaptchaToken}
+                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-600/20 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                         {loading ? <Loader2 className="w-5 h-5 animate-spin"/> : "Masuk Sekarang"}
+                         {!loading && <ArrowRight className="w-5 h-5"/>}
+                      </button>
+                    </form>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Right: Platform Features */}
-            <div className="animate-slide-in-right order-2">
-              <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 p-6 text-white shadow-2xl dark:from-blue-700 dark:via-indigo-700 dark:to-blue-800 md:p-8">
-                <div className="mb-6">
-                  <h3 className="mb-2 flex items-center gap-2 text-xl font-bold md:text-2xl">
-                    <Sparkles className="h-5 w-5" />
-                    Kenapa Coreline?
-                  </h3>
-                  <p className="text-sm text-blue-50">
-                    Platform pembelajaran coding modern dengan fitur lengkap
-                  </p>
-                </div>
+            {/* RIGHT: Features */}
+            <div className="relative animate-slide-in-right">
+              <div className="h-full bg-gradient-to-br from-blue-900 to-indigo-950 rounded-2xl p-8 border border-blue-800/50 shadow-2xl relative overflow-hidden">
+                 {/* Decor */}
+                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
 
-                <div className="space-y-3">
-                  {[
-                    {
-                      icon: Code2,
-                      title: 'Materi Lengkap',
-                      desc: 'Python, PHP, JavaScript & bahasa populer lainnya',
-                    },
-                    {
-                      icon: Trophy,
-                      title: 'Sertifikat Resmi',
-                      desc: 'Dapatkan sertifikat setelah menyelesaikan kursus',
-                    },
-                    {
-                      icon: Users,
-                      title: 'Support',
-                      desc: 'Diskusi & kolaborasi dengan mentor',
-                    },
-                    {
-                      icon: BookOpen,
-                      title: 'Update Materi',
-                      desc: 'Materi baru sesuai tren industri',
-                    },
-                    {
-                      icon: WifiOffIcon,
-                      title: 'Akses Offline',
-                      desc: 'Unduh materi untuk belajar tanpa koneksi internet',
-                    },
-                  ].map((feature, idx) => (
-                    <div
-                      key={feature.title}
-                      className="animate-fade-in group flex items-start gap-3 rounded-xl bg-white/10 p-4 backdrop-blur-sm ring-1 ring-white/20 transition-all hover:bg-white/15"
-                      style={{ animationDelay: `${idx * 100}ms` }}
-                    >
-                      <span className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-white/20 shadow-lg transition-transform group-hover:scale-110">
-                        <feature.icon className="h-5 w-5" />
-                      </span>
-                      <div>
-                        <h4 className="mb-0.5 font-semibold">{feature.title}</h4>
-                        <p className="text-xs text-blue-50/90">{feature.desc}</p>
-                      </div>
+                 <div className="relative z-10">
+                    <h3 className="text-2xl font-black text-white mb-2 flex items-center gap-2">
+                       <Sparkles className="w-6 h-6 text-yellow-400" /> Kenapa Coreline?
+                    </h3>
+                    <p className="text-blue-200 text-sm mb-8">Platform coding modern dengan ekosistem lengkap.</p>
+
+                    <div className="space-y-4">
+                       {[
+                          { icon: Code2, t: "Materi Lengkap", d: "Python, Go, TS, & SQL Path" },
+                          { icon: Trophy, t: "Sertifikat Resmi", d: "Validasi skill profesionalmu" },
+                          { icon: Users, t: "Komunitas", d: "Diskusi langsung dengan mentor" },
+                          { icon: WifiOff, t: "Offline Mode", d: "Belajar kapanpun tanpa internet" }
+                       ].map((item, i) => (
+                          <div key={i} className="flex items-start gap-4 p-3 rounded-xl bg-blue-950/40 border border-blue-800/30 hover:bg-blue-900/40 transition-colors">
+                             <div className="p-2 bg-blue-500/20 rounded-lg text-blue-300">
+                                <item.icon className="w-5 h-5" />
+                             </div>
+                             <div>
+                                <h4 className="font-bold text-white text-sm">{item.t}</h4>
+                                <p className="text-xs text-blue-300/80">{item.d}</p>
+                             </div>
+                          </div>
+                       ))}
                     </div>
-                  ))}
-                </div>
 
-                <div className="mt-6 rounded-xl bg-white/10 p-4 ring-1 ring-white/20 backdrop-blur-sm">
-                  <p className="mb-3 font-semibold">Butuh bantuan?</p>
-                  <a
-                    href={waHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group/btn inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:bg-emerald-600 hover:shadow-xl"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    Chat WhatsApp Admin
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-1" />
-                  </a>
-                  <p className="mt-2 text-center text-xs text-white/80">
-                    atau email{' '}
-                    <a
-                      href="mailto:admin@astbyte.com"
-                      className="font-semibold underline hover:text-white"
-                    >
-                      admin@astbyte.com
-                    </a>
-                  </p>
-                </div>
+                    <div className="mt-8 pt-6 border-t border-blue-800/50">
+                       <p className="text-xs font-bold text-blue-300 uppercase tracking-widest mb-3">Butuh Bantuan?</p>
+                       <a href={waHref} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-600/20">
+                          <MessageCircle className="w-5 h-5" /> Chat Admin WhatsApp
+                       </a>
+                    </div>
+                 </div>
               </div>
             </div>
-          </section>
 
-          <footer className="animate-fade-in mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
+          </div>
+
+          <footer className="mt-12 text-center text-xs font-medium text-slate-600">
             © {new Date().getFullYear()} Coreline by Astbyte. All rights reserved.
           </footer>
         </div>
       </div>
 
-      {/* Animations */}
       <style>{`
-        @keyframes fade-in-down {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .animate-float { animation: float 3s ease-in-out infinite; }
         
-        @keyframes fade-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in { animation: fade-in 0.5s ease-out; }
         
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
+        @keyframes slide-in-left { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        .animate-slide-in-left { animation: slide-in-left 0.6s ease-out; }
         
-        @keyframes slide-in-left {
-          from {
-            opacity: 0;
-            transform: translateX(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        
-        @keyframes slide-in-right {
-          from {
-            opacity: 0;
-            transform: translateX(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        
-        @keyframes bounce-in {
-          0% {
-            opacity: 0;
-            transform: scale(0.3);
-          }
-          50% {
-            transform: scale(1.05);
-          }
-          70% {
-            transform: scale(0.9);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        
-        @keyframes shake {
-          0%, 100% {
-            transform: translateX(0);
-          }
-          10%, 30%, 50%, 70%, 90% {
-            transform: translateX(-3px);
-          }
-          20%, 40%, 60%, 80% {
-            transform: translateX(3px);
-          }
-        }
-        
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-8px);
-          }
-        }
-        
-        .animate-fade-in-down {
-          animation: fade-in-down 0.5s ease-out;
-        }
-        
-        .animate-fade-in-up {
-          animation: fade-in-up 0.5s ease-out;
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 0.4s ease-out;
-        }
-        
-        .animate-slide-in-left {
-          animation: slide-in-left 0.5s ease-out;
-        }
-        
-        .animate-slide-in-right {
-          animation: slide-in-right 0.5s ease-out;
-        }
-        
-        .animate-bounce-in {
-          animation: bounce-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        
-        .animate-shake {
-          animation: shake 0.4s ease-in-out;
-        }
-        
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-        
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
+        @keyframes slide-in-right { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        .animate-slide-in-right { animation: slide-in-right 0.6s ease-out; }
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .animate-shake { animation: shake 0.3s ease-in-out; }
       `}</style>
     </div>
   );
