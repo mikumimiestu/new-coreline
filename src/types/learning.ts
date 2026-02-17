@@ -6,7 +6,7 @@ export interface LearningMaterial {
   title: string;
   description: string;
   content: string;
-  level: 'beginner' | 'intermediate' | 'advanced';
+  level: 'beginner' | 'intermediate' | 'advanced' | 'expert';
   order: number;
   created_at: string;
 }

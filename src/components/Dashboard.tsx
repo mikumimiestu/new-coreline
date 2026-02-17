@@ -16,7 +16,8 @@ import {
   Menu, Loader2, Search, Crown, Lock, Download, CheckCircle,
   FileText, RefreshCw, AlertTriangle, Target, Zap, TrendingUp,
   Clock, Star, PlayCircle, Brain, Rocket, Code, Trophy, Flame,
-  Layout, Smartphone, Database, Globe, Terminal, Layers, Cpu, Sparkles
+  Layout, Smartphone, Database, Globe, Terminal, Layers, Cpu, Sparkles,
+  Moon, CloudMoon, Sun
 } from 'lucide-react';
 
 /* ================================
@@ -28,17 +29,19 @@ type Category = 'all' | 'web-dev' | 'mobile' | 'backend' | 'data-science' | 'dev
 
 type Lang = {
   id: string;
-  category: Category[]; // Array agar satu bahasa bisa masuk beberapa kategori
+  category: Category[];
   name: string | JSX.Element;
   iconUrl?: string;
-  icon?: any; // Fallback icon jika tidak ada URL
+  icon?: any;
   comingSoon?: boolean;
   gradient: string;
   description: string;
-  badge?: string; // e.g. "Popular", "New"
+  badge?: string;
 };
 
-// DATA UTAMA: Digabungkan dengan Konsep "Path/Combinasi"
+/* ================================
+ * THEMED DATA: RAMADHAN PALETTE
+ * ================================ */
 const languageData: readonly Lang[] = [
   // --- WEB DEVELOPMENT ---
   { 
@@ -46,36 +49,34 @@ const languageData: readonly Lang[] = [
     category: ['web-dev', 'backend'],
     name: 'JavaScript', 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
-    comingSoon: true,
-    gradient: 'from-yellow-400 via-orange-500 to-red-500',
-    description: 'Modern Web Development',
-    badge: 'Essential'
+    gradient: 'from-amber-400 via-yellow-500 to-amber-600', // Gold (Cahaya)
+    description: 'Fondasi Web Modern',
+    badge: 'Wajib'
   },
   { 
     id: 'typescript', 
     category: ['web-dev', 'backend'],
     name: 'TypeScript', 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
-    gradient: 'from-blue-600 via-cyan-500 to-blue-700',
-    description: 'Scalable Enterprise Apps',
-    badge: 'Pro Choice'
+    gradient: 'from-emerald-500 via-teal-600 to-emerald-700', // Islamic Green
+    description: 'Aplikasi Skala Besar',
+    badge: 'Pilihan Pro'
   },
   { 
     id: 'ruby', 
     category: ['web-dev', 'backend'],
     name: 'Ruby on Rails', 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg',
-    gradient: 'from-red-600 to-rose-700',
-    description: 'Rapid Web Application Dev'
+    gradient: 'from-rose-700 to-red-900', // Warna Kurma/Sunset
+    description: 'Pengembangan Cepat'
   },
   { 
     id: 'php', 
     category: ['web-dev', 'backend'],
     name: 'PHP & Laravel', 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg',
-    comingSoon: true,
-    gradient: 'from-indigo-500 via-purple-600 to-indigo-800',
-    description: 'Server-side Powerhouse'
+    gradient: 'from-indigo-600 via-violet-700 to-slate-900', // Malam Hari
+    description: 'Backend Powerhouse'
   },
 
   // --- DATA SCIENCE & AI ---
@@ -84,9 +85,9 @@ const languageData: readonly Lang[] = [
     category: ['data-science', 'backend'],
     name: 'Python', 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-    gradient: 'from-blue-500 via-indigo-500 to-purple-600',
-    description: 'AI, Data Science & Backend',
-    badge: 'Best Seller'
+    gradient: 'from-green-600 via-emerald-600 to-teal-800', // Green Nature
+    description: 'AI & Data Science',
+    badge: 'Terpopuler'
   },
 
   // --- SYSTEM & BACKEND ---
@@ -95,8 +96,8 @@ const languageData: readonly Lang[] = [
     category: ['backend', 'devops'],
     name: 'Go (Golang)', 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg',
-    gradient: 'from-cyan-500 via-teal-500 to-emerald-600',
-    description: 'High Performance Systems'
+    gradient: 'from-cyan-600 via-sky-700 to-blue-900',
+    description: 'Sistem Performa Tinggi'
   },
   
   // --- DATABASE ---
@@ -105,8 +106,8 @@ const languageData: readonly Lang[] = [
     category: ['backend', 'data-science'],
     name: 'MySQL', 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
-    gradient: 'from-orange-500 via-amber-600 to-yellow-600',
-    description: 'Relational Database Mgmt'
+    gradient: 'from-amber-500 via-orange-600 to-red-700', // Senja
+    description: 'Manajemen Database'
   },
   { 
     id: 'postgresql', 
@@ -114,8 +115,8 @@ const languageData: readonly Lang[] = [
     name: 'PostgreSQL', 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
     comingSoon: true,
-    gradient: 'from-blue-700 via-indigo-800 to-slate-800',
-    description: 'Advanced SQL Systems'
+    gradient: 'from-slate-600 via-slate-700 to-slate-900',
+    description: 'Advanced SQL'
   },
 
   // --- MOBILE ---
@@ -124,36 +125,57 @@ const languageData: readonly Lang[] = [
     category: ['mobile'],
     name: (<div className="flex items-center gap-1.5">Dart</div>), 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dart/dart-original.svg',
-    gradient: 'from-teal-400 via-cyan-500 to-blue-500',
-    description: 'Flutter Mobile Apps',
-    comingSoon: false // Asumsi lu punya datanya atau mau ditampilkan
+    gradient: 'from-teal-400 via-emerald-500 to-green-600',
+    description: 'Aplikasi Flutter',
+    comingSoon: false 
   },
 
-  // --- KOMBINASI / PATH BARU (Placeholder Feature) ---
+  // --- PATHS ---
   {
     id: 'fullstack-path',
     category: ['web-dev'],
-    name: 'Fullstack Master',
+    name: 'Fullstack Berkah',
     icon: Globe,
-    gradient: 'from-emerald-500 to-teal-700',
-    description: 'Zero to Hero Web Developer',
+    gradient: 'from-emerald-400 to-green-700',
+    description: 'Dari Nol ke Jago Web',
     comingSoon: true,
-    badge: 'Path'
+    badge: 'Jalur'
   },
   {
     id: 'mobile-master',
     category: ['mobile'],
     name: 'Mobile Architect',
     icon: Smartphone,
-    gradient: 'from-violet-600 to-fuchsia-600',
-    description: 'iOS & Android Ecosystem',
+    gradient: 'from-violet-700 to-purple-900',
+    description: 'iOS & Android',
     comingSoon: true,
-    badge: 'Path'
+    badge: 'Jalur'
   }
 ] as const;
 
 type Level = 'beginner' | 'intermediate' | 'advanced';
 type Plan = 'free' | 'pro' | 'plus' | 'ultra';
+
+/* ================================
+ * Internal Helper: Decorative Lantern
+ * ================================ */
+const HangingLantern = ({ height = 'h-24', delay = '0s', left = 'left-10' }: { height?: string, delay?: string, left?: string }) => (
+  <div className={`absolute top-0 ${left} flex flex-col items-center z-0 animate-bounce`} style={{ animationDuration: '3s', animationDelay: delay }}>
+    {/* Tali */}
+    <div className={`w-[1px] ${height} bg-amber-500/50`}></div>
+    {/* Badan Lampion */}
+    <div className="w-8 h-10 bg-gradient-to-b from-amber-600 to-amber-800 rounded-t-lg rounded-b-xl border border-amber-400/50 shadow-[0_0_15px_rgba(245,158,11,0.5)] flex items-center justify-center relative">
+      {/* Detail Dalam */}
+      <div className="w-4 h-6 bg-yellow-200/20 rounded-full blur-[1px]"></div>
+    </div>
+    {/* Rumbai */}
+    <div className="flex gap-[2px] mt-[1px]">
+       <div className="w-[2px] h-3 bg-red-500"></div>
+       <div className="w-[2px] h-4 bg-red-500"></div>
+       <div className="w-[2px] h-3 bg-red-500"></div>
+    </div>
+  </div>
+);
 
 /* ================================
  * Main Component
@@ -165,7 +187,7 @@ export default function Dashboard() {
   // State
   const [materials, setMaterials] = useState<LearningMaterial[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<Category>('all'); // State untuk Tab Kategori
+  const [activeTab, setActiveTab] = useState<Category>('all');
   const [progressMap, setProgressMap] = useState<Record<string, number>>({});
   
   // UI State
@@ -179,10 +201,10 @@ export default function Dashboard() {
 
   // Setup Title
   useEffect(() => {
-    document.title = 'Dashboard | Coreline by AstByte';
+    document.title = 'Ramadhan Lounge | NewCoreline by AstByte';
   }, []);
 
-  // 1. Logic Fetch Progress (TETAP ADA)
+  // 1. Logic Fetch Progress
   useEffect(() => {
     let isMounted = true;
     const fetchProgressFromServer = async () => {
@@ -230,7 +252,7 @@ export default function Dashboard() {
   const plan = getPlanFromUser(user);
   const isPremium = ['pro', 'plus', 'ultra'].includes(plan);
 
-  // 2. Logic Update Progress / Sync (TETAP ADA)
+  // 2. Logic Update Progress / Sync
   const toggleModuleCompletion = async (materialId: string) => {
     if (!isPremium || !user) return;
 
@@ -269,7 +291,7 @@ export default function Dashboard() {
     else navigate(`/ad-loading?next=${encodeURIComponent(materialId)}`);
   };
 
-  // 3. Logic Certificate (TETAP ADA)
+  // 3. Logic Certificate (THEME: GOLD & EMERALD)
   const generateCertificate = async (langId: string) => {
   if (!user || !isPremium) return;
   setGeneratingCert(true);
@@ -281,122 +303,63 @@ export default function Dashboard() {
     const w = doc.internal.pageSize.getWidth();
     const h = doc.internal.pageSize.getHeight();
 
-    /* ================= MATTE DARK BACKGROUND ================= */
-    doc.setFillColor(14, 18, 32); // deep navy
+    // Background: Deep Emerald Green (Masjid color)
+    doc.setFillColor(6, 78, 59); // emerald-900
     doc.rect(0, 0, w, h, 'F');
 
-    /* ================= SUBTLE RADIAL GLOW ================= */
-    doc.setFillColor(22, 28, 55);
+    // Decorative Circle: Gold
+    doc.setFillColor(217, 119, 6); // amber-600
     doc.circle(w / 2, h / 2, 95, 'F');
 
-    doc.setFillColor(14, 18, 32);
+    // Inner Circle: Darker Green
+    doc.setFillColor(2, 44, 34); // emerald-950
     doc.circle(w / 2, h / 2, 88, 'F');
 
-    /* ================= ASTRAL ORBIT LINES ================= */
-    doc.setDrawColor(180, 190, 210); // platinum
-    doc.setLineWidth(0.4);
+    // Ornaments lines
+    doc.setDrawColor(251, 191, 36); // amber-400
+    doc.setLineWidth(0.5);
     doc.circle(w / 2, h / 2, 84);
-    doc.circle(w / 2, h / 2, 78);
+    
+    // Header
+    doc.setFont('times', 'bold'); // Serif font for elegance
+    doc.setFontSize(30);
+    doc.setTextColor(253, 230, 138); // amber-200
+    doc.text('CERTIFICATE OF COMPLETION', w / 2, 46, { align: 'center' });
 
-    /* ================= MICRO STARS ================= */
-    doc.setFillColor(200, 205, 220);
-    for (let i = 0; i < 14; i++) {
-      doc.circle(
-        Math.random() * (w - 60) + 30,
-        Math.random() * (h - 60) + 30,
-        0.35,
-        'F'
-      );
-    }
-
-    /* ================= BORDER ================= */
-    doc.setDrawColor(180, 190, 210);
-    doc.setLineWidth(1);
-    doc.roundedRect(18, 18, w - 36, h - 36, 12, 12);
-
-    /* ================= HEADER ================= */
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(26);
-    doc.setTextColor(235, 238, 245);
-    doc.text('CERTIFICATE OF COMPLETION', w / 2, 46, {
-      align: 'center'
-    });
-
-    /* ================= BRAND ================= */
-    doc.setFontSize(13);
+    doc.setFontSize(14);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(170, 175, 190);
-    doc.text('Issued by PT. Astral Byte Technology', w / 2, 62, {
-      align: 'center'
-    });
+    doc.setTextColor(167, 243, 208); // emerald-200
+    doc.text('Ramadhan Coding Bootcamp by AstByte', w / 2, 60, { align: 'center' });
 
-    /* ================= NAME ================= */
-    doc.setFontSize(38);
-    doc.setFont('helvetica', 'bold');
+    // Name
+    doc.setFontSize(42);
+    doc.setFont('times', 'bold');
     doc.setTextColor(255, 255, 255);
-    doc.text(user.full_name || 'Participant Name', w / 2, h / 2 - 6, {
-      align: 'center'
-    });
+    doc.text(user.full_name || 'Peserta Ramadhan', w / 2, h / 2 - 5, { align: 'center' });
 
-    doc.setDrawColor(180, 190, 210);
-    doc.setLineWidth(0.6);
-    doc.line(w / 2 - 62, h / 2 + 2, w / 2 + 62, h / 2 + 2);
+    // Divider
+    doc.setDrawColor(251, 191, 36);
+    doc.line(w / 2 - 70, h / 2 + 5, w / 2 + 70, h / 2 + 5);
 
-    /* ================= PROGRAM ================= */
-    doc.setFontSize(17);
+    // Context
+    doc.setFontSize(16);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(190, 195, 210);
-    doc.text('has successfully completed the', w / 2, h / 2 + 26, {
-      align: 'center'
-    });
+    doc.setTextColor(209, 250, 229);
+    doc.text('Telah menyelesaikan program pembelajaran', w / 2, h / 2 + 25, { align: 'center' });
 
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(19);
-    doc.setTextColor(220, 225, 235);
-    doc.text(`${langId.toUpperCase()} Certification Program`, w / 2, h / 2 + 42, {
-      align: 'center'
-    });
+    doc.setFontSize(22);
+    doc.setFont('times', 'bold');
+    doc.setTextColor(252, 211, 77); // amber-300
+    doc.text(`${langId.toUpperCase()}`, w / 2, h / 2 + 40, { align: 'center' });
 
-    /* ================= DATE ================= */
-    const date = new Date().toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-
-    doc.setFontSize(13);
+    // Footer
+    const date = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    doc.setFontSize(12);
     doc.setFont('helvetica', 'italic');
-    doc.setTextColor(160, 165, 185);
-    doc.text(`Issued on ${date}`, w / 2, h / 2 + 62, {
-      align: 'center'
-    });
+    doc.setTextColor(167, 243, 208);
+    doc.text(`Padang, ${date}`, w / 2, h - 30, { align: 'center' });
 
-    /* ================= SIGNATURE ================= */
-    doc.setDrawColor(180, 190, 210);
-    doc.line(w - 100, h - 52, w - 40, h - 52);
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(13);
-    doc.setTextColor(235, 238, 245);
-    doc.text('Zaki Mushthafa Billah', w - 70, h - 44, {
-      align: 'center'
-    });
-
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Founder & CEO — ASTBYTE', w - 70, h - 36, {
-      align: 'center'
-    });
-
-    /* ================= FOOTER ================= */
-    doc.setFontSize(10);
-    doc.setTextColor(140, 145, 165);
-    doc.text('ASTBYTE • Luxury Astral Digital Certificate', 24, h - 22);
-
-    doc.save(
-      `Luxury_Astral_Certificate_${langId}_${(user.full_name || 'Participant')
-        .replace(/\s+/g, '_')}.pdf`
-    );
+    doc.save(`Sertifikat_Ramadhan_${langId}.pdf`);
   } catch (err) {
     console.error(err);
     alert('Gagal generate sertifikat');
@@ -405,7 +368,7 @@ export default function Dashboard() {
   }
 };
 
-  // 4. Logic Fetch Materials (TETAP ADA)
+  // 4. Logic Fetch Materials
   useEffect(() => {
     if (!user) return;
     setLoading(true);
@@ -431,16 +394,12 @@ export default function Dashboard() {
     return () => clearTimeout(timer);
   }, [user, selectedLanguage, searchText, userType]);
 
-  // Logic Filtering untuk Tampilan Grid
+  // Filtering Logic
   const filteredLanguages = useMemo(() => {
     return languageData.filter(lang => {
-      // Filter by Search
       const matchSearch = lang.name.toString().toLowerCase().includes(searchText.toLowerCase()) || 
                           lang.description.toLowerCase().includes(searchText.toLowerCase());
-      
-      // Filter by Tab
       const matchTab = activeTab === 'all' || lang.category.includes(activeTab);
-
       return matchSearch && matchTab;
     });
   }, [searchText, activeTab]);
@@ -465,16 +424,19 @@ export default function Dashboard() {
   // --- RENDER ---
 
   if (authLoading) return (
-    <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center gap-4">
-      <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+    <div className="min-h-screen bg-[#022c22] flex flex-col items-center justify-center gap-4">
+      <div className="w-20 h-20 border-4 border-amber-500 border-t-emerald-800 rounded-full animate-spin flex items-center justify-center">
+         <Moon className="w-8 h-8 text-amber-400 animate-pulse" />
+      </div>
     </div>
   );
 
   if (!user) return (
-    <div className="min-h-screen bg-[#0F172A] flex items-center justify-center p-6">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-white mb-4">Sesi Berakhir</h1>
-        <Link to="/login" className="text-blue-500 hover:underline">Masuk Kembali</Link>
+    <div className="min-h-screen bg-[#022c22] flex items-center justify-center p-6 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')]">
+      <div className="text-center p-8 bg-[#064e3b]/80 backdrop-blur-md rounded-3xl border border-amber-500/30">
+        <h1 className="text-3xl font-serif font-bold text-amber-100 mb-4">Sesi Imsak (Berakhir)</h1>
+        <p className="text-emerald-200 mb-6">Silakan login kembali untuk melanjutkan ibadah koding.</p>
+        <Link to="/login" className="px-6 py-2 bg-amber-500 text-amber-950 font-bold rounded-xl hover:bg-amber-400 transition-colors">Masuk Kembali</Link>
       </div>
     </div>
   );
@@ -482,127 +444,106 @@ export default function Dashboard() {
   if (showProfile) return <ProfilePage onBack={() => setShowProfile(false)} />;
 
   return (
-    <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans selection:bg-blue-500/30">
+    // ROOT BG: Dark Emerald + Islamic Pattern Overlay
+    <div className="min-h-screen bg-[#022c22] text-slate-100 font-sans relative overflow-x-hidden">
       
-      {/* Background Decor */}
-      <div className="fixed top-0 left-0 w-full h-96 bg-gradient-to-b from-blue-900/20 to-transparent -z-10 pointer-events-none" />
+      {/* --- DECORATIVE BACKGROUNDS --- */}
+      {/* Pattern Overlay (Subtle) */}
+      <div className="fixed inset-0 opacity-10 pointer-events-none z-0" 
+           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d97706' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }}>
+      </div>
+      
+      {/* Gradient Glows */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-[#065f46]/40 to-transparent -z-10" />
+      
+      {/* HANGING LANTERNS (DECORATION) */}
+      <HangingLantern left="left-[10%]" height="h-32" delay="0s" />
+      <HangingLantern left="left-[85%]" height="h-24" delay="1s" />
+      <HangingLantern left="left-[15%]" height="h-16" delay="2s" />
+      <HangingLantern left="left-[90%]" height="h-40" delay="0.5s" />
 
-      {/* NAVBAR: Dark & Glassy */}
-      <nav className="sticky top-0 z-50 border-b border-slate-800 bg-[#0F172A]/80 backdrop-blur-xl">
+      {/* NAVBAR */}
+      <nav className="sticky top-0 z-50 border-b border-amber-500/20 bg-[#022c22]/80 backdrop-blur-xl supports-[backdrop-filter]:bg-[#022c22]/60">
         <div className="container mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20 group-hover:rotate-6 transition-transform">
-                <Zap className="text-white w-5 h-5 fill-current" />
+              {/* Logo: Moon & Star */}
+              <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.4)] group-hover:rotate-12 transition-transform">
+                <Moon className="text-[#022c22] w-6 h-6 fill-current" />
               </div>
               <div className="leading-tight">
-                <h1 className="text-xl font-black text-white tracking-tight">Coreline</h1>
-                <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">By AstByte</p>
+                <h1 className="text-xl font-serif font-black text-amber-50 tracking-wide">NewCoreline</h1>
+                <p className="text-[10px] text-emerald-400 font-bold tracking-widest uppercase">Ramadhan Edition</p>
               </div>
             </Link>
           </div>
 
           <div className="flex items-center gap-4">
             {isSyncing && (
-              <div className="hidden md:flex items-center gap-2 text-xs font-bold text-blue-400 bg-blue-500/10 px-3 py-1.5 rounded-full border border-blue-500/20">
-                <RefreshCw className="w-3 h-3 animate-spin" /> Syncing...
+              <div className="hidden md:flex items-center gap-2 text-xs font-bold text-amber-300 bg-amber-900/30 px-3 py-1.5 rounded-full border border-amber-500/30">
+                <RefreshCw className="w-3 h-3 animate-spin" /> Menyimpan...
               </div>
             )}
 
             <div className="hidden md:block text-right">
-              <div className="text-sm font-bold text-white">{user.full_name}</div>
-              <div className={`text-[10px] font-black uppercase tracking-wider inline-block px-2 py-0.5 rounded ${
-                plan === 'ultra' ? 'bg-violet-500/20 text-violet-400' :
-                plan === 'plus' ? 'bg-purple-500/20 text-purple-400' :
-                plan === 'pro' ? 'bg-amber-500/20 text-amber-400' :
-                'bg-slate-700 text-slate-400'
+              <div className="text-sm font-bold text-emerald-100">{user.full_name}</div>
+              <div className={`text-[10px] font-black uppercase tracking-wider inline-block px-2 py-0.5 rounded border ${
+                plan === 'ultra' ? 'bg-amber-900/40 text-amber-300 border-amber-500/50' :
+                plan === 'plus' ? 'bg-emerald-900/40 text-emerald-300 border-emerald-500/50' :
+                'bg-slate-800 text-slate-400 border-slate-700'
               }`}>
-                {plan} Plan
+                {plan} Jamaah
               </div>
             </div>
 
-            <button onClick={() => setShowProfile(true)} className="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all text-slate-300 hover:text-white">
+            <button onClick={() => setShowProfile(true)} className="p-2.5 bg-[#064e3b] hover:bg-[#065f46] border border-emerald-700 rounded-xl transition-all text-emerald-100">
               <UserIcon className="w-5 h-5" />
             </button>
-            <button onClick={logout} className="p-2.5 bg-red-500/10 hover:bg-red-500/20 rounded-xl transition-all text-red-400 group">
-              <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            <button onClick={logout} className="p-2.5 bg-red-900/20 hover:bg-red-900/40 border border-red-900/30 rounded-xl transition-all text-red-400">
+              <LogOut className="w-5 h-5" />
             </button>
           </div>
         </div>
       </nav>
 
       {/* MAIN CONTENT */}
-      <main className="container mx-auto px-6 py-10">
+      <main className="container mx-auto px-6 py-10 relative z-10">
 
-        {/* =======================================================
-            UPGRADE BANNER SECTION (DYNAMIC)
-           ======================================================= */}
+        {/* UPGRADE BANNER (KETUPAT/BEDUG THEME VIBE) */}
         {plan !== 'ultra' && (
-          <div className="mb-8 animate-fade-in-up">
+          <div className="mb-10 animate-fade-in-up">
             <div className={`relative overflow-hidden rounded-3xl border p-8 shadow-2xl transition-all hover:scale-[1.01] ${
               plan === 'free' 
-                ? 'bg-gradient-to-r from-amber-900/40 via-orange-900/30 to-[#0F172A] border-amber-500/30' 
-                : plan === 'pro'
-                ? 'bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-[#0F172A] border-blue-500/30'
-                : 'bg-gradient-to-r from-violet-900/40 via-fuchsia-900/30 to-[#0F172A] border-violet-500/30'
+                ? 'bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#022c22] border-amber-500/40' 
+                : 'bg-gradient-to-r from-blue-900 via-indigo-900 to-[#022c22] border-blue-500/40'
             }`}>
+              {/* Islamic Star Pattern SVG Background */}
+              <div className="absolute top-0 right-0 w-64 h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')]"></div>
               
-              {/* Background Glows */}
-              <div className={`absolute -top-24 -right-24 w-80 h-80 rounded-full blur-[80px] opacity-40 ${
-                plan === 'free' ? 'bg-amber-500' : 
-                plan === 'pro' ? 'bg-blue-500' : 
-                'bg-violet-500'
-              }`}></div>
-
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                      plan === 'free' 
-                        ? 'bg-amber-500/20 text-amber-400 border-amber-500/40' 
-                        : plan === 'pro'
-                        ? 'bg-blue-500/20 text-blue-400 border-blue-500/40'
-                        : 'bg-violet-500/20 text-violet-400 border-violet-500/40'
-                    }`}>
-                      {plan === 'free' ? 'Unlock Potential' : plan === 'pro' ? 'Go Ultimate' : 'Go Beyond'}
+                    <div className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border bg-amber-500/20 text-amber-300 border-amber-500/40">
+                      {plan === 'free' ? 'Berkah Ramadhan' : 'Tingkatkan Ilmu'}
                     </div>
-                    {plan === 'free' && <div className="text-amber-200 text-xs font-medium animate-pulse">🔥 Limited Offer</div>}
                   </div>
                   
-                  <h2 className="text-3xl font-black text-white mb-2 leading-tight">
-                    {plan === 'free' ? 'Upgrade to PRO Membership' : 
-                     plan === 'pro' ? 'Level Up to PLUS Access' : 
-                     'Become an ULTRA Member'}
+                  <h2 className="text-3xl font-serif font-black text-white mb-2 leading-tight">
+                    {plan === 'free' ? 'Upgrade Paket Bedug PRO' : 'Upgrade Paket Sahur ULTRA'}
                   </h2>
                   
-                  <p className="text-slate-300 max-w-2xl text-sm md:text-base leading-relaxed">
-                    {plan === 'free' 
-                      ? 'Buka akses ke semua materi premium, dapatkan sertifikat kelulusan eksklusif, dan mulai bangun portofolio coding profesional Anda sekarang.' 
-                      : plan === 'pro'
-                      ? 'Dapatkan fitur download materi offline, akses mentoring chat prioritas, dan source code project.'
-                      : 'Nikmati mentoring eksklusif via Video Call, Code Review personal, dan konsultasi karir langsung dengan expert.'
-                    }
+                  <p className="text-emerald-100/80 max-w-2xl text-sm leading-relaxed">
+                    Manfaatkan waktu luang di bulan puasa. Dapatkan akses materi premium, sertifikat eksklusif, dan mentor yang siap membantu 24/7.
                   </p>
                 </div>
 
                 <Link 
                   to="/pricing" 
-                  className={`group relative px-8 py-4 rounded-xl font-bold text-white shadow-xl transition-all transform hover:-translate-y-1 ${
-                    plan === 'free'
-                      ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 shadow-amber-500/20'
-                      : plan === 'pro'
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-500/20'
-                      : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 shadow-violet-500/20'
-                  }`}
+                  className="group relative px-8 py-4 rounded-xl font-bold text-[#022c22] shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all transform hover:-translate-y-1 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400"
                 >
                   <span className="flex items-center gap-3 text-sm uppercase tracking-wider">
-                    {plan === 'free' ? <Crown className="w-5 h-5 fill-current" /> : 
-                     plan === 'pro' ? <Sparkles className="w-5 h-5 fill-current" /> :
-                     <Rocket className="w-5 h-5 fill-current" />}
-                    
-                    {plan === 'free' ? 'Get PRO Access' : 
-                     plan === 'pro' ? 'Get PLUS Access' : 
-                     'Get ULTRA Access'}
+                    <Crown className="w-5 h-5 fill-current" />
+                    Ambil Berkah Sekarang
                   </span>
                 </Link>
               </div>
@@ -611,24 +552,27 @@ export default function Dashboard() {
         )}
 
         
-        {/* HERO SECTION */}
-        <div className="mb-12">
+        {/* HERO HEADER */}
+        <div className="mb-12 text-center md:text-left">
           {!selectedLanguage && (
-            <div className="mb-10 animate-fade-in-up">
-              <h1 className="text-4xl md:text-6xl font-black text-white mb-4 leading-tight">
-                Master the Future <br />
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500">
-                  of Technology.
+            <div className="mb-10 animate-fade-in-up relative">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-900/50 border border-emerald-700/50 text-emerald-300 text-xs font-bold mb-4">
+                <CloudMoon className="w-4 h-4" /> Edisi Spesial Ramadhan 1446 H
+              </div>
+              <h1 className="text-4xl md:text-6xl font-serif font-black text-white mb-4 leading-tight">
+                Ngabuburit Produktif <br />
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 filter drop-shadow-[0_0_10px_rgba(245,158,11,0.3)]">
+                  Jago Coding Sebelum Lebaran.
                 </span>
               </h1>
-              <p className="text-slate-400 text-lg max-w-xl mb-8">
-                Pilih jalur karirmu. Dari Web Development, AI, hingga Mobile Apps. Pelajari skill yang dibutuhkan industri saat ini.
+              <p className="text-emerald-200/70 text-lg max-w-xl mb-8">
+                Pilih jalur belajarmu. Tingkatkan skill teknologi, bangun portofolio, dan raih kemenangan karir di hari yang fitri.
               </p>
 
-              {/* TABS CATEGORY (Fitur Baru) */}
-              <div className="flex flex-wrap gap-2">
+              {/* TABS (PILL SHAPE WITH GOLD ACCENT) */}
+              <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                 {[
-                  { id: 'all', label: 'All Paths', icon: Layout },
+                  { id: 'all', label: 'Semua Jalur', icon: Layout },
                   { id: 'web-dev', label: 'Web Dev', icon: Globe },
                   { id: 'data-science', label: 'AI & Data', icon: Brain },
                   { id: 'backend', label: 'Backend', icon: Terminal },
@@ -637,10 +581,10 @@ export default function Dashboard() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as Category)}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all border ${
                       activeTab === tab.id
-                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25 ring-2 ring-blue-400/50'
-                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
+                        ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)]'
+                        : 'bg-[#064e3b]/50 border-emerald-800 text-emerald-300 hover:bg-[#065f46] hover:text-white'
                     }`}
                   >
                     <tab.icon className="w-4 h-4" />
@@ -651,18 +595,18 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* SEARCH BAR (Visible if filtering or inside module) */}
-          <div className="relative max-w-xl mb-10">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+          {/* SEARCH BAR */}
+          <div className="relative max-w-xl mb-10 mx-auto md:mx-0">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-amber-500" />
             <input
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              placeholder={selectedLanguage ? "Cari modul pelajaran..." : "Cari bahasa atau teknologi..."}
-              className="w-full bg-slate-900/50 border border-slate-700 rounded-2xl py-4 pl-12 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+              placeholder={selectedLanguage ? "Cari materi kuliah..." : "Cari teknologi (Contoh: Laravel, Python)..."}
+              className="w-full bg-[#064e3b]/40 border border-emerald-800/50 rounded-2xl py-4 pl-12 pr-4 text-emerald-100 placeholder:text-emerald-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all backdrop-blur-sm"
             />
           </div>
 
-          {/* GRID TAMPILAN UTAMA (Language/Path Cards) */}
+          {/* GRID TAMPILAN (CARD DESIGN UPDATE) */}
           {!selectedLanguage ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {languageStats.map((lang, idx) => {
@@ -673,108 +617,115 @@ export default function Dashboard() {
                     key={lang.id}
                     disabled={!!lang.comingSoon}
                     onClick={() => !lang.comingSoon && setSelectedLanguage(lang.id)}
-                    className={`group relative overflow-hidden rounded-[2rem] p-1 text-left transition-all duration-300 hover:-translate-y-2 ${
+                    className={`group relative h-full text-left transition-all duration-300 hover:-translate-y-2 ${
                       lang.comingSoon ? 'opacity-60 grayscale cursor-not-allowed' : 'cursor-pointer'
                     }`}
                   >
-                    {/* Card Border Gradient & Body */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-800 rounded-[2rem]"></div>
-                    <div className="relative h-full bg-[#0F172A] hover:bg-slate-900 rounded-[1.9rem] p-6 border border-slate-800 group-hover:border-slate-600 transition-colors flex flex-col">
+                    {/* Card Container with Dome-like top border radius */}
+                    <div className="relative h-full bg-gradient-to-b from-[#065f46] to-[#022c22] rounded-t-[2rem] rounded-b-2xl p-[1px] shadow-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+                      {/* Inner Border Gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/20 to-transparent rounded-t-[2rem] rounded-b-2xl pointer-events-none"></div>
                       
-                      {/* Badge if exists */}
-                      {lang.badge && !lang.comingSoon && (
-                        <div className="absolute top-4 right-4 bg-blue-500/10 text-blue-400 text-[10px] font-black px-2 py-1 rounded uppercase tracking-wider border border-blue-500/20">
-                          {lang.badge}
-                        </div>
-                      )}
-                      
-                      {/* Icon */}
-                      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${lang.gradient} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
-                        {lang.iconUrl ? (
-                          <img src={lang.iconUrl} alt={typeof lang.name === 'string' ? lang.name : 'Lang'} className="w-8 h-8 object-contain" />
-                        ) : (
-                          <lang.icon className="w-8 h-8 text-white" />
+                      {/* Card Content */}
+                      <div className="relative h-full bg-[#022c22] rounded-t-[1.9rem] rounded-b-[0.9rem] p-6 flex flex-col border border-emerald-800/50 group-hover:border-amber-500/50 transition-colors">
+                        
+                        {/* Badge */}
+                        {lang.badge && !lang.comingSoon && (
+                          <div className="absolute top-4 right-4 bg-amber-500/20 text-amber-300 text-[10px] font-black px-2 py-1 rounded border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+                            {lang.badge}
+                          </div>
                         )}
-                      </div>
-
-                      {/* Content */}
-                      <div className="mb-4 flex-1">
-                        <h3 className="text-xl font-black text-white mb-1 group-hover:text-blue-400 transition-colors">
-                          {lang.name}
-                        </h3>
-                        <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                          {lang.description}
-                        </p>
-                      </div>
-
-                      {/* Footer / Progress */}
-                      {lang.comingSoon ? (
-                        <div className="mt-auto pt-4 border-t border-slate-800">
-                          <span className="flex items-center gap-2 text-xs font-bold text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-lg w-fit">
-                            <Clock className="w-3 h-3" /> Coming Soon
-                          </span>
-                        </div>
-                      ) : showProgress ? (
-                        <div className="mt-auto">
-                          <div className="flex justify-between text-xs font-bold text-slate-400 mb-2">
-                            <span>{lang.completed}/{lang.total} Module</span>
-                            <span className={lang.isComplete ? 'text-green-400' : 'text-blue-400'}>{lang.progress}%</span>
-                          </div>
-                          <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full rounded-full transition-all duration-500 bg-gradient-to-r ${lang.gradient}`}
-                              style={{ width: `${lang.progress}%` }}
-                            ></div>
-                          </div>
-                          {lang.isComplete && (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); generateCertificate(lang.id); }}
-                              disabled={generatingCert}
-                              className="mt-4 w-full py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg border border-slate-700 flex items-center justify-center gap-2 transition-all"
-                            >
-                              {generatingCert ? <Loader2 className="w-3 h-3 animate-spin"/> : <Award className="w-3 h-3"/>}
-                              Get Certificate
-                            </button>
+                        
+                        {/* Icon Container (Glowing) */}
+                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${lang.gradient} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
+                          {lang.iconUrl ? (
+                            <img src={lang.iconUrl} alt="icon" className="w-8 h-8 object-contain drop-shadow-md" />
+                          ) : (
+                            <lang.icon className="w-8 h-8 text-white drop-shadow-md" />
                           )}
                         </div>
-                      ) : (
-                        <div className="mt-auto flex items-center text-sm font-bold text-slate-600 group-hover:text-white transition-colors">
-                          Start Path <ChevronRight className="w-4 h-4 ml-1" />
+
+                        {/* Texts */}
+                        <div className="mb-4 flex-1">
+                          <h3 className="text-xl font-serif font-bold text-white mb-1 group-hover:text-amber-400 transition-colors">
+                            {lang.name}
+                          </h3>
+                          <p className="text-sm text-emerald-200/60 font-medium leading-relaxed">
+                            {lang.description}
+                          </p>
                         </div>
-                      )}
+
+                        {/* Footer */}
+                        {lang.comingSoon ? (
+                          <div className="mt-auto pt-4 border-t border-emerald-900">
+                            <span className="flex items-center gap-2 text-xs font-bold text-amber-500/80 bg-amber-900/10 px-3 py-1.5 rounded-lg w-fit">
+                              <Clock className="w-3 h-3" /> Segera Hadir
+                            </span>
+                          </div>
+                        ) : showProgress ? (
+                          <div className="mt-auto">
+                            <div className="flex justify-between text-xs font-bold text-emerald-400 mb-2">
+                              <span>{lang.completed}/{lang.total} Modul</span>
+                              <span className={lang.isComplete ? 'text-amber-400' : 'text-emerald-400'}>{lang.progress}%</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-emerald-900 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full rounded-full transition-all duration-500 bg-gradient-to-r ${lang.gradient}`}
+                                style={{ width: `${lang.progress}%` }}
+                              ></div>
+                            </div>
+                            {lang.isComplete && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); generateCertificate(lang.id); }}
+                                disabled={generatingCert}
+                                className="mt-4 w-full py-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white text-xs font-bold rounded-lg border border-amber-500/50 flex items-center justify-center gap-2 transition-all shadow-lg"
+                              >
+                                {generatingCert ? <Loader2 className="w-3 h-3 animate-spin"/> : <Award className="w-3 h-3"/>}
+                                Unduh Sertifikat
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="mt-auto flex items-center text-sm font-bold text-emerald-500 group-hover:text-amber-400 transition-colors">
+                            Mulai Tadarus Kode <ChevronRight className="w-4 h-4 ml-1" />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </button>
                 );
               })}
             </div>
           ) : (
-            /* MODULE LIST VIEW (Detail) */
+            /* MODULE LIST VIEW */
             <div className="max-w-4xl mx-auto animate-fade-in-up">
               <button
                 onClick={() => setSelectedLanguage(null)}
-                className="group flex items-center gap-2 text-slate-400 hover:text-white mb-8 font-bold text-sm transition-colors"
+                className="group flex items-center gap-2 text-emerald-400 hover:text-amber-400 mb-8 font-bold text-sm transition-colors"
               >
-                <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                <div className="w-8 h-8 rounded-full bg-emerald-900/50 flex items-center justify-center group-hover:bg-amber-500/20 transition-colors border border-emerald-800">
                   <ChevronRight className="w-4 h-4 rotate-180" />
                 </div>
-                Back to Paths
+                Kembali ke Halaman Utama
               </button>
 
-              <div className="flex items-center gap-6 mb-10">
-                <div className={`w-20 h-20 rounded-3xl bg-gradient-to-br ${languageStats.find(l => l.id === selectedLanguage)?.gradient} flex items-center justify-center shadow-2xl`}>
+              <div className="flex items-center gap-6 mb-10 p-6 bg-gradient-to-r from-[#064e3b] to-transparent rounded-3xl border border-emerald-800/50 relative overflow-hidden">
+                <div className="absolute right-0 top-0 h-full w-32 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] opacity-10"></div>
+                
+                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${languageStats.find(l => l.id === selectedLanguage)?.gradient} flex items-center justify-center shadow-2xl z-10`}>
                   <img src={languageStats.find(l => l.id === selectedLanguage)?.iconUrl} className="w-10 h-10 object-contain" alt="Icon" />
                 </div>
-                <div>
-                  <h2 className="text-3xl md:text-4xl font-black text-white mb-2">
+                <div className="z-10">
+                  <h2 className="text-3xl md:text-4xl font-serif font-black text-white mb-2">
                     {languageStats.find(l => l.id === selectedLanguage)?.name}
                   </h2>
-                  <div className="flex items-center gap-3 text-slate-400 text-sm font-medium">
-                    <span className="bg-slate-800 px-3 py-1 rounded-lg text-white">
-                      {materials.length} Modules
+                  <div className="flex items-center gap-3 text-emerald-200 text-sm font-medium">
+                    <span className="bg-emerald-900/50 px-3 py-1 rounded-lg border border-emerald-700">
+                      {materials.length} Modul
                     </span>
                     <span>•</span>
-                    <span className="text-blue-400">
-                      {languageStats.find(l => l.id === selectedLanguage)?.progress}% Completed
+                    <span className="text-amber-400">
+                      {languageStats.find(l => l.id === selectedLanguage)?.progress}% Selesai
                     </span>
                   </div>
                 </div>
@@ -789,36 +740,35 @@ export default function Dashboard() {
                   return (
                     <div
                       key={m.id}
-                      className={`group relative bg-slate-900 border border-slate-800 hover:border-blue-500/50 rounded-2xl p-6 transition-all duration-300 ${locked ? 'opacity-60' : 'hover:bg-slate-800/50 hover:shadow-lg hover:shadow-blue-900/10'}`}
+                      className={`group relative bg-[#022c22] border border-emerald-800/40 hover:border-amber-500/50 rounded-2xl p-6 transition-all duration-300 ${locked ? 'opacity-60' : 'hover:bg-[#064e3b]/30 hover:shadow-lg hover:shadow-amber-500/5'}`}
                       style={{ animationDelay: `${idx * 50}ms` }}
                     >
                       <div className="flex gap-5 items-start">
-                        {/* Number / Status Icon */}
+                        {/* Status Icon */}
                         <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-lg font-black transition-colors ${
-                          isCompleted ? 'bg-green-500/20 text-green-400' :
-                          locked ? 'bg-slate-800 text-slate-500' :
-                          'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                          isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                          locked ? 'bg-slate-900 text-slate-600 border border-slate-800' :
+                          'bg-gradient-to-br from-amber-500 to-yellow-600 text-[#022c22] shadow-[0_0_10px_rgba(245,158,11,0.3)]'
                         }`}>
-                          {isCompleted ? <CheckCircle className="w-6 h-6" /> : locked ? <Lock className="w-5 h-5" /> : m.order}
+                          {isCompleted ? <CheckCircle className="w-6 h-6" /> : locked ? <Lock className="w-5 h-5" /> : <BookOpen className="w-5 h-5" />}
                         </div>
 
                         <div className="flex-1">
                           <div className="flex justify-between items-start mb-2">
-                            <h3 className={`text-lg font-bold ${locked ? 'text-slate-500' : 'text-white group-hover:text-blue-400 transition-colors'}`}>
+                            <h3 className={`text-lg font-bold font-serif ${locked ? 'text-slate-500' : 'text-emerald-50 group-hover:text-amber-400 transition-colors'}`}>
                               {m.title}
                             </h3>
-                            {/* Action Buttons (Mark Done / PDF) */}
                             {isPremium && !locked && (
                               <div className="flex gap-2">
                                 <button
                                   onClick={(e) => { e.stopPropagation(); toggleModuleCompletion(m.id); }}
-                                  className={`p-2 rounded-lg transition-all ${isCompleted ? 'bg-green-500/10 text-green-400' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
-                                  title={isCompleted ? "Mark Undone" : "Mark Done"}
+                                  className={`p-2 rounded-lg transition-all ${isCompleted ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-900/50 text-emerald-400 hover:bg-emerald-800 hover:text-amber-400'}`}
+                                  title="Tandai Selesai"
                                 >
                                   <CheckCircle className="w-4 h-4" />
                                 </button>
                                 {plan === 'plus' && (
-                                  <button className="p-2 rounded-lg bg-slate-800 text-purple-400 hover:bg-purple-500/20 transition-all">
+                                  <button className="p-2 rounded-lg bg-emerald-900/50 text-purple-400 hover:bg-purple-900/30 transition-all">
                                     <Download className="w-4 h-4" />
                                   </button>
                                 )}
@@ -826,18 +776,18 @@ export default function Dashboard() {
                             )}
                           </div>
                           
-                          <p className="text-slate-500 text-sm mb-4 line-clamp-2">{m.description}</p>
+                          <p className="text-emerald-200/50 text-sm mb-4 line-clamp-2">{m.description}</p>
                           
                           <button
                             onClick={() => !locked && handleStartModule(m.id)}
                             disabled={locked}
                             className={`px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${
-                              locked ? 'bg-slate-800 text-slate-500 cursor-not-allowed' :
-                              isCompleted ? 'bg-slate-800 text-white hover:bg-slate-700' :
-                              'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-lg hover:shadow-blue-600/25'
+                              locked ? 'bg-slate-900 text-slate-600 cursor-not-allowed' :
+                              isCompleted ? 'bg-emerald-900 text-emerald-200 hover:bg-emerald-800' :
+                              'bg-gradient-to-r from-amber-600 to-yellow-600 text-[#022c22] hover:shadow-[0_0_15px_rgba(245,158,11,0.3)]'
                             }`}
                           >
-                            {locked ? 'Locked' : isCompleted ? 'Review Material' : 'Start Learning'}
+                            {locked ? 'Terkunci' : isCompleted ? 'Ulangi Materi' : 'Mulai Belajar'}
                             {!locked && <ChevronRight className="w-4 h-4" />}
                           </button>
                         </div>
@@ -852,6 +802,8 @@ export default function Dashboard() {
       </main>
 
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&display=swap');
+        .font-serif { font-family: 'Playfair Display', serif; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in-up { animation: fadeInUp 0.4s ease-out forwards; }
       `}</style>

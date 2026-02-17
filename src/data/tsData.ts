@@ -1,68 +1,63 @@
 import type { LearningMaterial } from '../types/learning';
 
 export const MOCK_MATERIALS: LearningMaterial[] = [
-  // ==================== TYPESCRIPT MATERIALS ====================
+  // ==================== LEVEL 1: BEGINNER (DASAR) ====================
   {
     id: 'ts-01',
     user_type: 'student',
     language: 'typescript',
-    title: 'Pengenalan TypeScript: Why & Setup',
-    description: 'Apa itu Superset JS, Static Typing, dan konfigurasi tsconfig.json.',
+    title: '1. Pengenalan: Hello World & Setup',
+    description: 'Instalasi, konfigurasi tsconfig.json, dan eksekusi kode pertama.',
     content: `# 📘 Pengenalan TypeScript
 
 ## Apa itu TypeScript?
-TypeScript (TS) adalah *superset* dari JavaScript. Artinya, semua kode JS yang valid adalah kode TS yang valid.
-Bedanya: **TypeScript menambahkan Static Typing**.
+TypeScript (TS) adalah *superset* dari JavaScript. Artinya, TS adalah JavaScript + **Type System**.
+Browser tidak mengerti TS, jadi kita butuh **Compiler** (\`tsc\`) untuk mengubah (compile) TS menjadi JavaScript biasa.
 
-**Masalah di JavaScript:**
-\`\`\`javascript
-function tambah(a, b) {
-  return a + b;
-}
-tambah("10", 5); // Hasil: "105" (String concat, padahal maunya matematika)
-// Error baru ketahuan saat aplikasi dijalankan (Runtime).
-\`\`\`
-
-**Solusi TypeScript:**
-\`\`\`typescript
-function tambah(a: number, b: number): number {
-  return a + b;
-}
-tambah("10", 5); // ❌ Error langsung muncul di editor (Compile time).
-\`\`\`
-
----
-
-## 🛠️ Instalasi & Setup
-TypeScript butuh "Compiler" (\`tsc\`) untuk mengubah kode \`.ts\` menjadi \`.js\` agar bisa dibaca browser.
-
-1.  **Install:**
+## 🚀 Tutorial: Setup Pertama Kali
+1.  **Install TypeScript Global:**
     \`\`\`bash
     npm install -g typescript ts-node
     \`\`\`
-2.  **Inisialisasi Project:**
+    *(ts-node berguna untuk menjalankan file .ts langsung di terminal tanpa compile manual)*
+
+2.  **Buat Folder Project:**
     \`\`\`bash
+    mkdir belajar-ts
+    cd belajar-ts
     tsc --init
     \`\`\`
-    Ini akan membuat file \`tsconfig.json\`.
+    Perintah ini membuat file \`tsconfig.json\`.
+
+3.  **Coding Pertama (index.ts):**
+    Buat file \`index.ts\` dan ketik:
+    \`\`\`typescript
+    let pesan: string = "Hello World TypeScript";
+    console.log(pesan);
+    \`\`\`
+
+4.  **Jalankan:**
+    \`\`\`bash
+    ts-node index.ts
+    \`\`\`
 
 ## ⚙️ tsconfig.json Penting
-File konfigurasi untuk mengatur aturan main TS.
+Pastikan setting ini aktif di \`tsconfig.json\` untuk standar modern:
 \`\`\`json
 {
   "compilerOptions": {
-    "target": "es2016",       // Versi JS output
-    "module": "commonjs",     // Sistem modul (Node.js)
+    "target": "es2018",       // Versi JS output
+    "module": "commonjs",     // Sistem modul
     "strict": true,           // Wajib! Mode ketat (no implicit any)
-    "outDir": "./dist",       // Folder output .js
-    "rootDir": "./src"        // Folder sumber .ts
+    "rootDir": "./src",       // Tempat file .ts
+    "outDir": "./dist"        // Tempat hasil compile .js
   }
 }
 \`\`\`
 
-## 🎯 Outcome Modul
-- Mengerti beda *Static Typing* (TS) vs *Dynamic Typing* (JS).
-- Bisa setup environment TypeScript dasar.
+## 🎯 Outcome
+- Berhasil menjalankan file TypeScript pertama.
+- Memahami alur kerja TS -> JS.
 `,
     level: 'beginner',
     order: 1,
@@ -72,53 +67,48 @@ File konfigurasi untuk mengatur aturan main TS.
     id: 'ts-02',
     user_type: 'student',
     language: 'typescript',
-    title: 'Basic Types & Type Inference',
-    description: 'Primitive types, Array, Tuple, Any, dan Type Inference.',
+    title: '2. Basic Types & Primitives',
+    description: 'Tipe data primitif, Array, Tuple, dan bahaya tipe Any.',
     content: `# Tipe Data Dasar
 
-## 1. Primitives
-Tipe data standar JavaScript, tapi dideklarasikan secara eksplisit.
+Di TS, kita mendefinisikan tipe variabel secara eksplisit (atau membiarkan TS menebaknya/Inference).
 
+## 1. Primitives
 \`\`\`typescript
 let username: string = "Dino";
 let age: number = 25;
-let isActive: boolean = true;
-let anything: any = "Bahaya"; // Hindari 'any' sebisa mungkin!
+let isStudent: boolean = true;
+
+// Bahaya! Jangan sering pakai 'any'.
+// 'any' mematikan fitur pengecekan TS.
+let randomData: any = "Bisa string";
+randomData = 100; // Tidak error, tapi berbahaya
 \`\`\`
 
 ## 2. Array & Tuple
 \`\`\`typescript
-// Array biasa
-let hobbies: string[] = ["Coding", "Gaming"];
-let scores: Array<number> = [90, 85, 88];
+// Array
+let skills: string[] = ["JS", "TS", "React"];
+let grades: Array<number> = [90, 85, 88];
 
-// Tuple (Array dengan panjang dan tipe urutan tetap)
-// Cocok untuk koordinat atau format data csv sederhana
-let role: [number, string] = [1, "Admin"];
-// role[0] harus number, role[1] harus string
+// Tuple: Array dengan panjang & tipe urutan tetap
+// Cocok untuk format data ketat seperti CSV row atau koordinat
+let userRole: [number, string] = [1, "Admin"];
+// userRole[0] = "Admin"; // ❌ Error: Index 0 harus number
 \`\`\`
 
-## 3. Type Inference (Penebakan Otomatis)
-TS cukup pintar. Anda tidak harus selalu menulis tipe data jika nilainya sudah jelas.
-
-\`\`\`typescript
-let kampus = "Universitas Indonesia"; 
-// TS otomatis tahu 'kampus' itu string.
-// kampus = 100; // ❌ Error: Type 'number' is not assignable to type 'string'.
-\`\`\`
-
-## 4. Union Types (Si "Atau")
+## 3. Union Types (Si "Atau")
 Variabel yang bisa menerima lebih dari satu tipe.
-
 \`\`\`typescript
 let id: string | number;
-id = 101;   // OK
-id = "A-1"; // OK
+id = 101;     // OK
+id = "U-101"; // OK
+// id = true; // ❌ Error
 \`\`\`
 
-## 🎯 Outcome Modul
-- Terbiasa menulis tipe data eksplisit.
-- Memahami kapan menggunakan Tuple dan Union.
+## 🎯 Outcome
+- Bisa mendeklarasikan variabel dengan tipe yang aman.
+- Tahu kapan menggunakan Tuple vs Array biasa.
 `,
     level: 'beginner',
     order: 2,
@@ -128,21 +118,21 @@ id = "A-1"; // OK
     id: 'ts-03',
     user_type: 'student',
     language: 'typescript',
-    title: 'Object Shape: Interface vs Type Alias',
+    title: '3. Object Shape: Interface vs Type',
     description: 'Mendefinisikan bentuk objek, Optional properties, dan Readonly.',
-    content: `# Interface vs Type
+    content: `# Interface vs Type Alias
 
-Cara mendefinisikan "bentuk" (shape) dari sebuah object. Ini fitur yang paling sering dipakai.
+Bagaimana cara kita memberi tipe pada sebuah Object?
 
 ## 1. Interface
-Biasanya digunakan untuk mendefinisikan struktur Object atau Class. Bisa di-*extend*.
+Biasanya digunakan untuk model data (Entity). Bisa diperluas (extend).
 
 \`\`\`typescript
 interface User {
   id: number;
   name: string;
-  email?: string;      // Optional (boleh ada, boleh tidak)
-  readonly role: string; // Tidak bisa diubah setelah dibuat
+  email?: string;      // Tanda '?' artinya Optional (boleh kosong)
+  readonly role: string; // 'readonly' = tidak bisa diedit setelah dibuat
 }
 
 const u1: User = {
@@ -155,73 +145,72 @@ const u1: User = {
 \`\`\`
 
 ## 2. Type Alias
-Lebih fleksibel. Bisa untuk object, union, atau primitive.
+Lebih fleksibel. Bisa untuk object, tapi juga bisa untuk Union atau Primitive custom.
 
 \`\`\`typescript
-// Object Type
-type Point = {
-  x: number;
-  y: number;
-};
-
-// Union Type (Hanya bisa pakai 'type', tidak bisa 'interface')
+// Custom Type untuk status
 type Status = "Success" | "Pending" | "Failed"; // Literal Type
 
-let currentStatus: Status = "Pending";
-// currentStatus = "Error"; // ❌ Error: Type '"Error"' is not assignable to type 'Status'.
+let appStatus: Status = "Pending";
+// appStatus = "Error"; // ❌ Error: Hanya boleh 3 kata di atas
 \`\`\`
 
 ## Kapan pakai yang mana?
-- Gunakan **Interface** untuk mendefinisikan objek/API response (karena fitur *extends* lebih rapi).
-- Gunakan **Type** untuk Union, Tuple, atau fungsi kompleks.
+- **Interface:** Untuk Objek, Class, atau Response API.
+- **Type:** Untuk Union, Tuple, atau fungsi yang kompleks.
 
-## 🎯 Outcome Modul
-- Bisa membuat kontrak data (contract) menggunakan Interface.
-- Mengerti konsep *Optional chaining* (\`?\`) dan *Readonly*.
+## 🎯 Outcome
+- Bisa membuat kontrak data (Schema) yang rapi.
+- Memahami Optional Property (\`?\`).
 `,
-    level: 'intermediate',
+    level: 'beginner',
     order: 3,
     created_at: '2025-01-01T00:00:00Z'
   },
+
+  // ==================== LEVEL 2: INTERMEDIATE (MENENGAH) ====================
   {
     id: 'ts-04',
     user_type: 'student',
     language: 'typescript',
-    title: 'Functions & Narrowing',
-    description: 'Typing arguments, return types, void, dan Type Guards.',
+    title: '4. Functions & Narrowing',
+    description: 'Typing arguments, return types, dan teknik Narrowing.',
     content: `# Fungsi & Validasi Tipe
 
 ## 1. Typing Function
+Format: \`(param: tipe): tipe_return\`
+
 \`\`\`typescript
-// (a: tipe, b: tipe): tipe_return
 const multiply = (a: number, b: number): number => {
   return a * b;
 };
 
-// Void: Fungsi yang tidak mengembalikan nilai
-function logPesan(pesan: string): void {
-  console.log(pesan);
+// Void: Fungsi yang tidak mengembalikan nilai (hanya aksi)
+function logError(pesan: string): void {
+  console.error(pesan);
 }
 \`\`\`
 
 ## 2. Narrowing (Penyempitan Tipe)
-Saat menggunakan Union Type (\`string | number\`), kita harus cek tipe datanya dulu sebelum melakukan operasi spesifik.
+Saat menggunakan Union Type (\`string | number\`), TS butuh kepastian tipe apa yang sedang diproses.
 
 \`\`\`typescript
 function printId(id: string | number) {
+  // id.toUpperCase(); // ❌ Error: number tidak punya toUpperCase
+
   if (typeof id === "string") {
-    // Di dalam blok ini, TS tahu id adalah STRING
-    console.log("ID Huruf Besar:", id.toUpperCase());
+    // Di dalam blok ini, TS tahu id 100% STRING
+    console.log("ID String:", id.toUpperCase());
   } else {
     // Di sini, TS tahu id pasti NUMBER
-    console.log("ID Angka:", id.toFixed(2));
+    console.log("ID Number:", id.toFixed(2));
   }
 }
 \`\`\`
 
-## 🎯 Outcome Modul
-- Mencegah bug umum seperti \`undefined\` pada argumen fungsi.
-- Memahami konsep *Type Guard* (\`typeof\`, \`instanceof\`).
+## 🎯 Outcome
+- Mencegah bug *undefined* atau salah operasi pada fungsi.
+- Memahami konsep *Type Guard* (\`typeof\`).
 `,
     level: 'intermediate',
     order: 4,
@@ -231,19 +220,89 @@ function printId(id: string | number) {
     id: 'ts-05',
     user_type: 'student',
     language: 'typescript',
-    title: 'Generics: Reusable Code',
-    description: 'Konsep Generics <T>, Generic Functions, dan Generic Interfaces.',
+    title: '5. Classes & OOP Modern',
+    description: 'Class, Access Modifiers (Public/Private), dan Abstract Class.',
+    content: `# Object Oriented Programming (OOP) di TS
+
+TypeScript mengubah cara kita menulis Class di JS menjadi lebih mirip Java/C#.
+
+## 1. Access Modifiers
+Mengatur siapa yang boleh mengakses properti.
+
+\`\`\`typescript
+class BankAccount {
+  public owner: string;       // Bisa diakses siapa saja
+  private _balance: number;   // HANYA bisa diakses di dalam class ini
+  protected type: string;     // Bisa diakses class ini & turunannya (anak)
+
+  constructor(owner: string, balance: number) {
+    this.owner = owner;
+    this._balance = balance;
+    this.type = "Savings";
+  }
+
+  deposit(amount: number) {
+    this._balance += amount;
+  }
+
+  getBalance() {
+    return this._balance;
+  }
+}
+
+const myAccount = new BankAccount("Dino", 1000);
+myAccount.deposit(500);
+// console.log(myAccount._balance); // ❌ Error: Property '_balance' is private.
+\`\`\`
+
+## 2. Abstract Class
+Sebuah "cetakan dasar" yang tidak bisa dibuat objeknya langsung, tapi harus di-extend oleh class lain.
+
+\`\`\`typescript
+abstract class Hewan {
+  constructor(public nama: string) {}
+  
+  // Method ini WAJIB di-implementasikan oleh anak class
+  abstract bersuara(): void; 
+  
+  bernapas() {
+    console.log("Sedang bernapas...");
+  }
+}
+
+class Kucing extends Hewan {
+  bersuara() {
+    console.log("Meow!");
+  }
+}
+
+// const h = new Hewan("A"); // ❌ Error: Cannot create instance of abstract class
+\`\`\`
+
+## 🎯 Outcome
+- Siap menggunakan Framework OOP seperti NestJS atau Angular.
+- Mengerti enkapsulasi data.
+`,
+    level: 'intermediate',
+    order: 5,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'ts-06',
+    user_type: 'student',
+    language: 'typescript',
+    title: '6. Generics: Reusable Code',
+    description: 'Konsep Generics <T> agar kode fleksibel namun tetap type-safe.',
     content: `# Generics <T>
 
-Generics memungkinkan kita membuat komponen yang bisa bekerja dengan **berbagai tipe data**, namun tetap menjaga keamanan tipe.
-Bayangkan \`T\` sebagai **variabel untuk tipe data**.
+Generics memungkinkan kita membuat komponen yang bisa bekerja dengan **berbagai tipe data**. Bayangkan \`T\` sebagai **variabel untuk tipe data**.
 
 ## 1. Masalah Tanpa Generics
 \`\`\`typescript
 function identity(arg: any): any {
   return arg;
 }
-// Kita kehilangan info tipe. Masuk string, keluar any.
+// Masuk string, keluar 'any'. Kita kehilangan proteksi tipe.
 \`\`\`
 
 ## 2. Solusi Generics
@@ -252,12 +311,14 @@ function identity<T>(arg: T): T {
   return arg;
 }
 
-let output1 = identity<string>("Halo"); // Tipe jadi string
-let output2 = identity<number>(100);    // Tipe jadi number
-// output2.toUpperCase(); // ❌ Error, karena TS tahu output2 adalah number
+// Cara pakai:
+let output1 = identity<string>("Halo"); // Tipe output1 otomatis string
+let output2 = identity<number>(100);    // Tipe output2 otomatis number
 \`\`\`
 
-## 3. Generic Interface (Sangat berguna untuk API Response)
+## 3. Generic Interface (Wajib untuk API Response)
+Pola paling umum di Frontend/Backend.
+
 \`\`\`typescript
 interface ApiResponse<T> {
   status: number;
@@ -268,36 +329,40 @@ interface ApiResponse<T> {
 interface User { name: string }
 interface Product { title: string; price: number }
 
-const responseUser: ApiResponse<User> = {
+// Response berisi User
+const resUser: ApiResponse<User> = {
   status: 200,
   message: "OK",
-  data: { name: "Dino" } // Harus sesuai interface User
+  data: { name: "Dino" } 
 };
 
-const responseProduct: ApiResponse<Product> = {
+// Response berisi Product
+const resProduct: ApiResponse<Product> = {
   status: 200,
   message: "OK",
-  data: { title: "Laptop", price: 5000 } // Harus sesuai Product
+  data: { title: "Laptop", price: 5000 }
 };
 \`\`\`
 
-## 🎯 Outcome Modul
+## 🎯 Outcome
 - Tidak takut melihat simbol \`<T>\`.
 - Bisa membuat wrapper API response yang dinamis.
 `,
-    level: 'advanced',
-    order: 5,
+    level: 'intermediate',
+    order: 6,
     created_at: '2025-01-01T00:00:00Z'
   },
+
+  // ==================== LEVEL 3: ADVANCED (MAHIR) ====================
   {
-    id: 'ts-06',
+    id: 'ts-07',
     user_type: 'student',
     language: 'typescript',
-    title: 'Utility Types: Senjata Rahasia TS',
-    description: 'Partial, Required, Pick, Omit, Record. Wajib untuk React/Backend.',
+    title: '7. Utility Types',
+    description: 'Partial, Pick, Omit, Record. Tools wajib developer produktif.',
     content: `# Utility Types
 
-TypeScript menyediakan "alat bantu" untuk memanipulasi tipe yang sudah ada.
+TypeScript menyediakan "alat bantu" (built-in) untuk memanipulasi tipe.
 
 Misalkan kita punya interface induk:
 \`\`\`typescript
@@ -308,18 +373,19 @@ interface Todo {
 }
 \`\`\`
 
-## 1. Partial<T>
-Membuat semua properti jadi **Optional**. Berguna untuk fungsi *Update*.
+## 1. Partial<T> & Required<T>
+- \`Partial\`: Membuat semua properti jadi optional (untuk update form).
+- \`Required\`: Kebalikannya.
+
 \`\`\`typescript
-// Saat update, kita mungkin cuma mau ganti title saja
 function updateTodo(fields: Partial<Todo>) {
-  // fields bisa berisi { title: "Baru" } tanpa error field lain kurang
+  // fields bisa cuma { completed: true } tanpa error
 }
 \`\`\`
 
-## 2. Pick<T, Keys> & Omit<T, Keys>
-- **Pick:** Pilih sebagian properti saja.
-- **Omit:** Buang sebagian properti.
+## 2. Pick<T, K> & Omit<T, K>
+- \`Pick\`: Ambil sebagian properti saja.
+- \`Omit\`: Buang sebagian properti.
 
 \`\`\`typescript
 // Tipe baru hanya berisi title dan completed
@@ -329,38 +395,97 @@ type TodoPreview = Pick<Todo, "title" | "completed">;
 type TodoSimple = Omit<Todo, "description">;
 \`\`\`
 
-## 3. Record<Keys, Type>
-Membuat objek dengan key dan value tertentu. Pengganti \`object\` biasa.
+## 3. Record<K, V>
+Membuat objek dinamis dengan key dan value tertentu.
 \`\`\`typescript
-// Key harus string (nama page), Value harus string (url)
-const nav: Record<string, string> = {
-  home: "/home",
-  about: "/about",
-  // contact: 123 // ❌ Error: Value must be string
+// Key harus string (ID user), Value harus number (Score)
+const scores: Record<string, number> = {
+  "user_1": 100,
+  "user_2": 85,
+  // "user_3": "High" // ❌ Error: Value must be number
 };
 \`\`\`
 
-## 🎯 Outcome Modul
-- Coding lebih cepat dengan memanipulasi tipe yang ada daripada menulis ulang.
-- Menguasai tools yang sering muncul di library React/Vue.
+## 🎯 Outcome
+- Coding lebih cepat dengan memanipulasi tipe yang ada.
 `,
     level: 'advanced',
-    order: 6,
+    order: 7,
     created_at: '2025-01-01T00:00:00Z'
   },
   {
-    id: 'ts-07',
+    id: 'ts-08',
     user_type: 'student',
     language: 'typescript',
-    title: 'Studi Kasus 1: Manajemen Keranjang Belanja',
-    description: 'Latihan menerapkan Interface, Array of Objects, dan Function Logic.',
-    content: `# Studi Kasus 1: Shopping Cart Logic
+    title: '8. Advanced Types: Mapped & Conditional',
+    description: 'Teknik "Sihir" TypeScript: keyof, typeof, dan logika tipe.',
+    content: `# Advanced Type Manipulation
 
-## 📜 Skenario
-Anda diminta membuat logic backend sederhana untuk fitur keranjang belanja e-commerce.
-1.  Setiap produk punya \`id\`, \`name\`, dan \`price\`.
-2.  Item di keranjang (\`CartItem\`) adalah produk dengan tambahan \`qty\` (jumlah).
-3.  Buat fungsi untuk menambah item dan menghitung total harga.
+Ini adalah level di mana Anda mulai "memprogram" tipe data itu sendiri.
+
+## 1. keyof Operator
+Mengambil *key* dari sebuah object interface sebagai Union Type.
+\`\`\`typescript
+interface Person {
+  name: string;
+  age: number;
+}
+type PersonKeys = keyof Person; // "name" | "age"
+\`\`\`
+
+## 2. Mapped Types
+Membuat tipe baru berdasarkan perulangan key tipe lain.
+Contoh: Membuat tipe yang semua field-nya *boolean* (untuk validasi form).
+
+\`\`\`typescript
+// Loop semua key di T, ubah valuenya jadi boolean
+type Flags<T> = {
+  [Key in keyof T]: boolean;
+};
+
+type PersonFlags = Flags<Person>;
+/* Hasilnya:
+{
+  name: boolean;
+  age: boolean;
+}
+*/
+\`\`\`
+
+## 3. Conditional Types
+Logika \`if-else\` dalam definisi tipe.
+\`Format: T extends U ? X : Y\`
+
+\`\`\`typescript
+type IsString<T> = T extends string ? "Yes" : "No";
+
+type A = IsString<string>;  // "Yes"
+type B = IsString<number>;  // "No"
+\`\`\`
+
+## 🎯 Outcome
+- Memahami cara kerja library kompleks (seperti Redux/Prisma).
+- Bisa membuat tipe yang sangat dinamis.
+`,
+    level: 'expert',
+    order: 8,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+
+  // ==================== STUDI KASUS (PRACTICE) ====================
+  {
+    id: 'ts-09',
+    user_type: 'student',
+    language: 'typescript',
+    title: 'Studi Kasus 1: Shopping Cart Logic',
+    description: 'Latihan menerapkan Interface, Inheritance, dan Array Logic.',
+    content: `# Studi Kasus: Shopping Cart
+
+## 📜 Misi
+Buat logic keranjang belanja di mana:
+1.  Item keranjang punya \`qty\`.
+2.  Bisa hitung total harga.
+3.  Menggunakan **Class** dan **Interface**.
 
 ## 💻 Solusi Code
 \`\`\`typescript
@@ -379,145 +504,151 @@ class ShoppingCart {
   private items: CartItem[] = [];
 
   addToCart(product: Product, quantity: number): void {
-    // Cek apakah barang sudah ada?
-    const existingItem = this.items.find((item) => item.id === product.id);
-
-    if (existingItem) {
-      existingItem.qty += quantity;
+    const existing = this.items.find((item) => item.id === product.id);
+    if (existing) {
+      existing.qty += quantity;
     } else {
-      // Spread operator untuk menggabungkan product + qty
       this.items.push({ ...product, qty: quantity });
     }
   }
 
   getTotal(): number {
-    return this.items.reduce((total, item) => total + (item.price * item.qty), 0);
-  }
-
-  showCart(): void {
-    console.log("Isi Keranjang:", JSON.stringify(this.items, null, 2));
+    return this.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
   }
 }
 
-// --- EKSEKUSI ---
+// --- TEST ---
 const cart = new ShoppingCart();
-const laptop: Product = { id: 1, name: "MacBook", price: 15000000 };
-const mouse: Product = { id: 2, name: "Logitech", price: 200000 };
+cart.addToCart({ id: 1, name: "MacBook", price: 15 }, 1);
+cart.addToCart({ id: 2, name: "Mouse", price: 2 }, 5);
 
-cart.addToCart(laptop, 1);
-cart.addToCart(mouse, 2); // Beli 2 mouse
-cart.addToCart(laptop, 1); // Tambah 1 laptop lagi (Total jadi 2)
-
-cart.showCart();
-console.log("Total Bayar: Rp", cart.getTotal());
-\`\`\`
-
-## ✅ Hasil yang Diharapkan
-\`\`\`text
-Isi Keranjang: [
-  { "id": 1, "name": "MacBook", "price": 15000000, "qty": 2 },
-  { "id": 2, "name": "Logitech", "price": 200000, "qty": 2 }
-]
-Total Bayar: Rp 30400000
+console.log("Total:", cart.getTotal()); // Total: 25
 \`\`\`
 `,
-    level: 'advanced',
-    order: 7,
+    level: 'intermediate',
+    order: 9,
     created_at: '2025-01-01T00:00:00Z'
   },
   {
-    id: 'ts-08',
+    id: 'ts-10',
     user_type: 'student',
     language: 'typescript',
-    title: 'Studi Kasus 2: Flexible API Handler (Generics)',
-    description: 'Latihan menerapkan Generics <T> untuk menangani response API yang beragam.',
-    content: `# Studi Kasus 2: Type-Safe API Fetcher
+    title: 'Studi Kasus 2: Flexible API Handler',
+    description: 'Penerapan Generics <T> untuk handle berbagai response API.',
+    content: `# Studi Kasus: Generic API Fetcher
 
-## 📜 Skenario
-Aplikasi Anda mengambil data dari berbagai endpoint API (/users, /products, /settings).
-Format respon dari server backend SELALU konsisten:
-\`\`\`json
-{
-  "success": true,
-  "data": ... (isi beda-beda tergantung endpoint) ...
-}
-\`\`\`
-Tugas: Buat fungsi \`fetchData\` yang menggunakan **Generics**, agar saat kita mengambil data Users, autocomplete editor tahu isinya adalah User, bukan \`any\`.
+## 📜 Misi
+Buat fungsi \`fetchData\` yang tipe return-nya mengikuti endpoint yang dipanggil.
 
 ## 💻 Solusi Code
 \`\`\`typescript
-// 1. Bentuk Response Standar Backend
 interface BaseResponse<T> {
   success: boolean;
   data: T;
-  error?: string;
 }
 
-// 2. Definisi Tipe Data Aplikasi
-interface UserProfile {
-  id: number;
-  username: string;
-}
+interface User { id: number; username: string; }
+interface Product { sku: string; stock: number; }
 
-interface ProductDetail {
-  sku: string;
-  stock: number;
-}
-
-// 3. Fungsi Simulasi Fetch API dengan Generics
+// Generic Function
 async function fetchData<T>(endpoint: string): Promise<BaseResponse<T>> {
-  console.log(\`Fetching from \${endpoint}...\`);
-  
-  // Simulasi data dummy berdasarkan endpoint
-  // (Di dunia nyata ini adalah fetch() atau axios.get())
-  let dummyData: any;
-  
-  if (endpoint === "/user/1") {
-    dummyData = { id: 1, username: "dev_master" };
-  } else if (endpoint === "/product/A") {
-    dummyData = { sku: "XYZ-99", stock: 50 };
+  // Simulasi fetch
+  const dummy: any = endpoint.includes("user") 
+    ? { id: 1, username: "admin" } 
+    : { sku: "ABC", stock: 99 };
+
+  return { success: true, data: dummy };
+}
+
+async function main() {
+  // 1. Fetch User (Explicit Generic)
+  const userRes = await fetchData<User>("/api/user");
+  console.log(userRes.data.username); // Autocomplete: username ✅
+
+  // 2. Fetch Product
+  const prodRes = await fetchData<Product>("/api/product");
+  console.log(prodRes.data.stock); // Autocomplete: stock ✅
+}
+\`\`\`
+`,
+    level: 'advanced',
+    order: 10,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'ts-11',
+    user_type: 'student',
+    language: 'typescript',
+    title: 'Studi Kasus 3: Type-Safe Event Emitter',
+    description: 'Level Expert: Menggabungkan Keyof, Mapped Types, dan Generics.',
+    content: `# Expert Case: Type-Safe Event Emitter
+
+## 📜 Masalah
+Event Emitter biasa di JS tidak aman. Kita bisa kirim nama event yang salah atau data payload yang tidak sesuai dengan event-nya.
+
+## 🎯 Goal
+Buat class \`TypedEmitter\` dimana:
+1.  Hanya nama event yang terdaftar yang boleh dipanggil (\`on\` / \`emit\`).
+2.  Argument data harus sesuai dengan nama eventnya.
+
+## 💻 Solusi "Level Dewa"
+\`\`\`typescript
+// 1. Definisikan Peta Event & Data-nya
+type AppEvents = {
+  "login": { userId: number; time: Date };
+  "logout": void;
+  "error": { message: string; code: number };
+};
+
+// 2. Generic Class untuk Emitter
+class TypedEmitter<Events> {
+  // Simpan listener (fungsi callback)
+  private listeners: Partial<Record<keyof Events, Function[]>> = {};
+
+  // Method ON:
+  // - EventName dibatasi hanya key dari T (AppEvents)
+  // - Callback argumennya otomatis menyesuaikan tipe payload dari EventName tersebut
+  on<K extends keyof Events>(eventName: K, callback: (data: Events[K]) => void) {
+    if (!this.listeners[eventName]) {
+      this.listeners[eventName] = [];
+    }
+    this.listeners[eventName]!.push(callback);
   }
 
-  return {
-    success: true,
-    data: dummyData as T // Casting ke T
-  };
+  // Method EMIT:
+  // - Data yang dikirim WAJIB sesuai tipe Events[K]
+  emit<K extends keyof Events>(eventName: K, data: Events[K]) {
+    const eventListeners = this.listeners[eventName];
+    if (eventListeners) {
+      eventListeners.forEach(fn => fn(data));
+    }
+  }
 }
 
 // --- EKSEKUSI ---
-async function main() {
-  // Kasus A: Ambil User
-  // Kita beri tahu Generics bahwa T adalah UserProfile
-  const userRes = await fetchData<UserProfile>("/user/1");
-  
-  if (userRes.success) {
-    // Autocomplete aktif! Ketik userRes.data. akan muncul 'username'
-    console.log("User:", userRes.data.username.toUpperCase());
-  }
+const app = new TypedEmitter<AppEvents>();
 
-  // Kasus B: Ambil Product
-  const prodRes = await fetchData<ProductDetail>("/product/A");
-  
-  if (prodRes.success) {
-    // Autocomplete tahu di sini adanya 'stock', bukan 'username'
-    console.log("Stock:", prodRes.data.stock);
-  }
-}
+// ✅ Valid
+app.on("login", (payload) => {
+  // TS otomatis tahu payload punya userId & time!
+  console.log("User Login:", payload.userId);
+});
 
-main();
+app.emit("login", { userId: 1, time: new Date() }); // ✅ OK
+
+// ❌ Error Cases (Dicegah TS sebelum running):
+// app.on("register", () => {}); // Error: Event "register" tidak ada di AppEvents
+// app.emit("login", { userId: "budi" }); // Error: userId harus number
+// app.emit("error", { message: "Fail" }); // Error: Kurang properti 'code'
 \`\`\`
 
-## ✅ Hasil yang Diharapkan
-\`\`\`text
-Fetching from /user/1...
-User: DEV_MASTER
-Fetching from /product/A...
-Stock: 50
-\`\`\`
-*Poin penting: Jika anda mencoba akses \`prodRes.data.username\`, TypeScript akan memberi garis merah (Error) sebelum kode dijalankan.*
+## 🧠 Analisis
+Kode di atas menggunakan teknik:
+- **Generic Constraint** (\`K extends keyof Events\`): Membatasi input string.
+- **Indexed Access Type** (\`Events[K]\`): Mengambil tipe data spesifik berdasarkan key yang dipilih.
 `,
-    level: 'advanced',
-    order: 8,
+    level: 'expert',
+    order: 11,
     created_at: '2025-01-01T00:00:00Z'
   },
 ];

@@ -76,7 +76,7 @@ export default function MaterialContent({ content }: MaterialContentProps) {
       </div>
     ),
     thead: ({ children }) => (
-      <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+      <thead className="bg-slate-500 dark:bg-slate-800/50 border-b border-slate-500 dark:border-slate-700">
         {children}
       </thead>
     ),
