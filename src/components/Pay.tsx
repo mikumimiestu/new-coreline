@@ -14,6 +14,9 @@ import {
   CreditCard,
   QrCode,
   ArrowLeft,
+  Receipt,
+  Info,
+  Plus
 } from 'lucide-react';
 
 /* =========================================
@@ -25,6 +28,7 @@ type Cycle = 'monthly' | 'yearly';
 const MERCHANT_NAME = 'AstByte System';
 const API_BASE = 'https://authx.astbyte.com'; // Ganti ke localhost jika dev
 const TOKEN_KEY = 'astbyte_token';
+const PPN_RATE = 0.11; // 11% PPN
 
 const DEFAULT_PRICE: Record<Tier, { monthly: number; yearly: number }> = {
   student: { monthly: 0, yearly: 0 },
@@ -34,11 +38,9 @@ const DEFAULT_PRICE: Record<Tier, { monthly: number; yearly: number }> = {
 
 // Voucher Codes
 const VOUCHERS: Record<string, { type: 'percent' | 'fixed'; value: number; note?: string }> = {
-  // CORELINESATU: { type: 'percent', value: 5, note: 'Diskon 5%' }, // Mulai --/--/2026
-  ASTBYTEJAYA26: { type: 'percent', value: 5, note: 'Diskon 5%' }, // Berakhir 30 Desember 2026
-  HARUSCORELINE: { type: 'fixed', value: 70000, note: 'Potongan Rp70.000' }, // Mulai 02/02/2026
-  // MABA2026: { type: 'fixed', value: 50000, note: 'Promo Mahasiswa Baru' }, // Mulai --/--/2026
-  FEBARU: { type: 'percent', value: 10, note: 'Diskon Bulan Februari 10%' }, // Berakhir 30/2/2026
+  ASTBYTEJAYA26: { type: 'percent', value: 5, note: 'Diskon 5%' },
+  HARUSCORELINE: { type: 'fixed', value: 70000, note: 'Potongan Rp70.000' },
+  FEBARU: { type: 'percent', value: 10, note: 'Diskon Bulan Februari 10%' },
 };
 
 /* =========================================
@@ -102,7 +104,7 @@ export default function ManualQRISPage() {
   const cycleParam = (params.get('cycle') as Cycle) || 'monthly';
   const amountParam = Number(params.get('amount') || NaN);
 
-  // Computed Values
+  // Computed Values (Math Logic)
   const orderId = useMemo(() => makeOrderId(), []);
   
   const nominalRaw = useMemo(() => {
@@ -110,18 +112,20 @@ export default function ManualQRISPage() {
     return Number.isFinite(amountParam) ? Math.max(0, Math.round(amountParam)) : defaults[cycleParam];
   }, [tierParam, cycleParam, amountParam]);
 
+  // Kalkulasi Pembayaran
   const disc = useMemo(() => calcDiscount(nominalRaw, voucher), [nominalRaw, voucher]);
-  const total = Math.max(0, nominalRaw - disc.amount);
+  const subtotal = Math.max(0, nominalRaw - disc.amount); // Harga setelah diskon
+  const ppnAmount = Math.round(subtotal * PPN_RATE); // PPN 11% ditambahkan dari Subtotal
+  const grandTotal = subtotal + ppnAmount; // Total akhir yang harus dibayar
 
   useEffect(() => {
-    document.title = 'Pembayaran Saldo | Coreline';
+    document.title = 'Checkout Pembayaran | Coreline';
   }, []);
 
   // --- Actions ---
-
   const handleCopyTotal = async () => {
     try {
-      await navigator.clipboard.writeText(String(total));
+      await navigator.clipboard.writeText(String(grandTotal));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch { /* noop */ }
@@ -136,7 +140,7 @@ export default function ManualQRISPage() {
 
     const pid = publicId.trim();
     if (!pid) {
-      setErrorMsg('Harap masukkan Public ID.');
+      setErrorMsg('Harap masukkan Public ID Anda terlebih dahulu.');
       return;
     }
 
@@ -152,13 +156,13 @@ export default function ManualQRISPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.message || 'ID tidak ditemukan atau tidak valid.');
+        throw new Error(data?.message || 'Akun tidak ditemukan atau ID tidak valid.');
       }
 
       const t = data?.data?.token;
       const u = data?.data?.user;
 
-      if (!t || !u) throw new Error('Data user tidak valid.');
+      if (!t || !u) throw new Error('Respons data pengguna tidak valid.');
 
       setToken(t);
       if (typeof window !== 'undefined') localStorage.setItem(TOKEN_KEY, t);
@@ -171,7 +175,7 @@ export default function ManualQRISPage() {
       });
 
     } catch (err: any) {
-      setErrorMsg(err.message || 'Gagal mengecek akun.');
+      setErrorMsg(err.message || 'Gagal mengecek akun. Pastikan sistem sedang online.');
     } finally {
       setLoadingCheck(false);
     }
@@ -182,12 +186,12 @@ export default function ManualQRISPage() {
     setSuccessMsg(null);
 
     if (!token || !user) {
-      setErrorMsg('Sesi tidak valid. Silakan cek akun ulang.');
+      setErrorMsg('Sesi telah berakhir atau tidak valid. Silakan verifikasi akun ulang.');
       return;
     }
 
-    if (user.balance < total) {
-      setErrorMsg(`Saldo tidak cukup. Saldo: ${rupiah(user.balance)}, Tagihan: ${rupiah(total)}.`);
+    if (user.balance < grandTotal) {
+      setErrorMsg(`Saldo tidak mencukupi. Saldo Anda: ${rupiah(user.balance)}, Tagihan: ${rupiah(grandTotal)}.`);
       return;
     }
 
@@ -201,7 +205,7 @@ export default function ManualQRISPage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          amount: total,
+          amount: grandTotal, // Mengirimkan grand total (sudah termasuk PPN)
           order_id: orderId,
           tier: tierParam,
           cycle: cycleParam,
@@ -211,217 +215,214 @@ export default function ManualQRISPage() {
 
       const data = await res.json();
       if (!res.ok || data?.status !== 'success') {
-        throw new Error(data?.message || 'Pembayaran gagal.');
+        throw new Error(data?.message || 'Pembayaran gagal diproses.');
       }
 
-      // Update local balance state for UX
-      const newBalance = data?.data?.balance !== undefined ? Number(data.data.balance) : user.balance - total;
+      const newBalance = data?.data?.balance !== undefined ? Number(data.data.balance) : user.balance - grandTotal;
       setUser(prev => prev ? { ...prev, balance: newBalance } : prev);
       
-      setSuccessMsg('Pembayaran berhasil! Mengalihkan...');
+      setSuccessMsg('Pembayaran Berhasil! Mengalihkan ke halaman dashboard...');
       
       setTimeout(() => {
         window.location.href = '/dashboard';
-      }, 2000);
+      }, 2500);
 
     } catch (err: any) {
-      setErrorMsg(err.message || 'Terjadi kesalahan sistem.');
+      setErrorMsg(err.message || 'Terjadi kesalahan sistem saat memproses transaksi Anda.');
     } finally {
       setLoadingPay(false);
     }
   };
 
-  const isBalanceSufficient = user ? user.balance >= total : false;
+  const isBalanceSufficient = user ? user.balance >= grandTotal : false;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-200 dark:selection:bg-blue-900/50 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F19] text-slate-800 dark:text-slate-200 font-sans selection:bg-blue-200 dark:selection:bg-blue-900/50 transition-colors duration-300">
       
-      {/* Background Ambience (Dual Mode) */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-[20%] -left-[10%] w-[600px] h-[600px] bg-blue-200/40 dark:bg-blue-600/10 rounded-full blur-[100px] transition-colors duration-500" />
-        <div className="absolute top-[20%] -right-[10%] w-[500px] h-[500px] bg-purple-200/40 dark:bg-purple-600/10 rounded-full blur-[100px] transition-colors duration-500" />
+      {/* Background Glow Effects */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] bg-blue-400/20 dark:bg-blue-600/10 rounded-full blur-[100px]" />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[35vw] h-[35vw] max-w-[500px] max-h-[500px] bg-emerald-400/20 dark:bg-emerald-600/10 rounded-full blur-[120px]" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-10">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-6 md:py-12">
         
-        {/* HEADER */}
-        <header className="mb-10">
-          <a href="/pricing" className="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 mb-6 transition-colors text-sm font-medium">
-            <ArrowLeft className="w-4 h-4" /> Kembali ke Pilihan Paket
+        {/* HEADER SECTION */}
+        <header className="mb-8 md:mb-12">
+          <a href="/pricing" className="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm font-semibold mb-6 w-fit bg-white/60 dark:bg-slate-900/60 px-4 py-2 rounded-full backdrop-blur-md border border-slate-200 dark:border-slate-800 shadow-sm">
+            <ArrowLeft className="w-4 h-4" /> Kembali ke Paket
           </a>
           
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                  <img src="/logos/axipay.png" alt="AxiPay Logo" className='h-22 w-44 ml-[-28px] filter invert hue-rotate-180' />
-                </h1>
-              </div>
-              <p className="text-slate-600 dark:text-slate-400 max-w-lg">
-                Gunakan saldo akun AstByte Anda untuk berlangganan layanan Coreline secara instan tanpa biaya admin.
-              </p>
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <div className="max-w-xl">
+              <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-4">
+                <img src="/logos/axipay.png" alt="AxiPay" className="h-10 md:h-12 w-auto object-contain filter invert dark:hue-rotate-180 drop-shadow-sm" />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-500 dark:from-white dark:to-slate-400">
+                  Checkout
+                </span>
+              </h1>
             </div>
 
-            {/* Saldo Badge (Desktop) */}
+            {/* Saldo Badge (Desktop & Tablet) */}
             {user && (
-              <div className="hidden md:flex items-center gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 backdrop-blur-sm">
+              <div className="hidden sm:flex items-center gap-5 bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 backdrop-blur-xl transition-all hover:scale-[1.02]">
                 <div className="text-right">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Saldo Tersedia</p>
-                  <p className="text-xl font-bold text-slate-900 dark:text-white font-mono">{rupiah(user.balance)}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold mb-1">Saldo Tersedia</p>
+                  <p className="text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">{rupiah(user.balance)}</p>
                 </div>
-                <div className={`h-10 w-10 rounded-full flex items-center justify-center border ${isBalanceSufficient ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-red-50 text-red-600 border-red-100 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'}`}>
-                  {isBalanceSufficient ? <Check className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
+                <div className={`h-14 w-14 rounded-2xl flex items-center justify-center border-2 transition-colors ${isBalanceSufficient ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'}`}>
+                  {isBalanceSufficient ? <Wallet className="w-7 h-7" /> : <AlertTriangle className="w-7 h-7" />}
                 </div>
               </div>
             )}
           </div>
         </header>
 
-        <main className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <main className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
           
-          {/* LEFT COLUMN: FORM */}
-          <div className="lg:col-span-7 space-y-6">
+          {/* ==========================================
+              LEFT COLUMN: FORM & PAYMENT DETAILS
+              ========================================== */}
+          <div className="lg:col-span-7 space-y-6 md:space-y-8">
             
             {/* Step 1: Identification */}
-            <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm backdrop-blur-md relative overflow-hidden group">
-              <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
+            <section className="bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 rounded-[2rem] p-6 md:p-8 shadow-xl shadow-slate-200/40 dark:shadow-none backdrop-blur-xl relative overflow-hidden transition-all duration-300">
+              <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-blue-500 to-indigo-600" />
               
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700">1</div>
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Identifikasi Akun</h2>
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold border border-blue-100 dark:border-blue-500/20 text-lg shadow-sm">1</div>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Verifikasi Akun</h2>
                 </div>
-                {user && <BadgeCheck className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />}
+                {user && <BadgeCheck className="w-8 h-8 text-emerald-500 dark:text-emerald-400 animate-in zoom-in" />}
               </div>
 
               {!user ? (
-                <form onSubmit={handleCheckPublicId} className="space-y-4">
+                <form onSubmit={handleCheckPublicId} className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Masukkan Public ID</label>
-                    <div className="relative">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Public ID AstByte</label>
+                    <div className="relative group">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400 transition-colors" />
                       <input
                         type="text"
                         value={publicId}
                         onChange={(e) => setPublicId(e.target.value)}
                         placeholder="Contoh: 3e02d5cb-xxxx-xxxx..."
-                        className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl py-3.5 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all outline-none font-mono text-sm shadow-inner"
+                        className="w-full bg-white dark:bg-slate-950/50 border border-slate-300 dark:border-slate-700 rounded-2xl py-4 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 dark:focus:border-blue-500 transition-all outline-none font-mono text-sm md:text-base shadow-inner"
                       />
                     </div>
-                    <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">Public ID dapat dilihat pada menu Account Center di dashboard utama.</p>
+                    <p className="mt-2.5 text-xs md:text-sm text-slate-500 flex items-center gap-1.5">
+                      <Info className="w-4 h-4" /> Anda dapat menemukan Public ID di menu Account Center.
+                    </p>
                   </div>
                   
                   <button
                     type="submit"
-                    disabled={loadingCheck}
-                    className="w-full bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg border border-transparent dark:border-slate-700"
+                    disabled={loadingCheck || !publicId.trim()}
+                    className="w-full bg-slate-900 dark:bg-white hover:bg-blue-700 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-base md:text-lg"
                   >
-                    {loadingCheck ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Cek Ketersediaan Akun'}
+                    {loadingCheck ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Hubungkan Akun'}
                   </button>
                 </form>
               ) : (
-                <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex items-center justify-between group-hover:border-blue-300 dark:group-hover:border-blue-700 transition-colors">
+                <div className="bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center text-sm font-bold text-white">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-xl font-bold text-white shadow-md shadow-blue-500/20">
                       {user.full_name.charAt(0)}
                     </div>
                     <div>
-                      <p className="font-bold text-slate-900 dark:text-white">{user.full_name}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">{user.email}</p>
+                      <p className="font-bold text-slate-900 dark:text-white text-lg">{user.full_name}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{user.email}</p>
                     </div>
                   </div>
                   <button 
                     onClick={() => { setUser(null); setToken(null); }}
-                    className="text-xs text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 font-medium underline"
+                    className="px-5 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all text-center"
                   >
                     Ganti Akun
                   </button>
                 </div>
               )}
-            </div>
+            </section>
+
+            {/* Mobile Saldo Badge (Tampil hanya saat user login & di mobile) */}
+            {user && (
+              <div className="sm:hidden flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+                <div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase">Saldo Anda</p>
+                  <p className="text-lg font-black text-slate-900 dark:text-white font-mono">{rupiah(user.balance)}</p>
+                </div>
+                <div className={`p-2 rounded-lg ${isBalanceSufficient ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400'}`}>
+                   {isBalanceSufficient ? <Check className="w-5 h-5"/> : <AlertTriangle className="w-5 h-5"/>}
+                </div>
+              </div>
+            )}
 
             {/* Step 2: Payment Details */}
-            <div className={`bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm backdrop-blur-md relative overflow-hidden transition-opacity duration-500 ${!user ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-              <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
+            <section className={`bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 rounded-[2rem] p-6 md:p-8 shadow-xl shadow-slate-200/40 dark:shadow-none backdrop-blur-xl relative overflow-hidden transition-all duration-500 ${!user ? 'opacity-40 pointer-events-none grayscale-[0.3]' : 'opacity-100'}`}>
+              <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-emerald-400 to-teal-500" />
               
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700">2</div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Rincian Pembayaran</h2>
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-100 dark:border-emerald-500/20 text-lg shadow-sm">2</div>
+                <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Rincian Pembayaran</h2>
               </div>
 
-              <div className="space-y-6">
-                {/* Product Info */}
-                <div className="flex justify-between items-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 dark:bg-blue-500/20 rounded-lg text-blue-600 dark:text-blue-400">
-                      <CreditCard className="w-6 h-6" />
+              <div className="space-y-6 md:space-y-8">
+                
+                {/* Product Info Box */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 md:p-6 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3.5 bg-white dark:bg-slate-900 rounded-2xl text-blue-600 dark:text-blue-400 shadow-sm border border-slate-100 dark:border-slate-800">
+                      <CreditCard className="w-7 h-7" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Langganan</p>
-                      <p className="text-lg font-bold text-slate-900 dark:text-white capitalize">{tierParam} Plan <span className="text-slate-500 dark:text-slate-500 text-sm font-normal">({cycleParam})</span></p>
+                      <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Berlangganan</p>
+                      <p className="text-lg md:text-xl font-bold text-slate-900 dark:text-white capitalize flex items-center flex-wrap gap-2">
+                        {tierParam} Plan 
+                        <span className="text-slate-600 dark:text-slate-300 text-xs md:text-sm font-semibold px-2.5 py-1 bg-slate-200 dark:bg-slate-800 rounded-lg">{cycleParam}</span>
+                      </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-slate-900 dark:text-white">{rupiah(nominalRaw)}</p>
+                  <div className="sm:text-right border-t sm:border-t-0 border-slate-200 dark:border-slate-800 pt-4 sm:pt-0 mt-2 sm:mt-0">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Harga Dasar</p>
+                    <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">{rupiah(nominalRaw)}</p>
                   </div>
                 </div>
 
                 {/* Voucher Input */}
                 <div>
-                   <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Kode Voucher</label>
-                   <div className="relative flex gap-2">
-                     <div className="relative flex-1">
-                        <BadgePercent className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
-                        <input
-                          type="text"
-                          value={voucher}
-                          onChange={(e) => setVoucher(e.target.value)}
-                          placeholder="Punya kode promo?"
-                          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl py-3 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all outline-none text-sm uppercase shadow-inner"
-                        />
-                     </div>
+                   <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Kode Promo / Voucher</label>
+                   <div className="relative group">
+                      <BadgePercent className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
+                      <input
+                        type="text"
+                        value={voucher}
+                        onChange={(e) => setVoucher(e.target.value.toUpperCase())}
+                        placeholder="Masukkan kode voucher..."
+                        className="w-full bg-white dark:bg-slate-950/50 border border-slate-300 dark:border-slate-700 rounded-2xl py-4 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none font-bold tracking-widest uppercase shadow-inner"
+                      />
                    </div>
-                   {disc.valid && (
-                     <div className="mt-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                       <Check className="w-3 h-3" /> {disc.label} diterapkan (-{rupiah(disc.amount)})
+                   {/* Voucher Status Indicator */}
+                   {disc.valid ? (
+                     <div className="mt-3 text-sm font-medium text-emerald-700 dark:text-emerald-300 flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 px-4 py-2.5 rounded-xl w-fit border border-emerald-200 dark:border-emerald-500/20">
+                       <Check className="w-4 h-4 text-emerald-600" /> {disc.label} berhasil diterapkan! (-{rupiah(disc.amount)})
                      </div>
-                   )}
+                   ) : voucher.length > 0 && !disc.valid ? (
+                     <p className="mt-3 text-sm text-red-500 flex items-center gap-1.5"><AlertTriangle className="w-4 h-4"/> Kode voucher tidak valid atau kedaluwarsa.</p>
+                   ) : null}
                 </div>
 
-                {/* Total Calculation */}
-                <div className="border-t border-slate-200 dark:border-slate-800 pt-4 space-y-2">
-                   <div className="flex justify-between text-sm text-slate-500 dark:text-slate-400">
-                     <span>Subtotal</span>
-                     <span>{rupiah(nominalRaw)}</span>
-                   </div>
-                   {disc.amount > 0 && (
-                     <div className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400">
-                       <span>Diskon</span>
-                       <span>-{rupiah(disc.amount)}</span>
-                     </div>
-                   )}
-                   <div className="flex justify-between items-center pt-2">
-                     <span className="font-bold text-slate-900 dark:text-white">Total Tagihan</span>
-                     <div className="flex items-center gap-2">
-                        <span className="text-2xl font-bold text-slate-900 dark:text-white">{rupiah(total)}</span>
-                        <button onClick={handleCopyTotal} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400 transition-colors">
-                           {copied ? <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400"/> : <Copy className="w-4 h-4"/>}
-                        </button>
-                     </div>
-                   </div>
-                </div>
-
-                {/* Status Messages */}
+                {/* Alert Messages */}
                 {errorMsg && (
-                  <div className="p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 flex items-start gap-3">
-                    <AlertTriangle className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0" />
-                    <p className="text-sm text-red-700 dark:text-red-200">{errorMsg}</p>
+                  <div className="p-4 md:p-5 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 flex items-start gap-3 animate-in fade-in">
+                    <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm md:text-base font-medium text-red-800 dark:text-red-200">{errorMsg}</p>
                   </div>
                 )}
                 {successMsg && (
-                  <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 flex items-start gap-3">
-                    <Check className="w-5 h-5 text-emerald-500 dark:text-emerald-400 flex-shrink-0" />
-                    <p className="text-sm text-emerald-700 dark:text-emerald-200">{successMsg}</p>
+                  <div className="p-4 md:p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 flex items-start gap-3 animate-in fade-in">
+                    <Check className="w-6 h-6 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm md:text-base font-medium text-emerald-800 dark:text-emerald-200">{successMsg}</p>
                   </div>
                 )}
 
@@ -430,94 +431,128 @@ export default function ManualQRISPage() {
                   onClick={handlePay}
                   disabled={loadingPay || !isBalanceSufficient}
                   className={`
-                    w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg
+                    w-full py-4 md:py-5 rounded-2xl font-extrabold text-lg md:text-xl flex items-center justify-center gap-3 transition-all duration-300
                     ${isBalanceSufficient 
-                      ? 'bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-white shadow-blue-600/20' 
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-xl shadow-blue-500/30 hover:scale-[1.01]' 
                       : 'bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed border border-transparent dark:border-slate-700'
                     }
                   `}
                 >
                   {loadingPay ? (
                     <>
-                      <Loader2 className="w-5 h-5 animate-spin" /> Memproses...
+                      <Loader2 className="w-6 h-6 animate-spin" /> Memproses Transaksi...
                     </>
                   ) : !isBalanceSufficient ? (
                     <>
-                      <AlertTriangle className="w-5 h-5" /> Saldo Tidak Cukup
+                      <AlertTriangle className="w-6 h-6" /> Saldo Anda Tidak Cukup
                     </>
                   ) : (
                     <>
-                      Bayar Sekarang <ArrowRight className="w-5 h-5" />
+                      Bayar Sekarang <ArrowRight className="w-6 h-6" />
                     </>
                   )}
                 </button>
               </div>
-            </div>
+            </section>
 
           </div>
 
-          {/* RIGHT COLUMN: RECEIPT */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="sticky top-8">
-              <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-2xl shadow-slate-200/50 dark:shadow-black/50 relative overflow-hidden border border-slate-100 dark:border-slate-800">
-                {/* Receipt Decoration */}
-                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500" />
-                <div className="absolute -bottom-3 left-0 w-full h-6 bg-slate-50 dark:bg-[#0B0F19] [mask-image:linear-gradient(to_right,transparent_0%,#000_50%,transparent_100%),radial-gradient(circle_at_bottom,transparent_6px,#000_7px)] [mask-size:100%_100%,20px_20px] [mask-composite:intersect]" />
+          {/* ==========================================
+              RIGHT COLUMN: INVOICE / RECEIPT
+              ========================================== */}
+          <div className="lg:col-span-5 space-y-6 md:mt-0 mt-4">
+            <div className="sticky top-8 lg:top-12">
+              <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-0 shadow-2xl shadow-slate-200/60 dark:shadow-black/60 relative overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col">
+                
+                {/* Receipt Header Ribbon */}
+                <div className="h-3 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500" />
+                
+                <div className="p-6 md:p-8 flex-1">
+                  <div className="text-center mb-8">
+                    <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800/50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100 dark:border-slate-700/50 shadow-sm">
+                      <Receipt className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <h3 className="text-2xl font-black tracking-widest text-slate-900 dark:text-white uppercase">Invoice</h3>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm font-mono mt-2 bg-slate-100 dark:bg-slate-800/50 inline-block px-3 py-1 rounded-full">{orderId}</p>
+                  </div>
 
-                <div className="text-center mb-6">
-                  <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <QrCode className="w-6 h-6 text-slate-900 dark:text-white" />
+                  {/* Merchant & Order Details */}
+                  <div className="space-y-4 border-b-2 border-dashed border-slate-200 dark:border-slate-700 pb-6 mb-6">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 dark:text-slate-400 text-sm font-medium">Merchant</span>
+                      <span className="font-bold text-slate-900 dark:text-white text-right">{MERCHANT_NAME}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 dark:text-slate-400 text-sm font-medium">Tanggal</span>
+                      <span className="font-bold text-slate-900 dark:text-white text-right">
+                        {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric'})}
+                      </span>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">INVOICE</h3>
-                  <p className="text-slate-500 dark:text-slate-400 text-xs font-mono mt-1">{orderId}</p>
-                </div>
 
-                <div className="space-y-4 border-b-2 border-dashed border-slate-200 dark:border-slate-700 pb-6 mb-6">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-500 dark:text-slate-400">Merchant</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">{MERCHANT_NAME}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-500 dark:text-slate-400">Tanggal</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">{new Date().toLocaleDateString('id-ID')}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-500 dark:text-slate-400">Item</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">{tierParam.toUpperCase()} / {cycleParam}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2 mb-8">
-                   <div className="flex justify-between text-sm font-medium text-slate-600 dark:text-slate-300">
-                      <span>Harga</span>
-                      <span>{rupiah(nominalRaw)}</span>
-                   </div>
-                   {disc.amount > 0 && (
-                     <div className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400">
-                        <span>Diskon</span>
-                        <span>-{rupiah(disc.amount)}</span>
+                  {/* Math Calculations */}
+                  <div className="space-y-4">
+                     {/* 1. Base Price */}
+                     <div className="flex justify-between items-center text-slate-700 dark:text-slate-300 font-medium">
+                        <span>Harga Normal</span>
+                        <span>{rupiah(nominalRaw)}</span>
                      </div>
-                   )}
-                   <div className="flex justify-between text-xl font-extrabold mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
-                      <span>Total</span>
-                      <span>{rupiah(total)}</span>
-                   </div>
-                </div>
+                     
+                     {/* 2. Discount */}
+                     {disc.amount > 0 && (
+                       <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50/50 dark:bg-emerald-500/5 px-2 py-1 -mx-2 rounded">
+                          <span>Potongan Voucher</span>
+                          <span>-{rupiah(disc.amount)}</span>
+                       </div>
+                     )}
 
-                <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 text-center border border-slate-100 dark:border-slate-700">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Metode Pembayaran</p>
-                  <div className="flex items-center justify-center gap-2 font-bold text-slate-800 dark:text-white">
-                    <Wallet className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    AxiPay
+                     {/* 3. Subtotal (DPP) */}
+                     <div className="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-bold">
+                        <span>Subtotal</span>
+                        <span>{rupiah(subtotal)}</span>
+                     </div>
+                     
+                     {/* 4. PPN */}
+                     <div className="flex justify-between items-center text-slate-500 dark:text-slate-400 text-sm mt-2">
+                        <span className="flex items-center gap-1.5">
+                          <Plus className="w-3.5 h-3.5" /> PPN (11%)
+                        </span>
+                        <span>{rupiah(ppnAmount)}</span>
+                     </div>
                   </div>
                 </div>
 
+                {/* Grand Total Area (Highlight) */}
+                <div className="bg-slate-50 dark:bg-slate-950/80 p-6 md:p-8 pt-6 relative border-t border-slate-200 dark:border-slate-800">
+                   <div className="flex flex-col mb-5">
+                      <span className="font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-xs mb-2">Total Pembayaran</span>
+                      <div className="flex justify-between items-end">
+                        <span className="text-3xl md:text-4xl font-black text-blue-600 dark:text-blue-400 tracking-tight leading-none">
+                          {rupiah(grandTotal)}
+                        </span>
+                        <button onClick={handleCopyTotal} className="p-2.5 bg-white dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-colors border border-slate-200 dark:border-slate-700 shadow-sm group" title="Salin Nominal">
+                           {copied ? <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400"/> : <Copy className="w-5 h-5 group-hover:scale-110 transition-transform"/>}
+                        </button>
+                      </div>
+                   </div>
+
+                  <div className="bg-white dark:bg-slate-900 rounded-xl p-4 flex items-center justify-between border border-slate-200 dark:border-slate-800 shadow-sm mt-4">
+                    <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">Metode</span>
+                    <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white bg-blue-50 dark:bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-500/20">
+                      <Wallet className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      AxiPay
+                    </div>
+                  </div>
+                </div>
+
+                {/* Receipt Zigzag Bottom Effect (Very realistic CSS Trick) */}
+                <div className="absolute -bottom-3 left-0 w-full h-6 bg-[#f8fafc] dark:bg-[#0B0F19] [mask-image:linear-gradient(to_right,transparent_0%,#000_50%,transparent_100%),radial-gradient(circle_at_bottom,transparent_6px,#000_7px)] [mask-size:100%_100%,20px_20px] [mask-composite:intersect] transition-colors duration-300" />
               </div>
               
               {/* Security Badge */}
-              <div className="mt-6 flex items-center justify-center gap-2 text-slate-400 dark:text-slate-500 text-xs">
-                <Shield className="w-4 h-4" />
-                <span>Pembayaran Anda aman</span>
+              <div className="mt-8 flex items-center justify-center gap-2.5 text-slate-500 dark:text-slate-400 text-sm font-medium">
+                <Shield className="w-5 h-5 text-emerald-500" />
+                <span>Transaksi dijamin aman & terenkripsi</span>
               </div>
             </div>
           </div>
@@ -526,8 +561,8 @@ export default function ManualQRISPage() {
       </div>
       
       {/* Footer */}
-      <footer className="py-8 text-center border-t border-slate-200 dark:border-slate-800 mt-12 bg-white dark:bg-slate-950">
-        <p className="text-slate-500 dark:text-slate-400 text-sm">
+      <footer className="py-8 text-center mt-12 pb-12">
+        <p className="text-slate-400 dark:text-slate-500 text-sm font-medium">
           &copy; {new Date().getFullYear()} AstByte Technology. All rights reserved.
         </p>
       </footer>
