@@ -557,7 +557,7 @@ export default function Dashboard() {
           {!selectedLanguage && (
             <div className="mb-10 animate-fade-in-up relative">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-900/50 border border-emerald-700/50 text-emerald-300 text-xs font-bold mb-4">
-                <CloudMoon className="w-4 h-4" /> Edisi Spesial Ramadhan 1446 H
+                <CloudMoon className="w-4 h-4" /> Edisi Spesial Ramadhan 1447 H
               </div>
               <h1 className="text-4xl md:text-6xl font-serif font-black text-white mb-4 leading-tight">
                 Ngabuburit Produktif <br />

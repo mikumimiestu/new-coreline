@@ -171,7 +171,7 @@ export default function PricingPage() {
   const faqs = [
     {
       q: "Sampai kapan promo Ramadhan ini berlaku?",
-      a: "Promo diskon 20% berlaku selama bulan Ramadhan 1446 H. Harga akan kembali normal setelah Lebaran.",
+      a: "Promo diskon 20% berlaku selama bulan Ramadhan 1447 H. Harga akan kembali normal setelah Lebaran.",
     },
     {
       q: "Apa bedanya Plus dan Ultra?",

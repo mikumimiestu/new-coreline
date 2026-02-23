@@ -360,7 +360,7 @@ export default function LoginPage() {
           </div>
 
           <footer className="mt-12 text-center text-xs font-medium text-emerald-600/60">
-            © {new Date().getFullYear()} Coreline by Astbyte. Edisi Spesial Ramadhan 1446 H.
+            © {new Date().getFullYear()} Coreline by Astbyte. Edisi Spesial Ramadhan 1447 H.
           </footer>
         </div>
       </div>
