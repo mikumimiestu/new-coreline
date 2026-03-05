@@ -222,7 +222,7 @@ export default function LoginPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                 {[
                   { icon: Code2, n: "50+", l: "Modul Belajar" },
-                  { icon: Users, n: "500++", l: "Member Aktif" },
+                  { icon: Users, n: "500+", l: "Member Aktif" },
                   { icon: BookOpen, n: "100%", l: "Materi Praktik" },
                   { icon: Shield, n: "24/7", l: "Dukungan Mentor" }
                 ].map((stat, idx) => (
