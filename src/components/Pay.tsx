@@ -22,7 +22,7 @@ import {
 /* =========================================
    TYPES & CONFIG
    ========================================= */
-type Tier = 'student' | 'pro' | 'plus';
+type Tier = 'student' | 'pro' | 'plus' | 'ultra';
 type Cycle = 'monthly' | 'yearly';
 
 const MERCHANT_NAME = 'AstByte System';
@@ -30,17 +30,42 @@ const API_BASE = 'https://authx.astbyte.com'; // Ganti ke localhost jika dev
 const TOKEN_KEY = 'astbyte_token';
 const PPN_RATE = 0.11; // 11% PPN
 
+// Disesuaikan dengan harga normal yang ada di Pricing Page
 const DEFAULT_PRICE: Record<Tier, { monthly: number; yearly: number }> = {
   student: { monthly: 0, yearly: 0 },
-  pro: { monthly: 25000, yearly: 240000 },
-  plus: { monthly: 149000, yearly: 1440000 },
+  pro: { monthly: 25000, yearly: 250000 },
+  plus: { monthly: 75000, yearly: 750000 },
+  ultra: { monthly: 125000, yearly: 1250000 },
 };
 
-// Voucher Codes
-const VOUCHERS: Record<string, { type: 'percent' | 'fixed'; value: number; note?: string }> = {
-  ASTBYTEJAYA26: { type: 'percent', value: 5, note: 'Diskon 5%' },
-  HARUSCORELINE: { type: 'fixed', value: 70000, note: 'Potongan Rp70.000' },
-  FEBARU: { type: 'percent', value: 10, note: 'Diskon Bulan Februari 10%' },
+// Voucher Codes dengan batasan Tier & Cycle
+type VoucherConfig = {
+  type: 'percent' | 'fixed';
+  value: number;
+  note: string;
+  validTiers?: Tier[]; // Voucher hanya berlaku untuk tier ini (opsional)
+  validCycles?: Cycle[]; // Voucher hanya berlaku untuk cycle ini (opsional)
+};
+
+const VOUCHERS: Record<string, VoucherConfig> = {
+  ASTBYTEJAYA26: { 
+    type: 'percent', 
+    value: 5, 
+    note: 'Diskon 5%',
+  },
+  HARUSCORELINE: { 
+    type: 'fixed', 
+    value: 70000, 
+    note: 'Potongan Rp70.000 (Hanya Plus Tahunan)',
+    validTiers: ['plus'],
+    validCycles: ['yearly']
+  },
+  FEBARU: { 
+    type: 'percent', 
+    value: 10, 
+    note: 'Diskon Bulan Februari 10% (Hanya Pro)',
+    validTiers: ['pro']
+  },
 };
 
 /* =========================================
@@ -62,16 +87,25 @@ function makeOrderId() {
   return `TRX-${ts}-${random}`;
 }
 
-function calcDiscount(nominal: number, code: string) {
-  if (!code) return { valid: false, amount: 0, label: '' };
+function calcDiscount(nominal: number, code: string, currentTier: Tier, currentCycle: Cycle) {
+  if (!code) return { valid: false, amount: 0, label: '', error: '' };
+  
   const v = VOUCHERS[code.toUpperCase().trim()];
-  if (!v) return { valid: false, amount: 0, label: '' };
+  if (!v) return { valid: false, amount: 0, label: '', error: 'Kode voucher tidak valid atau kedaluwarsa.' };
+
+  // Pengecekan Batasan (Constraints)
+  if (v.validTiers && !v.validTiers.includes(currentTier)) {
+    return { valid: false, amount: 0, label: '', error: `Voucher ini tidak berlaku untuk paket ${currentTier.toUpperCase()}.` };
+  }
+  if (v.validCycles && !v.validCycles.includes(currentCycle)) {
+    return { valid: false, amount: 0, label: '', error: `Voucher ini tidak berlaku untuk langganan ${currentCycle === 'monthly' ? 'Bulanan' : 'Tahunan'}.` };
+  }
   
   let disc = v.type === 'percent' ? Math.floor((nominal * v.value) / 100) : v.value;
   disc = Math.min(disc, nominal); // Diskon tidak boleh melebihi harga
   
   const label = v.note || (v.type === 'percent' ? `Diskon ${v.value}%` : `Potongan ${rupiah(v.value)}`);
-  return { valid: true, amount: disc, label };
+  return { valid: true, amount: disc, label, error: '' };
 }
 
 type AuthUser = {
@@ -108,12 +142,12 @@ export default function ManualQRISPage() {
   const orderId = useMemo(() => makeOrderId(), []);
   
   const nominalRaw = useMemo(() => {
-    const defaults = DEFAULT_PRICE[tierParam];
+    const defaults = DEFAULT_PRICE[tierParam] || DEFAULT_PRICE['student'];
     return Number.isFinite(amountParam) ? Math.max(0, Math.round(amountParam)) : defaults[cycleParam];
   }, [tierParam, cycleParam, amountParam]);
 
   // Kalkulasi Pembayaran
-  const disc = useMemo(() => calcDiscount(nominalRaw, voucher), [nominalRaw, voucher]);
+  const disc = useMemo(() => calcDiscount(nominalRaw, voucher, tierParam, cycleParam), [nominalRaw, voucher, tierParam, cycleParam]);
   const subtotal = Math.max(0, nominalRaw - disc.amount); // Harga setelah diskon
   const ppnAmount = Math.round(subtotal * PPN_RATE); // PPN 11% ditambahkan dari Subtotal
   const grandTotal = subtotal + ppnAmount; // Total akhir yang harus dibayar
@@ -209,7 +243,7 @@ export default function ManualQRISPage() {
           order_id: orderId,
           tier: tierParam,
           cycle: cycleParam,
-          voucher_code: voucher || null,
+          voucher_code: disc.valid ? voucher : null, // Hanya kirim kode jika valid
         }),
       });
 
@@ -237,27 +271,31 @@ export default function ManualQRISPage() {
   const isBalanceSufficient = user ? user.balance >= grandTotal : false;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F19] text-slate-800 dark:text-slate-200 font-sans selection:bg-blue-200 dark:selection:bg-blue-900/50 transition-colors duration-300">
+    // Light Theme Container
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-blue-500/30 transition-colors duration-300 relative overflow-hidden">
       
-      {/* Background Glow Effects */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] bg-blue-400/20 dark:bg-blue-600/10 rounded-full blur-[100px]" />
-        <div className="absolute bottom-[-10%] right-[-5%] w-[35vw] h-[35vw] max-w-[500px] max-h-[500px] bg-emerald-400/20 dark:bg-emerald-600/10 rounded-full blur-[120px]" />
+      {/* Background Ambience (Grid & Glows) */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        {/* Subtle Grid Pattern */}
+        <div className="absolute inset-0 opacity-[0.4] bg-[linear-gradient(rgba(203,213,225,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(203,213,225,0.5)_1px,transparent_1px)] bg-[size:30px_30px]"></div>
+        {/* Soft Glows */}
+        <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] bg-blue-300/30 rounded-full blur-[100px]" />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[35vw] h-[35vw] max-w-[500px] max-h-[500px] bg-emerald-300/20 rounded-full blur-[120px]" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-6 md:py-12">
         
         {/* HEADER SECTION */}
         <header className="mb-8 md:mb-12">
-          <a href="/pricing" className="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm font-semibold mb-6 w-fit bg-white/60 dark:bg-slate-900/60 px-4 py-2 rounded-full backdrop-blur-md border border-slate-200 dark:border-slate-800 shadow-sm">
+          <a href="/pricing" className="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-colors text-sm font-bold mb-6 w-fit bg-white px-4 py-2.5 rounded-full shadow-sm border border-slate-200 hover:shadow-md hover:-translate-y-0.5 transform">
             <ArrowLeft className="w-4 h-4" /> Kembali ke Paket
           </a>
           
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
             <div className="max-w-xl">
-              <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-4">
-                <img src="/logos/axipay.png" alt="AxiPay" className="h-10 md:h-12 w-auto object-contain filter invert dark:hue-rotate-180 drop-shadow-sm" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-800 to-slate-500 dark:from-white dark:to-slate-400">
+              <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight flex items-center gap-4 drop-shadow-sm">
+                <img src="/logos/axipay.png" alt="AxiPay" className="h-10 md:h-12 w-auto object-contain filter brightness-0 opacity-80" />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">
                   Checkout
                 </span>
               </h1>
@@ -265,12 +303,12 @@ export default function ManualQRISPage() {
 
             {/* Saldo Badge (Desktop & Tablet) */}
             {user && (
-              <div className="hidden sm:flex items-center gap-5 bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 backdrop-blur-xl transition-all hover:scale-[1.02]">
+              <div className="hidden sm:flex items-center gap-5 bg-white border border-slate-200 rounded-3xl p-5 shadow-lg shadow-slate-200/50 transition-all hover:scale-[1.02]">
                 <div className="text-right">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold mb-1">Saldo Tersedia</p>
-                  <p className="text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">{rupiah(user.balance)}</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">Saldo Tersedia</p>
+                  <p className="text-2xl font-black text-slate-900 font-mono tracking-tight">{rupiah(user.balance)}</p>
                 </div>
-                <div className={`h-14 w-14 rounded-2xl flex items-center justify-center border-2 transition-colors ${isBalanceSufficient ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'}`}>
+                <div className={`h-14 w-14 rounded-2xl flex items-center justify-center border transition-colors shadow-sm ${isBalanceSufficient ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-red-50 text-red-600 border-red-200'}`}>
                   {isBalanceSufficient ? <Wallet className="w-7 h-7" /> : <AlertTriangle className="w-7 h-7" />}
                 </div>
               </div>
@@ -286,32 +324,32 @@ export default function ManualQRISPage() {
           <div className="lg:col-span-7 space-y-6 md:space-y-8">
             
             {/* Step 1: Identification */}
-            <section className="bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 rounded-[2rem] p-6 md:p-8 shadow-xl shadow-slate-200/40 dark:shadow-none backdrop-blur-xl relative overflow-hidden transition-all duration-300">
+            <section className="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-xl shadow-slate-200/50 relative overflow-hidden transition-all duration-300">
               <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-blue-500 to-indigo-600" />
               
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold border border-blue-100 dark:border-blue-500/20 text-lg shadow-sm">1</div>
-                  <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Verifikasi Akun</h2>
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 font-extrabold border border-blue-100 text-lg shadow-sm">1</div>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900">Verifikasi Akun</h2>
                 </div>
-                {user && <BadgeCheck className="w-8 h-8 text-emerald-500 dark:text-emerald-400 animate-in zoom-in" />}
+                {user && <BadgeCheck className="w-8 h-8 text-emerald-500 animate-in zoom-in" />}
               </div>
 
               {!user ? (
                 <form onSubmit={handleCheckPublicId} className="space-y-5">
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Public ID AstByte</label>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">Public ID AstByte</label>
                     <div className="relative group">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400 transition-colors" />
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
                       <input
                         type="text"
                         value={publicId}
                         onChange={(e) => setPublicId(e.target.value)}
                         placeholder="Contoh: 3e02d5cb-xxxx-xxxx..."
-                        className="w-full bg-white dark:bg-slate-950/50 border border-slate-300 dark:border-slate-700 rounded-2xl py-4 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 dark:focus:border-blue-500 transition-all outline-none font-mono text-sm md:text-base shadow-inner"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none font-mono text-sm md:text-base shadow-inner focus:bg-white"
                       />
                     </div>
-                    <p className="mt-2.5 text-xs md:text-sm text-slate-500 flex items-center gap-1.5">
+                    <p className="mt-2.5 text-xs md:text-sm text-slate-500 flex items-center gap-1.5 font-medium">
                       <Info className="w-4 h-4" /> Anda dapat menemukan Public ID di menu Account Center.
                     </p>
                   </div>
@@ -319,25 +357,25 @@ export default function ManualQRISPage() {
                   <button
                     type="submit"
                     disabled={loadingCheck || !publicId.trim()}
-                    className="w-full bg-slate-900 dark:bg-white hover:bg-blue-700 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-base md:text-lg"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed text-base md:text-lg hover:-translate-y-0.5"
                   >
                     {loadingCheck ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Hubungkan Akun'}
                   </button>
                 </form>
               ) : (
-                <div className="bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-xl font-bold text-white shadow-md shadow-blue-500/20">
                       {user.full_name.charAt(0)}
                     </div>
                     <div>
-                      <p className="font-bold text-slate-900 dark:text-white text-lg">{user.full_name}</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{user.email}</p>
+                      <p className="font-extrabold text-slate-900 text-lg">{user.full_name}</p>
+                      <p className="text-sm text-slate-500 font-medium mt-0.5">{user.email}</p>
                     </div>
                   </div>
                   <button 
                     onClick={() => { setUser(null); setToken(null); }}
-                    className="px-5 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all text-center"
+                    className="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-all text-center shadow-sm"
                   >
                     Ganti Akun
                   </button>
@@ -347,51 +385,51 @@ export default function ManualQRISPage() {
 
             {/* Mobile Saldo Badge (Tampil hanya saat user login & di mobile) */}
             {user && (
-              <div className="sm:hidden flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+              <div className="sm:hidden flex items-center justify-between bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
                 <div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase">Saldo Anda</p>
-                  <p className="text-lg font-black text-slate-900 dark:text-white font-mono">{rupiah(user.balance)}</p>
+                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Saldo Anda</p>
+                  <p className="text-lg font-black text-slate-900 font-mono">{rupiah(user.balance)}</p>
                 </div>
-                <div className={`p-2 rounded-lg ${isBalanceSufficient ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400'}`}>
+                <div className={`p-2.5 rounded-xl border ${isBalanceSufficient ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-red-50 text-red-600 border-red-100'}`}>
                    {isBalanceSufficient ? <Check className="w-5 h-5"/> : <AlertTriangle className="w-5 h-5"/>}
                 </div>
               </div>
             )}
 
             {/* Step 2: Payment Details */}
-            <section className={`bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 rounded-[2rem] p-6 md:p-8 shadow-xl shadow-slate-200/40 dark:shadow-none backdrop-blur-xl relative overflow-hidden transition-all duration-500 ${!user ? 'opacity-40 pointer-events-none grayscale-[0.3]' : 'opacity-100'}`}>
+            <section className={`bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-xl shadow-slate-200/50 relative overflow-hidden transition-all duration-500 ${!user ? 'opacity-40 pointer-events-none grayscale-[0.5]' : 'opacity-100'}`}>
               <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-emerald-400 to-teal-500" />
               
               <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-100 dark:border-emerald-500/20 text-lg shadow-sm">2</div>
-                <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Rincian Pembayaran</h2>
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 font-extrabold border border-emerald-100 text-lg shadow-sm">2</div>
+                <h2 className="text-xl md:text-2xl font-bold text-slate-900">Rincian Pembayaran</h2>
               </div>
 
               <div className="space-y-6 md:space-y-8">
                 
                 {/* Product Info Box */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 md:p-6 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 md:p-6 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm">
                   <div className="flex items-center gap-4">
-                    <div className="p-3.5 bg-white dark:bg-slate-900 rounded-2xl text-blue-600 dark:text-blue-400 shadow-sm border border-slate-100 dark:border-slate-800">
+                    <div className="p-3.5 bg-white rounded-2xl text-blue-600 shadow-sm border border-slate-200">
                       <CreditCard className="w-7 h-7" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Berlangganan</p>
-                      <p className="text-lg md:text-xl font-bold text-slate-900 dark:text-white capitalize flex items-center flex-wrap gap-2">
+                      <p className="text-sm font-bold text-slate-500 mb-1">Berlangganan</p>
+                      <p className="text-lg md:text-xl font-extrabold text-slate-900 capitalize flex items-center flex-wrap gap-2">
                         {tierParam} Plan 
-                        <span className="text-slate-600 dark:text-slate-300 text-xs md:text-sm font-semibold px-2.5 py-1 bg-slate-200 dark:bg-slate-800 rounded-lg">{cycleParam}</span>
+                        <span className="text-blue-700 text-xs md:text-sm font-bold px-2.5 py-1 bg-blue-100 rounded-lg border border-blue-200 uppercase">{cycleParam}</span>
                       </p>
                     </div>
                   </div>
-                  <div className="sm:text-right border-t sm:border-t-0 border-slate-200 dark:border-slate-800 pt-4 sm:pt-0 mt-2 sm:mt-0">
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Harga Dasar</p>
-                    <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">{rupiah(nominalRaw)}</p>
+                  <div className="sm:text-right border-t sm:border-t-0 border-slate-200 pt-4 sm:pt-0 mt-2 sm:mt-0">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Harga Dasar</p>
+                    <p className="text-xl md:text-2xl font-black text-slate-900">{rupiah(nominalRaw)}</p>
                   </div>
                 </div>
 
                 {/* Voucher Input */}
                 <div>
-                   <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Kode Promo / Voucher</label>
+                   <label className="block text-sm font-bold text-slate-700 mb-2">Kode Promo / Voucher</label>
                    <div className="relative group">
                       <BadgePercent className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
                       <input
@@ -399,30 +437,30 @@ export default function ManualQRISPage() {
                         value={voucher}
                         onChange={(e) => setVoucher(e.target.value.toUpperCase())}
                         placeholder="Masukkan kode voucher..."
-                        className="w-full bg-white dark:bg-slate-950/50 border border-slate-300 dark:border-slate-700 rounded-2xl py-4 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none font-bold tracking-widest uppercase shadow-inner"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none font-bold tracking-widest uppercase shadow-inner focus:bg-white"
                       />
                    </div>
                    {/* Voucher Status Indicator */}
                    {disc.valid ? (
-                     <div className="mt-3 text-sm font-medium text-emerald-700 dark:text-emerald-300 flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 px-4 py-2.5 rounded-xl w-fit border border-emerald-200 dark:border-emerald-500/20">
-                       <Check className="w-4 h-4 text-emerald-600" /> {disc.label} berhasil diterapkan! (-{rupiah(disc.amount)})
+                     <div className="mt-3 text-sm font-bold text-emerald-700 flex items-center gap-2 bg-emerald-50 px-4 py-3 rounded-xl w-fit border border-emerald-200 shadow-sm animate-in fade-in">
+                       <Check className="w-5 h-5 text-emerald-600" /> {disc.label} berhasil diterapkan! (-{rupiah(disc.amount)})
                      </div>
                    ) : voucher.length > 0 && !disc.valid ? (
-                     <p className="mt-3 text-sm text-red-500 flex items-center gap-1.5"><AlertTriangle className="w-4 h-4"/> Kode voucher tidak valid atau kedaluwarsa.</p>
+                     <p className="mt-3 text-sm font-medium text-red-600 flex items-center gap-1.5"><AlertTriangle className="w-4 h-4"/> {disc.error}</p>
                    ) : null}
                 </div>
 
                 {/* Alert Messages */}
                 {errorMsg && (
-                  <div className="p-4 md:p-5 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 flex items-start gap-3 animate-in fade-in">
-                    <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm md:text-base font-medium text-red-800 dark:text-red-200">{errorMsg}</p>
+                  <div className="p-4 md:p-5 rounded-2xl bg-red-50 border border-red-200 flex items-start gap-3 animate-in fade-in shadow-sm">
+                    <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm md:text-base font-bold text-red-800">{errorMsg}</p>
                   </div>
                 )}
                 {successMsg && (
-                  <div className="p-4 md:p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 flex items-start gap-3 animate-in fade-in">
-                    <Check className="w-6 h-6 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm md:text-base font-medium text-emerald-800 dark:text-emerald-200">{successMsg}</p>
+                  <div className="p-4 md:p-5 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-start gap-3 animate-in fade-in shadow-sm">
+                    <Check className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm md:text-base font-bold text-emerald-800">{successMsg}</p>
                   </div>
                 )}
 
@@ -433,8 +471,8 @@ export default function ManualQRISPage() {
                   className={`
                     w-full py-4 md:py-5 rounded-2xl font-extrabold text-lg md:text-xl flex items-center justify-center gap-3 transition-all duration-300
                     ${isBalanceSufficient 
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-xl shadow-blue-500/30 hover:scale-[1.01]' 
-                      : 'bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed border border-transparent dark:border-slate-700'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-xl shadow-blue-500/30 hover:-translate-y-0.5' 
+                      : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
                     }
                   `}
                 >
@@ -462,29 +500,29 @@ export default function ManualQRISPage() {
               ========================================== */}
           <div className="lg:col-span-5 space-y-6 md:mt-0 mt-4">
             <div className="sticky top-8 lg:top-12">
-              <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-0 shadow-2xl shadow-slate-200/60 dark:shadow-black/60 relative overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col">
+              <div className="bg-white rounded-[2rem] p-0 shadow-2xl shadow-slate-200/80 relative overflow-hidden border border-slate-200 flex flex-col">
                 
                 {/* Receipt Header Ribbon */}
                 <div className="h-3 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500" />
                 
                 <div className="p-6 md:p-8 flex-1">
                   <div className="text-center mb-8">
-                    <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800/50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100 dark:border-slate-700/50 shadow-sm">
-                      <Receipt className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                    <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-100 shadow-sm">
+                      <Receipt className="w-8 h-8 text-blue-600" />
                     </div>
-                    <h3 className="text-2xl font-black tracking-widest text-slate-900 dark:text-white uppercase">Invoice</h3>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm font-mono mt-2 bg-slate-100 dark:bg-slate-800/50 inline-block px-3 py-1 rounded-full">{orderId}</p>
+                    <h3 className="text-2xl font-black tracking-widest text-slate-900 uppercase">Invoice</h3>
+                    <p className="text-slate-500 text-sm font-mono font-bold mt-2 bg-slate-50 border border-slate-200 inline-block px-3 py-1 rounded-full">{orderId}</p>
                   </div>
 
                   {/* Merchant & Order Details */}
-                  <div className="space-y-4 border-b-2 border-dashed border-slate-200 dark:border-slate-700 pb-6 mb-6">
+                  <div className="space-y-4 border-b-2 border-dashed border-slate-200 pb-6 mb-6">
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-500 dark:text-slate-400 text-sm font-medium">Merchant</span>
-                      <span className="font-bold text-slate-900 dark:text-white text-right">{MERCHANT_NAME}</span>
+                      <span className="text-slate-500 text-sm font-bold">Merchant</span>
+                      <span className="font-extrabold text-slate-900 text-right">{MERCHANT_NAME}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-500 dark:text-slate-400 text-sm font-medium">Tanggal</span>
-                      <span className="font-bold text-slate-900 dark:text-white text-right">
+                      <span className="text-slate-500 text-sm font-bold">Tanggal</span>
+                      <span className="font-extrabold text-slate-900 text-right">
                         {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric'})}
                       </span>
                     </div>
@@ -493,27 +531,27 @@ export default function ManualQRISPage() {
                   {/* Math Calculations */}
                   <div className="space-y-4">
                      {/* 1. Base Price */}
-                     <div className="flex justify-between items-center text-slate-700 dark:text-slate-300 font-medium">
+                     <div className="flex justify-between items-center text-slate-700 font-bold">
                         <span>Harga Normal</span>
                         <span>{rupiah(nominalRaw)}</span>
                      </div>
                      
                      {/* 2. Discount */}
                      {disc.amount > 0 && (
-                       <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50/50 dark:bg-emerald-500/5 px-2 py-1 -mx-2 rounded">
+                       <div className="flex justify-between items-center text-emerald-600 font-bold bg-emerald-50 border border-emerald-100 px-3 py-1.5 -mx-3 rounded-lg">
                           <span>Potongan Voucher</span>
                           <span>-{rupiah(disc.amount)}</span>
                        </div>
                      )}
 
                      {/* 3. Subtotal (DPP) */}
-                     <div className="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-200 font-bold">
+                     <div className="flex justify-between items-center pt-4 border-t border-slate-100 text-slate-900 font-black text-lg">
                         <span>Subtotal</span>
                         <span>{rupiah(subtotal)}</span>
                      </div>
                      
                      {/* 4. PPN */}
-                     <div className="flex justify-between items-center text-slate-500 dark:text-slate-400 text-sm mt-2">
+                     <div className="flex justify-between items-center text-slate-500 font-bold text-sm mt-2">
                         <span className="flex items-center gap-1.5">
                           <Plus className="w-3.5 h-3.5" /> PPN (11%)
                         </span>
@@ -523,34 +561,34 @@ export default function ManualQRISPage() {
                 </div>
 
                 {/* Grand Total Area (Highlight) */}
-                <div className="bg-slate-50 dark:bg-slate-950/80 p-6 md:p-8 pt-6 relative border-t border-slate-200 dark:border-slate-800">
+                <div className="bg-slate-50 p-6 md:p-8 pt-6 relative border-t border-slate-200">
                    <div className="flex flex-col mb-5">
-                      <span className="font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-xs mb-2">Total Pembayaran</span>
+                      <span className="font-black text-slate-500 uppercase tracking-widest text-xs mb-2">Total Pembayaran</span>
                       <div className="flex justify-between items-end">
-                        <span className="text-3xl md:text-4xl font-black text-blue-600 dark:text-blue-400 tracking-tight leading-none">
+                        <span className="text-3xl md:text-4xl font-black text-blue-600 tracking-tight leading-none drop-shadow-sm">
                           {rupiah(grandTotal)}
                         </span>
-                        <button onClick={handleCopyTotal} className="p-2.5 bg-white dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-colors border border-slate-200 dark:border-slate-700 shadow-sm group" title="Salin Nominal">
-                           {copied ? <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400"/> : <Copy className="w-5 h-5 group-hover:scale-110 transition-transform"/>}
+                        <button onClick={handleCopyTotal} className="p-2.5 bg-white hover:bg-blue-50 rounded-xl text-slate-500 hover:text-blue-600 transition-colors border border-slate-200 hover:border-blue-200 shadow-sm group" title="Salin Nominal">
+                           {copied ? <Check className="w-5 h-5 text-emerald-600"/> : <Copy className="w-5 h-5 group-hover:scale-110 transition-transform"/>}
                         </button>
                       </div>
                    </div>
 
-                  <div className="bg-white dark:bg-slate-900 rounded-xl p-4 flex items-center justify-between border border-slate-200 dark:border-slate-800 shadow-sm mt-4">
-                    <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">Metode</span>
-                    <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white bg-blue-50 dark:bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-500/20">
-                      <Wallet className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <div className="bg-white rounded-xl p-4 flex items-center justify-between border border-slate-200 shadow-sm mt-4">
+                    <span className="text-sm font-bold text-slate-600">Metode</span>
+                    <div className="flex items-center gap-2 font-bold text-slate-900 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 shadow-sm">
+                      <Wallet className="w-4 h-4 text-blue-600" />
                       AxiPay
                     </div>
                   </div>
                 </div>
 
-                {/* Receipt Zigzag Bottom Effect (Very realistic CSS Trick) */}
-                <div className="absolute -bottom-3 left-0 w-full h-6 bg-[#f8fafc] dark:bg-[#0B0F19] [mask-image:linear-gradient(to_right,transparent_0%,#000_50%,transparent_100%),radial-gradient(circle_at_bottom,transparent_6px,#000_7px)] [mask-size:100%_100%,20px_20px] [mask-composite:intersect] transition-colors duration-300" />
+                {/* Receipt Zigzag Bottom Effect (Very realistic CSS Trick matched to Light Background) */}
+                <div className="absolute -bottom-3 left-0 w-full h-6 bg-[#f8fafc] [mask-image:linear-gradient(to_right,transparent_0%,#000_50%,transparent_100%),radial-gradient(circle_at_bottom,transparent_6px,#000_7px)] [mask-size:100%_100%,20px_20px] [mask-composite:intersect]" />
               </div>
               
               {/* Security Badge */}
-              <div className="mt-8 flex items-center justify-center gap-2.5 text-slate-500 dark:text-slate-400 text-sm font-medium">
+              <div className="mt-8 flex items-center justify-center gap-2.5 text-slate-500 text-sm font-bold">
                 <Shield className="w-5 h-5 text-emerald-500" />
                 <span>Transaksi dijamin aman & terenkripsi</span>
               </div>
@@ -562,7 +600,7 @@ export default function ManualQRISPage() {
       
       {/* Footer */}
       <footer className="py-8 text-center mt-12 pb-12">
-        <p className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+        <p className="text-slate-400 text-sm font-medium">
           &copy; {new Date().getFullYear()} AstByte Technology. All rights reserved.
         </p>
       </footer>
