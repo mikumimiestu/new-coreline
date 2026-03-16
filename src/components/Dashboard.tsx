@@ -177,7 +177,7 @@ export default function Dashboard() {
   // Chatbot State
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<{sender: 'bot' | 'user', text: string}[]>([
-    { sender: 'bot', text: 'Halo bro! Ada yang bisa CoreBot bantu hari ini? Pilih pertanyaan di bawah ya.' }
+    { sender: 'bot', text: 'Halo! Ada yang bisa CoreBot bantu hari ini? Pilih pertanyaan di bawah ya.' }
   ]);
 
   // Setup Title
@@ -424,7 +424,8 @@ export default function Dashboard() {
     { q: "Cara upgrade akun?", a: "Untuk upgrade, klik tombol 'Upgrade Sekarang' berkedip di bagian atas dashboard, atau kunjungi menu Profile Anda." },
     { q: "Kapan sertifikat bisa diunduh?", a: "Sertifikat otomatis tersedia setelah Anda menyelesaikan 100% modul pada sebuah bahasa pemrograman." },
     { q: "Apakah ada grup diskusi?", a: "Tentu! Member Pro & Ultra akan otomatis mendapat akses ke grup eksklusif (Telegram/Discord). Cek email kamu ya." },
-    { q: "Kenapa modul terkunci?", a: "Modul ke-3 dan seterusnya terkunci untuk akun Free. Silakan upgrade ke paket premium untuk akses tanpa batas." }
+    { q: "Kenapa modul terkunci?", a: "Kami memperbarui kebijakan kami, pada tanggal 15 Maret 2026 semua modul kami kunci untuk paket free." },
+    { q: "Bagaimana caranya video call?", a: "Untuk video call dengan mentor hanya berlaku untuk paket ultra, per-sesi hanya 1 jam dan 4x sebulan, lakukan permintaan video call melalui wa admin." }
   ];
 
   const handleAskBot = (faq: {q: string, a: string}) => {
