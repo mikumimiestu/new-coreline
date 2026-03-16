@@ -11,6 +11,10 @@ import PromoPage from "./components/Promo";
 import ComingSoonPage from "./components/ComingSoon";
 import AdLoadingPage from './components/AdLoadingPage';
 
+// Import Quiz & Exercise Pages yang baru dibuat
+import QuizPage from "./pages/QuizPage";
+import ExercisePage from "./pages/ExercisePage";
+
 // Import ProtectedRoute yang baru dibuat
 import ProtectedRoute from "./routers/ProtectedRoute";
 
@@ -40,6 +44,26 @@ function AppContent() {
         element={
           <ProtectedRoute requirePremium={true}>
             <MaterialPage />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Halaman Kuis: Diproteksi KHUSUS untuk user Premium */}
+      <Route 
+        path="/quiz/:id" 
+        element={
+          <ProtectedRoute requirePremium={true}>
+            <QuizPage />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Halaman Latihan Praktik: Diproteksi KHUSUS untuk user Premium */}
+      <Route 
+        path="/exercise/:id" 
+        element={
+          <ProtectedRoute requirePremium={true}>
+            <ExercisePage />
           </ProtectedRoute>
         } 
       />

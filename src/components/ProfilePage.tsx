@@ -3,7 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   User as UserIcon, Mail, Phone, CreditCard, ArrowLeft, Copy, Check,
   ShieldCheck, Loader2, Sparkles, Calendar, Crown, Edit3, X, Eye, EyeOff,
-  Zap, CheckCircle, ExternalLink, AlertCircle, Layout
+  Zap, CheckCircle, ExternalLink, AlertCircle, Layout, Trophy, BookOpen,
+  Activity, Star, Settings, MessageCircle, Heart, Receipt
 } from 'lucide-react';
 
 /* ================================
@@ -20,7 +21,7 @@ interface Subscription {
   start_date: string;
   end_date: string;
   payment_method: string;
-  status?: 'active' | 'expired'; // Optional logic
+  status?: 'active' | 'expired';
 }
 
 interface ProfilePageProps {
@@ -114,7 +115,6 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
   if (!authUser) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6 relative overflow-hidden">
-        {/* Subtle Background Pattern */}
         <div className="absolute inset-0 opacity-[0.4] bg-[linear-gradient(rgba(203,213,225,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(203,213,225,0.5)_1px,transparent_1px)] bg-[size:30px_30px]"></div>
         
         <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-10 text-center shadow-xl relative z-10">
@@ -131,12 +131,13 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
     );
   }
 
-  // Determine Visual Style based on Plan
+  // --- 4. DATA DERIVED DARI API ---
   const planType = authUser.subscription_type?.toLowerCase() || 'free';
   const isPro = planType === 'pro';
   const isPlus = planType === 'plus';
-
-  const accentGradient = isPro 
+  const isUltra = planType === 'ultra';
+  
+  const accentGradient = isPro || isUltra
     ? 'from-amber-400 to-orange-500' 
     : isPlus 
     ? 'from-fuchsia-500 to-purple-600' 
@@ -145,6 +146,43 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
   const avatarUrl = authUser.avatar_url && !photoError
     ? `${AUTHX_BASE}${authUser.avatar_url}`
     : `https://ui-avatars.com/api/?background=f8fafc&color=0f172a&name=${encodeURIComponent(authUser.full_name)}`;
+
+  // Kalkulasi Statistik Real dari API
+  const joinYear = authUser.created_at ? new Date(authUser.created_at).getFullYear() : new Date().getFullYear();
+  const totalTransactions = subs.length;
+  const isPremiumActive = authUser.subscription_status === 'active';
+
+  // Generate Badges Dinamis berdasarkan kondisi API
+  const dynamicBadges = [];
+  
+  // Badge 1: Pasti dapat karena punya akun
+  dynamicBadges.push({ 
+    id: 1, name: "Verified ID", desc: "Akun terverifikasi Coreline.", 
+    icon: ShieldCheck, color: "text-blue-500", bg: "bg-blue-100", border: "border-blue-200" 
+  });
+
+  // Badge 2: Berdasarkan status premium
+  if (isPremiumActive && planType !== 'free') {
+    dynamicBadges.push({ 
+      id: 2, name: "Sultan", desc: `Akses fitur ${planType.toUpperCase()}.`, 
+      icon: Crown, color: "text-purple-500", bg: "bg-purple-100", border: "border-purple-200" 
+    });
+  }
+
+  // Badge 3: Berdasarkan riwayat langganan
+  if (totalTransactions > 1) {
+    dynamicBadges.push({ 
+      id: 3, name: "Pelanggan Setia", desc: `${totalTransactions}x riwayat transaksi.`, 
+      icon: Receipt, color: "text-amber-500", bg: "bg-amber-100", border: "border-amber-200" 
+    });
+  }
+
+  // Badge 4: Pengguna aktif
+  dynamicBadges.push({ 
+    id: 4, name: "Pelajar Aktif", desc: "Siap eksplorasi modul digital.", 
+    icon: BookOpen, color: "text-emerald-500", bg: "bg-emerald-100", border: "border-emerald-200" 
+  });
+
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-blue-500/30">
@@ -158,9 +196,9 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
       {/* Navbar */}
       <nav className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/80 backdrop-blur-xl shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <button onClick={onBack} className="group flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors">
-            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            Kembali
+          <button onClick={onBack} className="group flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors bg-white rounded-full border border-slate-200 shadow-sm hover:shadow-md">
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Kembali ke Dashboard
           </button>
           
           <div className="flex items-center gap-3">
@@ -170,7 +208,7 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
              </div>
              <button
                 onClick={() => setShowEditModal(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md hover:shadow-lg shadow-blue-600/20"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white text-sm font-bold transition-all shadow-md hover:shadow-lg shadow-blue-500/20 border border-blue-400/50"
               >
                 <Edit3 className="w-4 h-4" />
                 <span className="hidden sm:inline">Edit Profile</span>
@@ -183,7 +221,6 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
         
         {/* HEADER CARD */}
         <div className="relative overflow-hidden rounded-[2.5rem] bg-white border border-slate-200 p-8 sm:p-12 shadow-xl animate-fade-in-up">
-          {/* Decorative Glow */}
           <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${accentGradient} opacity-[0.15] rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none`}></div>
 
           <div className="relative flex flex-col lg:flex-row items-center lg:items-start gap-10">
@@ -206,17 +243,22 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
               <div>
                 <h1 className="text-4xl sm:text-5xl font-black text-slate-900 flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:justify-start tracking-tight">
                   {authUser.full_name}
-                  {(isPro || isPlus) && <Sparkles className={`w-8 h-8 text-transparent bg-clip-text bg-gradient-to-r ${accentGradient}`} />}
+                  {isPremiumActive && planType !== 'free' && <Sparkles className={`w-8 h-8 text-transparent bg-clip-text bg-gradient-to-r ${accentGradient}`} />}
                 </h1>
                 
                 <div className="mt-4 flex flex-wrap gap-3 justify-center lg:justify-start">
-                  {authUser.subscription_status === 'active' && (
+                  {isPremiumActive && planType !== 'free' ? (
                     <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black text-white uppercase tracking-widest shadow-md bg-gradient-to-r ${accentGradient}`}>
                       <Crown className="w-3 h-3" />
                       {planType} Member
                     </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black text-slate-600 bg-slate-100 border border-slate-200 uppercase tracking-widest shadow-sm">
+                      <Layout className="w-3 h-3" />
+                      Free Member
+                    </span>
                   )}
-                  <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
                     <CheckCircle className="w-3 h-3 text-emerald-600" />
                     Verified Account
                   </span>
@@ -242,10 +284,10 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
                        {showPublicId ? authUser.public_id : getMaskedPublicId(authUser.public_id)}
                     </div>
                     <div className="flex border-l border-slate-200 pl-1">
-                      <button onClick={() => setShowPublicId(!showPublicId)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-white rounded-lg transition-colors shadow-sm">
+                      <button onClick={() => setShowPublicId(!showPublicId)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-white rounded-lg transition-colors shadow-sm" title="Tampilkan ID">
                         {showPublicId ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
                       </button>
-                      <button onClick={handleCopyId} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-white rounded-lg transition-colors shadow-sm ml-1">
+                      <button onClick={handleCopyId} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-white rounded-lg transition-colors shadow-sm ml-1" title="Salin ID">
                         {copied ? <Check className="w-4 h-4 text-emerald-500"/> : <Copy className="w-4 h-4"/>}
                       </button>
                     </div>
@@ -255,45 +297,86 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
           </div>
         </div>
 
-        {/* CONTENT GRID */}
+        {/* QUICK STATS - DYNAMIC DARI API */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in-up" style={{ animationDelay: '50ms' }}>
+           <StatCard icon={<Calendar />} title="Bergabung Sejak" value={`${joinYear}`} color="text-blue-600" bg="bg-blue-50" />
+           <StatCard icon={<Receipt />} title="Total Transaksi" value={`${totalTransactions} Transaksi`} color="text-amber-500" bg="bg-amber-50" />
+           <StatCard icon={<ShieldCheck />} title="Tipe Member" value={planType.toUpperCase()} color="text-purple-600" bg="bg-purple-50" />
+           <StatCard icon={<Activity />} title="Status Akun" value={isPremiumActive ? 'Aktif' : 'Basic'} color="text-emerald-600" bg="bg-emerald-50" />
+        </div>
+
+        {/* CONTENT GRID UTAMA */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-           {/* LEFT: Personal Info */}
-           <div className="lg:col-span-2 space-y-6">
+           
+           {/* LEFT COLUMN: Personal Info & Badges */}
+           <div className="lg:col-span-2 space-y-8">
+              
+              {/* Personal Info Box */}
               <div className="bg-white border border-slate-200 shadow-lg rounded-[2rem] p-8 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-                 <div className="flex items-center gap-3 mb-8">
-                    <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl">
-                       <UserIcon className="w-6 h-6 text-blue-600" />
+                 <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
+                    <div className="flex items-center gap-3">
+                       <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl">
+                          <UserIcon className="w-6 h-6 text-blue-600" />
+                       </div>
+                       <h2 className="text-xl font-black text-slate-900">Informasi Pribadi</h2>
                     </div>
-                    <h2 className="text-xl font-black text-slate-900">Informasi Pribadi</h2>
                  </div>
                  
-                 <div className="grid gap-6">
+                 <div className="grid md:grid-cols-2 gap-6">
                     <Field label="Nama Lengkap" value={authUser.full_name} icon={<UserIcon className="w-4 h-4"/>} />
-                    <Field label="Email" value={authUser.email} icon={<Mail className="w-4 h-4"/>} />
+                    <Field label="Email Utama" value={authUser.email} icon={<Mail className="w-4 h-4"/>} />
                     <Field label="Nomor Telepon" value={authUser.phone || '-'} icon={<Phone className="w-4 h-4"/>} />
+                    <Field label="Role Akses" value={authUser.user_type || 'Student'} icon={<Layout className="w-4 h-4"/>} />
+                 </div>
+              </div>
+
+              {/* Badges / Pencapaian Dinamis API */}
+              <div className="bg-white border border-slate-200 shadow-lg rounded-[2rem] p-8 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
+                 <div className="flex items-center gap-3 mb-6">
+                    <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                       <AwardIcon className="w-6 h-6 text-amber-500" />
+                    </div>
+                    <div>
+                       <h2 className="text-xl font-black text-slate-900">Pencapaian Akun</h2>
+                       <p className="text-sm text-slate-500 font-medium mt-1">Status dan lencana berdasarkan aktivitas kamu.</p>
+                    </div>
+                 </div>
+
+                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+                    {dynamicBadges.map(badge => (
+                       <div key={badge.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center hover:shadow-md transition-shadow group">
+                          <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${badge.bg} ${badge.border} border mb-3 group-hover:scale-110 transition-transform`}>
+                             <badge.icon className={`w-6 h-6 ${badge.color}`} />
+                          </div>
+                          <h4 className="font-bold text-slate-800 text-sm mb-1">{badge.name}</h4>
+                          <p className="text-[10px] text-slate-500 font-medium leading-relaxed">{badge.desc}</p>
+                       </div>
+                    ))}
                  </div>
               </div>
            </div>
 
-           {/* RIGHT: Subscriptions */}
-           <div className="lg:col-span-1">
-              <div className="bg-white border border-slate-200 shadow-lg rounded-[2rem] p-8 h-full animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+           {/* RIGHT COLUMN: Subscriptions & Quick Actions */}
+           <div className="lg:col-span-1 space-y-8">
+              
+              {/* Subscriptions Box */}
+              <div className="bg-white border border-slate-200 shadow-lg rounded-[2rem] p-8 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
                 <div className="flex items-center gap-3 mb-6">
                    <div className="p-3 bg-purple-50 border border-purple-100 rounded-xl">
                       <CreditCard className="w-6 h-6 text-purple-600" />
                    </div>
-                   <h2 className="text-xl font-black text-slate-900">Langganan</h2>
+                   <h2 className="text-xl font-black text-slate-900">Riwayat Langganan</h2>
                 </div>
 
-                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                    {subs.length === 0 ? (
                       <div className="text-center py-10 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50">
-                         <p className="text-slate-500 font-medium text-sm">Belum ada riwayat langganan.</p>
+                         <p className="text-slate-500 font-medium text-sm">Belum ada riwayat langganan premium.</p>
                       </div>
                    ) : (
                       subs.map(sub => {
                         const type = sub.subscribe_type?.toLowerCase();
-                        const grad = type === 'pro' ? 'from-amber-400 to-orange-500' : type === 'plus' ? 'from-fuchsia-500 to-purple-600' : 'from-blue-500 to-cyan-500';
+                        const grad = type === 'pro' || type === 'ultra' ? 'from-amber-400 to-orange-500' : type === 'plus' ? 'from-fuchsia-500 to-purple-600' : 'from-blue-500 to-cyan-500';
                         
                         return (
                           <div key={sub.id} className="relative group bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden hover:border-blue-300 hover:shadow-md transition-all">
@@ -326,11 +409,30 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
                    )}
                 </div>
               </div>
+
+              {/* Quick Actions / Links */}
+              <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-[2rem] p-8 shadow-xl text-white relative overflow-hidden animate-fade-in-up" style={{ animationDelay: '250ms' }}>
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+                 <h3 className="text-lg font-black mb-4 flex items-center gap-2">
+                    <Settings className="w-5 h-5 text-slate-300" /> Pengaturan Cepat
+                 </h3>
+                 <div className="space-y-3 relative z-10">
+                    <button onClick={() => setShowEditModal(true)} className="w-full flex items-center justify-between p-3.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl transition-all font-medium text-sm">
+                       <span className="flex items-center gap-3"><Edit3 className="w-4 h-4 text-blue-400" /> Ubah Password</span>
+                       <ExternalLink className="w-4 h-4 text-slate-400" />
+                    </button>
+                    <a href="https://wa.me/6285183209494" target="_blank" rel="noreferrer" className="w-full flex items-center justify-between p-3.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl transition-all font-medium text-sm">
+                       <span className="flex items-center gap-3"><MessageCircle className="w-4 h-4 text-emerald-400" /> Bantuan CS</span>
+                       <ExternalLink className="w-4 h-4 text-slate-400" />
+                    </a>
+                 </div>
+              </div>
+
            </div>
         </div>
       </main>
 
-      {/* EDIT MODAL */}
+      {/* EDIT MODAL (PENGALIHAN AXID) */}
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
           <div className="w-full max-w-lg bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-2xl animate-scale-in">
@@ -342,23 +444,23 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
                    <AlertCircle className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-black text-white">Edit Profile</h3>
-                <p className="text-blue-100 text-sm font-medium mt-1">Sistem Terintegrasi</p>
+                <p className="text-blue-100 text-sm font-medium mt-1">Sistem Terintegrasi AstByte</p>
              </div>
              
              <div className="p-8">
                 <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-6">
                    <p className="text-slate-600 text-sm text-center leading-relaxed">
-                      Untuk keamanan data, perubahan profil dikelola terpusat di <span className="font-bold text-blue-600">AXID AstByte</span>. Anda akan dialihkan ke halaman tersebut.
+                      Untuk keamanan dan sinkronisasi data antar platform, perubahan profil dan password dikelola terpusat di <span className="font-bold text-blue-600">AXID AstByte</span>.
                    </p>
                 </div>
                 
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                    <button onClick={() => setShowEditModal(false)} className="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl font-bold transition-all shadow-sm">
                       Batal
                    </button>
                    <button onClick={handleRedirectToAXID} className="flex-1 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-600/20">
                       <ExternalLink className="w-4 h-4" />
-                      Buka AXID
+                      Buka Portal AXID
                    </button>
                 </div>
              </div>
@@ -383,7 +485,8 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
   );
 }
 
-// Sub-Component for cleaner code
+// --- SUB-COMPONENTS --- //
+
 function Field({ label, value, icon }: { label: string, value: string, icon: any }) {
   return (
     <div>
@@ -394,5 +497,29 @@ function Field({ label, value, icon }: { label: string, value: string, icon: any
           {value || <span className="text-slate-400 italic font-medium">Belum diatur</span>}
        </div>
     </div>
+  );
+}
+
+function StatCard({ icon, title, value, color, bg }: { icon: any, title: string, value: string, color: string, bg: string }) {
+   return (
+      <div className="bg-white border border-slate-200 rounded-[1.5rem] p-5 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
+         <div className={`p-3 rounded-xl ${bg} ${color}`}>
+            {icon}
+         </div>
+         <div>
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{title}</p>
+            <p className="text-lg font-black text-slate-800">{value}</p>
+         </div>
+      </div>
+   );
+}
+
+// Icon Wrapper untuk Award biar nggak ribet import
+function AwardIcon(props: any) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="12" cy="8" r="6"></circle>
+      <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+    </svg>
   );
 }
