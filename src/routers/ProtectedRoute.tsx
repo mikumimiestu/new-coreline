@@ -4,10 +4,15 @@ import { useAuth } from "../contexts/AuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requirePremium?: boolean; // Tambahan prop untuk proteksi halaman berbayar
+  requirePremium?: boolean; // Prop untuk proteksi halaman berbayar (Pro, Plus, Ultra, Ultimate)
+  requireUltimate?: boolean; // Prop KHUSUS untuk proteksi fitur VIP/Ultimate (Offline Mentoring)
 }
 
-export default function ProtectedRoute({ children, requirePremium = false }: ProtectedRouteProps) {
+export default function ProtectedRoute({ 
+  children, 
+  requirePremium = false,
+  requireUltimate = false
+}: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   const location = useLocation();
 
@@ -26,17 +31,27 @@ export default function ProtectedRoute({ children, requirePremium = false }: Pro
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 3. Jika route ini khusus premium, cek tipe langganan user
-  if (requirePremium) {
-    const planType = (user as any).subscription_type?.toLowerCase().trim() || 'free';
-    const isPremium = ['pro', 'plus', 'ultra'].includes(planType);
+  // Ambil tipe plan user
+  const planType = (user as any).subscription_type?.toLowerCase().trim() || 'free';
 
-    if (!isPremium) {
-      // Jika user masih gratis, lempar ke halaman pricing/dashboard
+  // 3. Proteksi KHUSUS Paket Ultimate (Mentoring Offline)
+  if (requireUltimate) {
+    if (planType !== 'ultimate') {
+      // Jika nyoba akses tapi paketnya bukan ultimate, lempar ke pricing
       return <Navigate to="/pricing" replace />;
     }
   }
 
-  // 4. Jika lolos semua pengecekan, render halamannya
+  // 4. Proteksi route premium umum (Pro, Plus, Ultra, Ultimate)
+  if (requirePremium && !requireUltimate) {
+    const isPremium = ['pro', 'plus', 'ultra', 'ultimate'].includes(planType);
+
+    if (!isPremium) {
+      // Jika user masih gratis, lempar ke halaman pricing
+      return <Navigate to="/pricing" replace />;
+    }
+  }
+
+  // 5. Jika lolos semua pengecekan, render halamannya
   return <>{children}</>;
 }
