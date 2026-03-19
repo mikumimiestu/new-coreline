@@ -11,6 +11,7 @@ import PromoPage from "./components/Promo";
 import ComingSoonPage from "./components/ComingSoon";
 import AdLoadingPage from './components/AdLoadingPage';
 import OfflineMentoringPage from "./pages/OfflineMentoringPage";
+import PriorityMemberPage from "./pages/PriorityMemberPage";
 
 // Import Quiz & Exercise Pages yang baru dibuat
 import QuizPage from "./pages/QuizPage";
@@ -95,6 +96,16 @@ function AppContent() {
         } 
       />
 
+      {/* Halaman prioritas member */}
+      <Route 
+        path="/priority-member" 
+        element={
+          <ProtectedRoute requirePremium={true}>
+            <PriorityMemberPage />
+          </ProtectedRoute>
+        } 
+      />
+      
       {/* Halaman segera hadir */}
       <Route path="/coming-soon" element={<ComingSoonPage />} />
 

@@ -60,6 +60,14 @@ const SLIDER_DATA = [
     link: "/pricing",
     badge: "Hot Promo"
   },
+  {
+    id: 2,
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIteuuRIZhV7abothS4WlRYMDsqnTZApMFSg&s",
+    title: "Gabung menjadi member Prioritas Coreline",
+    desc: "Nikmati akses eksklusif ke konten premium, mentor ahli, dan fitur prioritas lainnya. Daftar sekarang untuk pengalaman belajar yang lebih mendalam!",
+    link: "/priority-member",
+    badge: "Prioritas"
+  },
 ];
 
 /* ================================
