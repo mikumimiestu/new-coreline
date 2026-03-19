@@ -10,6 +10,7 @@ import ManualQRISPage from "./components/Pay";
 import PromoPage from "./components/Promo";
 import ComingSoonPage from "./components/ComingSoon";
 import AdLoadingPage from './components/AdLoadingPage';
+import OfflineMentoringPage from "./pages/OfflineMentoringPage";
 
 // Import Quiz & Exercise Pages yang baru dibuat
 import QuizPage from "./pages/QuizPage";
@@ -83,6 +84,16 @@ function AppContent() {
 
       {/* Halaman promo */}
       <Route path="/promo" element={<PromoPage />} />
+
+      {/* Halaman offline mentor */}
+      <Route 
+        path="/offline-mentoring" 
+        element={
+          <ProtectedRoute>
+            <OfflineMentoringPage />
+          </ProtectedRoute>
+        } 
+      />
 
       {/* Halaman segera hadir */}
       <Route path="/coming-soon" element={<ComingSoonPage />} />

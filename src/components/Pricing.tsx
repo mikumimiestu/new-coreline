@@ -14,7 +14,9 @@ import {
   MonitorPlay,
   Briefcase,
   Percent,
-  Terminal
+  Terminal,
+  MapPin,
+  Building2
 } from "lucide-react";
 
 /**
@@ -67,25 +69,6 @@ export default function PricingPage() {
   // DATA PAKET DENGAN HARGA DISKON 10% (Tahunan dihitung bayar 10 bulan aja + disc 10%)
   const tiers = [
     {
-      id: "student",
-      name: "Starter",
-      tagline: "Mulai gratis untuk belajar fundamental",
-      icon: <Sparkles className="w-5 h-5" />,
-      monthly: 0, 
-      originalMonthly: 0,
-      yearly: 0,
-      originalYearly: 0,
-      popular: false,
-      features: [
-        { label: "Akses pengenalan materi", ok: true },
-        { label: "Progress & penyimpanan lokal", ok: false },
-        { label: "Tanpa Iklan", ok: false },
-        { label: "Akses Offline (Fokus Penuh)", ok: false },
-        { label: "Akses Source Code Project", ok: false },
-        { label: "Sertifikat Kompetensi", ok: false },
-      ],
-    },
-    {
       id: "pro",
       name: "Pro",
       tagline: "Tingkatkan skill dengan modul premium",
@@ -98,13 +81,14 @@ export default function PricingPage() {
       originalYearly: 250000,
       popular: false,
       features: [
-        { label: "Semua di Starter", ok: true },
-        { label: "Modul materi lengkap", ok: true },
-        { label: "Akses Quiz & Latihan", ok: true },
-        { label: "Sertifikat Kelulusan", ok: true },
-        { label: "Real project portfolio", ok: false },
-        { label: "Akses Source Code Project", ok: false },
+        { label: "Semua materi fundamental", ok: true },
+        { label: "Modul materi lengkap & kuis", ok: true },
+        { label: "Sertifikat Kelulusan Resmi", ok: true },
+        { label: "Mentoring Chat 1:1", ok: false },
+        { label: "Akses Full Source Code", ok: false },
+        { label: "Live Mentoring Video Call", ok: false },
       ],
+      colorTheme: "cyan"
     },
     {
       id: "plus",
@@ -119,13 +103,14 @@ export default function PricingPage() {
       originalYearly: 750000,
       popular: true,
       features: [
-        { label: "Semua di Pro", ok: true },
-        { label: "Mentoring Chat 1:1", ok: true },
-        { label: "Akses Source Code Project", ok: true },
-        { label: "Template portofolio", ok: true },
-        { label: "Live Code Review", ok: false },
-        { label: "Konsultasi Karir", ok: false },
+        { label: "Semua fitur di paket Pro", ok: true },
+        { label: "Mentoring via Chat 1:1", ok: true },
+        { label: "Akses Full Source Code Project", ok: true },
+        { label: "Template Portofolio Siap Pakai", ok: true },
+        { label: "Live Mentoring Video Call", ok: false },
+        { label: "Konsultasi Karir & CV", ok: false },
       ],
+      colorTheme: "blue"
     },
     {
       id: "ultra",
@@ -139,21 +124,45 @@ export default function PricingPage() {
       yearly: 1125000,
       originalYearly: 1250000,
       popular: false,
-      isNew: true,
       features: [
-        { label: "Semua di Plus", ok: true },
+        { label: "Semua fitur di paket Plus", ok: true },
         { label: "Live Mentoring (Video Call)", ok: true },
         { label: "Code Review Personal", ok: true },
-        { label: "Konsultasi Karir & CV", ok: true },
-        { label: "Akses Project Enterprise", ok: true },
-        { label: "Prioritas Lowongan Kerja", ok: true },
+        { label: "Konsultasi Karir & Review CV", ok: true },
+        { label: "Prioritas Rekomendasi Kerja", ok: true },
+        { label: "Mentoring Tatap Muka (Offline)", ok: false },
       ],
+      colorTheme: "purple"
+    },
+    {
+      id: "ultimate",
+      name: "Ultimate",
+      tagline: "Pengalaman belajar VIP dengan mentor offline",
+      icon: <Building2 className="w-5 h-5" />,
+      // Base: 310rb -> Harga Promo: 280rb
+      monthly: 280000,
+      originalMonthly: 310000,
+      // Base Year (10 bulan): 3.1jt -> Harga Promo: 2.8jt
+      yearly: 2800000,
+      originalYearly: 3100000,
+      popular: false,
+      isNew: true,
+      features: [
+        { label: "Semua fitur di paket Ultra", ok: true },
+        { label: "Mentoring Offline 3x Sebulan", ok: true },
+        { label: "On-Site Code Review & Debugging", ok: true },
+        { label: "Akses Private Networking Event", ok: true },
+        { label: "Grup Mastermind Eksklusif", ok: true },
+        { label: "Dukungan Proyek Skala Enterprise", ok: true },
+      ],
+      colorTheme: "amber",
+      areaRestriction: "Area Tertentu, Pastikan cek coverage area sebelum memilih paket ini"
     },
   ] as const;
 
   const faqs = [
     {
-      q: "Sampai kapan promo spesial ini berlaku?",
+      q: "Sampai kapan promo spesial 10% ini berlaku?",
       a: "Promo diskon 10% berlaku selama periode peluncuran platform. Harga akan kembali normal setelah kuota pendaftar pertama terpenuhi.",
     },
     {
@@ -161,12 +170,12 @@ export default function PricingPage() {
       a: "Selain diskon 10%, paket tahunan dihitung hanya 10 bulan tagihan. Artinya Anda menghemat biaya 2 bulan penuh jika dibandingkan dengan langganan bulanan!",
     },
     {
-      q: "Apa bedanya Plus dan Ultra?",
-      a: "Paket Plus fokus pada ketersediaan source code dan bantuan via chat. Paket Ultra memberikan pengalaman mentoring eksklusif (Video Call), code review personal, dan bimbingan persiapan karir.",
+      q: "Bagaimana sistem Mentoring Offline di paket Ultimate?",
+      a: "Untuk member Ultimate, Anda berhak menjadwalkan 3 kali sesi tatap muka langsung (offline) dengan mentor ahli kami setiap bulannya di lokasi yang disepakati (coworking space/cafe). Saat ini, fitur offline ini hanya tersedia untuk area tertentu.",
     },
     {
-      q: "Apakah bisa ganti paket kapan saja?",
-      a: "Tentu bisa. Anda dapat melakukan upgrade atau downgrade kapan pun; tagihan akan disesuaikan secara prorata pada siklus penagihan berikutnya.",
+      q: "Apakah saya bisa upgrade dari paket Plus ke Ultra atau Ultimate?",
+      a: "Tentu bisa. Anda dapat melakukan upgrade kapan pun, tagihan akan disesuaikan secara prorata pada siklus penagihan berikutnya.",
     },
   ];
 
@@ -179,27 +188,24 @@ export default function PricingPage() {
     },
     {
       id: 2,
-      text: "Investasi leher ke atas terbaik. Upgrade ke Ultra pas promo gini worth it banget. Mentornya sangat sabar dan ahli di bidangnya.",
+      text: "Investasi leher ke atas terbaik. Upgrade ke Ultra pas promo gini worth it banget. Mentornya sangat sabar pas sesi video call.",
       author: "Dimas",
       role: "Member Coreline Ultra"
     },
     {
       id: 3,
-      text: "Template portofolio dari paket Plus bikin saya lebih percaya diri buat apply ke pekerjaan remote luar negeri.",
+      text: "Ambil paket Ultimate adalah keputusan terbaik! Ketemu mentor langsung offline bikin error debugging yang biasanya berhari-hari selesai dalam hitungan jam.",
       author: "Sarah",
-      role: "Frontend Developer"
+      role: "Member Coreline Ultimate"
     }
   ];
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-blue-500/30 overflow-hidden relative">
       
-      {/* Background Ambience (Light Theme) */}
+      {/* Background Ambience */}
       <div className="fixed inset-0 pointer-events-none">
-         {/* Tech Grid Pattern */}
          <div className="absolute inset-0 opacity-[0.4] bg-[linear-gradient(rgba(203,213,225,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(203,213,225,0.5)_1px,transparent_1px)] bg-[size:30px_30px]"></div>
-         
-         {/* Glows */}
          <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-blue-300/20 blur-[100px] animate-pulse" />
          <div className="absolute bottom-1/4 -left-24 h-96 w-96 rounded-full bg-cyan-300/20 blur-[100px]" />
          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-full bg-gradient-to-b from-blue-200/30 to-transparent" />
@@ -210,7 +216,6 @@ export default function PricingPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             
-            {/* Promo Banner */}
             <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 mb-6 shadow-sm animate-bounce-slow">
               <Percent className="w-4 h-4 fill-current text-blue-600" /> PROMO SPESIAL: DISKON 10%
             </div>
@@ -223,10 +228,10 @@ export default function PricingPage() {
             </h1>
             
             <p className="text-slate-600 max-w-2xl mx-auto text-lg mb-10 font-medium">
-              Pilih paket belajar yang sesuai dengan kebutuhanmu. Nikmati akses tanpa batas ke kurikulum berstandar industri dan raih karir impianmu hari ini.
+              Pilih paket belajar premium yang sesuai dengan target karirmu. Nikmati akses tanpa batas ke kurikulum berstandar industri dan dukungan mentor profesional.
             </p>
 
-            {/* Billing Toggle (Styled) */}
+            {/* Billing Toggle */}
             <div className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-100/80 p-1.5 shadow-sm relative z-20">
               <button
                 onClick={() => setBilling("monthly")}
@@ -270,8 +275,8 @@ export default function PricingPage() {
                 className={`relative flex flex-col h-full rounded-3xl p-6 sm:p-8 transition-all duration-300 hover:-translate-y-2 border backdrop-blur-md ${
                   t.popular
                     ? "border-blue-300 bg-white shadow-[0_15px_40px_rgba(59,130,246,0.15)] z-10 scale-105 md:scale-100"
-                    : t.id === "ultra"
-                    ? "border-purple-300 bg-white shadow-[0_15px_40px_rgba(168,85,247,0.15)] z-10"
+                    : t.id === "ultimate"
+                    ? "border-amber-300 bg-gradient-to-b from-white to-amber-50/30 shadow-[0_15px_40px_rgba(245,158,11,0.15)] z-10"
                     : "border-slate-200 bg-white/60 hover:bg-white shadow-sm hover:shadow-lg"
                 }`}
               >
@@ -283,17 +288,17 @@ export default function PricingPage() {
                 )}
                 {/* @ts-ignore */}
                 {t.isNew && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-purple-600 text-white px-4 py-1 text-xs font-black shadow-lg shadow-purple-600/30 uppercase tracking-wider whitespace-nowrap">
-                    <Rocket className="w-3 h-3 fill-current" /> Rekomendasi Ahli
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-amber-500 text-white px-4 py-1 text-xs font-black shadow-lg shadow-amber-500/30 uppercase tracking-wider whitespace-nowrap">
+                    <Sparkles className="w-3 h-3 fill-current text-yellow-100" /> VIP Mentoring
                   </div>
                 )}
 
                 <div className="mb-4">
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm border ${
-                    t.id === "student" ? "bg-slate-50 text-slate-600 border-slate-200" :
-                    t.id === "pro" ? "bg-cyan-50 text-cyan-600 border-cyan-200" :
-                    t.id === "plus" ? "bg-blue-50 text-blue-600 border-blue-200" :
-                    "bg-purple-50 text-purple-600 border-purple-200"
+                    t.colorTheme === "cyan" ? "bg-cyan-50 text-cyan-600 border-cyan-200" :
+                    t.colorTheme === "blue" ? "bg-blue-50 text-blue-600 border-blue-200" :
+                    t.colorTheme === "purple" ? "bg-purple-50 text-purple-600 border-purple-200" :
+                    "bg-amber-50 text-amber-600 border-amber-200"
                   }`}>
                     {t.icon}
                   </div>
@@ -305,38 +310,38 @@ export default function PricingPage() {
 
                 {/* PRICING SECTION */}
                 <div className="mb-8">
-                  {t.monthly === 0 ? (
-                    <span className="text-4xl font-extrabold text-slate-900">
-                      Gratis
-                    </span>
-                  ) : (
-                    <div>
-                      {/* Original Price (Strikethrough) */}
-                      {isDiscounted && (
-                        <div className="flex items-center gap-2 mb-1">
-                           <span className="text-sm line-through text-slate-400 font-medium">
-                             {currency(originalPrice)}
-                           </span>
-                           <span className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-200 animate-pulse whitespace-nowrap shadow-sm">
-                             -10% PROMO
-                           </span>
-                        </div>
-                      )}
-                      
-                      {/* Current Price */}
-                      <div className="flex items-baseline gap-1">
-                        <span className={`text-4xl font-extrabold tracking-tight ${isDiscounted ? "text-blue-600" : "text-slate-900"}`}>
-                          {currency(currentPrice)}
-                        </span>
-                        <span className="text-sm font-semibold text-slate-500">
-                          /{billing === "monthly" ? "bln" : "thn"}
-                        </span>
+                  <div>
+                    {isDiscounted && (
+                      <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm line-through text-slate-400 font-medium">
+                            {currency(originalPrice)}
+                          </span>
+                          <span className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-200 animate-pulse whitespace-nowrap shadow-sm">
+                            -10% PROMO
+                          </span>
                       </div>
+                    )}
+                    <div className="flex items-baseline gap-1">
+                      <span className={`text-4xl font-extrabold tracking-tight ${isDiscounted ? "text-blue-600" : "text-slate-900"}`}>
+                        {currency(currentPrice)}
+                      </span>
+                      <span className="text-sm font-semibold text-slate-500">
+                        /{billing === "monthly" ? "bln" : "thn"}
+                      </span>
                     </div>
-                  )}
-                  {billing === "yearly" && t.monthly > 0 && (
+                  </div>
+                  {billing === "yearly" && (
                      <p className="text-xs text-emerald-600 font-bold mt-2 bg-emerald-50 inline-block px-2 py-1 rounded-md border border-emerald-100">
                        (Ditagih Rp {currency(currentPrice)} /tahun)
+                     </p>
+                  )}
+                  {/* Area Restriction for Ultimate */}
+                  {/* @ts-ignore */}
+                  {t.areaRestriction && (
+                     <p className="text-[10px] text-amber-700 font-bold mt-3 flex items-center gap-1 bg-amber-100/50 p-1.5 rounded-md border border-amber-200/50 leading-tight">
+                       <MapPin className="w-3 h-3 flex-shrink-0" />
+                       {/* @ts-ignore */}
+                       {t.areaRestriction}
                      </p>
                   )}
                 </div>
@@ -346,7 +351,9 @@ export default function PricingPage() {
                     <li key={i} className="flex items-start gap-3 text-sm">
                       <div className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center border ${
                         f.ok
-                          ? t.id === "ultra" ? "bg-purple-100 text-purple-600 border-purple-200" : "bg-blue-50 text-blue-600 border-blue-200"
+                          ? t.colorTheme === "purple" ? "bg-purple-100 text-purple-600 border-purple-200" 
+                          : t.colorTheme === "amber" ? "bg-amber-100 text-amber-600 border-amber-200"
+                          : "bg-blue-50 text-blue-600 border-blue-200"
                           : "bg-slate-50 text-slate-300 border-slate-100"
                       }`}>
                         <Check className="w-3 h-3" strokeWidth={3} />
@@ -365,16 +372,16 @@ export default function PricingPage() {
                 <a
                   href={payHref(t.id, currentPrice)}
                   className={`w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold transition-all transform active:scale-95 shadow-md ${
-                    t.id === "student"
-                      ? "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
-                      : t.id === "pro"
+                    t.id === "pro"
                       ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600 shadow-blue-500/20"
                       : t.id === "plus"
                       ? "bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700 shadow-indigo-500/20"
-                      : "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white hover:from-purple-700 hover:to-fuchsia-700 shadow-purple-500/20"
+                      : t.id === "ultra"
+                      ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white hover:from-purple-700 hover:to-fuchsia-700 shadow-purple-500/20"
+                      : "bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:from-amber-600 hover:to-orange-700 shadow-amber-500/20"
                   }`}
                 >
-                  {t.id === "student" ? "Daftar Gratis" : "Ambil Promo " + t.name}
+                  Pilih Paket {t.name}
                   <ArrowRight className="w-4 h-4" />
                 </a>
               </div>
@@ -391,7 +398,7 @@ export default function PricingPage() {
             <div>
               <h4 className="font-extrabold text-slate-900 text-lg">Butuh Bantuan Memilih Paket?</h4>
               <p className="text-slate-500 text-sm font-medium">
-                Hubungi tim support kami untuk berkonsultasi mengenai paket yang paling sesuai dengan kebutuhanmu.
+                Hubungi tim support kami untuk berkonsultasi mengenai paket yang paling sesuai dengan target karirmu.
               </p>
             </div>
           </div>
@@ -412,7 +419,7 @@ export default function PricingPage() {
             Perbandingan Spesifikasi Detail
           </h2>
           <p className="text-slate-500 mt-2 font-medium">
-            Lihat fasilitas lengkap yang akan Anda dapatkan di setiap tingkatan.
+            Lihat fasilitas lengkap yang akan Anda dapatkan di setiap tingkatan paket premium.
           </p>
         </div>
         
@@ -421,46 +428,53 @@ export default function PricingPage() {
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="py-5 pl-8 pr-4 font-extrabold text-slate-900 w-1/4">FITUR PLATFORM</th>
-                <th className="py-5 px-4 font-extrabold text-slate-600 text-center w-1/6">Starter</th>
-                <th className="py-5 px-4 font-extrabold text-cyan-600 text-center w-1/6">Pro</th>
-                <th className="py-5 px-4 font-extrabold text-blue-600 text-center w-1/6">Plus</th>
-                <th className="py-5 px-4 font-extrabold text-purple-600 text-center w-1/6 bg-purple-50/50">Ultra</th>
+                <th className="py-5 px-4 font-extrabold text-cyan-600 text-center w-[18%]">Pro</th>
+                <th className="py-5 px-4 font-extrabold text-blue-600 text-center w-[18%]">Plus</th>
+                <th className="py-5 px-4 font-extrabold text-purple-600 text-center w-[18%]">Ultra</th>
+                <th className="py-5 px-4 font-extrabold text-amber-600 text-center w-[18%] bg-amber-50/50">Ultimate</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {[
-                { name: "Akses Materi Dasar", v: [true, true, true, true] },
-                { name: "Modul Premium & Kuis", v: [false, true, true, true] },
-                { name: "Sertifikat Kompetensi", v: [false, true, true, true] },
-                { name: "Mentoring Chat 1:1", v: [false, false, true, true] },
-                { name: "Akses Full Source Code", v: [false, false, true, true], icon: Code2 },
-                { name: "Live Mentoring (Video Call)", v: [false, false, false, true], icon: MonitorPlay },
-                { name: "Review Code Personal", v: [false, false, false, true], icon: Code2 },
-                { name: "Konsultasi Karir & CV", v: [false, false, false, true], icon: Briefcase },
-                { name: "Prioritas Lowongan Kerja", v: [false, false, false, true], icon: Star },
+                { name: "Sertifikat Kompetensi Resmi", v: [true, true, true, true], icon: BadgeCheck },
+                { name: "Mentoring Chat 1:1", v: [false, true, true, true], icon: MessageCircle },
+                { name: "Akses Full Source Code", v: [false, true, true, true], icon: Code2 },
+                { name: "Template Portofolio Siap Pakai", v: [false, true, true, true], icon: Briefcase },
+                { name: "Live Mentoring Video Call", v: [false, false, true, true], icon: MonitorPlay },
+                { name: "Review Code Personal", v: [false, false, true, true], icon: Code2 },
+                { name: "Prioritas Lowongan Kerja", v: [false, false, true, true], icon: Star },
+                { name: "Mentoring Offline (Tatap Muka)", v: [false, false, false, true], icon: Building2 },
+                { name: "Private Networking Event", v: [false, false, false, true], icon: Sparkles },
               ].map((row, i) => (
                 <tr key={i} className="hover:bg-slate-50/80 transition-colors">
                   <td className="py-4 pl-8 pr-4 font-bold text-slate-700 flex items-center gap-2">
-                    {row.icon && <row.icon className={`w-4 h-4 ${i >= 5 ? 'text-purple-500' : 'text-blue-500'}`} />}
+                    {row.icon && <row.icon className={`w-4 h-4 ${
+                      i >= 7 ? 'text-amber-500' : i >= 4 ? 'text-purple-500' : 'text-blue-500'
+                    }`} />}
                     {row.name}
                   </td>
-                  {row.v.map((active, j) => (
-                    <td key={j} className={`py-4 px-4 text-center ${j === 3 ? 'bg-purple-50/30' : ''}`}>
-                      {active ? (
-                        <div className={`inline-flex items-center justify-center w-6 h-6 rounded-full border ${
-                          j === 3 
-                            ? "bg-purple-100 text-purple-600 border-purple-200" 
-                            : "bg-blue-50 text-blue-600 border-blue-200"
-                        }`}>
-                          <Check className="w-4 h-4" strokeWidth={3} />
-                        </div>
-                      ) : (
-                        <div className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-50 text-slate-300 border border-slate-100">
-                          <Check className="w-4 h-4" />
-                        </div>
-                      )}
-                    </td>
-                  ))}
+                  {row.v.map((active, j) => {
+                    const cellColor = j === 3 ? "amber" : j === 2 ? "purple" : "blue";
+                    const isBgCell = j === 3 ? "bg-amber-50/30" : "";
+                    
+                    return (
+                      <td key={j} className={`py-4 px-4 text-center ${isBgCell}`}>
+                        {active ? (
+                          <div className={`inline-flex items-center justify-center w-6 h-6 rounded-full border ${
+                            cellColor === "amber" ? "bg-amber-100 text-amber-600 border-amber-200" :
+                            cellColor === "purple" ? "bg-purple-100 text-purple-600 border-purple-200" :
+                            "bg-blue-50 text-blue-600 border-blue-200"
+                          }`}>
+                            <Check className="w-4 h-4" strokeWidth={3} />
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-50 text-slate-300 border border-slate-100">
+                            <Check className="w-4 h-4" />
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>
@@ -528,15 +542,15 @@ export default function PricingPage() {
         {/* Footer CTA */}
         <div className="mt-16 text-center">
           <p className="text-slate-600 font-medium mb-6">
-            Masih ragu? Coba dulu paket gratisnya. Tidak perlu kartu kredit.
+            Pilih paket belajar yang tepat dan percepat karir Anda sekarang juga.
           </p>
-          <a
-            href={payHref("student", 0)}
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-8 py-3.5 font-bold text-slate-700 hover:bg-slate-50 transition shadow-md hover:shadow-lg hover:-translate-y-0.5"
           >
-            Mulai Secara Gratis
+            Pilih Paket Belajar
             <ArrowRight className="w-4 h-4 text-blue-600" />
-          </a>
+          </button>
         </div>
       </section>
 

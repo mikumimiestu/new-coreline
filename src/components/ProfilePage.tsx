@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import {
   User as UserIcon, Mail, Phone, CreditCard, ArrowLeft, Copy, Check,
@@ -6,6 +6,16 @@ import {
   Zap, CheckCircle, ExternalLink, AlertCircle, Layout, Trophy, BookOpen,
   Activity, Star, Settings, MessageCircle, Heart, Receipt
 } from 'lucide-react';
+
+// Import Data Materi buat nyocokin ID dengan Judul Modul
+import { MOCK_MATERIALS as OTHER_MATERIALS } from '../data/otherData';
+import { MOCK_MATERIALS as PYTHON_MATERIALS } from '../data/pythonData';
+import { MOCK_MATERIALS as GO_MATERIALS } from '../data/golangData';
+import { MOCK_MATERIALS as MYSQL_MATERIALS } from '../data/mysqlData';
+import { MOCK_MATERIALS as TS_MATERIAL } from '../data/tsData';
+import { MOCK_MATERIALS as JS_MATERIAL } from '../data/jsData';
+import { MOCK_MATERIALS as PSQL_MATERIAL } from '../data/posgresData';
+import { MOCK_MATERIALS as RB_MATERIAL } from '../data/rubyData';
 
 /* ================================
  * CONFIG & TYPES
@@ -28,6 +38,26 @@ interface ProfilePageProps {
   onBack: () => void;
 }
 
+// Map ID bahasa ke Nama Keren Course-nya
+const COURSE_NAME_MAP: Record<string, string> = {
+  'javascript': 'JavaScript',
+  'typescript': 'TypeScript',
+  'php': 'PHP',
+  'nodejs': 'Node.js',
+  'react': 'React.js',
+  'vuejs': 'Vue.js',
+  'nextjs': 'Next.js',
+  'reactnative': 'React Native',
+  'python': 'Python',
+  'go': 'Go (Golang)',
+  'sql': 'MySQL',
+  'postgresql': 'PostgreSQL',
+  'docker': 'Docker',
+  'kubernetes': 'Kubernetes',
+  'english-tech': 'English for Tech',
+  'japanese': 'Japanese N5-N4'
+};
+
 /* ================================
  * MAIN COMPONENT
  * ================================ */
@@ -37,6 +67,7 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
   // Data State
   const [authUser, setAuthUser] = useState<any>(null);
   const [subs, setSubs] = useState<Subscription[]>([]);
+  const [progressMap, setProgressMap] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
   // UI State
@@ -71,6 +102,16 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
         if (subRes.ok && subData?.data?.subscriptions) {
           setSubs(subData.data.subscriptions);
         }
+
+        // Fetch Progress Pembelajaran
+        const progRes = await fetch(`${AUTHX_BASE}/api/learning/progress`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const progData = await progRes.json();
+        if (progRes.ok) {
+          setProgressMap(progData.data || {});
+        }
+
       } catch (e) {
         console.error('Load error:', e);
       } finally {
@@ -100,7 +141,50 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
     setShowEditModal(false);
   };
 
-  // --- 3. RENDER HELPERS ---
+  // --- 3. FILTER & COMPUTE COMPLETED COURSES ---
+  const completedCourses = useMemo(() => {
+    if (!authUser) return [];
+    
+    const userType = authUser.user_type || 'student';
+    // Gabung semua materi
+    const allMaterials = [
+      ...OTHER_MATERIALS, ...PYTHON_MATERIALS, ...GO_MATERIALS,
+      ...MYSQL_MATERIALS, ...TS_MATERIAL, ...JS_MATERIAL,
+      ...PSQL_MATERIAL, ...RB_MATERIAL
+    ].filter(m => m.user_type === userType);
+
+    // Grouping progress berdasarkan course/language
+    const courseStats: Record<string, { total: number, completed: number, id: string }> = {};
+
+    allMaterials.forEach(m => {
+      // Fix TS Error: Skip kalau languagenya null
+      if (!m.language) return;
+
+      if (!courseStats[m.language]) {
+        courseStats[m.language] = { total: 0, completed: 0, id: m.language };
+      }
+      courseStats[m.language].total += 1;
+      
+      if (progressMap[m.id] === 100) {
+        courseStats[m.language].completed += 1;
+      }
+    });
+
+    // Filter yang totalnya > 0 dan completed === total (Berarti tamat 100% course tsb)
+    const finished = Object.values(courseStats).filter(
+      c => c.total > 0 && c.completed === c.total
+    );
+
+    // Format output untuk dirender
+    return finished.map(f => ({
+       id: f.id,
+       name: COURSE_NAME_MAP[f.id] || f.id.toUpperCase(),
+       totalModules: f.total
+    }));
+  }, [authUser, progressMap]);
+
+
+  // --- 4. RENDER HELPERS ---
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
@@ -131,7 +215,7 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
     );
   }
 
-  // --- 4. DATA DERIVED DARI API ---
+  // --- 5. DATA DERIVED DARI API ---
   const planType = authUser.subscription_type?.toLowerCase() || 'free';
   const isPro = planType === 'pro';
   const isPlus = planType === 'plus';
@@ -155,13 +239,11 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
   // Generate Badges Dinamis berdasarkan kondisi API
   const dynamicBadges = [];
   
-  // Badge 1: Pasti dapat karena punya akun
   dynamicBadges.push({ 
     id: 1, name: "Verified ID", desc: "Akun terverifikasi Coreline.", 
     icon: ShieldCheck, color: "text-blue-500", bg: "bg-blue-100", border: "border-blue-200" 
   });
 
-  // Badge 2: Berdasarkan status premium
   if (isPremiumActive && planType !== 'free') {
     dynamicBadges.push({ 
       id: 2, name: "Sultan", desc: `Akses fitur ${planType.toUpperCase()}.`, 
@@ -169,7 +251,6 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
     });
   }
 
-  // Badge 3: Berdasarkan riwayat langganan
   if (totalTransactions > 1) {
     dynamicBadges.push({ 
       id: 3, name: "Pelanggan Setia", desc: `${totalTransactions}x riwayat transaksi.`, 
@@ -177,7 +258,6 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
     });
   }
 
-  // Badge 4: Pengguna aktif
   dynamicBadges.push({ 
     id: 4, name: "Pelajar Aktif", desc: "Siap eksplorasi modul digital.", 
     icon: BookOpen, color: "text-emerald-500", bg: "bg-emerald-100", border: "border-emerald-200" 
@@ -308,7 +388,7 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
         {/* CONTENT GRID UTAMA */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
            
-           {/* LEFT COLUMN: Personal Info & Badges */}
+           {/* LEFT COLUMN: Personal Info, Badges & Completed Courses */}
            <div className="lg:col-span-2 space-y-8">
               
               {/* Personal Info Box */}
@@ -354,13 +434,54 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
                     ))}
                  </div>
               </div>
+
+              {/* BARU: Course Selesai 100% (Bukan Modul Satuan) */}
+              <div className="bg-white border border-slate-200 shadow-lg rounded-[2rem] p-8 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+                 <div className="flex items-center gap-3 mb-6">
+                    <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+                       <Trophy className="w-6 h-6 text-emerald-600" />
+                    </div>
+                    <div>
+                       <h2 className="text-xl font-black text-slate-900">Course Selesai (100%)</h2>
+                       <p className="text-sm text-slate-500 font-medium mt-1">Daftar course yang berhasil kamu tamatkan secara penuh.</p>
+                    </div>
+                 </div>
+
+                 <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                    {completedCourses.length === 0 ? (
+                       <div className="text-center py-10 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50">
+                          <p className="text-slate-500 font-medium text-sm">Belum ada course yang berhasil diselesaikan 100%.</p>
+                       </div>
+                    ) : (
+                       completedCourses.map(course => (
+                          <div key={course.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:border-emerald-300 hover:shadow-md transition-all">
+                             <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shrink-0 shadow-sm border border-emerald-200">
+                                   <Trophy className="w-5 h-5" />
+                                </div>
+                                <div>
+                                   <h4 className="font-bold text-slate-800 text-sm line-clamp-1">{course.name}</h4>
+                                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">
+                                     Tamat • {course.totalModules} Modul
+                                   </p>
+                                </div>
+                             </div>
+                             <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 shrink-0 shadow-sm">
+                               100%
+                             </span>
+                          </div>
+                       ))
+                    )}
+                 </div>
+              </div>
+
            </div>
 
            {/* RIGHT COLUMN: Subscriptions & Quick Actions */}
            <div className="lg:col-span-1 space-y-8">
               
               {/* Subscriptions Box */}
-              <div className="bg-white border border-slate-200 shadow-lg rounded-[2rem] p-8 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+              <div className="bg-white border border-slate-200 shadow-lg rounded-[2rem] p-8 animate-fade-in-up" style={{ animationDelay: '250ms' }}>
                 <div className="flex items-center gap-3 mb-6">
                    <div className="p-3 bg-purple-50 border border-purple-100 rounded-xl">
                       <CreditCard className="w-6 h-6 text-purple-600" />
@@ -411,7 +532,7 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
               </div>
 
               {/* Quick Actions / Links */}
-              <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-[2rem] p-8 shadow-xl text-white relative overflow-hidden animate-fade-in-up" style={{ animationDelay: '250ms' }}>
+              <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-[2rem] p-8 shadow-xl text-white relative overflow-hidden animate-fade-in-up" style={{ animationDelay: '300ms' }}>
                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
                  <h3 className="text-lg font-black mb-4 flex items-center gap-2">
                     <Settings className="w-5 h-5 text-slate-300" /> Pengaturan Cepat
@@ -514,7 +635,7 @@ function StatCard({ icon, title, value, color, bg }: { icon: any, title: string,
    );
 }
 
-// Icon Wrapper untuk Award biar nggak ribet import
+// Icon Wrapper untuk Award
 function AwardIcon(props: any) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>

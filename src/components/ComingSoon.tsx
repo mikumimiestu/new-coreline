@@ -152,7 +152,7 @@ export default function ComingSoonPage() {
         {/* Footer Stats / Social Proof */}
         <div className="mt-16 pt-8 border-t border-white/5 grid grid-cols-2 sm:grid-cols-3 gap-8 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
           <div>
-            <div className="text-2xl font-bold text-white">2.5k+</div>
+            <div className="text-2xl font-bold text-white">50+</div>
             <div className="text-xs text-slate-500 uppercase tracking-wide font-medium mt-1">Student Waiting</div>
           </div>
           <div>
