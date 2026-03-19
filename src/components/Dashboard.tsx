@@ -682,7 +682,7 @@ export default function Dashboard() {
                     {/* Akses Offline Mentoring (Ultimate Only) */}
                     {canAccessOfflineMentoring && (
                       <Link to="/offline-mentoring" className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-xl text-sm font-bold shadow-sm transition-colors">
-                        <Building2 className="w-4 h-4" /> Mentoring Offline (Jabodetabek/Bandung)
+                        <Building2 className="w-4 h-4" /> Mentoring Offline
                       </Link>
                     )}
 
