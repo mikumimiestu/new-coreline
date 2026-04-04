@@ -12,6 +12,7 @@ import ComingSoonPage from "./components/ComingSoon";
 import AdLoadingPage from './components/AdLoadingPage';
 import OfflineMentoringPage from "./pages/OfflineMentoringPage";
 import PriorityMemberPage from "./pages/PriorityMemberPage";
+import TutorialPage from "./pages/TutorialPage";
 
 // Import Quiz & Exercise Pages yang baru dibuat
 import QuizPage from "./pages/QuizPage";
@@ -105,6 +106,9 @@ function AppContent() {
           </ProtectedRoute>
         } 
       />
+
+      {/* Halaman Tutorial */}
+      <Route path="/tutorial" element={<TutorialPage />} />
       
       {/* Halaman segera hadir */}
       <Route path="/coming-soon" element={<ComingSoonPage />} />

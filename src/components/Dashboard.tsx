@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import type { LearningMaterial } from '../types/learning';
 import { encodeId } from '../utils/hashId';
+import CoreBot from './CoreBot'; // Sesuaikan path foldernya
 
 // Import Data
 import { MOCK_MATERIALS as OTHER_MATERIALS } from '../data/otherData';
@@ -23,7 +24,8 @@ import {
   Clock, Star, PlayCircle, Brain, Rocket, Code, Trophy, Flame,
   Layout, Smartphone, Database, Globe, Terminal, Layers, Cpu, 
   Sparkles, MessageCircle, Boxes, Languages, Users, PenTool, HelpCircle, ArrowLeft,
-  Bot, Minus, ChevronLeft, ExternalLink, ShieldAlert, MonitorPlay, Building2, MapPin, Briefcase
+  Bot, Minus, ChevronLeft, ExternalLink, ShieldAlert, MonitorPlay, Building2, MapPin, Briefcase,
+  BookMarked
 } from 'lucide-react';
 
 /* ================================
@@ -137,8 +139,15 @@ const languageData: readonly Lang[] = [
     prerequisites: ['react']
   },
   { 
-    id: 'python', category: ['data-science', 'backend'],
+    id: 'python', category: ['backend'],
     name: 'Python', 
+    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+    gradient: 'from-green-500 via-emerald-500 to-teal-600', 
+    description: 'Bahasa serbaguna untuk AI & Backend.', badge: 'Populer', rating: 4.7, totalStudents: '774'
+  },
+  { 
+    id: 'python', category: ['data-science', 'backend'],
+    name: 'Python - Artificial Intelligence', 
     iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
     gradient: 'from-green-500 via-emerald-500 to-teal-600', 
     description: 'Bahasa serbaguna untuk AI & Backend.', badge: 'Populer', rating: 4.7, totalStudents: '774'
@@ -242,7 +251,7 @@ export default function Dashboard() {
     { sender: 'bot', text: 'Halo! Ada yang bisa CoreBot bantu hari ini? Pilih pertanyaan di bawah ya.' }
   ]);
 
-  const LAST_UPDATE = "20 Maret 2026, 08:15 WIB"; // Indikator Last Update
+  const LAST_UPDATE = "5 Apr 2026, 1:41 PM"; // Indikator Last Update
 
   useEffect(() => {
     document.title = 'Dashboard | Coreline by AstByte';
@@ -667,6 +676,10 @@ export default function Dashboard() {
                 <div className="mb-8">
                   <h3 className="text-sm font-extrabold text-slate-800 mb-3">Akses Fitur Khusus Paketmu:</h3>
                   <div className="flex flex-wrap gap-3">
+
+                    <Link to="/tutorial" className="inline-flex items-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 border border-indigo-200 text-red-700 rounded-xl text-sm font-bold shadow-sm transition-colors">
+                      <BookMarked className="w-4 h-4" /> Tutorial
+                    </Link>
                     
                     {/* Akses Portofolio Template (Pro ke atas) */}
                     {canAccessPortfolioTemplate && (
@@ -1055,50 +1068,8 @@ export default function Dashboard() {
         </div>
       </footer>
 
-      {/* --- STICKY BOT CHAT --- */}
-      <div className="fixed bottom-6 right-6 z-[9999] isolation-auto">
-        {isChatOpen ? (
-          <div className="w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-fade-in-up">
-            <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-4 flex items-center justify-between text-white">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"><Bot className="w-5 h-5 text-white" /></div>
-                <div>
-                  <h3 className="font-bold text-sm">CoreBot Assistant</h3>
-                  <div className="flex items-center gap-1 text-[10px]"><span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> Online</div>
-                </div>
-              </div>
-              <button onClick={() => setIsChatOpen(false)} className="hover:bg-white/20 p-1.5 rounded-lg transition-colors"><Minus className="w-5 h-5" /></button>
-            </div>
-
-            <div className="h-72 overflow-y-auto p-4 bg-slate-50 flex flex-col gap-3">
-              {chatMessages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${msg.sender === 'user' ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-white border border-slate-200 text-slate-700 rounded-bl-sm shadow-sm'}`}>
-                    {msg.text}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="p-4 bg-white border-t border-slate-100">
-              <p className="text-[11px] font-bold text-slate-400 mb-2 uppercase">Pilih Pertanyaan:</p>
-              <div className="flex flex-col gap-2">
-                {chatbotFaqs.map((faq, i) => (
-                  <button key={i} onClick={() => handleAskBot(faq)} className="text-left text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-xl transition-colors font-medium border border-blue-100">
-                    {faq.q}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <button onClick={() => setIsChatOpen(true)} className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-4 rounded-full shadow-xl hover:shadow-blue-500/40 hover:scale-110 transition-all flex items-center justify-center group border border-blue-400" title="Buka Chat Bantuan">
-             <MessageCircle className="w-7 h-7" />
-             <span className="absolute right-full mr-4 bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none hidden md:block shadow-lg">Ada kendala bro? Chat bot di sini.</span>
-          </button>
-        )}
-      </div>
-
+      <CoreBot />
+      
       <style>{`
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in-up { animation: fadeInUp 0.4s ease-out forwards; }

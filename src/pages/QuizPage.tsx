@@ -9,44 +9,214 @@ import {
 // Di real app, fetch data ini dari API: `GET /api/quizzes/${id}`
 const getQuizData = (id: string) => {
   const QUIZZES_DB: Record<string, any> = {
-    // Contoh jika ID modulnya mengandung kata 'javascript' atau 'js'
-    'js-basic': {
-      title: "Fundamental JavaScript",
+    'py-01': {
+      title: "Kuis: Modul 1 - Setup & Filosofi",
       questions: [
         {
           id: 1,
-          question: "Manakah dari berikut ini yang merupakan tipe data primitif dalam JavaScript?",
-          options: ["Array", "Object", "String", "Function"],
+          question: "Apa fungsi utama dari Virtual Environment (.venv)?",
+          options: [
+            "Meningkatkan kecepatan eksekusi kode Python",
+            "Mengisolasi dependensi proyek agar tidak terjadi bentrok",
+            "Mengubah kode Python menjadi bytecode",
+            "Menjalankan program secara global di OS"
+          ],
+          correctAnswer: 1
+        },
+        {
+          id: 2,
+          question: "Mengapa kita perlu menggunakan blok 'if __name__ == \"__main__\":' pada struktur file profesional?",
+          options: [
+            "Agar file aman dan tidak otomatis tereksekusi saat di-import oleh modul lain",
+            "Untuk mendeklarasikan variabel global",
+            "Sebagai syarat utama membuat fungsi main() di Python",
+            "Agar kode bisa dibaca oleh interpreter C-Python"
+          ],
+          correctAnswer: 0
+        }
+      ]
+    },
+    'py-02': {
+      title: "Kuis: Modul 2 - Tipe Data & Variabel",
+      questions: [
+        {
+          id: 1,
+          question: "Manakah dari berikut ini yang merupakan tipe data Mutable (bisa diubah isinya)?",
+          options: ["String", "Tuple", "List", "Integer"],
           correctAnswer: 2
         },
         {
           id: 2,
-          question: "Apa fungsi dari perintah 'console.log()'?",
+          question: "Jika variabel dideklarasikan 'x = 10', lalu kita ubah 'x = 20', apa yang sebenarnya terjadi di memori Python?",
           options: [
-            "Menghapus data di browser",
-            "Menampilkan output ke konsol",
-            "Menyimpan data ke database",
-            "Membuat variabel baru"
+            "Nilai objek 10 langsung ditimpa menjadi 20",
+            "Python membuat objek baru bernilai 20 dan memindahkan label 'x' ke objek tersebut",
+            "Akan terjadi error karena Integer itu Immutable",
+            "Memori akan menyimpan dua nilai di alamat yang sama"
           ],
           correctAnswer: 1
         }
       ]
     },
-    // Contoh jika ID modulnya mengandung kata 'python'
-    'py-basic': {
-      title: "Fundamental Python",
+    'py-03': {
+      title: "Kuis: Modul 3 - Control Flow",
       questions: [
         {
           id: 1,
-          question: "Bagaimana cara membuat fungsi di Python?",
-          options: ["function myFunc():", "def myFunc():", "create myFunc():", "func myFunc():"],
+          question: "Apa keunggulan utama dari Structural Pattern Matching (match-case) di Python 3.10+ dibandingkan if-else biasa?",
+          options: [
+            "Bisa membedah dan melakukan unpacking pada struktur data secara langsung",
+            "Mengeksekusi kode jauh lebih cepat pada operasi matematika",
+            "Hanya bisa digunakan untuk mengecek tipe data primitif",
+            "Menggantikan fungsi if sepenuhnya dalam semua kasus"
+          ],
+          correctAnswer: 0
+        },
+        {
+          id: 2,
+          question: "Apa kegunaan utama dari fungsi zip() saat melakukan iterasi (looping)?",
+          options: [
+            "Mengkompres file kode Python",
+            "Mendapatkan index dari setiap iterasi data",
+            "Mengurutkan data berdasarkan abjad",
+            "Menggabungkan dua atau lebih list agar bisa diiterasi secara paralel"
+          ],
+          correctAnswer: 3
+        }
+      ]
+    },
+    'py-04': {
+      title: "Kuis: Modul 4 - Data Structures",
+      questions: [
+        {
+          id: 1,
+          question: "Mengapa mengecek keanggotaan data ('if x in data') menggunakan tipe 'Set' jauh lebih cepat daripada 'List'?",
+          options: [
+            "Karena Set memiliki kompleksitas O(1) berbasis Hash Table",
+            "Karena Set mengurutkan datanya dari A-Z secara otomatis",
+            "Karena Set hanya bisa diisi dengan angka",
+            "Karena Set ditulis langsung dengan bahasa mesin"
+          ],
+          correctAnswer: 0
+        },
+        {
+          id: 2,
+          question: "Apa output dari List Comprehension berikut: [x**2 for x in range(3)]",
+          options: [
+            "[1, 2, 3]", 
+            "[0, 2, 4]", 
+            "[0, 1, 4]", 
+            "[1, 4, 9]"
+          ],
+          correctAnswer: 2
+        }
+      ]
+    },
+    'py-05': {
+      title: "Kuis: Modul 5 - Advanced Functions",
+      questions: [
+        {
+          id: 1,
+          question: "Apa perbedaan mendasar antara keyword 'return' dan 'yield' dalam Python?",
+          options: [
+            "yield menghasilkan error jika data kosong, return mengembalikan list kosong",
+            "return mengakhiri fungsi, sedangkan yield menjeda fungsi dan menyimpannya di memori (Lazy Evaluation)",
+            "keduanya melakukan hal yang sama persis",
+            "yield hanya bisa mengembalikan nilai string"
+          ],
           correctAnswer: 1
         },
         {
           id: 2,
-          question: "Tipe data koleksi mana di Python yang sifatnya 'immutable' (tidak bisa diubah)?",
-          options: ["List", "Dictionary", "Set", "Tuple"],
+          question: "Bagaimana mekanisme utama sebuah fungsi Decorator bekerja?",
+          options: [
+            "Menghapus fungsi target dari memori",
+            "Mengubah fungsi biasa menjadi sebuah Class object",
+            "Membungkus fungsi target untuk memodifikasi kelakuannya tanpa harus merubah kode asli fungsi tersebut",
+            "Mempercepat proses kompilasi kode saat dijalankan"
+          ],
+          correctAnswer: 2
+        }
+      ]
+    },
+    'py-06': {
+      title: "Kuis: Modul 6 - OOP Mastery",
+      questions: [
+        {
+          id: 1,
+          question: "Kapan waktu yang paling umum untuk menggunakan decorator '@classmethod'?",
+          options: [
+            "Untuk memanipulasi variabel instance (self) secara langsung",
+            "Untuk membuat Alternative Constructors (cara lain membuat objek)",
+            "Untuk menghitung operasi matematika dasar",
+            "Untuk menghapus objek dari memori (Garbage Collection)"
+          ],
+          correctAnswer: 1
+        },
+        {
+          id: 2,
+          question: "Mengapa di Python lebih disarankan menggunakan '@property' dibandingkan langsung membuat variabel public (misal: self.gaji = 500)?",
+          options: [
+            "Karena @property memperbolehkan kita menyisipkan validasi logika (Setter) tanpa mengubah cara pemanggilan variabelnya",
+            "Agar variabel otomatis terenkripsi di memori",
+            "Hanya karena terlihat lebih estetik",
+            "Membuat kode kompatibel dengan bahasa Java"
+          ],
+          correctAnswer: 0
+        }
+      ]
+    },
+    'py-07': {
+      title: "Kuis: Modul 7 - Exceptions & Managers",
+      questions: [
+        {
+          id: 1,
+          question: "Pada struktur Exception 'try-except-else-finally', kapankah blok 'else' akan dieksekusi?",
+          options: [
+            "Hanya jika terjadi error tipe ValueError",
+            "Selalu dieksekusi di akhir program tidak peduli ada error atau tidak",
+            "Hanya jika blok 'try' berhasil dieksekusi tanpa memicu error sama sekali",
+            "Saat program mengalami crash sistem"
+          ],
+          correctAnswer: 2
+        },
+        {
+          id: 2,
+          question: "Di dalam Custom Context Manager (blok 'with'), apa kegunaan parameter dalam fungsi '__exit__'?",
+          options: [
+            "Untuk membuka koneksi database",
+            "Untuk mendeklarasikan variabel global",
+            "Menjalankan perulangan while secara otomatis",
+            "Menangkap dan menangani tipe exception, nilai error, dan traceback jika terjadi masalah di dalam blok with"
+          ],
           correctAnswer: 3
+        }
+      ]
+    },
+    'py-08': {
+      title: "Kuis: Modul 8 - Asyncio",
+      questions: [
+        {
+          id: 1,
+          question: "Apa perbedaan utama antara 'time.sleep()' dan 'asyncio.sleep()'?",
+          options: [
+            "time.sleep() memblokir seluruh proses (synchronous), sedangkan asyncio.sleep() tidak memblokir (non-blocking) sehingga CPU bisa mengerjakan tugas lain",
+            "asyncio.sleep() dieksekusi lebih lambat dari time.sleep()",
+            "time.sleep() digunakan khusus untuk request internet",
+            "Tidak ada bedanya, fungsinya sama persis"
+          ],
+          correctAnswer: 0
+        },
+        {
+          id: 2,
+          question: "Fungsi apa yang umum digunakan untuk menjalankan/mengeksekusi coroutine async dari luar (lingkungan synchronous)?",
+          options: [
+            "await main()",
+            "asyncio.start(main())",
+            "asyncio.run(main())",
+            "Thread.start(main())"
+          ],
+          correctAnswer: 2
         }
       ]
     }
@@ -56,20 +226,13 @@ const getQuizData = (id: string) => {
   if (QUIZZES_DB[id]) return QUIZZES_DB[id];
 
   // Kalau tidak ada di DB, generate kuis dinamis berdasarkan ID-nya (Fallback)
-  const languageGuess = id.split('-')[0].toUpperCase();
   return {
-    title: `Kuis Evaluasi: Modul ${languageGuess}`,
+    title: `Kuis Evaluasi: ${id}`,
     questions: [
       {
         id: 1,
-        question: `Pertanyaan pertama terkait konsep di modul ${id}. Manakah pernyataan yang benar?`,
-        options: ["Pernyataan A", "Pernyataan B", "Pernyataan C", "Semua Benar"],
-        correctAnswer: 3
-      },
-      {
-        id: 2,
-        question: `Konsep utama yang diajarkan pada modul ${id} adalah...`,
-        options: ["Sintaks dasar", "Struktur data", "OOP", "Tergantung bahasa pemrogramannya"],
+        question: `Pertanyaan terkait proyek atau studi kasus di modul ${id}. Apakah fungsi utamanya?`,
+        options: ["Pilihan A", "Pilihan B", "Pilihan C", "Implementasi Praktik Terbaik"],
         correctAnswer: 3
       }
     ]
@@ -241,7 +404,7 @@ export default function QuizPage() {
             </div>
             
             <h2 className="text-3xl font-black text-slate-900 mb-2">Kuis Selesai!</h2>
-            <p className="text-slate-500 font-medium mb-8">Kamu telah menyelesaikan kuis {quizData.title}.</p>
+            <p className="text-slate-500 font-medium mb-8">Kamu telah menyelesaikan {quizData.title}.</p>
 
             <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 mb-8 inline-block min-w-[250px]">
               <p className="text-sm font-extrabold text-slate-500 uppercase tracking-widest mb-2">Nilai Akhir</p>
