@@ -189,7 +189,7 @@ export default function LoginPage() {
               </button>
               
               <a
-                href="https://axid.astbyte.com/"
+                href="https://axid.astbyte.com/register"
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center justify-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-8 py-4 rounded-xl font-bold text-lg transition-all w-full sm:w-auto hover:border-slate-400 shadow-sm"

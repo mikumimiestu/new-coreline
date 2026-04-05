@@ -45,6 +45,7 @@ type VoucherConfig = {
   note: string;
   validTiers?: Tier[]; // Voucher hanya berlaku untuk tier ini (opsional)
   validCycles?: Cycle[]; // Voucher hanya berlaku untuk cycle ini (opsional)
+  freePPN?: boolean; // Trik baru: true jika voucher ini menggratiskan PPN
 };
 
 const VOUCHERS: Record<string, VoucherConfig> = {
@@ -66,6 +67,12 @@ const VOUCHERS: Record<string, VoucherConfig> = {
     note: 'Diskon Bulan Februari 10% (Hanya Pro)',
     validTiers: ['pro']
   },
+  SUPER60K: {
+    type: 'fixed',
+    value: 60000,
+    note: 'Potongan Rp60.000 & Bebas PPN',
+    freePPN: true // <- Menggratiskan PPN
+  }
 };
 
 /* =========================================
@@ -88,24 +95,24 @@ function makeOrderId() {
 }
 
 function calcDiscount(nominal: number, code: string, currentTier: Tier, currentCycle: Cycle) {
-  if (!code) return { valid: false, amount: 0, label: '', error: '' };
+  if (!code) return { valid: false, amount: 0, label: '', error: '', freePPN: false };
   
   const v = VOUCHERS[code.toUpperCase().trim()];
-  if (!v) return { valid: false, amount: 0, label: '', error: 'Kode voucher tidak valid atau kedaluwarsa.' };
+  if (!v) return { valid: false, amount: 0, label: '', error: 'Kode voucher tidak valid atau kedaluwarsa.', freePPN: false };
 
   // Pengecekan Batasan (Constraints)
   if (v.validTiers && !v.validTiers.includes(currentTier)) {
-    return { valid: false, amount: 0, label: '', error: `Voucher ini tidak berlaku untuk paket ${currentTier.toUpperCase()}.` };
+    return { valid: false, amount: 0, label: '', error: `Voucher ini tidak berlaku untuk paket ${currentTier.toUpperCase()}.`, freePPN: false };
   }
   if (v.validCycles && !v.validCycles.includes(currentCycle)) {
-    return { valid: false, amount: 0, label: '', error: `Voucher ini tidak berlaku untuk langganan ${currentCycle === 'monthly' ? 'Bulanan' : 'Tahunan'}.` };
+    return { valid: false, amount: 0, label: '', error: `Voucher ini tidak berlaku untuk langganan ${currentCycle === 'monthly' ? 'Bulanan' : 'Tahunan'}.`, freePPN: false };
   }
   
   let disc = v.type === 'percent' ? Math.floor((nominal * v.value) / 100) : v.value;
   disc = Math.min(disc, nominal); // Diskon tidak boleh melebihi harga
   
   const label = v.note || (v.type === 'percent' ? `Diskon ${v.value}%` : `Potongan ${rupiah(v.value)}`);
-  return { valid: true, amount: disc, label, error: '' };
+  return { valid: true, amount: disc, label, error: '', freePPN: v.freePPN || false };
 }
 
 type AuthUser = {
@@ -149,7 +156,11 @@ export default function ManualQRISPage() {
   // Kalkulasi Pembayaran
   const disc = useMemo(() => calcDiscount(nominalRaw, voucher, tierParam, cycleParam), [nominalRaw, voucher, tierParam, cycleParam]);
   const subtotal = Math.max(0, nominalRaw - disc.amount); // Harga setelah diskon
-  const ppnAmount = Math.round(subtotal * PPN_RATE); // PPN 11% ditambahkan dari Subtotal
+  
+  // PPN Logic: Jika voucher memberikan free PPN, maka PPN 0, jika tidak hitung 11% dari subtotal
+  const rawPpnAmount = Math.round(subtotal * PPN_RATE);
+  const ppnAmount = disc.freePPN ? 0 : rawPpnAmount; 
+  
   const grandTotal = subtotal + ppnAmount; // Total akhir yang harus dibayar
 
   useEffect(() => {
@@ -554,8 +565,12 @@ export default function ManualQRISPage() {
                      <div className="flex justify-between items-center text-slate-500 font-bold text-sm mt-2">
                         <span className="flex items-center gap-1.5">
                           <Plus className="w-3.5 h-3.5" /> PPN (11%)
+                          {disc.freePPN && <span className="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-md ml-1">GRATIS</span>}
                         </span>
-                        <span>{rupiah(ppnAmount)}</span>
+                        <div className="flex items-center gap-2">
+                          {disc.freePPN && <span className="line-through text-slate-300 font-medium">{rupiah(rawPpnAmount)}</span>}
+                          <span className={disc.freePPN ? "text-emerald-600" : ""}>{rupiah(ppnAmount)}</span>
+                        </div>
                      </div>
                   </div>
                 </div>
@@ -583,7 +598,7 @@ export default function ManualQRISPage() {
                   </div>
                 </div>
 
-                {/* Receipt Zigzag Bottom Effect (Very realistic CSS Trick matched to Light Background) */}
+                {/* Receipt Zigzag Bottom Effect */}
                 <div className="absolute -bottom-3 left-0 w-full h-6 bg-[#f8fafc] [mask-image:linear-gradient(to_right,transparent_0%,#000_50%,transparent_100%),radial-gradient(circle_at_bottom,transparent_6px,#000_7px)] [mask-size:100%_100%,20px_20px] [mask-composite:intersect]" />
               </div>
               
