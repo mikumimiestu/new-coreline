@@ -251,7 +251,7 @@ export default function Dashboard() {
     { sender: 'bot', text: 'Halo! Ada yang bisa CoreBot bantu hari ini? Pilih pertanyaan di bawah ya.' }
   ]);
 
-  const LAST_UPDATE = "5 Apr 2026, 1:41 PM"; // Indikator Last Update
+  const LAST_UPDATE = "6 Apr 2026, 2:51 PM"; // Indikator Last Update
 
   useEffect(() => {
     document.title = 'Dashboard | Coreline by AstByte';
