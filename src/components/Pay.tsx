@@ -54,6 +54,11 @@ const VOUCHERS: Record<string, VoucherConfig> = {
     value: 5, 
     note: 'Diskon 5%',
   },
+  APRISK: { 
+    type: 'percent', 
+    value: 10, 
+    note: 'Diskon 10%',
+  },
   HARUSCORELINE: { 
     type: 'fixed', 
     value: 70000, 

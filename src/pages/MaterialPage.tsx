@@ -5,7 +5,6 @@ import type { LearningMaterial } from '../types/learning';
 import { decodeId, encodeId } from '../utils/hashId'; // IMPORT encodeId DI SINI
 
 // Import Data
-import { MOCK_MATERIALS as STUDENT_MATERIALS } from '../data/mockData';
 import { MOCK_MATERIALS as OTHER_MATERIALS } from '../data/otherData';
 import { MOCK_MATERIALS as PYTHON_MATERIALS } from '../data/pythonData';
 import { MOCK_MATERIALS as GO_MATERIALS } from '../data/golangData';
@@ -14,6 +13,9 @@ import { MOCK_MATERIALS as TS_MATERIAL } from '../data/tsData';
 import { MOCK_MATERIALS as JS_MATERIAL } from '../data/jsData';
 import { MOCK_MATERIALS as PSQL_MATERIAL } from '../data/posgresData';
 import { MOCK_MATERIALS as RB_MATERIAL } from '../data/rubyData';
+import { MOCK_MATERIALS as REACTJS_MATERIAL } from '../data/reactjsData';
+import { MOCK_MATERIALS as NEXTJS_MATERIAL } from '../data/nextjsData';
+import { MOCK_MATERIALS as NEXTJSEND_MATERIAL } from '../data/nextjsendData';
 
 // Icons & Components
 import { 
@@ -27,9 +29,10 @@ const API_BASE = 'https://authx.astbyte.com';
 
 // Gabungkan semua materi untuk pencarian ID
 const ALL_MATERIALS: LearningMaterial[] = [
-  ...STUDENT_MATERIALS, ...OTHER_MATERIALS, ...PYTHON_MATERIALS, 
+  ...OTHER_MATERIALS, ...PYTHON_MATERIALS, 
   ...GO_MATERIALS, ...MYSQL_MATERIALS, ...TS_MATERIAL, 
   ...JS_MATERIAL, ...PSQL_MATERIAL, ...RB_MATERIAL,
+  ...REACTJS_MATERIAL, ...NEXTJS_MATERIAL, ...NEXTJSEND_MATERIAL
 ];
 
 type Plan = 'free' | 'pro' | 'plus';

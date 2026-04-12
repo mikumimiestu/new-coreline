@@ -1,52 +1,63 @@
-import type { LearningMaterial } from '../types/learning';
+import { LearningMaterial } from '../types/learning';
 
 export const MOCK_MATERIALS: LearningMaterial[] = [
-  // ==================== LEVEL 1: BEGINNER (DASAR) ====================
+  // ==================== JAVASCRIPT CORE MATERIALS ====================
   {
     id: 'js-01',
     user_type: 'student',
     language: 'javascript',
-    title: '1. Hello World & Variable Standards',
-    description: 'Cara kerja JS Engine, Console, dan aturan mati var vs let vs const.',
-    content: `# 🟡 Pengenalan JavaScript
+    title: 'Pengenalan JavaScript & Ekosistem Node.js',
+    description: 'Arsitektur V8 Engine, Node.js, Manajemen Paket (npm), dan Setup Proyek Modern.',
+    content: `# 🟡 Modul 1: JS Deep Dive & Professional Setup
 
-## Apa itu JavaScript?
-JavaScript (JS) adalah bahasa pemrograman yang membuat website menjadi **hidup**.
-- **HTML:** Tulang (Struktur).
-- **CSS:** Baju (Tampilan).
-- **JS:** Otak (Logika, Data, Interaksi).
+## 1. Filosofi & Ekosistem JavaScript
+JavaScript (JS) diciptakan oleh **Brendan Eich** dalam 10 hari pada tahun 1995. Awalnya hanya untuk browser, kini dengan adanya **Node.js** (berbasis V8 Engine dari Google), JS bisa berjalan di server, mobile, hingga IoT.
 
+JS menggunakan sifat **Single-threaded, Non-blocking, Asynchronous**.
 
+---
 
-JS berjalan di browser (Client-side) dan di server (Node.js). V8 Engine adalah mesin di balik Google Chrome dan Node.js yang mengeksekusi kode JS kita dengan sangat cepat.
+## 2. Setup Lingkungan Kerja Profesional
+Di industri, kita menggunakan **Node.js** dan **npm (Node Package Manager)** untuk mengatur proyek.
 
-## 1. Output & Debugging
-\`\`\`javascript
-console.log("Halo Dunia"); // Debugging standar
-console.table({nama: "Budi", umur: 20}); // Menampilkan data tabel rapi
-alert("Pop up!"); // Interaksi kasar (jarang dipakai di app modern)
-\`\`\`
+**Workflow Eksekusi:**
+1. **Inisialisasi Proyek:** \`mkdir belajar_js && cd belajar_js\`
+2. **Buat file package.json:** \`npm init -y\` (Ini seperti "KTP" proyekmu).
+3. **Manajemen Paket:** - Install dependency: \`npm install nodemon --save-dev\` (tool agar auto-restart saat kode diubah).
+4. **Jalankan script:** Tambahkan \`"start": "node main.js"\` di package.json.
 
-## 2. Variabel: Aturan Modern
-⚠️ **Haram menggunakan \`var\` di project modern!** \`var\` memiliki masalah *hoisting* dan *scope* yang menyebabkan bug fatal.
+---
 
-| Keyword | Bisa Diubah? | Scope | Kapan Dipakai? |
-|:---|:---:|:---|:---|
-| **const** | ❌ Tidak | Block | **Gunakan 95% waktu coding.** |
-| **let** | ✅ Ya | Block | Gunakan hanya jika nilai *pasti* berubah (loop, counter). |
-| **var** | ✅ Ya | Function | **Legacy.** Jangan dipakai. |
+## 3. Menulis Kode Pertama (Modern ES6+)
+Kita sudah meninggalkan \`var\`. Sekarang standar industri adalah menggunakan \`const\` dan ES6 Modules (opsional, tambahkan \`"type": "module"\` di package.json).
 
 \`\`\`javascript
-const PI = 3.14;
-// PI = 3.15; // ❌ Error: Assignment to constant variable.
+// file: index.js
+const main = () => {
+  const user = "Developer";
+  console.log(\`System Active. Welcome, \${user}!\`);
+};
 
-let skor = 0;
-skor = 10; // ✅ Aman
+// Cek apakah file ini dijalankan langsung
+if (require.main === module) {
+  main();
+}
 \`\`\`
 
-## 🎯 Outcome
-- Setup mental: "Default ke \`const\`, ganti \`let\` kalau terpaksa".
-- Bisa melihat log di Browser Console (F12).
+---
+
+## 📝 Quiz Singkat
+1. Apa fungsi dari \`package.json\` dalam sebuah proyek Node.js?
+2. Mengapa Node.js disebut *non-blocking*?
+
+## ✍️ Latihan (15 Menit)
+1. Buat folder baru, inisialisasi npm (\`npm init -y\`).
+2. Buat file \`index.js\`, tulis fungsi sederhana yang menyapa nama Anda.
+3. Jalankan file tersebut dari terminal menggunakan \`node index.js\`.
+
+## 🎯 Target Kompetensi
+- Paham konsep dasar ekosistem Node.js.
+- Mampu setup proyek JS berbasis npm.
 `,
     level: 'beginner',
     order: 1,
@@ -56,57 +67,62 @@ skor = 10; // ✅ Aman
     id: 'js-02',
     user_type: 'student',
     language: 'javascript',
-    title: '2. Types, Coercion & Truthy/Falsy',
-    description: 'Hati-hati dengan "Magic" JS saat menjumlahkan string dan angka.',
-    content: `# Tipe Data & Keunikan JS
+    title: 'Variables, Data Types & Modern Syntax',
+    description: 'Memahami let vs const, Tipe Data Primitif vs Referensi, dan Template Literals.',
+    content: `# 🏗️ Modul 2: Data Types & Modern Syntax
 
-JS adalah *Dynamically Typed*. Satu variabel bisa berubah tipe datanya tanpa dideklarasikan ulang.
+## 1. Variabel: Jangan Pakai 'var'!
+Di JS modern (ES6+), kita punya aturan ketat:
+- **const**: Gunakan ini *secara default*. Nilainya tidak bisa di-*reassign* (diisi ulang).
+- **let**: Gunakan ini *hanya* jika nilainya pasti akan berubah (misal: di dalam loop).
+- **var**: **Tinggalkan!** Bikin pusing karena masalah *Hoisting* dan *Scope*.
 
-## 1. Primitives & Template Literal
-\`\`\`javascript
-let nama = "Budi";      // String
-let umur = 25;          // Number (Int/Float sama saja)
-let isPro = true;       // Boolean
-let kosong = null;      // Value-nya sengaja di-"kosong"-kan
-let gaAda = undefined;  // Belum diset value sama sekali
+---
 
-// Template Literal (Backtick \`) - WAJIB PAKAI INI DI INDUSTRI
-console.log(\`Halo \${nama}, umurmu \${umur}\`); 
-\`\`\`
-
-## 2. The "Bad Parts": Type Coercion
-JS suka memaksa ubah tipe data di luar nalar kita. 
+## 2. Primitives vs Reference Types
+Ini sering jadi pertanyaan *interview*:
+- **Primitif** (\`String\`, \`Number\`, \`Boolean\`, \`Undefined\`, \`Null\`): Disalin berdasarkan nilainya (*Pass by Value*).
+- **Referensi** (\`Object\`, \`Array\`, \`Function\`): Disalin berdasarkan alamat memorinya (*Pass by Reference*).
 
 \`\`\`javascript
-console.log(1 + "1");  // "11" (Angka dipaksa jadi String)
-console.log(10 - "5"); // 5    (String dipaksa jadi Angka) - Aneh kan?
+// Bukti Reference Type
+const userA = { nama: "Budi" };
+const userB = userA; 
 
-// Perbandingan: == vs ===
-console.log(5 == "5");  // true (Cek nilai saja, tipe bodo amat)
-console.log(5 === "5"); // false (Cek Nilai DAN Tipe) ✅ WAJIB PAKAI INI
+userB.nama = "Andi";
+console.log(userA.nama); // Output: Andi (Ikut berubah karena memorinya sama!)
 \`\`\`
 
-## 3. Truthy & Falsy
-Di JS, semua nilai dianggap **True** dalam kondisi (if/else), KECUALI 6 hal ini (**Falsy**):
-1. \`false\`
-2. \`0\` (nol)
-3. \`""\` (string kosong)
-4. \`null\`
-5. \`undefined\`
-6. \`NaN\` (Not a Number)
+---
+
+## 3. Template Literals & Destructuring
+Manipulasi string terbaik menggunakan *Template Literals* (menggunakan backtick).
 
 \`\`\`javascript
-const user = ""; // String kosong = Falsy
-if (user) {
-  console.log("Ada user");
-} else {
-  console.log("User kosong"); // Ini yang jalan
-}
+const salary = 15500000;
+// Format angka ke format Rupiah standar
+const formatRupiah = new Intl.NumberFormat('id-ID', {
+  style: 'currency', currency: 'IDR'
+}).format(salary);
+
+console.log(\`Gaji bulanan lo: \${formatRupiah}\`);
+
+// Object Destructuring (Biar nggak ngetik panjang-panjang)
+const config = { host: 'localhost', port: 8080 };
+const { host, port } = config; 
+console.log(\`Running on \${host}:\${port}\`);
 \`\`\`
 
-## 🎯 Outcome
-- Selalu pakai \`===\` untuk menghindari bug konyol.
-- Paham konsep Truthy/Falsy untuk validasi form yang elegan.
+---
+
+## 📝 Quiz Singkat
+1. Apa yang terjadi jika kita mencoba mengubah isi array yang dideklarasikan dengan \`const\`?
+2. Kapan waktu yang tepat menggunakan \`let\` dibandingkan \`const\`?
+
+## ✍️ Latihan (20 Menit)
+1. Buat program sederhana untuk menghitung BMI.
+2. Gunakan tipe data referensi (Object) untuk menyimpan berat dan tinggi.
+3. Buat string menggunakan *Template Literal* yang menyebutkan status obesitas/normal.
 `,
     level: 'beginner',
     order: 2,
@@ -116,44 +132,71 @@ if (user) {
     id: 'js-03',
     user_type: 'student',
     language: 'javascript',
-    title: '3. Control Flow & Logic',
-    description: 'Percabangan (If/Else, Ternary) dan Perulangan (For, While).',
-    content: `# Logika & Perulangan
+    title: 'Control Flow, Ternary & Short-Circuiting',
+    description: 'Switch-case, Ternary Operator, Optional Chaining (?.), dan Nullish Coalescing (??).',
+    content: `# 🧠 Modul 3: Control Flow & Logic
 
-Bagaimana cara membuat keputusan dalam kode dan mengulang tugas tanpa capek.
-
-## 1. Ternary Operator (If/Else Modern)
-Di React/Vue, kamu akan jarang pakai \`if/else\` panjang, melainkan pakai *Ternary*.
+## 1. Ternary Operator (If-Else 1 Baris)
+Sangat berguna untuk menyederhanakan kode.
 
 \`\`\`javascript
-const nilai = 80;
-
-// Cara Lama:
+const nilai = 85;
+// if-else panjang:
 let status;
-if (nilai >= 75) {
-  status = "Lulus";
-} else {
-  status = "Gagal";
-}
+if (nilai >= 75) status = "Lulus"; else status = "Gagal";
 
-// Cara Modern (Ternary): Kondisi ? Jika_True : Jika_False
-const statusModern = nilai >= 75 ? "Lulus" : "Gagal";
-console.log(statusModern); // "Lulus"
+// Cara Pro (Ternary):
+const statusPro = nilai >= 75 ? "Lulus" : "Gagal";
+console.log(statusPro);
 \`\`\`
 
-## 2. Perulangan Dasar (For Loop)
+---
+
+## 2. Modern Logic: Optional Chaining (?.) & Nullish Coalescing (??)
+Sering kita dapat data dari API yang tidak lengkap dan bikin aplikasi *crash*. Ini solusinya:
+
 \`\`\`javascript
-// for(nilai_awal; kondisi_berhenti; penambahan)
-for (let i = 1; i <= 5; i++) {
-  console.log(\`Perulangan ke-\${i}\`);
+const user = {
+  id: 1,
+  profile: {
+    // email: "user@mail.com" // anggap email ini tidak ada dari DB
+  }
+};
+
+// ❌ Cara Lama (Rawan Crash / Uncaught TypeError)
+// const email = user.profile.email.toLowerCase(); 
+
+// ✅ Cara Modern (Optional Chaining)
+// Kalau email undefined, dia berhenti dan gak error.
+const email = user.profile?.email?.toLowerCase(); 
+
+// Nullish Coalescing (??)
+// Berikan nilai default JIKA data sebelah kirinya null / undefined.
+const username = user.profile?.name ?? "Guest User";
+console.log(username); // Output: Guest User
+\`\`\`
+
+---
+
+## 3. Looping: for...of vs for...in
+Jangan pakai \`for (let i = 0; ...)\` lagi jika tidak perlu *index*.
+- **for...of**: Untuk iterasi Array.
+- **for...in**: Untuk iterasi *keys* pada Object.
+
+\`\`\`javascript
+const tags = ['js', 'web', 'api'];
+for (const tag of tags) {
+  console.log(\`Tag: \${tag}\`);
 }
 \`\`\`
 
-## 🎯 Outcome
-- Bisa membuat alur logika sederhana.
-- Menguasai Ternary operator untuk mempersingkat kode if/else.
+---
+
+## ✍️ Latihan (20 Menit)
+1. Buat object \`mahasiswa\` dengan *nested object* \`alamat.kota\`.
+2. Hapus \`kota\`, lalu gunakan *Optional Chaining* dan *Nullish Coalescing* untuk mengamankan kodenya agar jika kota tidak ada, kembalikan string "Kota Tidak Diketahui".
 `,
-    level: 'beginner',
+    level: 'intermediate',
     order: 3,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -161,94 +204,142 @@ for (let i = 1; i <= 5; i++) {
     id: 'js-04',
     user_type: 'student',
     language: 'javascript',
-    title: '4. Functions: Arrow vs Declaration',
-    description: 'Revolusi ES6 Arrow Function dan Default Parameters.',
-    content: `# Modern Functions
+    title: 'Struktur Data Lanjut: Array Methods Mastery',
+    description: 'High Order Array Methods: Map, Filter, Reduce, dan Spread Operator.',
+    content: `# 🧱 Modul 4: Data Structures & Array Methods
 
-Fungsi adalah blok kode yang bisa dipakai berulang kali.
+Programmer JS sejati sangat jarang menggunakan loop manual (\`for\` atau \`while\`) untuk memanipulasi data. Mereka menggunakan *High-Order Methods*.
 
-## 1. Arrow Function (ES6)
-Cara penulisan modern yang lebih ringkas dan sering dipakai di dunia kerja.
+## 1. Map, Filter, Reduce (Holy Trinity)
 
 \`\`\`javascript
-// Cara Lama (Declaration)
-function tambah(a, b) {
-  return a + b;
-}
+const products = [
+  { name: 'Laptop', price: 15000, category: 'Tech' },
+  { name: 'Mouse', price: 500, category: 'Tech' },
+  { name: 'Buku', price: 100, category: 'Stationery' }
+];
 
-// Cara Baru (Arrow Function)
-const kali = (a, b) => {
-  return a * b;
-};
+// 1. FILTER: Ambil yang kategorinya Tech saja
+const techProducts = products.filter(p => p.category === 'Tech');
 
-// One-Liner (Implicit Return) - Sangat sering dipakai di React
-const bagi = (a, b) => a / b;
+// 2. MAP: Modifikasi datanya (misal: tambah diskon)
+const discounted = techProducts.map(p => ({
+  name: p.name,
+  price: p.price * 0.9 // Diskon 10%
+}));
 
-console.log(bagi(10, 2)); // 5
+// 3. REDUCE: Hitung total harga
+const totalBelanja = discounted.reduce((total, p) => total + p.price, 0);
+
+console.log(totalBelanja); // Output: 13950
 \`\`\`
 
-## 2. Default Parameters
-Menghindari error jika *user* lupa memasukkan argumen.
+---
+
+## 2. Spread Operator (...)
+Cara paling bersih untuk *copy* atau menggabungkan object/array tanpa merusak aslinya (Immutability).
+
 \`\`\`javascript
-// Jika nama kosong, otomatis diisi "Guest"
-const sapa = (nama = "Guest") => \`Halo \${nama}\`;
+const defaultTheme = { mode: 'light', font: 'Arial' };
+const userTheme = { mode: 'dark' };
 
-console.log(sapa()); // "Halo Guest"
-console.log(sapa("Dino")); // "Halo Dino"
+// Gabungkan object (yang kanan menimpa yang kiri)
+const finalConfig = { ...defaultTheme, ...userTheme };
+console.log(finalConfig); // { mode: 'dark', font: 'Arial' }
+
+const arr1 = [1, 2];
+const arr2 = [...arr1, 3, 4]; // [1, 2, 3, 4]
 \`\`\`
 
-## 🎯 Outcome
-- Bisa mengubah fungsi lama menjadi Arrow Function.
-- Mengerti *Implicit Return* (tanpa keyword \`return\` dan kurung kurawal).
+---
+
+## 📝 Quiz Singkat
+1. Apa perbedaan output dari method \`.map()\` dan \`.filter()\`?
+2. Mengapa \`.reduce()\` membutuhkan argumen angka \`0\` di bagian akhir parameternya?
+
+## ✍️ Latihan (20 Menit)
+1. Diberikan array kotor berisi angka dan string: \`[1, "2", "halo", 3, 4]\`.
+2. Gunakan \`.filter()\` untuk membuang semua data ber-tipe string (gunakan \`typeof\`).
+3. Gunakan \`.reduce()\` untuk menjumlahkan semua angka yang tersisa.
 `,
-    level: 'beginner',
+    level: 'intermediate',
     order: 4,
     created_at: '2025-01-01T00:00:00Z'
   },
-
-  // ==================== LEVEL 2: INTERMEDIATE (MENENGAH) ====================
   {
     id: 'js-05',
     user_type: 'student',
     language: 'javascript',
-    title: '5. Array Magic: Map, Filter, Reduce',
-    description: 'Meninggalkan For Loop manual demi Functional Programming.',
-    content: `# Array Manipulation
+    title: 'Advanced Functions: Arrow, Closures & Callbacks',
+    description: 'First-class citizens, Arrow Functions, Lexical Scope, dan teknik Currying/Closures.',
+    content: `# ⚙️ Modul 5: Advanced Functions (Expert Core)
 
-Di dunia kerja modern (seperti di React), kita jarang pakai \`for (let i=0...)\` untuk memproses Array. Kita pakai *Higher Order Functions*.
+Di JavaScript, fungsi adalah *First-Class Citizens* (Bisa disimpan di variabel, dilempar ke fungsi lain, atau di-*return* dari fungsi).
+
+## 1. Arrow Functions (=>)
+Lebih pendek dan mengikat konteks \`this\` (lexical scope) dari tempat ia dideklarasikan.
 
 \`\`\`javascript
-const harga = [1000, 2000, 3000, 4000, 5000];
+// Function biasa
+function tambah(a, b) {
+  return a + b;
+}
+
+// Arrow function (Implicit return jika satu baris)
+const tambahPro = (a, b) => a + b;
 \`\`\`
 
-## 1. MAP (Transformasi)
-Mengubah setiap elemen array menjadi bentuk baru. **Jumlah data TETAP**.
+---
+
+## 2. Closures (Teknik Tingkat Dewa)
+Closure adalah kemampuan sebuah fungsi untuk "mengingat" variabel di scope luarnya, meskipun fungsi luar tersebut sudah selesai dijalankan. Sangat berguna untuk *Data Privacy*.
+
 \`\`\`javascript
-// Diskon 50% semua barang
-const diskon = harga.map(item => item * 0.5);
-console.log(diskon); // [500, 1000, 1500, 2000, 2500]
+function createCounter() {
+  let count = 0; // Variabel ini "tersembunyi" (Private)
+
+  return {
+    increment: () => {
+      count++;
+      return count;
+    },
+    decrement: () => {
+      count--;
+      return count;
+    }
+  };
+}
+
+const myCounter = createCounter();
+console.log(myCounter.increment()); // 1
+console.log(myCounter.increment()); // 2
+console.log(myCounter.count); // undefined (Tidak bisa diakses langsung!)
 \`\`\`
 
-## 2. FILTER (Penyaringan)
-Menyaring elemen sesuai kondisi. **Jumlah data BISA BERKURANG**.
+---
+
+## 3. Callbacks
+Callback adalah fungsi yang dilempar sebagai argumen ke fungsi lain. Biasanya dipakai untuk proses asynchronous dasar.
+
 \`\`\`javascript
-// Ambil yang mahal saja (> 2500)
-const mahal = harga.filter(item => item > 2500);
-console.log(mahal); // [3000, 4000, 5000]
+const downloadFile = (url, callback) => {
+  console.log(\`Mulai download dari \${url}...\`);
+  setTimeout(() => {
+    callback("File-Isi-Rahasia.pdf"); // Panggil setelah 2 detik
+  }, 2000);
+};
+
+downloadFile("https://example.com/file", (result) => {
+  console.log(\`Download Selesai! Mendapatkan: \${result}\`);
+});
 \`\`\`
 
-## 3. REDUCE (Totaling)
-Merangkum/menggabungkan array menjadi **SATU nilai** (misal: total harga keranjang belanja).
-\`\`\`javascript
-// acc = akumulator (penampung), curr = item saat ini, 0 = nilai awal
-const total = harga.reduce((acc, curr) => acc + curr, 0); 
-console.log(total); // 15000
-\`\`\`
-
-## 🎯 Outcome
-- Wajib hafal \`map\`, \`filter\`, \`reduce\` di luar kepala karena ini pondasi manipulasi data di Frontend modern.
+## ✍️ Latihan (30 Menit)
+1. Buat sebuah fungsi *Closure* bernama \`createBankAccount(initialBalance)\`.
+2. Buat method internal \`deposit(amount)\` dan \`withdraw(amount)\`.
+3. Pastikan \`withdraw\` menolak penarikan jika uang tidak cukup, dan saldo tidak bisa diubah langsung dari luar.
 `,
-    level: 'intermediate',
+    level: 'advanced',
     order: 5,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -256,42 +347,76 @@ console.log(total); // 15000
     id: 'js-06',
     user_type: 'student',
     language: 'javascript',
-    title: '6. DOM Manipulation & Events',
-    description: 'Menghubungkan Logic JS ke HTML. querySelector adalah raja.',
-    content: `# Document Object Model (DOM)
+    title: 'OOP Mastery: Classes, Prototypes & The "this" Keyword',
+    description: 'Modern ES6 Classes, constructor, encapsulation (Private fields #), dan warisan.',
+    content: `# 🏛️ Modul 6: OOP Mastery
 
+JavaScript pada dasarnya berbasis *Prototype*, namun sejak ES6, kita punya *Syntax Sugar* bernama \`class\` yang mirip bahasa OOP tradisional (Java/Python).
 
-
-DOM adalah representasi struktur HTML sebagai sebuah "pohon" (Tree) yang bisa dibaca dan diotak-atik oleh JS.
-
-## 1. Selecting Elements
-Lupakan \`getElementById\`, gunakan **querySelector** (seperti CSS selector: pakai \`.\` untuk class, \`#\` untuk id).
+## 1. Class & Constructor
 \`\`\`javascript
-const judul = document.querySelector("h1"); // Tag
-const tombol = document.querySelector(".btn-save"); // Class
-const input = document.querySelector("#username"); // ID
+class Karyawan {
+  // Private field (Fitur Modern JS)
+  #gaji; 
+
+  constructor(nama, gajiAwal) {
+    this.nama = nama;
+    this.#gaji = gajiAwal;
+  }
+
+  // Getter
+  get infoGaji() {
+    return \`Rp \${this.#gaji}\`;
+  }
+
+  // Setter dengan validasi
+  set naikGaji(nominal) {
+    if (nominal < 0) throw new Error("Gaji tidak bisa minus!");
+    this.#gaji += nominal;
+  }
+}
+
+const staff = new Karyawan("Budi", 5000000);
+staff.naikGaji = 1000000;
+console.log(staff.infoGaji); // Rp 6000000
+// console.log(staff.#gaji); // ERROR! Private field tidak bisa diakses
 \`\`\`
 
-## 2. Event Listener
-Menambahkan interaksi (klik, ketik, scroll).
+---
+
+## 2. Inheritance (Pewarisan)
+Gunakan kata kunci \`extends\` dan panggil \`super()\` untuk mengeksekusi constructor milik parent.
+
 \`\`\`javascript
-tombol.addEventListener("click", () => {
-  // Mengubah CSS via JS
-  judul.style.color = "red";
-  
-  // Mengubah teks
-  judul.textContent = "Data Berhasil Disimpan!";
-  
-  // Mengambil value dari inputan user
-  console.log("Input user:", input.value);
-});
+class Manager extends Karyawan {
+  constructor(nama, gajiAwal, departemen) {
+    super(nama, gajiAwal); // Wajib panggil parent constructor
+    this.departemen = departemen;
+  }
+
+  // Polymorphism (Override method)
+  get infoGaji() {
+    return \`[Rahasia Manager] \${super.infoGaji}\`;
+  }
+}
+
+const bos = new Manager("Siska", 15000000, "IT");
+console.log(bos.infoGaji);
 \`\`\`
 
-## 🎯 Outcome
-- Tahu cara memanipulasi elemen web secara langsung via JS.
-- Bisa mengambil *value* dari Form HTML untuk diproses.
+---
+
+## 3. Misteri Keyword 'this'
+Di JS, nilai \`this\` ditentukan **BAGAIMANA** fungsi dipanggil, bukan di mana ia dibuat (kecuali Arrow Function).
+- Jika dipanggil dari object: \`this\` = object tersebut.
+- Arrow function tidak punya \`this\` sendiri, dia minjem dari scope luarnya!
+
+## ✍️ Latihan (30 Menit)
+1. Buat class \`Kendaraan\` dengan properti \`merk\` dan \`tahun\`.
+2. Buat class turunan \`Mobil\` yang punya method \`startEngine()\`.
+3. Gunakan *Private Fields* untuk menyimpan status mesin (hidup/mati).
 `,
-    level: 'intermediate',
+    level: 'advanced',
     order: 6,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -299,53 +424,71 @@ tombol.addEventListener("click", () => {
     id: 'js-07',
     user_type: 'student',
     language: 'javascript',
-    title: '7. Asynchronous: Promise & Async/Await',
-    description: 'Menangani API Call & mencegah browser macet dengan Event Loop.',
-    content: `# Asynchronous JavaScript
+    title: 'Exception Handling & Modules',
+    description: 'Blok try...catch...finally, Custom Error Object, dan ES6 Export/Import.',
+    content: `# 🛡️ Modul 7: Errors & Modules
 
-JS itu *Single Threaded* (hanya bisa kerjakan satu tugas dalam satu waktu). Kalau ada proses lama (download file/tarik data API), JS akan menyerahkannya ke Web APIs di background, lalu lanjut membaca baris kode berikutnya.
+Aplikasi yang baik tidak akan nge-hang/crash layarnya menjadi putih saat terjadi error, melainkan menangkapnya secara elegan.
 
-
-
-## 1. Konsep Promise (Janji)
-Sebuah Promise punya 3 status: *Pending* (menunggu), *Fulfilled* (berhasil), atau *Rejected* (gagal).
-
-## 2. Async / Await (The Modern Standard)
-Cara modern agar kode *async* (tidak sinkron) terlihat rapi seperti kode biasa, tanpa terjebak *Callback Hell*.
-
+## 1. Exception Handling (try-catch)
 \`\`\`javascript
-// Simulasi ambil data server (butuh waktu 2 detik)
-const getUser = () => {
-  return new Promise(resolve => setTimeout(() => resolve("Dino"), 2000));
-};
-
-const main = async () => {
-  console.log("1. Loading...");
-  
-  try {
-    // await MENGHENTIKAN SEMENTARA eksekusi di fungsi ini sampai data datang
-    const user = await getUser(); 
-    console.log("2. User ditemukan:", user);
-  } catch (error) {
-    console.log("Error:", error);
+const bagiAngka = (a, b) => {
+  if (typeof a !== 'number' || typeof b !== 'number') {
+    // Melempar Custom Error
+    throw new TypeError("Input harus berupa angka!");
   }
-  
-  console.log("3. Selesai");
+  if (b === 0) {
+    throw new Error("Tidak bisa dibagi dengan nol!");
+  }
+  return a / b;
 };
 
-main();
-// Output: 
-// 1. Loading...
-// (Tunggu 2 detik)
-// 2. User ditemukan: Dino
-// 3. Selesai
+try {
+  console.log("Mencoba proses...");
+  const hasil = bagiAngka(10, 0);
+  console.log(hasil); // Baris ini tidak tereksekusi jika error
+} catch (error) {
+  // Menangkap error dan menampilkannya tanpa nge-crash aplikasi
+  console.error(\`🚨 TERJADI KESALAHAN: \${error.message}\`);
+} finally {
+  console.log("Proses Selesai (Ini selalu jalan).");
+}
 \`\`\`
 
-## 🎯 Outcome
-- Paham cara menggunakan \`try...catch\` untuk menangani error.
-- Bisa menahan proses JS dengan \`await\` saat memanggil API.
+---
+
+## 2. Sistem Modul (ES6 Moudles)
+Membagi kode ke banyak file agar rapi (*Separation of Concerns*).
+
+**File math.js (Export):**
+\`\`\`javascript
+export const PI = 3.14159;
+
+export function luasLingkaran(r) {
+  return PI * r * r;
+}
+
+// Default export (Hanya boleh 1 per file)
+export default class Kalkulator {}
+\`\`\`
+
+**File main.js (Import):**
+\`\`\`javascript
+// Import named export (harus pakai kurung kurawal)
+import { PI, luasLingkaran } from './math.js';
+// Import default export (tanpa kurung kurawal, nama bebas)
+import MainKalkulator from './math.js';
+
+console.log(luasLingkaran(10));
+\`\`\`
+*(Catatan: Di Node.js, pastikan ada \`"type": "module"\` di package.json).*
+
+## ✍️ Latihan (20 Menit)
+1. Buat file \`database.js\`, isinya sebuah fungsi yang jika parameter ID kurang dari 0 akan memunculkan Error "ID tidak valid".
+2. Di file \`app.js\`, import fungsi tersebut.
+3. Gunakan \`try...catch\` di dalam \`app.js\` untuk menjalankan fungsinya.
 `,
-    level: 'intermediate',
+    level: 'advanced',
     order: 7,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -353,94 +496,144 @@ main();
     id: 'js-08',
     user_type: 'student',
     language: 'javascript',
-    title: '8. ES6 Modules (Import / Export)',
-    description: 'Membagi kode menjadi file-file kecil yang rapi dan terstruktur.',
-    content: `# Modules
+    title: 'Asynchronous JS (Promises & Async/Await)',
+    description: 'Menjinakkan proses Asynchronous, lepas dari Callback Hell dengan modern Fetch dan Async/Await.',
+    content: `# ⚡ Modul 8: Async/Await & Promises
 
-Di project nyata, kode JS tidak pernah ditaruh di 1 file panjang. Kita membaginya menjadi modul-modul (file terpisah).
+JavaScript itu *Single-Threaded* (cuma punya 1 "tangan" buat kerja). Kalau JS disuruh nunggu *download* file 1GB, aplikasinya nge-*freeze*? TIDAK. JS mendelegasikan tugas I/O ke Browser/Node.js, dan lanjut ke baris berikutnya (*Non-Blocking*).
 
-## 1. Export (Mengekspos fungsi/variabel)
-\`math.js\`:
+## 1. Janji Manis (Promises)
+Promise adalah objek yang mewakili penyelesaian (atau kegagalan) dari sebuah operasi *asynchronous*.
+State-nya ada 3: **Pending**, **Fulfilled** (Berhasil), **Rejected** (Gagal).
+
 \`\`\`javascript
-// Named Export (Bisa banyak per file)
-export const tambah = (a, b) => a + b;
-export const kurang = (a, b) => a - b;
+const masakNasi = new Promise((resolve, reject) => {
+  const adaBeras = true;
+  setTimeout(() => {
+    if (adaBeras) resolve("🍚 Nasi Matang!");
+    else reject("💥 Beras habis boss!");
+  }, 2000);
+});
 
-// Default Export (Hanya 1 per file, biasanya untuk Komponen Utama)
-const kalkulator = { merk: "Casio" };
-export default kalkulator;
+// Cara baca promise model lama (.then/.catch)
+masakNasi
+  .then((hasil) => console.log(hasil))
+  .catch((error) => console.log(error));
 \`\`\`
 
-## 2. Import (Menggunakan fungsi dari file lain)
-\`app.js\`:
+---
+
+## 2. Async / Await (Modern Way)
+Di ES8 (2017), kita diperkenalkan dengan \`async/await\`. Kodenya terlihat *synchronous* (berurutan) padahal dia asinkronus! Jauh lebih rapi.
+
 \`\`\`javascript
-// Import Default (Bebas kasih nama apa saja, tidak pakai kurung kurawal)
-import MesinHitung from './math.js';
+// Fetch API (Bawaan modern JS untuk request HTTP)
+const getUserData = async (userId) => {
+  try {
+    console.log(\`Fetching data untuk user \${userId}...\`);
+    
+    // Tunggu sampai fetch selesai
+    const response = await fetch(\`https://jsonplaceholder.typicode.com/users/\${userId}\`);
+    
+    if (!response.ok) throw new Error("Gagal mengambil data");
+    
+    // Tunggu sampai data di-parse jadi JSON
+    const data = await response.json(); 
+    console.log(\`✅ Data diterima: \${data.name}\`);
+    
+  } catch (error) {
+    console.error(\`❌ Error: \${error.message}\`);
+  }
+};
 
-// Import Named (Nama WAJIB sama, pakai kurung kurawal)
-import { tambah, kurang } from './math.js';
-
-console.log(MesinHitung.merk); // Casio
-console.log(tambah(5, 5));     // 10
+getUserData(1);
 \`\`\`
 
-## 🎯 Outcome
-- Bisa menghubungkan file JS satu dengan yang lain.
-- Siap masuk ke arsitektur *Component-Based* seperti React/Vue/Angular.
+---
+
+## 3. Promise.all()
+Kalau punya 3 request yang **TIDAK** saling bergantung, jalanin barengan aja biar ngebut!
+
+\`\`\`javascript
+const p1 = fetch('api/data1');
+const p2 = fetch('api/data2');
+// Tunggu keduanya selesai bersamaan
+const [res1, res2] = await Promise.all([p1, p2]);
+\`\`\`
+
+## ✍️ Latihan (30 Menit)
+1. Buat fungsi \`delay(ms)\` yang mengembalikan sebuah \`Promise\` dan di-*resolve* dengan \`setTimeout\`.
+2. Gunakan \`async/await\` untuk memanggil \`delay(2000)\`, lalu cetak "Selesai menunggu 2 detik!".
 `,
-    level: 'intermediate',
+    level: 'expert',
     order: 8,
     created_at: '2025-01-01T00:00:00Z'
   },
-
-  // ==================== LEVEL 3: ADVANCED & EXPERT (SENIOR TOPICS) ====================
   {
     id: 'js-09',
     user_type: 'student',
     language: 'javascript',
-    title: '9. Advanced: Destructuring & Spread',
-    description: 'Fitur ES6+ untuk memanipulasi Object/Array dengan sangat elegan.',
-    content: `# ES6+ Features
+    title: 'Studi Kasus 1: Node.js CLI File Explorer',
+    description: 'Proyek JS Murni: Script utilitas membaca file sistem dengan FS Modul Asynchronous.',
+    content: `# 🛠️ Project 1: Asynchronous CLI File Explorer
 
-Fitur "Quality of Life" yang wajib dikuasai agar kode terlihat seperti *Senior Developer*.
+## 📜 Tujuan
+Membangun tool CLI menggunakan Node.js untuk membaca isi direktori secara asynchronous dan menampilkan detail ukuran file (dalam Kilobyte).
 
-## 1. Destructuring (Bongkar Paket)
-Mengekstrak nilai dari Object/Array menjadi variabel terpisah.
+## 💻 Implementasi Kode
+
 \`\`\`javascript
-const mhs = {
-  nama: "Budi",
-  alamat: { kota: "Jakarta", pos: 123 }
+import fs from 'fs/promises'; // Gunakan versi Promise dari File System
+import path from 'path';
+
+const scanFolder = async (folderPath) => {
+  try {
+    // 1. Cek apakah folder eksis
+    await fs.access(folderPath);
+    console.log(\`\\n📂 Scanning direktori: \${folderPath}...\`);
+
+    // 2. Baca isi folder (membaca file dan foldernya)
+    const files = await fs.readdir(folderPath);
+
+    if (files.length === 0) {
+      console.log("Folder kosong.");
+      return;
+    }
+
+    // 3. Iterasi dan proses masing-masing item
+    for (const file of files) {
+      const fullPath = path.join(folderPath, file);
+      
+      // Ambil detail stat dari file
+      const stats = await fs.stat(fullPath);
+
+      if (stats.isDirectory()) {
+        console.log(\`[DIR]  📁 \${file}\`);
+      } else {
+        const sizeInKB = (stats.size / 1024).toFixed(2);
+        console.log(\`[FILE] 📄 \${file} (\${sizeInKB} KB)\`);
+      }
+    }
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      console.error("❌ Error: Folder tidak ditemukan!");
+    } else {
+      console.error(\`❌ Terjadi kesalahan: \${error.message}\`);
+    }
+  }
 };
 
-// Cara Lama (Bikin capek ngetik)
-// const nama = mhs.nama;
-// const kota = mhs.alamat.kota;
-
-// Cara Baru (Destructuring)
-const { nama, alamat: { kota } } = mhs;
-console.log(nama, kota); // Budi Jakarta
+// Eksekusi (Jalankan file ini dengan mengetik 'node main.js ./')
+const targetDir = process.argv[2] || './'; 
+scanFolder(targetDir);
 \`\`\`
 
-## 2. Spread Operator (...)
-Meng-copy atau menggabungkan array/object tanpa merusak data aslinya (*Immutability*).
+---
 
-\`\`\`javascript
-const hobiLama = ["Makan", "Tidur"];
-// Gabung array
-const hobiBaru = ["Coding", ...hobiLama, "Gaming"];
-
-const userA = { name: "A", role: "User" };
-// Update object: Copy semua dari userA, tapi timpa 'role' jadi Admin
-const userB = { ...userA, role: "Admin" };
-
-console.log(userB); // { name: "A", role: "Admin" }
-\`\`\`
-
-## 🎯 Outcome
-- Koding lebih cepat, bersih, dan ringkas.
-- Memahami konsep *Immutability* (tidak merusak data asal), aturan emas di Redux/React State.
+## ✍️ Tantangan Pengembangan
+Modifikasi script ini agar menggunakan \`Promise.all()\` di dalam loop untuk memproses \`fs.stat()\` secara paralel agar jauh lebih cepat ketika memproses ribuan file.
 `,
-    level: 'advanced',
+    level: 'expert',
     order: 9,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -448,104 +641,155 @@ console.log(userB); // { name: "A", role: "Admin" }
     id: 'js-10',
     user_type: 'student',
     language: 'javascript',
-    title: '10. OOP: Classes & Inheritance',
-    description: 'Object Oriented Programming versi Modern JS.',
-    content: `# Classes di JavaScript
+    title: 'Studi Kasus 2: Robust E-Commerce Cart (OOP)',
+    description: 'Proyek Final: Menggabungkan ES6 Classes, Map/Reduce, dan Private Fields.',
+    content: `# 🛒 Project 2: E-Commerce Cart System
 
-Sejak ES6, JS punya *syntactic sugar* berupa \`class\` agar mirip dengan bahasa OOP lain (Java, C#).
+## 📜 Tujuan
+Menguji pemahaman *Core JavaScript OOP* dan manipulasi *Array*.
 
-## 1. Class & Constructor
+## 💻 Implementasi Kode
+
 \`\`\`javascript
-class Kendaraan {
-  // Constructor: Fungsi yang jalan otomatis saat objek dibuat
-  constructor(merk, roda) {
-    this.merk = merk;
-    this.roda = roda;
-  }
-
-  jalan() {
-    console.log(\`\${this.merk} sedang berjalan dengan \${this.roda} roda.\`);
+// 1. Class Product
+class Product {
+  constructor(id, nama, harga) {
+    this.id = id;
+    this.nama = nama;
+    this.harga = harga;
   }
 }
 
-const avanza = new Kendaraan("Toyota", 4);
-avanza.jalan(); // Toyota sedang berjalan dengan 4 roda.
-\`\`\`
-
-## 2. Inheritance (Pewarisan)
-\`\`\`javascript
-class MobilSport extends Kendaraan {
-  constructor(merk, turbo) {
-    super(merk, 4); // super() memanggil constructor milik class Induk (Kendaraan)
-    this.turbo = turbo;
+// 2. Class CartItem
+class CartItem {
+  constructor(product, qty) {
+    this.product = product;
+    this.qty = qty;
   }
-
-  ngebut() {
-    console.log(\`Wush! \${this.merk} ngebut pakai \${this.turbo} turbo!\`);
+  
+  get subtotal() {
+    return this.product.harga * this.qty;
   }
 }
 
-const ferrari = new MobilSport("Ferrari", "Twin");
-ferrari.jalan();  // Mewarisi method dari Kendaraan
-ferrari.ngebut(); // Method miliknya sendiri
-\`\`\`
+// 3. Class Cart Controller
+class ShoppingCart {
+  #items = []; // Private field, gak bisa diotak-atik dari luar
 
-## 🎯 Outcome
-- Bisa memodelkan data dunia nyata ke dalam bentuk Class.
-- Memahami *Blueprint* pembuatan objek.
+  tambahItem(product, qty = 1) {
+    const existing = this.#items.find(item => item.product.id === product.id);
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      this.#items.push(new CartItem(product, qty));
+    }
+    console.log(\`✅ \${qty}x \${product.nama} ditambahkan.\`);
+  }
+
+  hapusItem(productId) {
+    this.#items = this.#items.filter(item => item.product.id !== productId);
+    console.log(\`🗑️ Item ID \${productId} dihapus.\`);
+  }
+
+  // Menggunakan getter & array method reduce
+  get totalHarga() {
+    return this.#items.reduce((total, item) => total + item.subtotal, 0);
+  }
+
+  cetakStruk() {
+    console.log("\\n=== STRUK BELANJA ===");
+    this.#items.forEach(item => {
+      console.log(\`- \${item.product.nama} x\${item.qty} = Rp \${item.subtotal}\`);
+    });
+    console.log(\`---------------------\\nTOTAL: Rp \${this.totalHarga}\\n=====================\`);
+  }
+}
+
+// --- Eksekusi ---
+const laptop = new Product(1, "MacBook Pro", 25000000);
+const mouse = new Product(2, "Logitech Master", 1500000);
+
+const cartUser = new ShoppingCart();
+cartUser.tambahItem(laptop, 1);
+cartUser.tambahItem(mouse, 2);
+
+cartUser.cetakStruk();
+
+// Keamanan: Coba retas array item-nya dari luar
+// cartUser.#items = []; // ERROR! Private field dilindungi oleh ES6 Engine.
+\`\`\`
 `,
-    level: 'advanced',
+    level: 'expert',
     order: 10,
     created_at: '2025-01-01T00:00:00Z'
   },
+  // ==================== ALGORITHMS & DATA STRUCTURES (JS) ====================
   {
     id: 'js-11',
     user_type: 'student',
     language: 'javascript',
-    title: '11. Expert: Closures & Currying',
-    description: 'Konsep Lexical Scope, Function Factory, dan Private Variables.',
-    content: `# Closures
+    title: 'Algoritma Pencarian (Searching): Linear & Binary Search',
+    description: 'Memahami dasar pencarian data dan optimasi dari O(n) menjadi O(log n) dengan Binary Search.',
+    content: `# 🔍 Modul 11: Algoritma Pencarian (Searching)
 
-Closure adalah kemampuan function untuk **mengingat variabel di lingkungan sekitarnya (Lexical Scope)** meskipun function induknya sudah selesai dieksekusi. Ini konsep level *Senior*.
+Dalam pemrograman, menemukan data dengan cepat adalah kunci performa aplikasi. Kita akan bahas dua algoritma utama: **Linear Search** dan **Binary Search**.
 
-## 1. Basic Closure (Data Privacy)
-Di JS murni, kita bisa menyembunyikan data agar tidak diubah sembarangan dari luar.
+## 1. Linear Search (Pencarian Berurutan)
+Cara paling sederhana: cek item satu per satu dari awal sampai akhir. JS punya method bawaan untuk ini: \`.indexOf()\` atau \`.find()\`. Kompleksitas O(n).
+
 \`\`\`javascript
-function createCounter() {
-  let count = 0; // Variabel private! Terkurung di dalam function.
+const linearSearch = (arr, target) => {
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] === target) return i;
+  }
+  return -1; // Tidak ditemukan
+};
+
+// Testing
+const data = [10, 50, 30, 70, 80, 20];
+console.log("Index target 70:", linearSearch(data, 70)); // Output: 3
+\`\`\`
+
+---
+
+## 2. Binary Search (Pencarian Bagi Dua)
+Cara kerja bagaikan mencari kata di kamus: buka tengahnya, cek apakah kata tersebut ada di paruh kiri atau kanan, lalu ulangi.
+- **Syarat Mutlak:** Array **HARUS** sudah dalam keadaan terurut (sorted).
+- **Performa:** Sangat cepat! Kompleksitas O(log n).
+
+### Implementasi:
+Di JS, pembagian tidak otomatis dibulatkan seperti di Python (//). Kita wajib menggunakan \`Math.floor()\` untuk mendapatkan index tengah.
+
+\`\`\`javascript
+const binarySearch = (arr, target) => {
+  let kiri = 0;
+  let kanan = arr.length - 1;
   
-  return function() {
-    count++;
-    return count;
-  };
-}
+  while (kiri <= kanan) {
+    // Bulatkan ke bawah agar bisa jadi index array
+    let tengah = Math.floor((kiri + kanan) / 2);
+    
+    if (arr[tengah] === target) {
+      return tengah; // Ketemu!
+    } else if (arr[tengah] < target) {
+      kiri = tengah + 1; // Buang paruh kiri
+    } else {
+      kanan = tengah - 1; // Buang paruh kanan
+    }
+  }
+  return -1;
+};
 
-const counterA = createCounter();
-const counterB = createCounter();
-
-console.log(counterA()); // 1
-console.log(counterA()); // 2
-console.log(counterB()); // 1 (Instance terpisah!)
-// console.log(count); // Error: count is not defined (Aman dari luar)
+// Testing (Pastikan data terurut!)
+const dataTerurut = [10, 20, 30, 50, 70, 80];
+console.log("Index target 70:", binarySearch(dataTerurut, 70)); // Output: 4
 \`\`\`
 
-## 2. Practical Use: Function Factory (Currying)
-Memecah fungsi dengan banyak argumen menjadi rangkaian fungsi berantai.
-\`\`\`javascript
-const multiplier = (factor) => (number) => number * factor;
-
-const kaliDua = multiplier(2);
-const kaliLima = multiplier(5);
-
-console.log(kaliDua(10)); // 20
-console.log(kaliLima(10)); // 50
-\`\`\`
-
-## 🎯 Outcome
-- Memahami cara kerja \`useState\` di React (di balik layar, React pakai Closure!).
-- Bisa membuat struktur kode yang *secure* via Function Scope.
+## ✍️ Latihan (20 Menit)
+1. Bikin list angka urut dari 1 sampai 1.000.000 menggunakan \`Array.from()\`.
+2. Gunakan fungsi \`binarySearch\` untuk mencari angka \`999999\`. Catat \`console.time('binary')\` untuk melihat betapa super kilat algoritma ini dieksekusi oleh mesin V8!
 `,
-    level: 'expert',
+    level: 'intermediate',
     order: 11,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -553,113 +797,128 @@ console.log(kaliLima(10)); // 50
     id: 'js-12',
     user_type: 'student',
     language: 'javascript',
-    title: '12. Expert: Prototypes & This',
-    description: 'Jantung JS sebenarnya (bukan Class tapi Prototype).',
-    content: `# Prototypes & Keyword 'This'
+    title: 'Algoritma Pengurutan Dasar (Basic Sorting)',
+    description: 'Mempelajari algoritma sorting sederhana: Bubble Sort dan Selection Sort (O(n^2)).',
+    content: `# 📊 Modul 12: Pengurutan Dasar (Basic Sorting)
 
+Sebelum masuk ke algoritma kompleks, bro harus paham dulu dasar-dasar memindahkan posisi elemen di memori. Ini krusial buat ngebangun nalar *logic*.
 
-
-JavaScript *sebenarnya* tidak punya Class. \`class\` di ES6 itu aslinya diubah menjadi **Prototype** di belakang layar oleh JS Engine. JS murni berbasis *Prototypal Inheritance*.
-
-## 1. Prototype Chain
-Setiap object di JS punya "induk gaib" yang disebut \`__proto__\` atau Prototype. Jika sebuah objek tidak punya fungsi tertentu, dia akan mencarinya ke *Prototype* induknya secara berantai.
+## 1. Bubble Sort (Gelembung)
+Membandingkan elemen bersebelahan dan menukarnya jika salah urutan. Elemen terbesar "menggelembung" ke paling kanan.
 
 \`\`\`javascript
-const hewan = {
-  makan: function() { console.log("Nyam nyam"); }
+const bubbleSort = (arr) => {
+  const n = arr.length;
+  for (let i = 0; i < n; i++) {
+    let swapped = false;
+    
+    // Kurangi i di loop kedua, karena i elemen terakhir sudah pasti terurut
+    for (let j = 0; j < n - i - 1; j++) {
+      if (arr[j] > arr[j + 1]) {
+        // Swap menggunakan Destructuring JS
+        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+        swapped = true;
+      }
+    }
+    // Jika dalam 1 putaran tidak ada yang ditukar, berarti array sudah urut
+    if (!swapped) break;
+  }
+  return arr;
 };
 
-// Kucing mewarisi hewan via Prototype
-const kucing = Object.create(hewan);
-kucing.meong = function() { console.log("Meow"); };
-
-kucing.meong(); // Meow
-kucing.makan(); // Nyam nyam (Karena kucing tidak punya makan(), dia ambil dari Prototype hewan)
+console.log("Bubble Sort:", bubbleSort([64, 34, 25, 12, 22, 11, 90]));
 \`\`\`
 
-## 2. Tricky 'this'
-Berbeda dengan bahasa lain, nilai \`this\` di JS berubah tergantung **SIAPA YANG MEMANGGIL** fungsinya pada saat eksekusi, bukan di mana ia ditulis.
+---
+
+## 2. Selection Sort (Pemilihan)
+Mencari nilai paling kecil di bagian array yang belum terurut, lalu menaruhnya di batas kiri.
 
 \`\`\`javascript
-const obj = {
-  nama: "Objek A",
-  sapa: function() { console.log(this.nama); }
+const selectionSort = (arr) => {
+  const n = arr.length;
+  for (let i = 0; i < n; i++) {
+    let minIdx = i;
+    
+    // Cari yang lebih kecil di sisi kanan
+    for (let j = i + 1; j < n; j++) {
+      if (arr[j] < arr[minIdx]) {
+        minIdx = j;
+      }
+    }
+    
+    // Tukar posisinya
+    if (minIdx !== i) {
+      [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+    }
+  }
+  return arr;
 };
 
-obj.sapa(); // "Objek A" -> Dipanggil oleh 'obj', maka 'this' = obj
-
-const sapaLuar = obj.sapa;
-sapaLuar(); // undefined! -> Dipanggil tanpa objek induk (Global), 'this' lepas!
-
-// Solusi: Ikat secara paksa pakai .bind()
-const sapaBenar = obj.sapa.bind(obj);
-sapaBenar(); // "Objek A"
+console.log("Selection Sort:", selectionSort([29, 10, 14, 37, 14]));
 \`\`\`
 
-## 🎯 Outcome
-- Bisa membaca *source code library* JS tua.
-- Tidak bingung saat \`this\` tiba-tiba menjadi undefined atau merujuk ke Window/Global object.
+## ✍️ Latihan (20 Menit)
+1. Modifikasi script \`bubbleSort\` agar menerima 1 parameter tambahan \`isAscending\` berjenis boolean.
+2. Jika true, urutkan dari kecil ke besar. Jika false, dari besar ke kecil (Ubah logika pembandingnya \`>\` jadi \`<\`).
 `,
-    level: 'expert',
+    level: 'intermediate',
     order: 12,
     created_at: '2025-01-01T00:00:00Z'
   },
-
-  // ==================== STUDI KASUS ====================
   {
     id: 'js-13',
     user_type: 'student',
     language: 'javascript',
-    title: 'Studi Kasus 1: Fetch API & DOM Rendering',
-    description: 'Aplikasi pencarian user GitHub sederhana.',
-    content: `# Studi Kasus: GitHub User Finder
+    title: 'Advanced Sorting: Divide & Conquer (Quick Sort)',
+    description: 'Menguasai paradigma Divide and Conquer dengan Quick Sort (O(n log n)).',
+    content: `# 🚀 Modul 13: Advanced Sorting (Divide & Conquer)
 
-## 📜 Misi
-1. User mengetik username GitHub di kolom input.
-2. Saat tombol diklik, JS mengambil data via API publik GitHub.
-3. Mengelola status Loading/Error.
-4. Render hasilnya (Avatar, Nama, Followers) ke DOM HTML.
+Algoritma dasar \`O(n^2)\` terlalu lambat untuk jutaan data. Solusinya? **Divide and Conquer**. Algoritma ini akan memecah data besar jadi fragmen kecil lalu dieksekusi secara rekursif. Mari kita bedah **Quick Sort**.
 
-## 💻 Solusi
+## 1. Memahami Logika Quick Sort
+Pilih 1 elemen sebagai **Pivot**. Buat 2 grup: Grup Kiri (lebih kecil dari pivot) dan Grup Kanan (lebih besar dari pivot). Rekursi kedua grup, lalu gabungkan: \`Kiri + Pivot + Kanan\`.
+
+### Implementasi Modern (ES6 Filter & Spread)
+Cara ini elegan walau agak boros memori karena kita terus membuat Array baru dengan \`.filter()\`.
+
 \`\`\`javascript
-const input = document.querySelector("#username");
-const btn = document.querySelector("#btn-search");
-const resultDiv = document.querySelector("#result");
-
-const searchUser = async () => {
-  const username = input.value;
-  
-  if (!username) return alert("Masukkan username dulu!");
-  
-  // Set Loading State
-  resultDiv.innerHTML = "Mencari data...";
-
-  try {
-    const response = await fetch(\`https://api.github.com/users/\${username}\`);
-    
-    // Cek jika API balikin status 404 (Not Found)
-    if (!response.ok) throw new Error("User tidak ditemukan di GitHub.");
-    
-    const data = await response.json();
-    
-    // Render UI pakai Template Literal
-    resultDiv.innerHTML = \`
-      <div class="card" style="border: 1px solid #ccc; padding: 1rem; margin-top: 1rem;">
-        <img src="\${data.avatar_url}" width="100" style="border-radius: 50%" />
-        <h3>\${data.name || username}</h3>
-        <p>\${data.bio || "User ini tidak memiliki bio."}</p>
-        <p><strong>Followers:</strong> \${data.followers} | <strong>Following:</strong> \${data.following}</p>
-        <a href="\${data.html_url}" target="_blank">Lihat Profil GitHub</a>
-      </div>
-    \`;
-  } catch (err) {
-    // Render Error UI
-    resultDiv.innerHTML = \`<p style="color:red; font-weight:bold;">\${err.message}</p>\`;
+const quickSort = (arr) => {
+  // Base case: Array isi 1 atau 0 sudah pasti terurut
+  if (arr.length <= 1) {
+    return arr;
   }
+
+  // Pilih elemen terakhir sebagai Pivot, dan keluarkan dari array
+  const pivot = arr.pop();
+  
+  // Pisahkan menggunakan filter()
+  const lebihKecil = arr.filter(x => x <= pivot);
+  const lebihBesar = arr.filter(x => x > pivot);
+  
+  // Panggil ulang, lalu gabung pakai Spread Operator
+  return [...quickSort(lebihKecil), pivot, ...quickSort(lebihBesar)];
 };
 
-btn.addEventListener("click", searchUser);
+// Ingat: .pop() itu memanipulasi array asli, jadi kita lempar hasil copian-nya aja
+const dataMentah = [33, 10, 55, 71, 29, 99, 14];
+const hasilSort = quickSort([...dataMentah]); 
+
+console.log(\`Data Awal: \${dataMentah}\`);
+console.log(\`Hasil Quick Sort: \${hasilSort}\`);
 \`\`\`
+
+---
+
+## 2. Bagaimana dengan JS built-in \`.sort()\`?
+PENTING BRO! Jika lo pakai \`arr.sort()\` di JS tanpa parameter, JS akan mengubah semua angka menjadi **String** dan mengurutkannya sesuai abjad. 
+\`[10, 2, 30].sort()\` -> Outputnya \`[10, 2, 30]\` (salah!).
+
+Cara benernya: \`arr.sort((a, b) => a - b)\`. Ini disebut fungsi *Comparator*. Di balik layar, engine V8 Node.js/Chrome pakai variasi Timsort.
+
+## ✍️ Latihan (30 Menit)
+1. Cobalah jalankan program \`[5, 20, 100, 3].sort()\` di JS. Amati error logikanya.
+2. Perbaiki fungsi bawaan JS tersebut dengan menambahkan arrow function \`(a, b) => b - a\` untuk mengurutkan secara descending.
 `,
     level: 'advanced',
     order: 13,
@@ -669,80 +928,161 @@ btn.addEventListener("click", searchUser);
     id: 'js-14',
     user_type: 'student',
     language: 'javascript',
-    title: 'Studi Kasus 2: Mini Reactive Store (Observer Pattern)',
-    description: 'Expert: Membuat sistem state management ala Redux/Vuex dari nol.',
-    content: `# Expert Case: Reactive Store
+    title: 'Struktur Data Lanjut: Stack & Queue',
+    description: 'Membuat tumpukan LIFO (Stack) dan antrean FIFO (Queue) menggunakan Array JS yang dimodifikasi.',
+    content: `# 🥞 Modul 14: Stack & Queue
 
-Di React (Redux) atau Vue (Pinia), jika sebuah "State" (Data pusat) berubah, UI akan otomatis *re-render*. Bagaimana cara kerjanya di balik layar? Kita pakai **Observer Pattern**.
+Di JavaScript, tipe data Array punya *method-method* ajaib yang membuatnya bisa berfungsi sebagai Stack maupun Queue.
 
-## 💻 Solusi
+## 1. Stack (Tumpukan / LIFO)
+Aturannya **LIFO** (Last In, First Out). Yang terakhir masuk, yang pertama keluar. Contoh: Tombol Undo.
+
+- **Masuk (Push):** \`.push()\` (nambah ke belakang)
+- **Keluar (Pop):** \`.pop()\` (buang dari belakang)
+
 \`\`\`javascript
-class Store {
-  constructor(initialState) {
-    this.state = initialState; // Data pusat
-    this.listeners = [];       // Array untuk menampung fungsi-fungsi yang antre ingin di-update
-  }
+const stackBrowser = [];
 
-  // 1. Subscribe: Mendaftarkan fungsi komponen agar dikabari saat data berubah
-  subscribe(listener) {
-    this.listeners.push(listener);
-  }
+// Navigasi website (Push)
+stackBrowser.push("google.com");
+stackBrowser.push("youtube.com");
+stackBrowser.push("github.com");
+console.log("Histori:", stackBrowser);
 
-  // 2. SetState: Fungsi tunggal untuk mengubah data
-  setState(newState) {
-    // Gabungkan state lama dengan data baru
-    this.state = { ...this.state, ...newState }; 
-    // Teriak/Kabari semua fungsi yang sudah subscribe!
-    this.notify();
-  }
-
-  // 3. Notify: Menjalankan semua fungsi yang antre
-  notify() {
-    this.listeners.forEach(listener => listener(this.state));
-  }
-}
-
-// ====================
-// PENGGUNAAN DI APLIKASI
-// ====================
-
-const appStore = new Store({ count: 0, user: "Guest" });
-
-// Anggap ini adalah fungsi untuk Re-render UI
-function renderUI(state) {
-  console.log(\`[UI RE-RENDER] User sekarang: \${state.user}, Counter: \${state.count}\`);
-}
-
-// Anggap ini fungsi untuk mencatat log ke Server
-function logAnalytics(state) {
-  console.log(\`[ANALYTICS] Terdeteksi perubahan data. Count: \${state.count}\`);
-}
-
-// Kita daftarkan kedua fungsi di atas ke dalam Store
-appStore.subscribe(renderUI);
-appStore.subscribe(logAnalytics);
-
-// Simulasi Interaksi User mengubah data
-console.log("--- Initial Data ---");
-appStore.setState({ count: 1 }); // User klik tombol tambah
-
-console.log("\\n--- User Login ---");
-appStore.setState({ user: "Dino", count: 2 });
+// Klik tombol 'Back' (Pop)
+const halamanTerakhir = stackBrowser.pop();
+console.log("Back dari:", halamanTerakhir); // github.com
+console.log("Sisa histori:", stackBrowser); // [google, youtube]
 \`\`\`
 
-## ✅ Hasil Output di Console
-\`\`\`text
---- Initial Data ---
-[UI RE-RENDER] User sekarang: Guest, Counter: 1
-[ANALYTICS] Terdeteksi perubahan data. Count: 1
+---
 
---- User Login ---
-[UI RE-RENDER] User sekarang: Dino, Counter: 2
-[ANALYTICS] Terdeteksi perubahan data. Count: 2
+## 2. Queue (Antrean / FIFO)
+Aturannya **FIFO** (First In, First Out). Yang pertama masuk, dia yang pertama keluar (kayak kasir).
+
+- **Masuk (Enqueue):** \`.push()\` (antre di belakang)
+- **Keluar (Dequeue):** \`.shift()\` (panggil yang terdepan)
+
+*Note: Fungsi \`.shift()\` sebenarnya kurang efisien di array super besar (O(n)), tapi untuk aplikasi standar JS, V8 Engine sudah mengoptimasinya.*
+
+\`\`\`javascript
+class Queue {
+  constructor() {
+    this.items = [];
+  }
+  
+  enqueue(elemen) {
+    this.items.push(elemen);
+  }
+  
+  dequeue() {
+    // Buang item pertama dari array dan kembalikan nilainya
+    if(this.isEmpty()) return "Antrean Kosong!";
+    return this.items.shift(); 
+  }
+  
+  isEmpty() {
+    return this.items.length === 0;
+  }
+}
+
+const loket = new Queue();
+loket.enqueue("Andi");
+loket.enqueue("Budi");
+
+console.log(\`Melayani: \${loket.dequeue()}\`); // Melayani: Andi
 \`\`\`
+
+## ✍️ Latihan (20 Menit)
+1. Buat fungsi \`isBalanced(kurung)\` menggunakan \`Stack\` untuk ngecek tanda kurung. 
+   Contoh: \`"{[()]}"\` (Valid/True), \`"{[(])}"\` (Tidak Valid/False).
 `,
-    level: 'expert',
+    level: 'advanced',
     order: 14,
     created_at: '2025-01-01T00:00:00Z'
   },
+  {
+    id: 'js-15',
+    user_type: 'student',
+    language: 'javascript',
+    title: 'Graph & Tree Traversal (BFS & DFS)',
+    description: 'Merepresentasikan Graph dengan Object List dan menjelajahinya secara rekursif.',
+    content: `# 🕸️ Modul 15: Graph, Tree & Traversal
+
+Bagaimana AI Game mencari jalan (*Pathfinding*)? Atau Facebook memberikan rekomendasi "Orang yang Mungkin Anda Kenal"? Di baliknya ada algoritma **Graph**!
+
+## 1. Representasi Graph di JavaScript
+Kita merepresentasikan jaringan teman ini menggunakan *Object* (Adjacency List).
+
+\`\`\`javascript
+const graphSosmed = {
+  'A': ['B', 'C'],
+  'B': ['A', 'D', 'E'],
+  'C': ['A', 'F'],
+  'D': ['B'],
+  'E': ['B', 'F'],
+  'F': ['C', 'E']
+};
+\`\`\`
+
+---
+
+## 2. Depth First Search (DFS)
+DFS menyelam seru ke ujung cabang sebelum balik lagi. Paling gampang diimplementasikan pakai **Rekursi**.
+
+\`\`\`javascript
+// Gunakan JS Set() agar pencarian super cepat (O(1)) dan tidak ada duplikat
+const dfs = (graph, start, visited = new Set()) => {
+  visited.add(start);
+  process.stdout.write(start + " -> "); // Print kesamping di Node.js
+  
+  for (const tetangga of graph[start]) {
+    // Kalau temannya belum dikunjungi, masuk ke profil temannya!
+    if (!visited.has(tetangga)) {
+      dfs(graph, tetangga, visited);
+    }
+  }
+};
+
+console.log("Jalur DFS:");
+dfs(graphSosmed, 'A'); 
+// A -> B -> D -> E -> F -> C ->
+\`\`\`
+
+---
+
+## 3. Breadth First Search (BFS)
+BFS lebih seperti "Cek dulu teman level 1 gue siapa aja, baru lanjut ngecek temannya temen". Ini wajib pakai struktur **Queue**. Sangat bagus untuk rute terpendek!
+
+\`\`\`javascript
+const bfs = (graph, start) => {
+  const visited = new Set([start]);
+  const queue = [start]; // Array sbg Queue
+  
+  while (queue.length > 0) {
+    const nodeSekarang = queue.shift(); // Dequeue (keluar antrean)
+    process.stdout.write(nodeSekarang + " -> ");
+    
+    // Cek semua relasinya
+    for (const tetangga of graph[nodeSekarang]) {
+      if (!visited.has(tetangga)) {
+        visited.add(tetangga);
+        queue.push(tetangga); // Enqueue (masuk antrean)
+      }
+    }
+  }
+};
+
+console.log("\\n\\nJalur BFS:");
+bfs(graphSosmed, 'A'); 
+// A -> B -> C -> D -> E -> F ->
+\`\`\`
+
+## 🏆 Kesimpulan Algoritma Master
+Selesai bro! Penguasaan struktur data dan algoritma fundamental di JavaScript ini ibarat lo udah pegang *black card* di dunia *Programming*. Lo siap bikin *library* lo sendiri atau tembus tes koding perusahaan top!
+`,
+    level: 'expert',
+    order: 15,
+    created_at: '2025-01-01T00:00:00Z'
+  }
 ];

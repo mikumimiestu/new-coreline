@@ -5,7 +5,7 @@ import type { LearningMaterial } from '../types/learning';
 import { encodeId } from '../utils/hashId';
 import CoreBot from './CoreBot'; // Sesuaikan path foldernya
 
-// Import Data
+// Import Data Statis Modul (Tetap dipertahankan untuk list modul di dalam course)
 import { MOCK_MATERIALS as OTHER_MATERIALS } from '../data/otherData';
 import { MOCK_MATERIALS as PYTHON_MATERIALS } from '../data/pythonData';
 import { MOCK_MATERIALS as GO_MATERIALS } from '../data/golangData';
@@ -14,6 +14,9 @@ import { MOCK_MATERIALS as TS_MATERIAL } from '../data/tsData';
 import { MOCK_MATERIALS as JS_MATERIAL } from '../data/jsData';
 import { MOCK_MATERIALS as PSQL_MATERIAL } from '../data/posgresData';
 import { MOCK_MATERIALS as RB_MATERIAL } from '../data/rubyData';
+import { MOCK_MATERIALS as REACTJS_MATERIAL } from '../data/reactjsData';
+import { MOCK_MATERIALS as NEXTJS_MATERIAL } from '../data/nextjsData';
+import { MOCK_MATERIALS as NEXTJSEND_MATERIAL } from '../data/nextjsendData';
 import ProfilePage from './ProfilePage';
 
 // Import Icons
@@ -25,7 +28,7 @@ import {
   Layout, Smartphone, Database, Globe, Terminal, Layers, Cpu, 
   Sparkles, MessageCircle, Boxes, Languages, Users, PenTool, HelpCircle, ArrowLeft,
   Bot, Minus, ChevronLeft, ExternalLink, ShieldAlert, MonitorPlay, Building2, MapPin, Briefcase,
-  BookMarked
+  BookMarked, Send
 } from 'lucide-react';
 
 /* ================================
@@ -47,7 +50,7 @@ type Lang = {
   badge?: string;
   rating: number;
   totalStudents: string;
-  prerequisites?: string[]; // FITUR BARU: Prasyarat course
+  prerequisites?: string[]; 
 };
 
 /* ================================
@@ -73,142 +76,6 @@ const SLIDER_DATA = [
 ];
 
 /* ================================
- * THEMED DATA: MODERN TECH PALETTE
- * ================================ */
-const languageData: readonly Lang[] = [
-  { 
-    id: 'javascript', category: ['web-dev', 'backend'],
-    name: 'JavaScript', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
-    gradient: 'from-yellow-400 via-yellow-500 to-amber-500', 
-    description: 'Fondasi Web Modern dari nol.', badge: 'Wajib', rating: 4.8, totalStudents: '1.2k'
-  },
-  { 
-    id: 'typescript', category: ['web-dev', 'backend'],
-    name: 'TypeScript', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
-    gradient: 'from-blue-500 via-blue-600 to-indigo-700', 
-    description: 'JavaScript dengan Superpower.', badge: 'Pro', rating: 4.9, totalStudents: '857',
-    prerequisites: ['javascript'] // TS butuh JS
-  },
-  { 
-    id: 'php', category: ['web-dev', 'backend'],
-    name: 'PHP', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg',
-    gradient: 'from-indigo-500 via-violet-600 to-purple-800', 
-    description: 'Backend web paling populer.', rating: 4.5, totalStudents: '225'
-  },
-  { 
-    id: 'nodejs', category: ['backend', 'web-dev'],
-    name: 'Node.js', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
-    gradient: 'from-green-500 via-green-600 to-emerald-700', 
-    description: 'Jalankan JavaScript di sisi server.', badge: 'Populer', rating: 4.7, totalStudents: '640',
-    prerequisites: ['javascript'] // Node.js butuh JS
-  },
-  { 
-    id: 'react', category: ['framework', 'web-dev'],
-    name: 'React.js', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
-    gradient: 'from-cyan-400 via-cyan-500 to-blue-500', 
-    description: 'Bangun UI interaktif modern.', badge: 'Hot', rating: 4.9, totalStudents: '920',
-    prerequisites: ['javascript', 'typescript'] // REACT HARUS LULUS JS & TS DULU
-  },
-  { 
-    id: 'vuejs', category: ['framework', 'web-dev'],
-    name: 'Vue.js', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg',
-    gradient: 'from-emerald-400 via-emerald-500 to-green-600', 
-    description: 'Framework UI yang progresif & ringan.', rating: 4.8, totalStudents: '410',
-    prerequisites: ['javascript']
-  },
-  { 
-    id: 'nextjs', category: ['framework', 'web-dev', 'backend'],
-    name: 'Next.js',
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg',
-    gradient: 'from-slate-700 via-slate-800 to-slate-900', 
-    description: 'Framework React untuk Produksi.', badge: 'Advanced', rating: 4.9, totalStudents: '530',
-    prerequisites: ['react'] // NEXT.JS HARUS LULUS REACT DULU
-  },
-  { 
-    id: 'reactnative', category: ['mobile', 'framework'],
-    name: 'React Native',
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
-    gradient: 'from-sky-400 via-blue-500 to-indigo-600', 
-    description: 'Bangun aplikasi Mobile iOS & Android.', badge: 'Mobile', rating: 4.7, totalStudents: '315',
-    prerequisites: ['react']
-  },
-  { 
-    id: 'python', category: ['backend'],
-    name: 'Python', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-    gradient: 'from-green-500 via-emerald-500 to-teal-600', 
-    description: 'Bahasa serbaguna untuk AI & Backend.', badge: 'Populer', rating: 4.7, totalStudents: '774'
-  },
-  { 
-    id: 'python', category: ['data-science', 'backend'],
-    name: 'Python - Artificial Intelligence', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-    gradient: 'from-green-500 via-emerald-500 to-teal-600', 
-    description: 'Bahasa serbaguna untuk AI & Backend.', badge: 'Populer', rating: 4.7, totalStudents: '774'
-  },
-  { 
-    id: 'go', category: ['backend', 'devops'],
-    name: 'Go (Golang)', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg',
-    gradient: 'from-cyan-400 via-sky-500 to-blue-600',
-    description: 'Sistem Backend Performa Tinggi.', rating: 4.6, totalStudents: '480'
-  },
-  { 
-    id: 'sql', category: ['backend', 'data-science'],
-    name: 'MySQL', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
-    gradient: 'from-orange-400 via-amber-500 to-orange-600', 
-    description: 'Manajemen Database Relasional (RDBMS).', badge: 'Wajib', rating: 4.5, totalStudents: '810'
-  },
-  { 
-    id: 'postgresql', category: ['backend', 'data-science'],
-    name: 'PostgreSQL', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
-    gradient: 'from-blue-400 via-indigo-500 to-slate-700',
-    description: 'Database relasional tingkat lanjut.', rating: 4.8, totalStudents: '340',
-    prerequisites: ['sql']
-  },
-  { 
-    id: 'docker', category: ['devops'],
-    name: 'Docker', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg',
-    gradient: 'from-blue-500 via-sky-600 to-cyan-700',
-    description: 'Containerisasi aplikasi modern.', badge: 'Ops', rating: 4.9, totalStudents: '420',
-  },
-  { 
-    id: 'kubernetes', category: ['devops'],
-    name: 'Kubernetes', 
-    iconUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg',
-    gradient: 'from-indigo-500 via-blue-600 to-sky-600',
-    description: 'Orkestrasi container skala besar.', rating: 0, totalStudents: '0',
-    prerequisites: ['docker'],
-    comingSoon: true
-  },
-  { 
-    id: 'english-tech', category: ['language'],
-    name: 'English for Tech', 
-    icon: Languages,
-    gradient: 'from-rose-400 via-red-500 to-rose-600', 
-    description: 'Bahasa Inggris untuk Wawancara & IT.', badge: 'Soft Skill', rating: 0, totalStudents: '0',
-    comingSoon: true
-  },
-  { 
-    id: 'japanese', category: ['language'],
-    name: 'Japanese N5-N4', 
-    icon: Languages,
-    gradient: 'from-red-500 to-red-700', 
-    description: 'Persiapan kerja IT di Jepang.', rating: 0, totalStudents: '0',
-    comingSoon: true
-  },
-] as const;
-
-/* ================================
  * CATEGORY MAPPING FOR SECTIONS
  * ================================ */
 const CATEGORIES_INFO = [
@@ -230,7 +97,11 @@ export default function Dashboard() {
   const { user, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // State
+  // State Data Course (Dinamic dari Database API)
+  const [languageData, setLanguageData] = useState<Lang[]>([]);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+
+  // State Modul Internal
   const [materials, setMaterials] = useState<LearningMaterial[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Category>('all');
@@ -244,6 +115,13 @@ export default function Dashboard() {
   const [generatingCert, setGeneratingCert] = useState(false);
   const [searchText, setSearchText] = useState('');
 
+  // Rating State
+  const [userRating, setUserRating] = useState<number>(0);
+  const [hoverRating, setHoverRating] = useState<number>(0);
+  const [reviewText, setReviewText] = useState('');
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+  const [ratingSuccess, setRatingSuccess] = useState(false);
+
   // Slider & Chatbot State
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -251,7 +129,7 @@ export default function Dashboard() {
     { sender: 'bot', text: 'Halo! Ada yang bisa CoreBot bantu hari ini? Pilih pertanyaan di bawah ya.' }
   ]);
 
-  const LAST_UPDATE = "6 Apr 2026, 2:51 PM"; // Indikator Last Update
+  const LAST_UPDATE = "13 Apr 2026, 3:00 PM";
 
   useEffect(() => {
     document.title = 'Dashboard | Coreline by AstByte';
@@ -264,7 +142,40 @@ export default function Dashboard() {
     return () => clearInterval(slideInterval);
   }, []);
 
-  // 1. Logic Fetch Progress
+  // Reset rating state ketika ganti language
+  useEffect(() => {
+    setUserRating(0);
+    setHoverRating(0);
+    setReviewText('');
+    setRatingSuccess(false);
+  }, [selectedLanguage]);
+
+  // FITUR BARU: Ambil List Course dari Database API
+  useEffect(() => {
+    let isMounted = true;
+    const fetchCourses = async () => {
+      try {
+        setLoadingCourses(true);
+        const response = await fetch(`${API_BASE}/api/coreline/courses`);
+        if (response.ok) {
+          const result = await response.json();
+          if (isMounted && result.status === "success") {
+            const coursesFromDb: Lang[] = result.data.map((c: any) => ({
+              ...c,
+              rating: c.rating ? parseFloat(c.rating).toFixed(1) : "0.0", 
+              totalStudents: c.totalStudents || "0",
+            }));
+            setLanguageData(coursesFromDb);
+          }
+        }
+      } catch (error) { console.error(error); } 
+      finally { if (isMounted) setLoadingCourses(false); }
+    };
+    fetchCourses();
+    return () => { isMounted = false; };
+  }, []);
+
+  // 1. Logic Fetch Progress Modul
   useEffect(() => {
     let isMounted = true;
     const fetchProgressFromServer = async () => {
@@ -309,16 +220,14 @@ export default function Dashboard() {
 
   const userType = resolveUserType();
   const plan = getPlanFromUser(user);
-  // Dianggap premium jika plan bukan 'free'
   const isPremium = plan !== 'free';
 
-  // Helper untuk Cek Level Akses Fitur
   const canAccessVideoCall = ['ultra', 'ultimate'].includes(plan);
   const canAccessOfflineMentoring = plan === 'ultimate';
-  const canAccessPortfolioTemplate = isPremium; // Pro ke atas bisa akses template
+  const canAccessPortfolioTemplate = isPremium;
 
-  // 2. Logic Update Progress / Sync
-  const toggleModuleCompletion = async (materialId: string) => {
+  // 2. Logic Update Progress / Sync (DITAMBAH LOGIC ENROLLMENT SAAT SELESAI MODUL)
+  const toggleModuleCompletion = async (materialId: string, courseId: string) => {
     if (!isPremium || !user) return;
 
     let token = localStorage.getItem('astbyte_token') || (user as any).token;
@@ -336,6 +245,16 @@ export default function Dashboard() {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ material_id: materialId, progress: newProgress })
       });
+
+      // FITUR BARU: Trigger enroll jika progress jadi 100% (Selesai modul)
+      // Sengaja ngga di-await biar UI tetep responsif, biarkan jalan di background
+      if (newProgress === 100 && courseId) {
+        fetch(`${API_BASE}/api/coreline/courses/${courseId}/enroll`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        }).catch(e => console.error("Auto-enrollment error", e));
+      }
+
     } catch (err) {
       console.error(err);
       setProgressMap(prev => ({ ...prev, [materialId]: currentProgress })); // Revert
@@ -351,7 +270,17 @@ export default function Dashboard() {
     return plan === 'free';
   };
 
-  const handleStartModule = (materialId: string) => {
+  const handleStartModule = async (materialId: string, courseId: string) => {
+    let token = localStorage.getItem('astbyte_token') || (user as any).token;
+    if (token) {
+      try {
+        await fetch(`${API_BASE}/api/coreline/courses/${courseId}/enroll`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      } catch (e) { console.error("Enrollment error", e); }
+    }
+
     if (isPremium) {
       navigate(`/materials/${encodeId(materialId)}`);
     } else {
@@ -432,6 +361,39 @@ export default function Dashboard() {
     }
   };
 
+  // Submit Rating Handler
+  const handleSubmitRating = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || userRating === 0 || !selectedLanguage) return;
+
+    let token = localStorage.getItem('astbyte_token') || (user as any).token;
+    if (!token) return;
+
+    setIsSubmittingRating(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/coreline/courses/${selectedLanguage}/rate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ rating: userRating, review: reviewText })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.status === 'success') {
+        setRatingSuccess(true);
+      } else {
+        alert(data.message || "Gagal mengirim rating");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Terjadi kesalahan jaringan.");
+    } finally {
+      setIsSubmittingRating(false);
+    }
+  };
+
   // 4. Logic Fetch Materials
   useEffect(() => {
     if (!user) return;
@@ -440,7 +402,8 @@ export default function Dashboard() {
     const allMaterials: LearningMaterial[] = [
       ...OTHER_MATERIALS, ...PYTHON_MATERIALS, ...GO_MATERIALS,
       ...MYSQL_MATERIALS, ...TS_MATERIAL, ...JS_MATERIAL,
-      ...PSQL_MATERIAL, ...RB_MATERIAL
+      ...PSQL_MATERIAL, ...RB_MATERIAL, ...REACTJS_MATERIAL, ...NEXTJS_MATERIAL,
+      ...NEXTJSEND_MATERIAL
     ];
     
     let list = allMaterials.filter((m) => m.user_type === userType);
@@ -460,15 +423,15 @@ export default function Dashboard() {
 
 
   /* ==========================================================
-   * PENGHITUNGAN STATISTIK & PRASYARAT (PREREQUISITES) BARU
+   * PENGHITUNGAN STATISTIK & PRASYARAT (PREREQUISITES)
    * ========================================================== */
   
-  // Hitung stats untuk SEMUA bahasa terlebih dahulu buat dapetin status "Selesai"
   const allLanguageStats = useMemo(() => {
     const allMaterials = [
       ...OTHER_MATERIALS, ...PYTHON_MATERIALS, ...GO_MATERIALS,
       ...MYSQL_MATERIALS, ...TS_MATERIAL, ...JS_MATERIAL,
-      ...PSQL_MATERIAL, ...RB_MATERIAL
+      ...PSQL_MATERIAL, ...RB_MATERIAL, ...REACTJS_MATERIAL, ...NEXTJS_MATERIAL,
+      ...NEXTJSEND_MATERIAL
     ].filter((m) => m.user_type === userType);
 
     return languageData.map(lang => {
@@ -479,9 +442,8 @@ export default function Dashboard() {
       
       return { ...lang, total, completed, progress, isComplete: completed === total && total > 0 };
     });
-  }, [progressMap, userType]);
+  }, [progressMap, userType, languageData]);
 
-  // Kumpulkan ID bahasa yang sudah tamat 100%
   const completedLangIds = useMemo(() => {
     const set = new Set<string>();
     allLanguageStats.forEach(l => {
@@ -490,7 +452,6 @@ export default function Dashboard() {
     return set;
   }, [allLanguageStats]);
 
-  // Filter berdasarkan search dan tab
   const filteredLanguageStats = useMemo(() => {
     return allLanguageStats.filter(lang => {
       const matchSearch = lang.name.toString().toLowerCase().includes(searchText.toLowerCase()) || 
@@ -509,7 +470,6 @@ export default function Dashboard() {
     }
   }, [progressMap, allLanguageStats]);
 
-
   // Chatbot logic
   const chatbotFaqs = [
     { q: "Cara upgrade akun?", a: "Untuk upgrade, klik tombol 'Upgrade Sekarang' berkedip di atas, atau dari menu Profile." },
@@ -527,11 +487,12 @@ export default function Dashboard() {
 
   // --- RENDER ---
 
-  if (authLoading) return (
+  if (authLoading || loadingCourses) return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
       <div className="w-16 h-16 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin flex items-center justify-center">
          <Terminal className="w-6 h-6 text-blue-600 animate-pulse" />
       </div>
+      <p className="text-slate-500 font-bold animate-pulse">Memuat Server...</p>
     </div>
   );
 
@@ -598,7 +559,7 @@ export default function Dashboard() {
       {/* MAIN CONTENT */}
       <main className="container mx-auto px-4 sm:px-6 py-10 relative z-10 flex-1 min-h-screen">
 
-        {/* UPGRADE BANNER (Hanya tampil jika belum Ultimate) */}
+        {/* UPGRADE BANNER */}
         {plan !== 'ultimate' && (
           <div className="mb-8 animate-fade-in-up">
             <div className={`relative overflow-hidden rounded-3xl border p-8 shadow-lg transition-all hover:shadow-xl ${
@@ -671,7 +632,7 @@ export default function Dashboard() {
                  </div>
               </div>
 
-              {/* FITUR PREMIUM SHORTCUTS (BARU) */}
+              {/* FITUR PREMIUM SHORTCUTS */}
               {isPremium && (
                 <div className="mb-8">
                   <h3 className="text-sm font-extrabold text-slate-800 mb-3">Akses Fitur Khusus Paketmu:</h3>
@@ -681,26 +642,21 @@ export default function Dashboard() {
                       <BookMarked className="w-4 h-4" /> Tutorial
                     </Link>
                     
-                    {/* Akses Portofolio Template (Pro ke atas) */}
                     {canAccessPortfolioTemplate && (
                       <Link to="/coming-soon" className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-xl text-sm font-bold shadow-sm transition-colors">
                         <Briefcase className="w-4 h-4" /> Template Portofolio
                       </Link>
                     )}
 
-                    {/* Akses Video Call Mentoring (Ultra ke atas) */}
                     {canAccessVideoCall && (
                       <button 
-                        onClick={() => {
-                         window.open("https://wa.me/6285183209494");
-                        }}
+                        onClick={() => { window.open("https://wa.me/6285183209494"); }}
                         className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 rounded-xl text-sm font-bold shadow-sm transition-colors"
                       >
                         <MonitorPlay className="w-4 h-4" /> Jadwalkan Video Call
                       </button>
                     )}
 
-                    {/* Akses Offline Mentoring (Ultimate Only) */}
                     {canAccessOfflineMentoring && (
                       <Link to="/offline-mentoring" className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-xl text-sm font-bold shadow-sm transition-colors">
                         <Building2 className="w-4 h-4" /> Mentoring Offline
@@ -820,15 +776,15 @@ export default function Dashboard() {
                                isLockedByPrereq ? 'bg-slate-50/80 border-slate-200' : 'group-hover:border-blue-300 group-hover:shadow-xl'
                             }`}>
                               {!isLockedByPrereq && (
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/5 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <div className="absolute top-0 right-0 w-32 h-32 from-blue-500/5 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                               )}
                               
                               <div className="flex justify-between items-start mb-5">
-                                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${lang.gradient} flex items-center justify-center shadow-md transition-transform duration-300 ${isLockedByPrereq ? 'grayscale opacity-70' : 'group-hover:scale-105'}`}>
+                                <div className={`w-14 h-14 rounded-2xl ${lang.gradient} flex items-center justify-center transition-transform duration-300 ${isLockedByPrereq ? 'grayscale opacity-70' : 'group-hover:scale-105'}`}>
                                   {lang.iconUrl ? (
                                     <img src={lang.iconUrl} alt="icon" className="w-8 h-8 object-contain drop-shadow-md" />
                                   ) : (
-                                    <lang.icon className="w-8 h-8 text-white drop-shadow-md" />
+                                    <Boxes className="w-8 h-8 text-white drop-shadow-md" />
                                   )}
                                 </div>
                                 <div className="text-right flex flex-col items-end gap-1.5">
@@ -857,7 +813,6 @@ export default function Dashboard() {
                                 </p>
                               </div>
 
-                              {/* FOOTER KARTU COURSE */}
                               {lang.comingSoon ? (
                                 <div className="mt-auto pt-4 border-t border-slate-200/60 relative z-10">
                                   <span className="flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg w-fit border border-slate-200">
@@ -878,9 +833,6 @@ export default function Dashboard() {
                                   <div className="flex justify-between text-xs font-bold text-slate-600 mb-2">
                                     <span>{lang.completed}/{lang.total} Modul</span>
                                     <span className={lang.isComplete ? 'text-blue-600' : 'text-slate-500'}>{lang.progress}%</span>
-                                  </div>
-                                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
-                                    <div className={`h-full rounded-full transition-all duration-500 bg-gradient-to-r ${lang.gradient}`} style={{ width: `${lang.progress}%` }}></div>
                                   </div>
                                   {lang.isComplete && (
                                     <button
@@ -911,7 +863,7 @@ export default function Dashboard() {
               })}
             </div>
           ) : (
-            /* MODULE LIST VIEW (SAMA SEPERTI SEBELUMNYA) */
+            /* MODULE LIST VIEW */
             <div className="max-w-4xl mx-auto animate-fade-in-up">
               <button onClick={() => setSelectedLanguage(null)} className="group flex items-center gap-2 text-slate-500 hover:text-blue-600 mb-8 font-bold text-sm transition-colors bg-white px-4 py-2.5 rounded-full border border-slate-200 shadow-sm hover:shadow-md w-fit">
                 <ArrowLeft className="w-4 h-4" /> Kembali ke Kategori
@@ -980,7 +932,8 @@ export default function Dashboard() {
                               </h3>
                               {isPremium && !locked && (
                                 <div className="flex gap-2">
-                                  <button onClick={(e) => { e.stopPropagation(); toggleModuleCompletion(m.id); }} className={`p-2.5 rounded-lg transition-all border shadow-sm ${isCompleted ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100' : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200'}`} title={isCompleted ? "Batal Selesai" : "Tandai Selesai"}>
+                                  {/* UPDATE PADA PEMANGGILAN toggleModuleCompletion DI BAWAH INI */}
+                                  <button onClick={(e) => { e.stopPropagation(); toggleModuleCompletion(m.id, selectedLanguage!); }} className={`p-2.5 rounded-lg transition-all border shadow-sm ${isCompleted ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100' : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200'}`} title={isCompleted ? "Batal Selesai" : "Tandai Selesai"}>
                                     <CheckCircle className="w-4 h-4" />
                                   </button>
                                   {plan === 'plus' && (
@@ -1002,7 +955,7 @@ export default function Dashboard() {
                             
                             <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-4 pt-4 border-t border-slate-100">
                               <button
-                                onClick={() => !locked && handleStartModule(m.id)}
+                                onClick={() => !locked && handleStartModule(m.id, selectedLanguage!)}
                                 disabled={locked}
                                 className={`flex-1 sm:flex-none px-6 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
                                   locked ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 shadow-none' :
@@ -1032,6 +985,69 @@ export default function Dashboard() {
                     );
                   })
                 )}
+
+                {/* FITUR BARU: KOMPONEN RATING COURSE (Hanya muncul jika ada materials) */}
+                {materials.length > 0 && selectedLanguage && (
+                  <div className="mt-12 bg-gradient-to-br from-white to-slate-50 rounded-3xl border border-slate-200 p-8 shadow-md relative overflow-hidden">
+                    {ratingSuccess ? (
+                      <div className="text-center py-6 animate-fade-in-up">
+                        <div className="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-emerald-50">
+                          <CheckCircle className="w-8 h-8" />
+                        </div>
+                        <h3 className="text-2xl font-black text-slate-800 mb-2">Terima Kasih!</h3>
+                        <p className="text-slate-500 font-medium">Ulasan kamu sangat berarti untuk perkembangan materi Coreline.</p>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleSubmitRating} className="relative z-10">
+                        <div className="text-center mb-6">
+                          <h3 className="text-2xl font-black text-slate-800 mb-2">Bagaimana pengalaman belajarmu?</h3>
+                          <p className="text-slate-500 text-sm font-medium">Beri nilai untuk materi <span className="font-bold text-blue-600">{filteredLanguageStats.find(l => l.id === selectedLanguage)?.name}</span></p>
+                        </div>
+                        
+                        {/* Star Selector */}
+                        <div className="flex justify-center gap-2 mb-6">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onMouseEnter={() => setHoverRating(star)}
+                              onMouseLeave={() => setHoverRating(0)}
+                              onClick={() => setUserRating(star)}
+                              className="focus:outline-none transform transition-transform hover:scale-110"
+                            >
+                              <Star className={`w-10 h-10 transition-colors ${
+                                star <= (hoverRating || userRating) 
+                                  ? 'fill-amber-400 text-amber-500 drop-shadow-md' 
+                                  : 'text-slate-300'
+                              }`} />
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Review Input */}
+                        <div className="max-w-xl mx-auto">
+                          <textarea 
+                            value={reviewText}
+                            onChange={(e) => setReviewText(e.target.value)}
+                            placeholder="Tulis ulasanmu di sini (opsional)..."
+                            className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none shadow-sm mb-4"
+                            rows={3}
+                          ></textarea>
+                          
+                          <button 
+                            type="submit" 
+                            disabled={userRating === 0 || isSubmittingRating}
+                            className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md"
+                          >
+                            {isSubmittingRating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-4 h-4" />}
+                            Kirim Penilaian
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+                )}
+
               </div>
             </div>
           )}

@@ -498,7 +498,7 @@ import time
 
 async def masak_air():
     print("Mulai masak air...")
-    await asyncio.sleep(2) # Simulasi non-blocking delay (CPU bisa ngerjain yang lain)
+    await asyncio.sleep(2) # Simulasi non-blocking delay
     print("Air mendidih!")
     return "Kopi Siap"
 
@@ -518,11 +518,9 @@ async def main():
     
     print(f"Selesai dalam {time.time() - start:.2f} detik")
 
-# Titik masuk program async
 if __name__ == "__main__":
     asyncio.run(main())
 \`\`\`
-*Coba perhatikan: Tanpa async, butuh 3 detik (2+1). Dengan async, cuma butuh 2 detik karena jalan paralel!*
 
 ---
 
@@ -548,7 +546,7 @@ if __name__ == "__main__":
     content: `# 🛠️ Project 1: Advanced File Organizer
 
 ## 📜 Tujuan
-Membangun tool CLI (Command Line) murni Python untuk mensortir file ke dalam folder berdasarkan ekstensinya, menggunakan Generator agar hemat memori dan Decorator untuk logging.
+Membangun tool CLI murni Python untuk mensortir file ke dalam folder berdasarkan ekstensinya, menggunakan Generator agar hemat memori dan Decorator untuk logging.
 
 ## 💻 Implementasi Kode
 
@@ -566,7 +564,7 @@ def log_operation(func):
         return result
     return wrapper
 
-# 2. Generator untuk List File (Hemat Memori untuk folder isi jutaan file)
+# 2. Generator untuk List File (Hemat Memori)
 def get_files_generator(folder_path):
     path = Path(folder_path)
     for file_path in path.iterdir():
@@ -580,30 +578,20 @@ def organize_folder(target_folder):
         print("Folder tidak ditemukan!")
         return
 
-    # Iterasi langsung dari Generator
     for file_path in get_files_generator(target_folder):
         extension = file_path.suffix.lstrip('.')
         if not extension:
-            continue # Abaikan file tanpa ekstensi
+            continue
 
-        # Buat folder destinasi
         dest_folder = Path(target_folder) / extension
         dest_folder.mkdir(exist_ok=True)
 
-        # Pindahkan file
         shutil.move(str(file_path), str(dest_folder / file_path.name))
         print(f"Memindahkan: {file_path.name} -> /{extension}")
 
 if __name__ == "__main__":
-    # Cara pakai: Buat folder 'test_dir' isi file sembarang
-    # organize_folder("./test_dir")
     pass
 \`\`\`
-
----
-
-## ✍️ Tantangan Pengembangan
-Modifikasi script ini agar menggunakan **Custom Exception** jika folder tidak ada, dan gunakan \`match-case\` untuk mem-bundle ekstensi (misal: .jpg, .png masuk ke folder "Images" bukan ke folder nama ekstensinya).
 `,
     level: 'expert',
     order: 9,
@@ -618,7 +606,7 @@ Modifikasi script ini agar menggunakan **Custom Exception** jika folder tidak ad
     content: `# 🏛️ Project 2: Robust Library System
 
 ## 📜 Tujuan
-Menguji pemahaman *Core Python OOP* level expert. Bebas dari library eksternal, hanya murni arsitektur bahasa Python yang solid.
+Menguji pemahaman *Core Python OOP* level expert. Bebas dari library eksternal.
 
 ## 💻 Implementasi Kode
 
@@ -626,16 +614,14 @@ Menguji pemahaman *Core Python OOP* level expert. Bebas dari library eksternal, 
 from dataclasses import dataclass, field
 import uuid
 
-# 1. Custom Exception
 class PeminjamanError(Exception):
     pass
 
-# 2. Dataclass modern
 @dataclass
 class Buku:
     judul: str
     penulis: str
-    _is_loaned: bool = field(default=False, init=False) # Tersembunyi, tak perlu di init
+    _is_loaned: bool = field(default=False, init=False)
     id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
 
     @property
@@ -647,60 +633,388 @@ class Buku:
             raise PeminjamanError(f"Buku '{self.judul}' sedang dipinjam.")
         self._is_loaned = True
 
-    def kembalikan(self):
-        self._is_loaned = False
-
-    # Dunder Method
     def __str__(self):
         return f"[{self.id}] {self.judul} oleh {self.penulis} ({self.status})"
 
-# 3. Pengelola Data
 class Perpustakaan:
     def __init__(self):
-        self.__koleksi = [] # Private list
+        self.__koleksi = []
 
     def tambah_buku(self, buku: Buku):
         self.__koleksi.append(buku)
 
-    # Generator untuk pencarian
     def cari_buku(self, kata_kunci: str):
         for buku in self.__koleksi:
             if kata_kunci.lower() in buku.judul.lower():
                 yield buku
 
-    # Dunder agar objek Perpustakaan bisa di iterasi
     def __iter__(self):
         return iter(self.__koleksi)
 
-# --- Eksekusi ---
 if __name__ == "__main__":
     perpus = Perpustakaan()
     perpus.tambah_buku(Buku("Automate The Boring Stuff", "Al Sweigart"))
-    perpus.tambah_buku(Buku("Fluent Python", "Luciano Ramalho"))
-
-    # Menggunakan fitur iterasi kustom (__iter__)
-    buku_target = list(perpus)[1]
     
-    try:
-        print(f"Mencoba meminjam: {buku_target.judul}...")
-        buku_target.pinjam()
-        print("Berhasil dipinjam!")
-        
-        # Coba pinjam lagi (akan memicu Exception)
-        buku_target.pinjam()
-    except PeminjamanError as e:
-        print(f"ERROR: {e}")
-
-    print("\\nStatus Terakhir:")
-    for b in perpus:
-        print(b)
+    buku_target = list(perpus)[0]
+    buku_target.pinjam()
+    print("Berhasil dipinjam!")
 \`\`\`
-
-## 🏆 Kesimpulan Masterclass
-Selamat! Anda baru saja menguasai arsitektur inti dari Python. Dengan memahami fundamental dan *expert core* ini, Anda tidak akan sekadar "menempel kode", melainkan siap merancang *framework* atau mengoptimasi sistem *backend* berskala besar.
 `,
     level: 'expert',
     order: 10,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  // ==================== ALGORITHMS & DATA STRUCTURES (NEW) ====================
+  {
+    id: 'py-11',
+    user_type: 'student',
+    language: 'python',
+    title: 'Algoritma Pencarian (Searching): Linear & Binary Search',
+    description: 'Memahami dasar pencarian data dan optimasi dari O(n) menjadi O(log n) dengan Binary Search.',
+    content: `# 🔍 Modul 11: Algoritma Pencarian (Searching)
+
+Dalam pemrograman, menemukan data dengan cepat adalah kunci performa aplikasi. Kita akan bahas dua algoritma utama: **Linear Search** dan **Binary Search**.
+
+## 1. Linear Search (Pencarian Berurutan)
+Cara paling sederhana: cek item satu per satu dari awal sampai akhir.
+- **Kelebihan:** Data tidak perlu diurutkan sebelumnya.
+- **Kekurangan:** Lambat jika datanya banyak. Kompleksitas waktunya adalah O(n).
+
+\`\`\`python
+def linear_search(arr: list, target: int) -> int:
+    """Mengembalikan index dari target, atau -1 jika tidak ditemukan."""
+    for i in range(len(arr)):
+        if arr[i] == target:
+            return i
+    return -1
+
+# Testing
+data = [10, 50, 30, 70, 80, 20]
+print("Index target 70:", linear_search(data, 70)) # Output: 3
+\`\`\`
+
+---
+
+## 2. Binary Search (Pencarian Bagi Dua)
+Cara kerja bagaikan mencari kata di kamus: buka tengahnya, cek apakah kata tersebut ada di paruh kiri atau kanan, lalu ulangi.
+- **Syarat Mutlak:** Array atau list **HARUS** sudah dalam keadaan terurut (sorted).
+- **Performa:** Sangat cepat! Kompleksitas waktunya O(log n).
+
+### Cara Kerja (Step-by-Step):
+1. Tentukan batas \`kiri\` (index 0) dan \`kanan\` (index terakhir).
+2. Cari nilai \`tengah\` = (kiri + kanan) // 2.
+3. Jika nilai tengah = target, pencarian selesai!
+4. Jika nilai tengah < target, geser batas \`kiri\` ke \`tengah + 1\` (karena target pasti di kanan).
+5. Jika nilai tengah > target, geser batas \`kanan\` ke \`tengah - 1\` (target pasti di kiri).
+
+\`\`\`python
+def binary_search(arr: list, target: int) -> int:
+    kiri = 0
+    kanan = len(arr) - 1
+    
+    while kiri <= kanan:
+        tengah = (kiri + kanan) // 2
+        
+        if arr[tengah] == target:
+            return tengah # Ketemu!
+        elif arr[tengah] < target:
+            kiri = tengah + 1 # Buang paruh kiri
+        else:
+            kanan = tengah - 1 # Buang paruh kanan
+            
+    return -1 # Tidak ditemukan
+
+# Testing (Pastikan data terurut!)
+data_terurut = [10, 20, 30, 50, 70, 80]
+print("Index target 70:", binary_search(data_terurut, 70)) # Output: 4
+\`\`\`
+
+## ✍️ Latihan (20 Menit)
+1. Buat list berisi 1000 angka acak yang sudah di-sort.
+2. Hitung berapa kali perulangan \`while\` terjadi pada \`binary_search\` saat mencari angka tertentu dengan menambahkan variabel counter. Buktikan logikanya jauh lebih cepat dari \`linear_search\`!
+`,
+    level: 'intermediate',
+    order: 11,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'py-12',
+    user_type: 'student',
+    language: 'python',
+    title: 'Algoritma Pengurutan Dasar (Basic Sorting)',
+    description: 'Mempelajari algoritma sorting sederhana: Bubble Sort dan Selection Sort (O(n^2)).',
+    content: `# 📊 Modul 12: Pengurutan Dasar (Basic Sorting)
+
+Sebelum masuk ke algoritma kompleks, bro harus paham dulu dasar-dasar memindahkan posisi elemen di memori. Walau lambat (O(n^2)), ini fundamental banget!
+
+## 1. Bubble Sort (Gelembung)
+Algoritma ini bekerja dengan membandingkan elemen yang bersebelahan dan menukarnya (swap) jika urutannya salah. Elemen terbesar akan "menggelembung" ke paling kanan.
+
+### Cara Kerja:
+1. Looping dari elemen pertama ke elemen terakhir.
+2. Jika elemen ke-i > elemen ke-(i+1), tukar posisi mereka!
+3. Ulangi terus sampai tidak ada pertukaran lagi.
+
+\`\`\`python
+def bubble_sort(arr: list) -> list:
+    n = len(arr)
+    for i in range(n):
+        # Optimasi: Jika array sudah terurut, hentikan loop
+        swapped = False
+        
+        # Elemen terakhir (sejumlah i) sudah pasti berada di posisi benar
+        for j in range(0, n - i - 1):
+            if arr[j] > arr[j + 1]:
+                # Tukar posisi (Pythonic way)
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                swapped = True
+                
+        if not swapped:
+            break # Berhenti jika tidak ada lagi yang ditukar
+            
+    return arr
+
+print("Bubble Sort:", bubble_sort([64, 34, 25, 12, 22, 11, 90]))
+\`\`\`
+
+---
+
+## 2. Selection Sort (Pemilihan)
+Membagi array jadi 2 bagian: Kiri (sudah terurut) dan Kanan (belum terurut). Dia mencari nilai paling kecil di bagian kanan, lalu menaruhnya di ujung batas kiri.
+
+\`\`\`python
+def selection_sort(arr: list) -> list:
+    n = len(arr)
+    for i in range(n):
+        # Anggap elemen ke-i adalah yang terkecil saat ini
+        min_idx = i
+        
+        # Cari elemen yang lebih kecil di sisa array (bagian kanan)
+        for j in range(i + 1, n):
+            if arr[j] < arr[min_idx]:
+                min_idx = j
+                
+        # Tukar elemen terkecil yang ditemukan dengan elemen pertama di sisa array
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]
+        
+    return arr
+
+print("Selection Sort:", selection_sort([29, 10, 14, 37, 14]))
+\`\`\`
+
+## ✍️ Latihan (20 Menit)
+1. Modifikasi \`bubble_sort\` agar bisa melakukan sorting secara menurun (Descending). Apa yang perlu diubah pada simbol operatornya?
+`,
+    level: 'intermediate',
+    order: 12,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'py-13',
+    user_type: 'student',
+    language: 'python',
+    title: 'Advanced Sorting: Divide & Conquer (Quick Sort)',
+    description: 'Menguasai paradigma Divide and Conquer dengan Quick Sort (O(n log n)).',
+    content: `# 🚀 Modul 13: Advanced Sorting (Divide & Conquer)
+
+Algoritma pengurutan dasar lambat untuk jutaan data. Solusinya? **Divide and Conquer** (Pecah dan Taklukkan). Di modul ini kita akan membedah **Quick Sort**, salah satu algoritma tercepat (O(n log n)).
+
+## 1. Memahami Logika Quick Sort
+Ide utamanya adalah memilih satu elemen sebagai **Pivot** (poros), lalu memisahkan array menjadi dua grup:
+1. Grup yang nilainya **lebih kecil** dari Pivot.
+2. Grup yang nilainya **lebih besar** dari Pivot.
+Setelah dipisah, proses diulang (Rekursi) untuk masing-masing grup, lalu digabung kembali.
+
+### Implementasi Super Pythonic (Menggunakan List Comprehension)
+Cara ini sangat mudah dibaca, meskipun memakan memori sedikit lebih banyak karena kita membuat list baru di setiap iterasi.
+
+\`\`\`python
+def quick_sort(arr: list) -> list:
+    # Base case: Jika array kosong atau isi 1, otomatis sudah terurut
+    if len(arr) <= 1:
+        return arr
+    else:
+        # Pilih elemen terakhir sebagai pivot
+        pivot = arr.pop()
+        
+        # Partisi array menggunakan List Comprehension
+        lebih_kecil = [x for x in arr if x <= pivot]
+        lebih_besar = [x for x in arr if x > pivot]
+        
+        # Panggil ulang secara rekursif, lalu gabungkan: (Kecil) + Pivot + (Besar)
+        return quick_sort(lebih_kecil) + [pivot] + quick_sort(lebih_besar)
+
+# Testing
+data_mentah = [33, 10, 55, 71, 29, 99, 14]
+hasil_sort = quick_sort(data_mentah.copy())
+print(f"Data Awal: {data_mentah}")
+print(f"Hasil Quick Sort: {hasil_sort}")
+\`\`\`
+
+---
+
+## 2. Kenapa Rekursi itu Penting?
+Di Python, rekursi (fungsi yang memanggil dirinya sendiri) adalah nyawa dari algoritma *Tree* dan *Sorting*.
+Aturan wajib rekursi: **Harus punya Base Case!**
+Jika di \`quick_sort\` base case-nya (\`if len(arr) <= 1\`) tidak ada, program akan mengalami *RecursionError (Maximum recursion depth exceeded)*.
+
+## ✍️ Latihan (30 Menit)
+1. Python memiliki built-in method \`.sort()\` dan fungsi \`sorted()\`. Tahukah kamu algoritma apa yang dipakai Python di belakang layar? (Clue: Namanya Timsort, gabungan dari Merge Sort dan Insertion Sort).
+2. Buat fungsi \`merge_sort()\` sederhana dengan konsep membagi dua list ke kiri dan kanan sampai tersisa 1 elemen!
+`,
+    level: 'advanced',
+    order: 13,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'py-14',
+    user_type: 'student',
+    language: 'python',
+    title: 'Struktur Data Lanjut: Stack & Queue',
+    description: 'Membuat tumpukan LIFO (Stack) dan antrean FIFO (Queue) yang efisien menggunakan collections.deque.',
+    content: `# 🥞 Modul 14: Stack & Queue
+
+Di dunia nyata, kita sering butuh menyimpan data dengan aturan spesifik. Misalnya *Undo/Redo* di Word, atau Antrean print dokumen.
+
+## 1. Stack (Tumpukan / LIFO)
+Aturannya **LIFO** (Last In, First Out). Yang terakhir masuk, yang pertama keluar. Bayangkan seperti menumpuk piring.
+
+Di Python, List bawaan sudah sangat optimal untuk dijadikan Stack!
+- **Push (Tambah):** Gunakan \`.append()\`
+- **Pop (Ambil & Hapus):** Gunakan \`.pop()\`
+
+\`\`\`python
+stack_browser = []
+
+# Navigasi website (Push)
+stack_browser.append("google.com")
+stack_browser.append("youtube.com")
+stack_browser.append("github.com")
+print("Histori saat ini:", stack_browser)
+
+# Klik tombol 'Back' (Pop)
+halaman_terakhir = stack_browser.pop()
+print("Back dari:", halaman_terakhir) # Keluar github.com
+print("Sisa histori:", stack_browser) # Sisa youtube & google
+\`\`\`
+
+---
+
+## 2. Queue (Antrean / FIFO)
+Aturannya **FIFO** (First In, First Out). Yang pertama masuk, yang pertama keluar. Bayangkan antrean di kasir supermarket.
+
+**🚨 PENTING:** Jangan gunakan List biasa untuk Queue! Menghapus elemen pertama dari List (\`list.pop(0)\`) itu lambat (O(n)) karena semua elemen di belakangnya harus digeser satu per satu.
+Gunakan \`collections.deque\` (Double Ended Queue) untuk performa instan O(1)!
+
+\`\`\`python
+from collections import deque
+
+antrean_tiket = deque(["Andi", "Budi"])
+
+# Ada yang datang masuk antrean (Enqueue)
+antrean_tiket.append("Citra")
+antrean_tiket.append("Deni")
+print("Antrean saat ini:", antrean_tiket)
+
+# Loket melayani pelanggan (Dequeue)
+dilayani = antrean_tiket.popleft() # Cepat dan efisien!
+print(f"Sedang melayani: {dilayani}") # Andi keluar duluan
+print("Sisa Antrean:", antrean_tiket)
+\`\`\`
+
+## ✍️ Latihan (20 Menit)
+1. Buat fungsi \`is_balanced(kurung: str) -> bool\` yang menggunakan **Stack** untuk mengecek apakah sepasang tanda kurung valid.
+   Contoh: \`"{[()]}"\` -> True, \`"{[(])}"\` -> False.
+   (Hint: Push jika kurung buka, Pop dan cek pasangannya jika kurung tutup).
+`,
+    level: 'advanced',
+    order: 14,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'py-15',
+    user_type: 'student',
+    language: 'python',
+    title: 'Graph & Tree Traversal (BFS & DFS)',
+    description: 'Merepresentasikan Graph dengan Dictionary dan menjelajahinya menggunakan algoritma BFS dan DFS.',
+    content: `# 🕸️ Modul 15: Graph, Tree & Traversal
+
+Bagaimana Google Maps mencari jalan? Bagaimana AI mencari langkah catur? Jawabannya ada pada struktur data **Graph** dan **Tree**!
+
+## 1. Representasi Graph di Python
+Graph adalah kumpulan Node (Simpul) yang dihubungkan oleh Edge (Garis). Cara paling umum merepresentasikan Graph di Python adalah menggunakan **Adjacency List** berbasis Dictionary.
+
+\`\`\`python
+# Teman-temannya setiap orang (Graph tak berarah)
+graph_sosmed = {
+    'A': ['B', 'C'],
+    'B': ['A', 'D', 'E'],
+    'C': ['A', 'F'],
+    'D': ['B'],
+    'E': ['B', 'F'],
+    'F': ['C', 'E']
+}
+\`\`\`
+
+---
+
+## 2. Depth First Search (DFS)
+"Selami sedalam mungkin ke satu cabang, kalau buntu baru mundur (backtrack)."
+DFS sangat mudah diimplementasikan menggunakan **Stack** atau **Recursion**.
+
+\`\`\`python
+def dfs(graph: dict, start: str, visited=None):
+    if visited is None:
+        visited = set() # Set untuk mencatat node yang sudah dikunjungi
+        
+    visited.add(start)
+    print(start, end=" -> ")
+    
+    # Jelajahi semua tetangga yang belum dikunjungi
+    for tetangga in graph[start]:
+        if tetangga not in visited:
+            dfs(graph, tetangga, visited)
+
+print("Jalur DFS:")
+dfs(graph_sosmed, 'A') 
+# Output (bisa bervariasi tergantung urutan dict): A -> B -> D -> E -> F -> C ->
+\`\`\`
+
+---
+
+## 3. Breadth First Search (BFS)
+"Cek semua tetangga terdekat (level 1) dulu, baru turun ke level 2."
+BFS wajib menggunakan **Queue**. Sangat bagus untuk mencari *Shortest Path* (Rute Terpendek).
+
+\`\`\`python
+from collections import deque
+
+def bfs(graph: dict, start: str):
+    visited = set([start])
+    queue = deque([start]) # Masukkan node awal ke antrean
+    
+    while queue:
+        # Ambil orang antrean paling depan
+        node_sekarang = queue.popleft()
+        print(node_sekarang, end=" -> ")
+        
+        # Cek semua temannya
+        for tetangga in graph[node_sekarang]:
+            if tetangga not in visited:
+                visited.add(tetangga)
+                queue.append(tetangga) # Masukkan teman ke antrean
+
+print("\\nJalur BFS:")
+bfs(graph_sosmed, 'A') 
+# Output: A -> B -> C -> D -> E -> F ->
+\`\`\`
+
+## 🏆 Kesimpulan Algoritma Master
+Gokil! Bro baru aja nyelesaiin materi Algoritma paling *core* di Computer Science! 
+Kalau bro menguasai modul 1-15 ini, logika dan pemahaman struktur data Python bro udah ada di level *Software Engineer* beneran!
+`,
+    level: 'expert',
+    order: 15,
     created_at: '2025-01-01T00:00:00Z'
   }
 ];

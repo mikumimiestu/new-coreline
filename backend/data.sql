@@ -47,3 +47,63 @@ CREATE TABLE subscriptions (
     created_at DATETIME NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
+
+SELECT MAX(user_id)
+FROM coreline_enrollments
+WHERE
+    course_id = 'python';
+
+INSERT INTO
+    coreline_enrollments (
+        user_id,
+        course_id,
+        enrolled_at
+    )
+SELECT n + 126, 'python', NOW()
+FROM (
+        SELECT @row := @row + 1 AS n
+        FROM (
+                SELECT 0
+                UNION ALL
+                SELECT 1
+                UNION ALL
+                SELECT 2
+                UNION ALL
+                SELECT 3
+                UNION ALL
+                SELECT 4
+            ) t1, (
+                SELECT 0
+                UNION ALL
+                SELECT 1
+                UNION ALL
+                SELECT 2
+                UNION ALL
+                SELECT 3
+                UNION ALL
+                SELECT 4
+            ) t2, (
+                SELECT 0
+                UNION ALL
+                SELECT 1
+                UNION ALL
+                SELECT 2
+                UNION ALL
+                SELECT 3
+                UNION ALL
+                SELECT 4
+            ) t3, (
+                SELECT 0
+                UNION ALL
+                SELECT 1
+                UNION ALL
+                SELECT 2
+                UNION ALL
+                SELECT 3
+                UNION ALL
+                SELECT 4
+            ) t4, (
+                SELECT @row := -1
+            ) t0
+        LIMIT 200
+    ) x;
