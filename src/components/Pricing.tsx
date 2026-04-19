@@ -84,6 +84,7 @@ export default function PricingPage() {
         { label: "Semua materi fundamental", ok: true },
         { label: "Modul materi lengkap & kuis", ok: true },
         { label: "Sertifikat Kelulusan Resmi", ok: true },
+        { label: "Storage Cloud 5 GB", ok: true },
         { label: "Mentoring Chat 1:1", ok: false },
         { label: "Akses Full Source Code", ok: false },
         { label: "Live Mentoring Video Call", ok: false },
@@ -107,6 +108,7 @@ export default function PricingPage() {
         { label: "Mentoring via Chat 1:1", ok: true },
         { label: "Akses Full Source Code Project", ok: true },
         { label: "Template Portofolio Siap Pakai", ok: true },
+        { label: "Storage Cloud 10 GB", ok: true },
         { label: "Live Mentoring Video Call", ok: false },
         { label: "Konsultasi Karir & CV", ok: false },
       ],
@@ -130,6 +132,7 @@ export default function PricingPage() {
         { label: "Code Review Personal", ok: true },
         { label: "Konsultasi Karir & Review CV", ok: true },
         { label: "Prioritas Rekomendasi Kerja", ok: true },
+        { label: "Storage Cloud 20 GB", ok: true },
         { label: "Mentoring Tatap Muka (Offline)", ok: false },
       ],
       colorTheme: "purple"
@@ -154,6 +157,7 @@ export default function PricingPage() {
         { label: "Akses Private Networking Event", ok: true },
         { label: "Grup Mastermind Eksklusif", ok: true },
         { label: "Dukungan Proyek Skala Enterprise", ok: true },
+        { label: "Storage Cloud 50 GB", ok: true },
       ],
       colorTheme: "amber",
       areaRestriction: "Area Tertentu, Pastikan cek coverage area sebelum memilih paket ini"
