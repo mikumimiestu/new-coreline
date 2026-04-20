@@ -69,14 +69,15 @@ export default function MaterialContent({ content }: MaterialContentProps) {
   const mdComponents: Components = {
     // --- Layout Elements ---
     table: ({ children }) => (
-      <div className="my-8 w-full overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">{children}</table>
-        </div>
+      <div className="my-8 w-full overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm relative z-0">
+        {/* Pastikan z-index rendah agar tidak menutupi dropdown dari parent */}
+        <table className="w-full text-left text-sm whitespace-nowrap md:whitespace-normal">
+          {children}
+        </table>
       </div>
     ),
     thead: ({ children }) => (
-      <thead className="bg-slate-500 dark:bg-slate-800/50 border-b border-slate-500 dark:border-slate-700">
+      <thead className="bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
         {children}
       </thead>
     ),
@@ -93,7 +94,7 @@ export default function MaterialContent({ content }: MaterialContentProps) {
     th: ({ children, ...props }) => (
       <th
         {...props}
-        className="px-6 py-4 font-semibold text-slate-900 dark:text-slate-100 whitespace-nowrap"
+        className="px-6 py-4 font-bold text-slate-900 dark:text-slate-100"
       >
         {children}
       </th>
@@ -159,7 +160,7 @@ export default function MaterialContent({ content }: MaterialContentProps) {
       <blockquote className="my-8 relative overflow-hidden rounded-r-lg border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-900/10 p-4 sm:p-6">
         <div className="relative z-10 flex gap-4">
           <Info className="h-6 w-6 flex-shrink-0 text-blue-500 mt-1" />
-          <div className="text-slate-700 dark:text-slate-200 italic">
+          <div className="text-slate-700 dark:text-slate-200 italic font-medium">
             {children}
           </div>
         </div>
@@ -169,7 +170,11 @@ export default function MaterialContent({ content }: MaterialContentProps) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 animate-fade-in">
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 animate-fade-in relative z-0">
+      {/* Container utamanya dikasih z-index rendah (z-0) 
+        biar dropdown dari parent component (seperti Dashboard)
+        bisa melayang di atas konten ini.
+      */}
       {parts.map((part, index) => {
         // --- RENDERING CODE BLOCK ---
         if (part.type === 'code') {
@@ -180,20 +185,21 @@ export default function MaterialContent({ content }: MaterialContentProps) {
           return (
             <div
               key={index}
-              className="group relative my-8 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-[#0F1117] shadow-xl transition-all hover:shadow-2xl"
+              className="group relative my-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-[#0F1117] shadow-xl transition-all hover:shadow-2xl z-0"
+              // Dihapus overflow-hidden di container ini agar styling scrollbar jalan lancar
             >
               {/* Code Header (Mac Style) */}
-              <div className="flex items-center justify-between border-b border-white/10 bg-white/5 px-4 py-3 backdrop-blur-md">
+              <div className="flex items-center justify-between border-b border-white/10 bg-white/5 px-4 py-3 rounded-t-xl backdrop-blur-md">
                 <div className="flex items-center gap-4">
                   {/* Window Controls Decoration */}
                   <div className="flex gap-1.5 opacity-70 hover:opacity-100 transition-opacity">
-                    <div className="h-3 w-3 rounded-full bg-red-500/80" />
-                    <div className="h-3 w-3 rounded-full bg-yellow-500/80" />
-                    <div className="h-3 w-3 rounded-full bg-green-500/80" />
+                    <div className="h-3 w-3 rounded-full bg-red-500/80 shadow-sm" />
+                    <div className="h-3 w-3 rounded-full bg-yellow-500/80 shadow-sm" />
+                    <div className="h-3 w-3 rounded-full bg-green-500/80 shadow-sm" />
                   </div>
                   
                   {/* Language Badge */}
-                  <div className="flex items-center gap-2 rounded px-2 py-0.5 text-xs font-medium text-slate-400 bg-white/5 border border-white/5 uppercase tracking-wider">
+                  <div className="flex items-center gap-2 rounded px-2 py-0.5 text-xs font-bold text-slate-400 bg-white/5 border border-white/10 uppercase tracking-wider">
                     <Terminal className="h-3 w-3" />
                     {language}
                   </div>
@@ -203,7 +209,7 @@ export default function MaterialContent({ content }: MaterialContentProps) {
                   {/* Wrap Toggle */}
                   <button
                     onClick={() => toggleWrap(index)}
-                    className={`flex h-8 items-center gap-2 rounded-lg px-3 text-xs font-medium transition-all ${
+                    className={`flex h-8 items-center gap-2 rounded-lg px-3 text-xs font-bold transition-all ${
                         isWrapped 
                         ? 'bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/50' 
                         : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200'
@@ -217,12 +223,12 @@ export default function MaterialContent({ content }: MaterialContentProps) {
                   {/* Copy Button */}
                   <button
                     onClick={() => copyToClipboard(part.content, index)}
-                    className="flex h-8 items-center gap-2 rounded-lg bg-white/5 px-3 text-xs font-medium text-slate-400 transition-all hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="flex h-8 items-center gap-2 rounded-lg bg-white/5 px-3 text-xs font-bold text-slate-400 transition-all hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                   >
                     {copiedIndex === index ? (
                       <>
-                        <Check className="h-3.5 w-3.5 text-green-400" />
-                        <span className="hidden sm:block text-green-400">Copied!</span>
+                        <Check className="h-3.5 w-3.5 text-emerald-400" />
+                        <span className="hidden sm:block text-emerald-400">Copied!</span>
                       </>
                     ) : (
                       <>
@@ -235,18 +241,18 @@ export default function MaterialContent({ content }: MaterialContentProps) {
               </div>
 
               {/* Code Body */}
-              <div className="relative overflow-hidden">
+              <div className="relative rounded-b-xl overflow-hidden">
                 <pre
                   className={`
                     scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-700
-                    max-h-[600px] overflow-auto p-4 text-[13px] sm:text-sm font-mono leading-6 text-slate-300
+                    max-h-[600px] overflow-auto p-4 text-[13px] sm:text-sm font-mono leading-relaxed text-slate-300
                     ${isWrapped ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'}
                   `}
                 >
                   <code className="block min-w-full">
                     {lines.map((line, i) => (
-                      <div key={i} className="table-row hover:bg-white/5 transition-colors w-full">
-                        <span className="table-cell select-none pr-4 text-right text-slate-600 w-[40px] align-top">
+                      <div key={i} className="table-row hover:bg-white/5 transition-colors w-full group/line">
+                        <span className="table-cell select-none pr-4 text-right text-slate-600 w-[40px] align-top group-hover/line:text-slate-400 transition-colors">
                           {i + 1}
                         </span>
                         <span className="table-cell w-full">{line || ' '}</span>
@@ -263,7 +269,7 @@ export default function MaterialContent({ content }: MaterialContentProps) {
         return (
           <article
             key={index}
-            className="prose prose-slate prose-lg max-w-none dark:prose-invert"
+            className="prose prose-slate prose-lg max-w-none dark:prose-invert relative z-0"
           >
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
               {normalizeTables(part.content)}
@@ -290,11 +296,11 @@ export default function MaterialContent({ content }: MaterialContentProps) {
           background: transparent;
         }
         .scrollbar-thin::-webkit-scrollbar-thumb {
-          background-color: rgba(255, 255, 255, 0.1);
+          background-color: rgba(255, 255, 255, 0.15);
           border-radius: 4px;
         }
         .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-          background-color: rgba(255, 255, 255, 0.2);
+          background-color: rgba(255, 255, 255, 0.3);
         }
       `}</style>
     </div>

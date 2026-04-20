@@ -3,9 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import type { LearningMaterial } from '../types/learning';
 import { encodeId } from '../utils/hashId';
-import CoreBot from './CoreBot'; // Sesuaikan path foldernya
+import CoreBot from './CoreBot'; 
 
-// Import Data Statis Modul (Tetap dipertahankan untuk list modul di dalam course)
+// Import Data Statis Modul
 import { MOCK_MATERIALS as OTHER_MATERIALS } from '../data/otherData';
 import { MOCK_MATERIALS as PYTHON_MATERIALS } from '../data/pythonData';
 import { MOCK_MATERIALS as GO_MATERIALS } from '../data/golangData';
@@ -28,7 +28,7 @@ import {
   Layout, Smartphone, Database, Globe, Terminal, Layers, Cpu, 
   Sparkles, MessageCircle, Boxes, Languages, Users, PenTool, HelpCircle, ArrowLeft,
   Bot, Minus, ChevronLeft, ExternalLink, ShieldAlert, MonitorPlay, Building2, MapPin, Briefcase,
-  BookMarked, Send
+  BookMarked, Send, Cloud, HardDrive, ChevronDown
 } from 'lucide-react';
 
 /* ================================
@@ -97,22 +97,18 @@ export default function Dashboard() {
   const { user, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // State Data Course (Dinamic dari Database API)
   const [languageData, setLanguageData] = useState<Lang[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
 
-  // State Modul Internal
   const [materials, setMaterials] = useState<LearningMaterial[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Category>('all');
   const [progressMap, setProgressMap] = useState<Record<string, number>>({});
   
-  // UI State
   const [isSyncing, setIsSyncing] = useState(false);
   const [isFetchingProgress, setIsFetchingProgress] = useState(true);
   const [showProfile, setShowProfile] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [generatingCert, setGeneratingCert] = useState(false);
   const [searchText, setSearchText] = useState('');
 
   // Rating State
@@ -122,14 +118,14 @@ export default function Dashboard() {
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const [ratingSuccess, setRatingSuccess] = useState(false);
 
-  // Slider & Chatbot State
+  // Slider State
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState<{sender: 'bot' | 'user', text: string}[]>([
-    { sender: 'bot', text: 'Halo! Ada yang bisa CoreBot bantu hari ini? Pilih pertanyaan di bawah ya.' }
-  ]);
 
-  const LAST_UPDATE = "13 Apr 2026, 3:00 PM";
+  // Certificate Dropdown State
+  const [generatingCert, setGeneratingCert] = useState(false);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+
+  const LAST_UPDATE = "20 Apr 2026, 11:20 PM";
 
   useEffect(() => {
     document.title = 'Dashboard | Coreline by AstByte';
@@ -142,7 +138,6 @@ export default function Dashboard() {
     return () => clearInterval(slideInterval);
   }, []);
 
-  // Reset rating state ketika ganti language
   useEffect(() => {
     setUserRating(0);
     setHoverRating(0);
@@ -150,7 +145,6 @@ export default function Dashboard() {
     setRatingSuccess(false);
   }, [selectedLanguage]);
 
-  // FITUR BARU: Ambil List Course dari Database API
   useEffect(() => {
     let isMounted = true;
     const fetchCourses = async () => {
@@ -175,7 +169,6 @@ export default function Dashboard() {
     return () => { isMounted = false; };
   }, []);
 
-  // 1. Logic Fetch Progress Modul
   useEffect(() => {
     let isMounted = true;
     const fetchProgressFromServer = async () => {
@@ -226,7 +219,6 @@ export default function Dashboard() {
   const canAccessOfflineMentoring = plan === 'ultimate';
   const canAccessPortfolioTemplate = isPremium;
 
-  // 2. Logic Update Progress / Sync (DITAMBAH LOGIC ENROLLMENT SAAT SELESAI MODUL)
   const toggleModuleCompletion = async (materialId: string, courseId: string) => {
     if (!isPremium || !user) return;
 
@@ -246,18 +238,15 @@ export default function Dashboard() {
         body: JSON.stringify({ material_id: materialId, progress: newProgress })
       });
 
-      // FITUR BARU: Trigger enroll jika progress jadi 100% (Selesai modul)
-      // Sengaja ngga di-await biar UI tetep responsif, biarkan jalan di background
       if (newProgress === 100 && courseId) {
         fetch(`${API_BASE}/api/coreline/courses/${courseId}/enroll`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         }).catch(e => console.error("Auto-enrollment error", e));
       }
-
     } catch (err) {
       console.error(err);
-      setProgressMap(prev => ({ ...prev, [materialId]: currentProgress })); // Revert
+      setProgressMap(prev => ({ ...prev, [materialId]: currentProgress })); 
     } finally {
       setIsSyncing(false);
     }
@@ -288,10 +277,12 @@ export default function Dashboard() {
     }
   };
 
-  // 3. Logic Certificate
-  const generateCertificate = async (langId: string) => {
+  // LOGIC GENERATE PDF & OPSI PENYIMPANAN
+  const processCertificate = async (langId: string, toLocal: boolean, toCloud: boolean) => {
     if (!user || !isPremium) return;
+    
     setGeneratingCert(true);
+    setOpenDropdownId(null); 
 
     try {
       const { default: jsPDF } = await import("jspdf");
@@ -353,15 +344,53 @@ export default function Dashboard() {
       doc.text(`Issued: ${date}`, 20, h - 15);
       doc.text(`Certificate ID: ${certId}`, w - 20, h - 15, { align: "right" });
 
-      doc.save(`AstByte_Certificate_${langId}.pdf`);
+      const fileName = `AstByte_Certificate_${langId.toUpperCase()}.pdf`;
+      let successMessages = [];
+
+      if (toLocal) {
+        doc.save(fileName);
+        successMessages.push("diunduh ke perangkat");
+      }
+
+      if (toCloud) {
+        const pdfBlob = doc.output('blob');
+        const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+        let token = localStorage.getItem('astbyte_token') || (user as any).token;
+        
+        if (token) {
+          const formData = new FormData();
+          formData.append('file', pdfFile);
+          formData.append('name', fileName);
+          formData.append('type', 'document'); 
+          formData.append('size', pdfBlob.size.toString());
+
+          const res = await fetch(`${API_BASE}/api/storage/files`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+          });
+
+          const json = await res.json();
+          if (json.status === 'success') {
+            successMessages.push("dicadangkan ke CloudNest");
+          } else {
+            console.error("Gagal simpan ke CloudNest", json);
+            alert(`Gagal mencadangkan ke CloudNest: ${json.message}`);
+          }
+        }
+      }
+
+      if (successMessages.length > 0) {
+        alert(`Selamat! Sertifikat berhasil ${successMessages.join(" dan ")}.`);
+      }
+
     } catch (err) {
-      console.error(err); alert("Gagal generate sertifikat");
+      console.error(err); alert("Gagal memproses sertifikat");
     } finally {
       setGeneratingCert(false);
     }
   };
 
-  // Submit Rating Handler
   const handleSubmitRating = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || userRating === 0 || !selectedLanguage) return;
@@ -394,7 +423,6 @@ export default function Dashboard() {
     }
   };
 
-  // 4. Logic Fetch Materials
   useEffect(() => {
     if (!user) return;
     setLoading(true);
@@ -420,11 +448,6 @@ export default function Dashboard() {
     const timer = setTimeout(() => setLoading(false), 300);
     return () => clearTimeout(timer);
   }, [user, selectedLanguage, searchText, userType]);
-
-
-  /* ==========================================================
-   * PENGHITUNGAN STATISTIK & PRASYARAT (PREREQUISITES)
-   * ========================================================== */
   
   const allLanguageStats = useMemo(() => {
     const allMaterials = [
@@ -470,23 +493,6 @@ export default function Dashboard() {
     }
   }, [progressMap, allLanguageStats]);
 
-  // Chatbot logic
-  const chatbotFaqs = [
-    { q: "Cara upgrade akun?", a: "Untuk upgrade, klik tombol 'Upgrade Sekarang' berkedip di atas, atau dari menu Profile." },
-    { q: "Kapan sertifikat bisa diunduh?", a: "Otomatis setelah menyelesaikan 100% modul pada sebuah bahasa pemrograman." },
-    { q: "Kenapa modul terkunci (Prasyarat)?", a: "Beberapa framework modern mewajibkan kamu menyelesaikan course basicnya dulu, misalnya React mewajibkan kamu lulus JS & TS agar pondasimu kuat." },
-    { q: "Bagaimana caranya video call mentor?", a: "Fitur video call hanya untuk member Ultra/Ultimate, silakan klik tombol 'Jadwalkan Video Call' di dashboard atau request jadwal lewat WhatsApp Admin." }
-  ];
-
-  const handleAskBot = (faq: {q: string, a: string}) => {
-    setChatMessages(prev => [...prev, { sender: 'user', text: faq.q }]);
-    setTimeout(() => {
-      setChatMessages(prev => [...prev, { sender: 'bot', text: faq.a }]);
-    }, 600);
-  };
-
-  // --- RENDER ---
-
   if (authLoading || loadingCourses) return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
       <div className="w-16 h-16 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin flex items-center justify-center">
@@ -512,12 +518,10 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans relative overflow-x-hidden selection:bg-blue-500/30">
       
-      {/* --- BACKGROUNDS --- */}
       <div className="fixed inset-0 opacity-[0.4] pointer-events-none z-0 bg-[linear-gradient(rgba(203,213,225,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(203,213,225,0.5)_1px,transparent_1px)] bg-[size:30px_30px]"></div>
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-blue-100/50 to-transparent -z-10" />
       <div className="absolute top-20 right-0 w-96 h-96 bg-cyan-300/20 rounded-full blur-3xl pointer-events-none" />
 
-      {/* NAVBAR */}
       <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 shadow-sm">
         <div className="container mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-6">
@@ -556,10 +560,8 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      {/* MAIN CONTENT */}
       <main className="container mx-auto px-4 sm:px-6 py-10 relative z-10 flex-1 min-h-screen">
 
-        {/* UPGRADE BANNER */}
         {plan !== 'ultimate' && (
           <div className="mb-8 animate-fade-in-up">
             <div className={`relative overflow-hidden rounded-3xl border p-8 shadow-lg transition-all hover:shadow-xl ${
@@ -600,7 +602,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* HERO & STATS */}
         <div className="mb-10 text-center md:text-left">
           {!selectedLanguage && (
             <div className="mb-10 animate-fade-in-up relative">
@@ -615,7 +616,6 @@ export default function Dashboard() {
               </h1>
               
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-6">
-                 {/* Progress Info */}
                  <div className="bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
                    <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><Target className="w-5 h-5" /></div>
                    <div className="text-left">
@@ -632,48 +632,35 @@ export default function Dashboard() {
                  </div>
               </div>
 
-              {/* FITUR PREMIUM SHORTCUTS */}
               {isPremium && (
                 <div className="mb-8">
                   <h3 className="text-sm font-extrabold text-slate-800 mb-3">Akses Fitur Khusus Paketmu:</h3>
                   <div className="flex flex-wrap gap-3">
-
                     <Link to="/tutorial" className="inline-flex items-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 border border-indigo-200 text-red-700 rounded-xl text-sm font-bold shadow-sm transition-colors">
                       <BookMarked className="w-4 h-4" /> Tutorial
                     </Link>
-                    
                     {canAccessPortfolioTemplate && (
                       <Link to="/coming-soon" className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-xl text-sm font-bold shadow-sm transition-colors">
                         <Briefcase className="w-4 h-4" /> Template Portofolio
                       </Link>
                     )}
-
                     {canAccessVideoCall && (
-                      <button 
-                        onClick={() => { window.open("https://wa.me/6285183209494"); }}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 rounded-xl text-sm font-bold shadow-sm transition-colors"
-                      >
+                      <button onClick={() => { window.open("https://wa.me/6285183209494"); }} className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 rounded-xl text-sm font-bold shadow-sm transition-colors">
                         <MonitorPlay className="w-4 h-4" /> Jadwalkan Video Call
                       </button>
                     )}
-
                     {canAccessOfflineMentoring && (
                       <Link to="/offline-mentoring" className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-xl text-sm font-bold shadow-sm transition-colors">
                         <Building2 className="w-4 h-4" /> Mentoring Offline
                       </Link>
                     )}
-
                   </div>
                 </div>
               )}
 
-              {/* SLIDER PROMO */}
               <div className="mb-10 relative w-full h-64 md:h-80 rounded-3xl overflow-hidden shadow-lg group bg-slate-900">
                  {SLIDER_DATA.map((slide, index) => (
-                    <div 
-                      key={slide.id} 
-                      className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
-                    >
+                    <div key={slide.id} className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
                       <img src={slide.image} alt={slide.title} className="w-full h-full object-cover opacity-60" />
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
                       <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full md:w-3/4">
@@ -701,7 +688,6 @@ export default function Dashboard() {
                  </div>
               </div>
 
-              {/* TABS KATEGORI */}
               <div className="flex overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 gap-3 md:flex-wrap scrollbar-hide">
                 {[{ id: 'all', label: 'Semua Kategori', icon: Layout }, ...CATEGORIES_INFO].map((tab) => (
                   <button
@@ -720,7 +706,6 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* SEARCH BAR */}
           <div className="relative max-w-xl mb-10 mx-auto md:mx-0">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
@@ -731,7 +716,7 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* GRID COURSE */}
+          {/* === BAGIAN GRID COURSE === */}
           {!selectedLanguage ? (
             <div className="space-y-12">
               {CATEGORIES_INFO.filter(cat => activeTab === 'all' || activeTab === cat.id).map((catInfo) => {
@@ -741,8 +726,12 @@ export default function Dashboard() {
 
                 if (sectionLanguages.length === 0) return null;
 
+                // 👇 PERBAIKAN 1: Cek apakah ada dropdown aktif di dalam kategori ini
+                const hasActiveDropdown = sectionLanguages.some(l => l.id === openDropdownId);
+
                 return (
-                  <div key={catInfo.id} className="animate-fade-in-up">
+                  // 👇 PERBAIKAN 2: Angkat z-index seluruh blok kategori jika dropdownnya aktif
+                  <div key={catInfo.id} className={`animate-fade-in-up relative ${hasActiveDropdown ? 'z-[100]' : 'z-10'}`}>
                     <div className="flex items-center gap-3 mb-6">
                       <div className="p-2.5 bg-blue-100 rounded-xl text-blue-600 shadow-sm border border-blue-200">
                         <catInfo.icon className="w-5 h-5" />
@@ -750,36 +739,41 @@ export default function Dashboard() {
                       <h2 className="text-2xl font-extrabold text-slate-800">{catInfo.label}</h2>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative">
                       {sectionLanguages.map((lang) => {
                         const showProgress = isPremium && lang.total > 0;
-                        
-                        // LOGIKA PRASYARAT (PREREQUISITES)
                         const missingPrereqs = lang.prerequisites?.filter(reqId => !completedLangIds.has(reqId)) || [];
                         const isLockedByPrereq = missingPrereqs.length > 0;
                         const missingNames = missingPrereqs.map(reqId => languageData.find(l => l.id === reqId)?.name).join(', ');
 
                         return (
-                          <button
+                          // 👇 PERBAIKAN 3: Ganti <button> terluar jadi <div> biar HTML valid dan gampang atur z-index
+                          <div
                             key={lang.id}
-                            disabled={!!lang.comingSoon || isLockedByPrereq}
                             onClick={() => {
-                              if (!lang.comingSoon && !isLockedByPrereq) setSelectedLanguage(lang.id);
+                              if (!lang.comingSoon && !isLockedByPrereq && openDropdownId !== lang.id) {
+                                setSelectedLanguage(lang.id);
+                              }
                             }}
-                            className={`group relative h-full text-left transition-all duration-300 ${
+                            className={`group relative h-full text-left transition-all duration-300 ${openDropdownId === lang.id ? 'z-[110]' : 'z-10'} ${
                               lang.comingSoon ? 'opacity-60 cursor-not-allowed' : 
                               isLockedByPrereq ? 'cursor-not-allowed' : 
                               'cursor-pointer hover:-translate-y-1.5'
                             }`}
                           >
-                            <div className={`relative h-full bg-white rounded-3xl p-6 flex flex-col border border-slate-200 shadow-sm transition-all overflow-hidden ${
+                            {/* 👇 PERBAIKAN 4: CABUT overflow-hidden DARI CONTAINER INI */}
+                            <div className={`relative h-full bg-white rounded-3xl p-6 flex flex-col border border-slate-200 shadow-sm transition-all ${
                                isLockedByPrereq ? 'bg-slate-50/80 border-slate-200' : 'group-hover:border-blue-300 group-hover:shadow-xl'
                             }`}>
-                              {!isLockedByPrereq && (
-                                <div className="absolute top-0 right-0 w-32 h-32 from-blue-500/5 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                              )}
                               
-                              <div className="flex justify-between items-start mb-5">
+                              {/* Background Decoration Wrapper (Ini yang pakai overflow-hidden biar warnanya ga jebol) */}
+                              <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+                                {!isLockedByPrereq && (
+                                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                )}
+                              </div>
+                              
+                              <div className="flex justify-between items-start mb-5 relative z-10">
                                 <div className={`w-14 h-14 rounded-2xl ${lang.gradient} flex items-center justify-center transition-transform duration-300 ${isLockedByPrereq ? 'grayscale opacity-70' : 'group-hover:scale-105'}`}>
                                   {lang.iconUrl ? (
                                     <img src={lang.iconUrl} alt="icon" className="w-8 h-8 object-contain drop-shadow-md" />
@@ -834,15 +828,65 @@ export default function Dashboard() {
                                     <span>{lang.completed}/{lang.total} Modul</span>
                                     <span className={lang.isComplete ? 'text-blue-600' : 'text-slate-500'}>{lang.progress}%</span>
                                   </div>
+                                  
                                   {lang.isComplete && (
-                                    <button
-                                      onClick={(e) => { e.stopPropagation(); generateCertificate(lang.id); }}
-                                      disabled={generatingCert}
-                                      className="mt-4 w-full py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-xl border border-blue-200 flex items-center justify-center gap-2 transition-all shadow-sm"
-                                    >
-                                      {generatingCert ? <Loader2 className="w-4 h-4 animate-spin"/> : <Award className="w-4 h-4"/>}
-                                      Unduh Sertifikat
-                                    </button>
+                                    <div className="relative w-full mt-4">
+                                      <button
+                                        onClick={(e) => { 
+                                          e.stopPropagation(); 
+                                          setOpenDropdownId(openDropdownId === lang.id ? null : lang.id); 
+                                        }}
+                                        disabled={generatingCert && openDropdownId === lang.id}
+                                        className="w-full py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-xl border border-blue-200 flex items-center justify-between px-4 transition-all shadow-sm"
+                                      >
+                                        <span className="flex items-center gap-2">
+                                          {generatingCert && openDropdownId === lang.id ? <Loader2 className="w-4 h-4 animate-spin"/> : <Award className="w-4 h-4"/>}
+                                          Unduh Sertifikat
+                                        </span>
+                                        <ChevronDown className={`w-4 h-4 transition-transform ${openDropdownId === lang.id ? 'rotate-180' : ''}`} />
+                                      </button>
+
+                                      {/* Dropdown Options Menu */}
+                                      {openDropdownId === lang.id && (
+                                        <>
+                                          <div 
+                                            className="fixed inset-0 z-[9998]" 
+                                            onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); }}
+                                          ></div>
+                                          
+                                          <div 
+                                            className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-2xl border border-slate-200 z-[9999] overflow-hidden animate-fade-in-up"
+                                            onClick={(e) => e.stopPropagation()} // Mencegah klik masuk ke card
+                                          >
+                                            <div className="p-1.5 flex flex-col gap-1">
+                                              <button 
+                                                onClick={(e) => { e.stopPropagation(); processCertificate(lang.id, true, false); }} 
+                                                className="flex items-center gap-2.5 w-full p-2.5 text-left text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-colors"
+                                              >
+                                                <div className="bg-slate-100 p-1.5 rounded-md"><HardDrive className="w-3.5 h-3.5" /></div>
+                                                Ke Perangkat Saja
+                                              </button>
+                                              
+                                              <button 
+                                                onClick={(e) => { e.stopPropagation(); processCertificate(lang.id, false, true); }} 
+                                                className="flex items-center gap-2.5 w-full p-2.5 text-left text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-colors"
+                                              >
+                                                <div className="bg-slate-100 p-1.5 rounded-md"><Cloud className="w-3.5 h-3.5" /></div>
+                                                Ke CloudNest Saja
+                                              </button>
+                                              
+                                              <button 
+                                                onClick={(e) => { e.stopPropagation(); processCertificate(lang.id, true, true); }} 
+                                                className="flex items-center gap-2.5 w-full p-2.5 text-left text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                                              >
+                                                <div className="bg-blue-100 p-1.5 rounded-md"><CheckCircle className="w-3.5 h-3.5" /></div>
+                                                Unduh & Cadangkan
+                                              </button>
+                                            </div>
+                                          </div>
+                                        </>
+                                      )}
+                                    </div>
                                   )}
                                 </div>
                               ) : (
@@ -854,7 +898,7 @@ export default function Dashboard() {
                                 </div>
                               )}
                             </div>
-                          </button>
+                          </div>
                         );
                       })}
                     </div>
@@ -863,7 +907,7 @@ export default function Dashboard() {
               })}
             </div>
           ) : (
-            /* MODULE LIST VIEW */
+            // === BAGIAN DETAIL MODULE (Ketik dipilih) ===
             <div className="max-w-4xl mx-auto animate-fade-in-up">
               <button onClick={() => setSelectedLanguage(null)} className="group flex items-center gap-2 text-slate-500 hover:text-blue-600 mb-8 font-bold text-sm transition-colors bg-white px-4 py-2.5 rounded-full border border-slate-200 shadow-sm hover:shadow-md w-fit">
                 <ArrowLeft className="w-4 h-4" /> Kembali ke Kategori
@@ -932,7 +976,6 @@ export default function Dashboard() {
                               </h3>
                               {isPremium && !locked && (
                                 <div className="flex gap-2">
-                                  {/* UPDATE PADA PEMANGGILAN toggleModuleCompletion DI BAWAH INI */}
                                   <button onClick={(e) => { e.stopPropagation(); toggleModuleCompletion(m.id, selectedLanguage!); }} className={`p-2.5 rounded-lg transition-all border shadow-sm ${isCompleted ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100' : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200'}`} title={isCompleted ? "Batal Selesai" : "Tandai Selesai"}>
                                     <CheckCircle className="w-4 h-4" />
                                   </button>
@@ -986,7 +1029,6 @@ export default function Dashboard() {
                   })
                 )}
 
-                {/* FITUR BARU: KOMPONEN RATING COURSE (Hanya muncul jika ada materials) */}
                 {materials.length > 0 && selectedLanguage && (
                   <div className="mt-12 bg-gradient-to-br from-white to-slate-50 rounded-3xl border border-slate-200 p-8 shadow-md relative overflow-hidden">
                     {ratingSuccess ? (
@@ -1004,7 +1046,6 @@ export default function Dashboard() {
                           <p className="text-slate-500 text-sm font-medium">Beri nilai untuk materi <span className="font-bold text-blue-600">{filteredLanguageStats.find(l => l.id === selectedLanguage)?.name}</span></p>
                         </div>
                         
-                        {/* Star Selector */}
                         <div className="flex justify-center gap-2 mb-6">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <button
@@ -1024,7 +1065,6 @@ export default function Dashboard() {
                           ))}
                         </div>
 
-                        {/* Review Input */}
                         <div className="max-w-xl mx-auto">
                           <textarea 
                             value={reviewText}
@@ -1052,7 +1092,6 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* SECTION BANTUAN */}
           {!selectedLanguage && (
             <div className="mt-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-8 md:p-12 relative overflow-hidden shadow-xl animate-fade-in-up" style={{animationDelay: '300ms'}}>
                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
@@ -1074,7 +1113,6 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* FOOTER */}
       <footer className="bg-white border-t border-slate-200 py-8 relative z-10">
         <div className="container mx-auto px-6 text-center text-slate-500 font-medium">
           <p className="mb-2">&copy; {new Date().getFullYear()} Coreline by AstByte. All rights reserved.</p>
