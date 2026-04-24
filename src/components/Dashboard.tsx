@@ -277,7 +277,6 @@ export default function Dashboard() {
     }
   };
 
-  // LOGIC GENERATE PDF & OPSI PENYIMPANAN
   const processCertificate = async (langId: string, toLocal: boolean, toCloud: boolean) => {
     if (!user || !isPremium) return;
     
@@ -466,6 +465,17 @@ export default function Dashboard() {
       return { ...lang, total, completed, progress, isComplete: completed === total && total > 0 };
     });
   }, [progressMap, userType, languageData]);
+
+  // Logic buat nentuin course terakhir yang dipelajarin user (progress > 0 && < 100)
+  const lastActiveCourse = useMemo(() => {
+    if (!allLanguageStats || allLanguageStats.length === 0) return null;
+    const inProgress = allLanguageStats.filter(l => l.progress > 0 && l.progress < 100);
+    if (inProgress.length > 0) {
+      // Ambil yang paling tinggi progressnya atau terserah mau di sort gmn, kita sort by progress
+      return inProgress.sort((a, b) => b.progress - a.progress)[0];
+    }
+    return null;
+  }, [allLanguageStats]);
 
   const completedLangIds = useMemo(() => {
     const set = new Set<string>();
@@ -658,6 +668,38 @@ export default function Dashboard() {
                 </div>
               )}
 
+              {/* === SECTION LANJUT BELAJAR (Diambil dari progress terakhir) === */}
+              {lastActiveCourse && (
+                <div className="mb-10 relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl p-6 md:p-8 group animate-fade-in-up">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transition-transform group-hover:scale-110 duration-700"></div>
+                  <div className="absolute bottom-0 left-0 w-40 h-40 bg-cyan-500/20 rounded-full blur-2xl -ml-10 -mb-10 pointer-events-none transition-transform group-hover:scale-110 duration-700"></div>
+
+                  <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-5">
+                       <div className={`w-16 h-16 rounded-2xl ${lastActiveCourse.gradient} flex items-center justify-center shadow-lg shrink-0 border border-white/10`}>
+                         {lastActiveCourse.iconUrl ? <img src={lastActiveCourse.iconUrl} className="w-8 h-8 object-contain" alt="Icon" /> : <Boxes className="w-8 h-8 text-white"/>}
+                       </div>
+                       <div className="text-left">
+                         <span className="text-blue-400 text-[10px] font-black uppercase tracking-widest mb-1 flex items-center gap-1.5"><MonitorPlay className="w-3.5 h-3.5"/> Terakhir Dipelajari</span>
+                         <h3 className="text-2xl font-extrabold text-white mb-2">{lastActiveCourse.name}</h3>
+                         <div className="flex items-center gap-3">
+                           <div className="w-32 h-2 bg-slate-800 rounded-full overflow-hidden">
+                             <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full" style={{ width: `${lastActiveCourse.progress}%` }}></div>
+                           </div>
+                           <span className="text-slate-300 text-xs font-bold">{lastActiveCourse.progress}% Selesai</span>
+                         </div>
+                       </div>
+                    </div>
+                    <button 
+                      onClick={() => setSelectedLanguage(lastActiveCourse.id)} 
+                      className="px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 flex-shrink-0 w-full md:w-auto justify-center"
+                    >
+                      Lanjut Belajar <ChevronRight className="w-4 h-4"/>
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="mb-10 relative w-full h-64 md:h-80 rounded-3xl overflow-hidden shadow-lg group bg-slate-900">
                  {SLIDER_DATA.map((slide, index) => (
                     <div key={slide.id} className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
@@ -726,17 +768,29 @@ export default function Dashboard() {
 
                 if (sectionLanguages.length === 0) return null;
 
-                // 👇 PERBAIKAN 1: Cek apakah ada dropdown aktif di dalam kategori ini
                 const hasActiveDropdown = sectionLanguages.some(l => l.id === openDropdownId);
 
                 return (
-                  // 👇 PERBAIKAN 2: Angkat z-index seluruh blok kategori jika dropdownnya aktif
                   <div key={catInfo.id} className={`animate-fade-in-up relative ${hasActiveDropdown ? 'z-[100]' : 'z-10'}`}>
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="p-2.5 bg-blue-100 rounded-xl text-blue-600 shadow-sm border border-blue-200">
-                        <catInfo.icon className="w-5 h-5" />
+                    
+                    {/* Header Kategori dengan Tombol "Lihat Semua Materi" */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-blue-100 rounded-xl text-blue-600 shadow-sm border border-blue-200">
+                          <catInfo.icon className="w-5 h-5" />
+                        </div>
+                        <h2 className="text-2xl font-extrabold text-slate-800">{catInfo.label}</h2>
                       </div>
-                      <h2 className="text-2xl font-extrabold text-slate-800">{catInfo.label}</h2>
+                      
+                      {/* Tombol Lihat Semua (Hanya muncul jika tab "Semua Kategori" aktif) */}
+                      {activeTab === 'all' && (
+                        <button 
+                          onClick={() => setActiveTab(catInfo.id as Category)} 
+                          className="text-sm font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg transition-colors flex items-center gap-1 border border-blue-100"
+                        >
+                          Lihat Semua <ChevronRight className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative">
@@ -747,7 +801,6 @@ export default function Dashboard() {
                         const missingNames = missingPrereqs.map(reqId => languageData.find(l => l.id === reqId)?.name).join(', ');
 
                         return (
-                          // 👇 PERBAIKAN 3: Ganti <button> terluar jadi <div> biar HTML valid dan gampang atur z-index
                           <div
                             key={lang.id}
                             onClick={() => {
@@ -761,12 +814,10 @@ export default function Dashboard() {
                               'cursor-pointer hover:-translate-y-1.5'
                             }`}
                           >
-                            {/* 👇 PERBAIKAN 4: CABUT overflow-hidden DARI CONTAINER INI */}
                             <div className={`relative h-full bg-white rounded-3xl p-6 flex flex-col border border-slate-200 shadow-sm transition-all ${
                                isLockedByPrereq ? 'bg-slate-50/80 border-slate-200' : 'group-hover:border-blue-300 group-hover:shadow-xl'
                             }`}>
                               
-                              {/* Background Decoration Wrapper (Ini yang pakai overflow-hidden biar warnanya ga jebol) */}
                               <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
                                 {!isLockedByPrereq && (
                                   <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -856,7 +907,7 @@ export default function Dashboard() {
                                           
                                           <div 
                                             className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-2xl border border-slate-200 z-[9999] overflow-hidden animate-fade-in-up"
-                                            onClick={(e) => e.stopPropagation()} // Mencegah klik masuk ke card
+                                            onClick={(e) => e.stopPropagation()} 
                                           >
                                             <div className="p-1.5 flex flex-col gap-1">
                                               <button 

@@ -181,7 +181,8 @@ export default function CoreBot() {
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-[9999] isolation-auto">
+      {/* Container utama dengan position: fixed biar nempel di pojok kanan bawah layar */}
+      <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end">
         {isChatOpen ? (
           <div 
             className={`bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-bottom-right chat-lux-anim

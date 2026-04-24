@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 import {
   Check,
   Zap,
@@ -16,7 +17,10 @@ import {
   Percent,
   Terminal,
   MapPin,
-  Building2
+  Building2,
+  ArrowDown,
+  RefreshCw,
+  TrendingUp
 } from "lucide-react";
 
 /**
@@ -25,13 +29,52 @@ import {
  */
 
 const TOKEN_KEY = "astbyte_token";
+const AUTHX_BASE = "https://authx.astbyte.com";
+
+// Mapping hirarki paket untuk ngecek Upgrade / Downgrade
+const PLAN_RANK: Record<string, number> = {
+  free: 0,
+  pro: 1,
+  plus: 2,
+  ultra: 3,
+  ultimate: 4,
+};
 
 export default function PricingPage() {
+  const { user } = useAuth();
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
+  
+  // State User Plan
+  const [userPlan, setUserPlan] = useState("free");
+  const [isSubActive, setIsSubActive] = useState(false);
 
   useEffect(() => {
     document.title = "Harga & Paket | Coreline by AstByte";
   }, []);
+
+  // Fetch Data User Buat Cek Paket Aktif
+  useEffect(() => {
+    const fetchUserPlan = async () => {
+      const token = localStorage.getItem(TOKEN_KEY) || (user as any)?.token;
+      if (!token) return;
+
+      try {
+        const res = await fetch(`${AUTHX_BASE}/api/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok && data?.data?.user) {
+          const plan = data.data.user.subscription_type?.toLowerCase() || "free";
+          setUserPlan(plan);
+          setIsSubActive(data.data.user.subscription_status === "active");
+        }
+      } catch (err) {
+        console.error("Gagal mengambil data paket user:", err);
+      }
+    };
+
+    fetchUserPlan();
+  }, [user]);
 
   const currency = (n: number) =>
     new Intl.NumberFormat("id-ID", {
@@ -273,6 +316,30 @@ export default function PricingPage() {
             const originalPrice = price(t.originalMonthly, t.originalYearly);
             const isDiscounted = currentPrice < originalPrice;
 
+            // Logic Upgrade / Downgrade / Perpanjang
+            const thisRank = PLAN_RANK[t.id] || 0;
+            const currentRank = PLAN_RANK[userPlan] || 0;
+            
+            let buttonText = `Pilih Paket ${t.name}`;
+            let buttonAction = "buy"; // buy, upgrade, downgrade, renew
+            let ButtonIcon = ArrowRight;
+
+            if (userPlan !== "free") {
+               if (thisRank === currentRank) {
+                  buttonText = "Perpanjang Paket";
+                  buttonAction = "renew";
+                  ButtonIcon = RefreshCw;
+               } else if (thisRank > currentRank) {
+                  buttonText = `Upgrade ke ${t.name}`;
+                  buttonAction = "upgrade";
+                  ButtonIcon = TrendingUp;
+               } else {
+                  buttonText = `Downgrade ke ${t.name}`;
+                  buttonAction = "downgrade";
+                  ButtonIcon = ArrowDown;
+               }
+            }
+
             return (
               <div
                 key={t.id}
@@ -375,8 +442,10 @@ export default function PricingPage() {
 
                 <a
                   href={payHref(t.id, currentPrice)}
-                  className={`w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold transition-all transform active:scale-95 shadow-md ${
-                    t.id === "pro"
+                  className={`group w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold transition-all transform active:scale-95 shadow-md ${
+                    buttonAction === "downgrade" 
+                      ? "bg-white text-slate-600 border border-slate-300 hover:bg-slate-50 hover:text-slate-800 shadow-sm"
+                      : t.id === "pro"
                       ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600 shadow-blue-500/20"
                       : t.id === "plus"
                       ? "bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700 shadow-indigo-500/20"
@@ -385,8 +454,8 @@ export default function PricingPage() {
                       : "bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:from-amber-600 hover:to-orange-700 shadow-amber-500/20"
                   }`}
                 >
-                  Pilih Paket {t.name}
-                  <ArrowRight className="w-4 h-4" />
+                  {buttonText}
+                  <ButtonIcon className={`w-4 h-4 transition-transform ${buttonAction === 'renew' ? 'group-hover:rotate-180 duration-500' : 'group-hover:translate-x-1'}`} />
                 </a>
               </div>
             );

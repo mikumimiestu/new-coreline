@@ -18,11 +18,12 @@ import {
   Info,
   Plus
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext'; // Import useAuth untuk auto-read
 
 /* =========================================
    TYPES & CONFIG
    ========================================= */
-type Tier = 'student' | 'pro' | 'plus' | 'ultra';
+type Tier = 'student' | 'pro' | 'plus' | 'ultra' | 'ultimate'; // Tambah ultimate
 type Cycle = 'monthly' | 'yearly';
 
 const MERCHANT_NAME = 'AstByte System';
@@ -30,12 +31,13 @@ const API_BASE = 'https://authx.astbyte.com'; // Ganti ke localhost jika dev
 const TOKEN_KEY = 'astbyte_token';
 const PPN_RATE = 0.11; // 11% PPN
 
-// Disesuaikan dengan harga normal yang ada di Pricing Page
+// Disesuaikan dengan harga diskon promo yang ada di Pricing Page
 const DEFAULT_PRICE: Record<Tier, { monthly: number; yearly: number }> = {
   student: { monthly: 0, yearly: 0 },
-  pro: { monthly: 25000, yearly: 250000 },
-  plus: { monthly: 75000, yearly: 750000 },
-  ultra: { monthly: 125000, yearly: 1250000 },
+  pro: { monthly: 22500, yearly: 225000 },
+  plus: { monthly: 67500, yearly: 675000 },
+  ultra: { monthly: 112500, yearly: 1125000 },
+  ultimate: { monthly: 280000, yearly: 2800000 },
 };
 
 // Voucher Codes dengan batasan Tier & Cycle
@@ -62,21 +64,16 @@ const VOUCHERS: Record<string, VoucherConfig> = {
   HARUSCORELINE: { 
     type: 'fixed', 
     value: 70000, 
-    note: 'Potongan Rp70.000 (Hanya Plus Tahunan)',
-    validTiers: ['plus'],
+    note: 'Potongan Rp70.000 (Hanya Tahunan)',
+    validTiers: ['plus', 'ultra', 'ultimate'], // Hanya untuk Plus, Ultra, Ultimate
     validCycles: ['yearly']
-  },
-  FEBARU: { 
-    type: 'percent', 
-    value: 10, 
-    note: 'Diskon Bulan Februari 10% (Hanya Pro)',
-    validTiers: ['pro']
   },
   SUPER60K: {
     type: 'fixed',
     value: 60000,
     note: 'Potongan Rp60.000 & Bebas PPN',
-    freePPN: true // <- Menggratiskan PPN
+    freePPN: true, // <- Menggratiskan PPN
+    validTiers: ['ultimate']
   }
 };
 
@@ -131,6 +128,8 @@ type AuthUser = {
    MAIN COMPONENT
    ========================================= */
 export default function ManualQRISPage() {
+  const { user: authContextUser } = useAuth(); // Ambil dari context auth
+  
   // State
   const [user, setUser] = useState<AuthUser | null>(null);
   const [publicId, setPublicId] = useState('');
@@ -149,6 +148,39 @@ export default function ManualQRISPage() {
   const tierParam = (params.get('tier') as Tier) || 'student';
   const cycleParam = (params.get('cycle') as Cycle) || 'monthly';
   const amountParam = Number(params.get('amount') || NaN);
+
+  // Auto-Read Data User dari Context API jika sudah login
+  useEffect(() => {
+    const autoLoadUser = async () => {
+      let currentToken = localStorage.getItem(TOKEN_KEY) || (authContextUser as any)?.token;
+      
+      if (currentToken) {
+        setToken(currentToken);
+        setLoadingCheck(true);
+        try {
+          // Fetch the latest balance & info to be safe
+          const res = await fetch(`${API_BASE}/api/auth/me`, {
+            headers: { Authorization: `Bearer ${currentToken}` }
+          });
+          const data = await res.json();
+          if (res.ok && data?.data?.user) {
+            setUser({
+              public_id: data.data.user.public_id,
+              full_name: data.data.user.full_name,
+              email: data.data.user.email,
+              balance: data.data.user.balance ?? 0,
+            });
+          }
+        } catch (err) {
+          console.error("Auto load user failed:", err);
+        } finally {
+          setLoadingCheck(false);
+        }
+      }
+    };
+
+    autoLoadUser();
+  }, [authContextUser]);
 
   // Computed Values (Math Logic)
   const orderId = useMemo(() => makeOrderId(), []);
@@ -181,6 +213,7 @@ export default function ManualQRISPage() {
     } catch { /* noop */ }
   };
 
+  // Ini fungsi Manual Fallback kalau context API belum login / expired
   const handleCheckPublicId = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
@@ -366,7 +399,7 @@ export default function ManualQRISPage() {
                       />
                     </div>
                     <p className="mt-2.5 text-xs md:text-sm text-slate-500 flex items-center gap-1.5 font-medium">
-                      <Info className="w-4 h-4" /> Anda dapat menemukan Public ID di menu Account Center.
+                      <Info className="w-4 h-4" /> Masukkan Public ID jika tidak login otomatis.
                     </p>
                   </div>
                   
@@ -389,6 +422,7 @@ export default function ManualQRISPage() {
                       <p className="text-sm text-slate-500 font-medium mt-0.5">{user.email}</p>
                     </div>
                   </div>
+                  {/* Tombol Logout/Ganti Akun ini akan men-clear state user saat ini agar muncul form input */}
                   <button 
                     onClick={() => { setUser(null); setToken(null); }}
                     className="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-all text-center shadow-sm"
