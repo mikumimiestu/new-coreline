@@ -1,14 +1,16 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Lock, AlertCircle, Loader2, Check, MessageCircle, ArrowRight,
   Sparkles, Shield, Trophy, Users, WifiOff, ChevronLeft, Terminal, 
   Laptop, Star, Quote, Code2, BookOpen, ShieldCheck, Cpu,
-  Target, Zap, PlayCircle, CheckCircle2 // <-- Tambahan icon baru
+  Target, Zap, PlayCircle, CheckCircle2, GraduationCap, Layers,
+  Brain, Award, HelpCircle, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import ReCAPTCHA from 'react-google-recaptcha';
 
 const RECAPTCHA_SITE_KEY = '6LcHoB0sAAAAAGwuOnnHNhKOHBfdai_JbmB0118Z';
+const API_BASE = 'https://authx.astbyte.com';
 
 export default function LoginPage() {
   const [showForm, setShowForm] = useState(false);
@@ -112,16 +114,47 @@ export default function LoginPage() {
   };
 
   const features = [
-    { icon: Laptop, t: "Kurikulum Industri", d: "Materi pembelajaran up-to-date yang dirancang khusus sesuai standar industri teknologi terkini." },
-    { icon: Trophy, t: "Sertifikasi Profesional", d: "Dapatkan sertifikat valid untuk menunjang portofolio, CV, dan akselerasi karir masa depanmu." },
-    { icon: Users, t: "Komunitas Developer", d: "Akses grup diskusi eksklusif untuk networking, kolaborasi, dan tanya-jawab bersama mentor." },
-    { icon: WifiOff, t: "Belajar Fleksibel", d: "Akses materi kapan saja dengan alur terstruktur yang membantu kamu fokus belajar di mana pun." }
+    { icon: Laptop, t: "Kurikulum Standar Industri", d: "Materi disusun oleh praktisi IT aktif, mengacu pada kebutuhan skill terkini di perusahaan teknologi." },
+    { icon: Trophy, t: "Sertifikasi Profesional", d: "Dapatkan sertifikat valid setiap menyelesaikan course untuk memperkuat CV dan portofolio karirmu." },
+    { icon: Brain, t: "Kuis & Latihan Interaktif", d: "Setiap modul dilengkapi kuis dan latihan coding langsung agar pemahaman lebih mendalam." },
+    { icon: Users, t: "Komunitas & Mentor", d: "Bergabung dengan komunitas developer aktif dan dapatkan bimbingan dari mentor berpengalaman." },
+    { icon: Layers, t: "15+ Jalur Belajar", d: "Dari Python, JavaScript, React, hingga UI/UX Design dan Product Management — semua tersedia." },
+    { icon: GraduationCap, t: "Dari Pemula ke Profesional", d: "Alur belajar terstruktur dari level dasar hingga advanced, cocok untuk siapa saja tanpa syarat." }
   ];
 
+  // State untuk data kursus dari API
+  const [apiCourses, setApiCourses] = useState<any[]>([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(true);
+
+  // Fetch katalog kursus dari API saat komponen dimuat
+  useEffect(() => {
+    async function fetchCourses() {
+      try {
+        const res = await fetch(`${API_BASE}/api/coreline/courses`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.data && Array.isArray(data.data)) {
+            // Filter: tidak comingSoon, totalStudents > 100, ambil 5 terpopuler
+            const popularCourses = data.data
+              .filter((c: any) => !c.comingSoon && Number(c.totalStudents || 0) > 100)
+              .sort((a: any, b: any) => Number(b.totalStudents || 0) - Number(a.totalStudents || 0))
+              .slice(0, 4);
+            setApiCourses(popularCourses);
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch courses for catalog:', e);
+      } finally {
+        setIsLoadingCourses(false);
+      }
+    }
+    fetchCourses();
+  }, []);
+
   const learningPaths = [
-    { icon: Target, title: "Tentukan Pilihanmu", desc: "Pilih alur belajar sesuai minat, dari Web Dev, Mobile, UI/UX, hingga Data Science." },
-    { icon: PlayCircle, title: "Mulai Belajar & Praktik", desc: "Tonton materi video interaktif dan kerjakan kuis serta mini project di setiap modul." },
-    { icon: CheckCircle2, title: "Raih Sertifikasi", desc: "Selesaikan final project, lulus evaluasi, dan dapatkan sertifikat keahlian resmimu." }
+    { icon: Target, title: "1. Pilih Jalur Belajar", desc: "Tentukan minatmu — Web Dev, Data Science, UI/UX, atau Soft Skill. Kami punya 15+ jalur yang siap kamu eksplorasi." },
+    { icon: PlayCircle, title: "2. Belajar & Praktik", desc: "Pelajari teori terstruktur, kerjakan kuis interaktif, dan selesaikan latihan coding langsung di setiap modul." },
+    { icon: CheckCircle2, title: "3. Raih Sertifikat", desc: "Setelah seluruh modul selesai 100%, sertifikat profesional otomatis bisa kamu unduh dan gunakan." }
   ];
 
   const testimonials = [
@@ -129,6 +162,15 @@ export default function LoginPage() {
     { name: "Siti N.", role: "UI/UX Designer", text: "Kurikulumnya terstruktur rapi. Alhamdulillah bisa upgrade skill bareng mentor expert. Sertifikatnya sangat berguna.", rating: 5 },
     { name: "Budi S.", role: "Freelance Engineer", text: "Komunitasnya sangat aktif dan saling bantu. Recommended banget buat yang mau pivot karir ke dunia IT.", rating: 5 }
   ];
+
+  const faqs = [
+    { q: "Apakah Coreline cocok untuk pemula yang belum pernah coding?", a: "Tentu! Semua kursus dirancang dari level paling dasar. Kami menyediakan penjelasan langkah demi langkah yang mudah dipahami bahkan jika kamu belum pernah menulis satu baris kode pun." },
+    { q: "Bagaimana cara mendapatkan sertifikat?", a: "Sertifikat akan otomatis tersedia untuk diunduh setelah kamu menyelesaikan 100% modul pada sebuah course. Sertifikat bisa diunduh dalam format PDF langsung dari Dashboard." },
+    { q: "Apa perbedaan akun Free dan Premium?", a: "Akun Free bisa mengakses beberapa modul awal di setiap course. Akun Premium (Pro/Plus/Ultra/Ultimate) mendapat akses penuh ke seluruh materi, sertifikat, kuis, dan fitur mentoring." },
+    { q: "Ada berapa total kursus yang tersedia?", a: "Saat ini kami memiliki 15+ kursus aktif mulai dari Python, JavaScript, React, Go, TypeScript, hingga non-coding seperti UI/UX Design, Agile & Scrum, Product Management, English for Tech, dan Japanese N5-N4." },
+  ];
+
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
     // Wrapper utama: Tema Terang (bg-slate-50)
@@ -167,17 +209,23 @@ export default function LoginPage() {
           {/* HERO SECTION */}
           <section className="container mx-auto px-6 py-16 md:py-24 text-center flex flex-col items-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 border border-blue-200 text-blue-700 text-sm font-bold mb-8 animate-fade-in shadow-sm">
-              <Sparkles className="w-4 h-4 text-blue-600" /> Platform Belajar Tech #1
+              <Sparkles className="w-4 h-4 text-blue-600" /> 15+ Kursus Aktif • 200+ Modul Pembelajaran
             </div>
             
             <h1 className="mb-6 text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 drop-shadow-sm max-w-4xl leading-tight animate-fade-in" style={{animationDelay: '0.1s'}}>
-              Bangun Karir Impianmu di <br className="hidden md:block" />
-              <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Dunia Digital</span>
+              Platform Belajar<br className="hidden md:block" />
+              <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Coding & Tech Skills</span>
             </h1>
             
-            <p className="text-lg md:text-xl text-slate-600 font-medium max-w-2xl mb-12 animate-fade-in" style={{animationDelay: '0.2s'}}>
-              Platform edukasi interaktif Coreline by AstByte. Kuasai keahlian coding terkini dan persiapkan dirimu menjadi profesional teknologi yang dicari industri.
+            <p className="text-lg md:text-xl text-slate-600 font-medium max-w-2xl mb-8 animate-fade-in" style={{animationDelay: '0.2s'}}>
+              Kuasai Python, JavaScript, React, Go, Data Analysis, UI/UX Design, hingga Product Management — semua dalam satu platform interaktif dengan sertifikat resmi.
             </p>
+
+            <div className="flex flex-wrap justify-center gap-3 mb-12 animate-fade-in" style={{animationDelay: '0.25s'}}>
+              {["Python", "JavaScript", "React", "Go", "TypeScript", "UI/UX", "Data Analysis", "Agile & Scrum"].map(tag => (
+                <span key={tag} className="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-lg shadow-sm">{tag}</span>
+              ))}
+            </div>
 
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto animate-fade-in" style={{animationDelay: '0.3s'}}>
               <button
@@ -251,7 +299,7 @@ export default function LoginPage() {
                 <p className="text-slate-600 max-w-2xl mx-auto">Kami menyediakan ekosistem belajar yang komprehensif untuk membantu kamu berkembang dari pemula hingga menjadi ahli.</p>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {features.map((item, i) => (
                   <div key={i} className="flex flex-col p-8 rounded-2xl bg-white border border-slate-200 hover:border-blue-400 hover:shadow-2xl transition-all transform hover:-translate-y-2 group">
                     <div className="p-4 bg-blue-50 rounded-xl text-blue-600 mb-6 inline-block w-fit group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-sm">
@@ -262,6 +310,53 @@ export default function LoginPage() {
                   </div>
                 ))}
               </div>
+            </div>
+          </section>
+
+          {/* COURSE CATALOG PREVIEW (Dari API) */}
+          <section className="py-20">
+            <div className="container mx-auto px-6 max-w-6xl">
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">Katalog Kursus Populer</h2>
+                <p className="text-slate-600 max-w-2xl mx-auto">Jelajahi berbagai kursus coding dan non-coding yang siap membawa karirmu ke level berikutnya.</p>
+              </div>
+              
+              {isLoadingCourses ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-4" />
+                  <p className="text-sm font-bold text-slate-500">Memuat katalog kursus...</p>
+                </div>
+              ) : apiCourses.length === 0 ? (
+                <p className="text-center text-slate-500">Tidak dapat memuat katalog kursus saat ini.</p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {apiCourses.map((course, i) => (
+                    <div key={course.id || i} className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer">
+                      <div className={`h-24 bg-gradient-to-br ${course.gradient || 'from-slate-400 to-slate-600'} flex items-center justify-center relative`}>
+                        <div className="absolute inset-0 bg-black/10 mix-blend-overlay"></div>
+                        {course.iconUrl ? (
+                          <img src={course.iconUrl} alt={course.name} className="w-12 h-12 object-contain drop-shadow-lg group-hover:scale-110 transition-transform relative z-10" />
+                        ) : (
+                          <BookOpen className="w-10 h-10 text-white drop-shadow-lg group-hover:scale-110 transition-transform relative z-10" />
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h4 className="font-bold text-slate-900 text-sm mb-1 line-clamp-1">{course.name}</h4>
+                        <p className="text-xs text-slate-500 mb-2 line-clamp-1">{course.description}</p>
+                        <div className="flex items-center gap-2">
+                          {course.badge && (
+                            <span className="text-[10px] font-black text-purple-600 bg-purple-50 px-2 py-0.5 rounded border border-purple-100">{course.badge}</span>
+                          )}
+                          <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600">
+                            <Star className="w-3 h-3 fill-current" /> {course.rating || '0.0'}
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-400">{course.totalStudents || '0'} siswa</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
 
@@ -299,7 +394,36 @@ export default function LoginPage() {
             </div>
           </section>
 
-          {/* NEW SECTION: CTA (Call To Action) */}
+          {/* FAQ SECTION */}
+          <section className="bg-slate-100 py-20 border-y border-slate-200">
+            <div className="container mx-auto px-6 max-w-3xl">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">Pertanyaan yang Sering Diajukan</h2>
+                <p className="text-slate-600">Temukan jawaban untuk pertanyaan umum tentang platform Coreline.</p>
+              </div>
+              
+              <div className="space-y-4">
+                {faqs.map((faq, i) => (
+                  <div key={i} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <button 
+                      onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                      className="w-full flex items-center justify-between p-6 text-left"
+                    >
+                      <span className="font-bold text-slate-800 pr-4">{faq.q}</span>
+                      {openFaq === i ? <ChevronUp className="w-5 h-5 text-blue-500 shrink-0" /> : <ChevronDown className="w-5 h-5 text-slate-400 shrink-0" />}
+                    </button>
+                    {openFaq === i && (
+                      <div className="px-6 pb-6 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-4 animate-fade-in">
+                        {faq.a}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* CTA (Call To Action) */}
           <section className="container mx-auto px-6 py-12 mb-12">
             <div className="bg-slate-900 rounded-3xl p-10 md:p-16 text-center relative overflow-hidden shadow-2xl">
               <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>

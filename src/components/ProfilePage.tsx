@@ -17,6 +17,12 @@ import { MOCK_MATERIALS as TS_MATERIAL } from '../data/tsData';
 import { MOCK_MATERIALS as JS_MATERIAL } from '../data/jsData';
 import { MOCK_MATERIALS as PSQL_MATERIAL } from '../data/posgresData';
 import { MOCK_MATERIALS as RB_MATERIAL } from '../data/rubyData';
+import { MOCK_MATERIALS as PYTHON_DA_MATERIALS } from '../data/pythonDataAnalysis';
+import { MOCK_MATERIALS as ENG_MATERIALS } from '../data/englishTechData';
+import { MOCK_MATERIALS as JP_MATERIALS } from '../data/japaneseData';
+import { MOCK_MATERIALS as UIUX_MATERIALS } from '../data/uiuxData';
+import { MOCK_MATERIALS as AGILE_MATERIALS } from '../data/agileScrumData';
+import { MOCK_MATERIALS as PM_MATERIALS } from '../data/productManagementData';
 
 /* ================================
  * CONFIG & TYPES
@@ -56,7 +62,11 @@ const COURSE_NAME_MAP: Record<string, string> = {
   'docker': 'Docker',
   'kubernetes': 'Kubernetes',
   'english-tech': 'English for Tech',
-  'japanese': 'Japanese N5-N4'
+  'japanese': 'Japanese N5-N4',
+  'py-da': 'Python Data Analysis',
+  'ui-ux': 'UI/UX Design',
+  'agile-scrum': 'Agile & Scrum',
+  'product-management': 'Product Management'
 };
 
 /* ================================
@@ -145,14 +155,15 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
 
   // --- 3. FILTER & COMPUTE COMPLETED COURSES ---
   const completedCourses = useMemo(() => {
-    if (!authUser) return [];
+    if (!authUser) return { inProgress: [] as any[], finished: [] as any[] };
     
     const userType = authUser.user_type || 'student';
     // Gabung semua materi
     const allMaterials = [
-      ...OTHER_MATERIALS, ...PYTHON_MATERIALS, ...GO_MATERIALS,
+      ...OTHER_MATERIALS, ...PYTHON_MATERIALS, ...PYTHON_DA_MATERIALS, ...GO_MATERIALS,
       ...MYSQL_MATERIALS, ...TS_MATERIAL, ...JS_MATERIAL,
-      ...PSQL_MATERIAL, ...RB_MATERIAL
+      ...PSQL_MATERIAL, ...RB_MATERIAL,
+      ...ENG_MATERIALS, ...JP_MATERIALS, ...UIUX_MATERIALS, ...AGILE_MATERIALS, ...PM_MATERIALS
     ].filter(m => m.user_type === userType);
 
     // Grouping progress berdasarkan course/language
@@ -172,17 +183,31 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
       }
     });
 
-    // Filter yang totalnya > 0 dan completed === total (Berarti tamat 100% course tsb)
-    const finished = Object.values(courseStats).filter(
-      c => c.total > 0 && c.completed === c.total
-    );
+    const inProgress: any[] = [];
+    const finished: any[] = [];
 
-    // Format output untuk dirender
-    return finished.map(f => ({
-       id: f.id,
-       name: COURSE_NAME_MAP[f.id] || f.id.toUpperCase(),
-       totalModules: f.total
-    }));
+    Object.values(courseStats).forEach(c => {
+      if (c.total === 0) return;
+      if (c.completed > 0 && c.completed < c.total) {
+        inProgress.push({
+          id: c.id,
+          name: COURSE_NAME_MAP[c.id] || c.id.toUpperCase(),
+          totalModules: c.total,
+          completed: c.completed,
+          progress: Math.round((c.completed / c.total) * 100)
+        });
+      } else if (c.completed === c.total) {
+        finished.push({
+          id: c.id,
+          name: COURSE_NAME_MAP[c.id] || c.id.toUpperCase(),
+          totalModules: c.total,
+          completed: c.completed,
+          progress: 100
+        });
+      }
+    });
+
+    return { inProgress, finished };
   }, [authUser, progressMap]);
 
 
@@ -192,7 +217,7 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
       <div className="flex min-h-screen items-center justify-center bg-slate-50/50 backdrop-blur-sm">
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin flex items-center justify-center shadow-lg">
-             <Layout className="w-6 h-6 text-blue-600 animate-pulse" />
+             <UserIcon className="w-6 h-6 text-blue-600 animate-pulse" />
           </div>
           <p className="text-sm font-bold text-slate-500 animate-pulse">Memuat Profil...</p>
         </div>
@@ -440,41 +465,89 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
                  </div>
               </div>
 
-              {/* Course Selesai 100% */}
+              {/* Course Sedang Dipelajari */}
               <div className="bg-white/80 backdrop-blur-xl border border-white shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] rounded-[2rem] p-8 sm:p-10 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+                 <div className="flex items-center gap-4 mb-8">
+                    <div className="p-3.5 bg-blue-50/80 border border-blue-100 rounded-2xl shadow-sm">
+                       <Activity className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                       <h2 className="text-2xl font-black text-slate-900 tracking-tight">Sedang Dipelajari</h2>
+                       <p className="text-sm text-slate-500 font-medium mt-1">Lanjutkan kursus yang sedang kamu pelajari saat ini.</p>
+                    </div>
+                 </div>
+
+                 <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                    {completedCourses.inProgress.length === 0 ? (
+                       <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-[1.5rem] bg-slate-50/50 backdrop-blur-sm">
+                          <BookOpen className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                          <p className="text-slate-500 font-medium text-sm">Belum ada course yang sedang dipelajari.</p>
+                       </div>
+                    ) : (
+                       completedCourses.inProgress.map((course: any) => (
+                          <div key={course.id} className="group flex flex-col p-5 bg-white border border-slate-100 shadow-sm rounded-[1.5rem] hover:border-blue-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                             <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-4">
+                                   <div className="w-12 h-12 bg-blue-50/80 text-blue-600 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-blue-100 group-hover:scale-105 transition-transform">
+                                      <Layout className="w-6 h-6" />
+                                   </div>
+                                   <div>
+                                      <h4 className="font-extrabold text-slate-800 text-[15px] line-clamp-1 group-hover:text-blue-600 transition-colors">{course.name}</h4>
+                                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                                        {course.completed} / {course.totalModules} Modul Selesai
+                                      </p>
+                                   </div>
+                                </div>
+                                <span className="text-xs font-black text-blue-600 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100 shrink-0 shadow-sm">
+                                  {course.progress}%
+                                </span>
+                             </div>
+                             <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                               <div className="h-full bg-blue-500 rounded-full" style={{ width: `${course.progress}%` }}></div>
+                             </div>
+                          </div>
+                       ))
+                    )}
+                 </div>
+              </div>
+
+              {/* Course Selesai 100% */}
+              <div className="bg-white/80 backdrop-blur-xl border border-white shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] rounded-[2rem] p-8 sm:p-10 animate-fade-in-up" style={{ animationDelay: '250ms' }}>
                  <div className="flex items-center gap-4 mb-8">
                     <div className="p-3.5 bg-emerald-50/80 border border-emerald-100 rounded-2xl shadow-sm">
                        <Trophy className="w-6 h-6 text-emerald-600" />
                     </div>
                     <div>
-                       <h2 className="text-2xl font-black text-slate-900 tracking-tight">Course Selesai (100%)</h2>
+                       <h2 className="text-2xl font-black text-slate-900 tracking-tight">Course Selesai & Sertifikat</h2>
                        <p className="text-sm text-slate-500 font-medium mt-1">Daftar course yang berhasil kamu tamatkan secara penuh.</p>
                     </div>
                  </div>
 
-                 <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                    {completedCourses.length === 0 ? (
-                       <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-[2rem] bg-slate-50/50 backdrop-blur-sm">
-                          <BookOpen className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                 <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                    {completedCourses.finished.length === 0 ? (
+                       <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-[1.5rem] bg-slate-50/50 backdrop-blur-sm">
+                          <Trophy className="w-10 h-10 text-slate-300 mx-auto mb-3" />
                           <p className="text-slate-500 font-medium text-sm">Belum ada course yang berhasil diselesaikan 100%.</p>
                        </div>
                     ) : (
-                       completedCourses.map(course => (
-                          <div key={course.id} className="group flex items-center justify-between p-5 bg-white border border-slate-100 shadow-sm rounded-[1.5rem] hover:border-emerald-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-emerald-50/80 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-emerald-100 group-hover:scale-105 transition-transform">
-                                   <Trophy className="w-6 h-6" />
+                       completedCourses.finished.map((course: any) => (
+                          <div key={course.id} className="group flex flex-col p-5 bg-white border border-slate-100 shadow-sm rounded-[1.5rem] hover:border-emerald-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                             <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                   <div className="w-12 h-12 bg-emerald-50/80 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-emerald-100 group-hover:scale-105 transition-transform">
+                                      <Trophy className="w-6 h-6" />
+                                   </div>
+                                   <div>
+                                      <h4 className="font-extrabold text-slate-800 text-[15px] line-clamp-1 group-hover:text-emerald-600 transition-colors">{course.name}</h4>
+                                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                                        Tamat • {course.totalModules} Modul
+                                      </p>
+                                   </div>
                                 </div>
-                                <div>
-                                   <h4 className="font-extrabold text-slate-800 text-[15px] line-clamp-1 group-hover:text-emerald-600 transition-colors">{course.name}</h4>
-                                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
-                                     Tamat • {course.totalModules} Modul
-                                   </p>
-                                </div>
+                                <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100 shrink-0 shadow-sm flex items-center gap-1">
+                                  <CheckCircle className="w-3 h-3" /> 100%
+                                </span>
                              </div>
-                             <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100 shrink-0 shadow-sm">
-                               100%
-                             </span>
                           </div>
                        ))
                     )}

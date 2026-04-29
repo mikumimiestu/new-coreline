@@ -143,10 +143,11 @@ export default function CoreBot() {
         
         ${userContextString}
 
-        Panduan pengetahuan:
+        Panduan pengetahuan Coreline:
         1. Fitur Premium: Pro/Plus (Akses materi penuh, sertifikat), Ultra (Mentoring Online), Ultimate (Mentoring Offline & Online).
         2. Sertifikat otomatis bisa diunduh jika modul mencapai 100%.
         3. Kontak CS/Admin: WA di +62 851-8320-9494.
+        4. Katalog Kursus Saat Ini: Python (Dasar & Lanjut), Python Data Analysis, Golang, MySQL, PostgreSQL, TypeScript, Javascript, Ruby, ReactJS, Next.js, English for Tech, Japanese N5-N4 for IT, UI/UX Design, Agile & Scrum, dan Product Management.
 
         Instruksi Formatting WAJIB:
         - Gunakan paragraf yang pendek dan berikan jeda baris (Enter) antar paragraf agar mudah dibaca.
@@ -181,8 +182,8 @@ export default function CoreBot() {
 
   return (
     <>
-      {/* Container utama dengan position: fixed biar nempel di pojok kanan bawah layar */}
-      <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end">
+      {/* Container utama dengan position: fixed biar nempel persis di kanan bawah layar */}
+      <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[9999] flex flex-col items-end">
         {isChatOpen ? (
           <div 
             className={`bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-bottom-right chat-lux-anim

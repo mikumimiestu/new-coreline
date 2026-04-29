@@ -1,66 +1,53 @@
 import { LearningMaterial } from '../types/learning';
 
 export const MOCK_MATERIALS: LearningMaterial[] = [
-  // ==================== PYTHON CORE MATERIALS ====================
+  // ==================== PYTHON BASIC TO INTERMEDIATE MATERIALS ====================
   {
     id: 'py-01',
     user_type: 'student',
     language: 'python',
-    title: 'Pengenalan Python & Lingkungan Kerja Profesional',
-    description: 'Filosofi Python, Arsitektur Interpreter, Manajemen Dependensi Modern, dan Standar PEP 8.',
-    content: `# 🐍 Modul 1: Python Deep Dive & Professional Setup
+    title: 'Modul 1: Pengenalan Python & Dasar Pemrograman',
+    description: 'Mengenal Python, cara instalasi, dan menulis program pertama Anda dengan fungsi print() dan variabel.',
+    content: `# 🐍 Modul 1: Pengenalan Python & Dasar Pemrograman
 
-## 1. Filosofi & Ekosistem Python
-Python diciptakan oleh **Guido van Rossum** pada 1991. Keunggulannya bukan pada kecepatan eksekusi mentah, melainkan pada **produktivitas pengembang**.
+## 1. Apa itu Python?
+Python adalah bahasa pemrograman tingkat tinggi yang diciptakan oleh **Guido van Rossum** pada tahun 1991. Python sangat populer karena sintaksnya yang mudah dibaca dan mirip dengan bahasa Inggris. Python digunakan secara luas dalam Web Development, Data Science, Kecerdasan Buatan (AI), dan Otomatisasi.
 
-### Zen of Python (PEP 20)
-Tiga poin inti filosofi desain Python:
-1. **Readability Counts**: Kode dibaca lebih sering daripada ditulis.
-2. **There should be one—and preferably only one—obvious way to do it**: Menghindari ambiguitas.
-3. **If the implementation is hard to explain, it's a bad idea**: Kesederhanaan adalah kunci.
+## 2. Kenapa Belajar Python?
+- **Mudah Dipelajari:** Sintaksnya bersih dan tidak membutuhkan banyak tanda baca kompleks seperti titik koma (\`;\`) atau kurung kurawal (\`{}\`).
+- **Komunitas Besar:** Jika Anda mengalami masalah, ribuan solusi sudah tersedia di internet.
+- **Multiguna:** Bisa digunakan untuk hampir semua jenis pengembangan perangkat lunak.
 
----
-
-## 2. Setup Lingkungan Kerja Profesional
-Di industri, kita **haram** mengandalkan "Global Python". Kita menggunakan isolasi (Virtual Environment) untuk menghindari **Dependency Hell**.
-
-**Workflow Eksekusi:**
-1. **Inisialisasi Proyek:** \`mkdir belajar_python && cd belajar_python\`
-2. **Buat Virtual Environment:** \`python -m venv .venv\`
-3. **Aktivasi:** - Windows: \`.venv\\Scripts\\activate\`
-   - macOS/Linux: \`source .venv/bin/activate\`
-4. **Manajemen Paket:** - Install: \`pip install ruff\` (Linter modern)
-   - Freeze: \`pip freeze > requirements.txt\`
-
----
-
-## 3. Menulis Kode Pertama (Boilerplate Profesional)
-Struktur file Python selalu menggunakan blok \`if __name__ == "__main__":\` agar file aman saat di-import oleh modul lain.
+## 3. Menulis Kode Pertama Anda
+Di Python, untuk menampilkan teks ke layar, kita menggunakan fungsi \`print()\`.
 
 \`\`\`python
-# file: hello.py
-def main():
-    user = "Developer"
-    print(f"System Active. Welcome, {user}!")
+# Ini adalah komentar, baris ini tidak akan dieksekusi oleh Python
+print("Halo, Dunia!")
+print("Selamat datang di kelas Python dasar.")
+\`\`\`
 
-if __name__ == "__main__":
-    main()
+## 4. Variabel Dasar
+Variabel adalah wadah untuk menyimpan data. Di Python, Anda tidak perlu mendeklarasikan tipe data secara eksplisit.
+
+\`\`\`python
+nama = "Budi"        # Menyimpan teks (String)
+umur = 20            # Menyimpan angka (Integer)
+sedang_belajar = True # Menyimpan nilai kebenaran (Boolean)
+
+print("Nama saya", nama)
+print("Umur saya", umur, "tahun")
 \`\`\`
 
 ---
 
 ## 📝 Quiz Singkat
-1. Apa fungsi dari Virtual Environment (\`.venv\`)?
-2. Mengapa kita perlu menggunakan \`if __name__ == "__main__":\`?
+1. Siapa pencipta bahasa pemrograman Python?
+2. Fungsi apa yang digunakan untuk menampilkan teks ke layar?
 
-## ✍️ Latihan (15 Menit)
-1. Buat folder baru, inisialisasi \`.venv\`, dan aktifkan.
-2. Buat file \`main.py\`, tulis fungsi sederhana yang menyapa nama Anda.
-3. Jalankan file tersebut dari terminal menggunakan \`python main.py\`.
-
-## 🎯 Target Kompetensi
-- Paham alur kerja interpreter.
-- Mampu setup proyek Python yang terisolasi.
+## ✍️ Latihan (10 Menit)
+1. Buatlah variabel untuk menyimpan nama lengkap, hobi, dan tahun lahir Anda.
+2. Gunakan fungsi \`print()\` untuk menampilkan kalimat perkenalan diri Anda menggunakan variabel tersebut.
 `,
     level: 'beginner',
     order: 1,
@@ -70,67 +57,73 @@ if __name__ == "__main__":
     id: 'py-02',
     user_type: 'student',
     language: 'python',
-    title: 'Data Types, Variabel & Type Hinting',
-    description: 'Eksplorasi tipe data primitif, Mutability, Memory Reference, dan String Manipulation.',
-    content: `# 🏗️ Modul 2: Data Types & Type Hinting
+    title: 'Modul 2: Tipe Data & Operasi Dasar',
+    description: 'Mempelajari tipe data primitif, konversi tipe data (casting), operasi aritmatika, dan menerima input dari user.',
+    content: `# 🔢 Modul 2: Tipe Data & Operasi Dasar
 
-## 1. Variabel & Memory Reference
-Di Python, variabel bukanlah "kotak" penyimpan nilai, tapi **label** yang menunjuk ke objek di memori. Python menggunakan **Dynamic Typing** (tipe data ditentukan otomatis) tapi **Strongly Typed** (tidak bisa menjumlahkan angka dan string secara langsung).
-
-## 2. Immutability vs Mutability
-Konsep paling penting di Python:
-- **Immutable** (Tidak bisa diubah setelah dibuat): \`int\`, \`float\`, \`str\`, \`bool\`, \`tuple\`.
-- **Mutable** (Bisa diubah isinya): \`list\`, \`dict\`, \`set\`.
-
----
-
-## 3. Modern Type Hinting (Standar Industri)
-Walau dinamis, *best practice* saat ini mewajibkan **Type Hinting** agar kode mudah dibaca dan di-debug oleh IDE.
+## 1. Tipe Data Primitif di Python
+Setiap nilai di Python memiliki tipe data. Berikut adalah tipe data dasar yang paling sering digunakan:
+- **String (\`str\`)**: Teks, diapit oleh tanda kutip tunggal (\`'\`) atau ganda (\`"\`). Contoh: \`"Hello"\`
+- **Integer (\`int\`)**: Angka bulat. Contoh: \`100\`, \`-5\`
+- **Float (\`float\`)**: Angka desimal. Contoh: \`3.14\`, \`0.5\`
+- **Boolean (\`bool\`)**: Nilai kebenaran, hanya bisa \`True\` atau \`False\`.
 
 \`\`\`python
-from typing import Final, Optional
+teks = "Python Seru" # str
+angka_bulat = 42     # int
+angka_desimal = 3.5  # float
+lulus = True         # bool
 
-# Konstanta
-PI: Final[float] = 3.14159
-
-# Variabel biasa
-username: str = "admin_dev"
-is_active: bool = True
-
-# Koleksi data modern (Python 3.9+)
-tags: list[str] = ["backend", "api"]
-user_profile: dict[str, int] = {"id": 1, "level": 99}
-
-# Boleh bernilai None
-middle_name: Optional[str] = None
+# Mengecek tipe data menggunakan type()
+print(type(teks)) # Output: <class 'str'>
 \`\`\`
 
----
-
-## 4. Master String Manipulation & F-Strings
-F-Strings (Python 3.6+) adalah cara terbaik memanipulasi teks.
+## 2. Operasi Aritmatika
+Python dapat digunakan sebagai kalkulator dengan operator aritmatika standar:
+- Penjumlahan: \`+\`
+- Pengurangan: \`-\`
+- Perkalian: \`*\`
+- Pembagian (Hasil float): \`/\`
+- Pembagian Bulat (Floor division): \`//\`
+- Sisa Bagi (Modulo): \`%\`
+- Pangkat: \`**\`
 
 \`\`\`python
-salary: int = 15500000
-# Formatting angka dengan pemisah ribuan dan desimal
-print(f"Gaji: Rp {salary:,.2f}") # Output: Rp 15,500,000.00
+a = 10
+b = 3
+print(a + b)  # 13
+print(a / b)  # 3.3333...
+print(a // b) # 3
+print(a % b)  # 1 (sisa bagi dari 10 dibagi 3)
+print(a ** b) # 1000 (10 pangkat 3)
+\`\`\`
 
-# String Methods
-slug = "  Python Developer  ".strip().lower().replace(" ", "-")
-print(slug) # Output: python-developer
+## 3. Menerima Input dari User (Input & Casting)
+Kita bisa meminta user memasukkan data menggunakan \`input()\`.
+**Penting:** Hasil dari \`input()\` selalu berupa String (\`str\`). Jika butuh angka, kita harus mengubah (casting) tipe datanya.
+
+\`\`\`python
+# Meminta input
+nama = input("Masukkan nama Anda: ")
+
+# Meminta input angka dan langsung diubah menjadi integer (casting)
+tahun_lahir_str = input("Masukkan tahun lahir Anda: ")
+tahun_lahir = int(tahun_lahir_str)
+
+umur = 2025 - tahun_lahir
+print("Halo", nama, "umur Anda adalah", umur)
 \`\`\`
 
 ---
 
 ## 📝 Quiz Singkat
-1. Apa bedanya tipe data *Mutable* dan *Immutable*?
-2. Jika \`x = 10\`, lalu kita ketik \`x = 20\`, apakah kita mengubah nilai int 10 atau membuat objek baru?
+1. Apa hasil dari \`10 % 3\`?
+2. Jika \`x = input("Masukkan umur: ")\`, apa tipe data awal dari variabel \`x\`?
 
-## ✍️ Latihan (20 Menit)
-1. Buat program sederhana untuk menghitung BMI (Body Mass Index).
-2. Minta input berat badan (kg) dan tinggi badan (cm) dari user menggunakan \`input()\`.
-3. Lakukan konversi tipe data yang aman menggunakan \`try...except ValueError\`.
-4. Cetak hasil BMI menggunakan f-string dengan 1 angka di belakang koma.
+## ✍️ Latihan (15 Menit)
+1. Buat program sederhana untuk menghitung luas persegi panjang.
+2. Minta input panjang dan lebar dari user (gunakan \`float()\`).
+3. Kalikan panjang dan lebar, lalu print hasilnya ("Luas persegi panjang adalah: ...").
 `,
     level: 'beginner',
     order: 2,
@@ -140,66 +133,65 @@ print(slug) # Output: python-developer
     id: 'py-03',
     user_type: 'student',
     language: 'python',
-    title: 'Control Flow & Logic Optimization',
-    description: 'Percabangan Match Case, Walrus Operator, dan teknik iterasi efisien.',
-    content: `# 🧠 Modul 3: Control Flow & Loops
+    title: 'Modul 3: Percabangan & Logika (If-Else)',
+    description: 'Mengendalikan alur program menggunakan kondisional (If, Elif, Else) dan operator logika (And, Or, Not).',
+    content: `# 🔀 Modul 3: Percabangan & Logika
 
-## 1. Structural Pattern Matching (Match-Case)
-Di Python 3.10+, kita punya \`match-case\` yang jauh lebih sakti dari switch-case biasa karena bisa membedah struktur data (Unpacking).
+Program seringkali perlu mengambil keputusan berdasarkan suatu kondisi. Di Python, kita menggunakan percabangan.
+
+## 1. Operator Perbandingan
+Sebelum membuat keputusan, kita membandingkan nilai menggunakan operator yang menghasilkan \`True\` atau \`False\`:
+- \`==\` : Sama dengan
+- \`!=\` : Tidak sama dengan
+- \`>\`  : Lebih dari
+- \`<\`  : Kurang dari
+- \`>=\` : Lebih dari sama dengan
+- \`<=\` : Kurang dari sama dengan
+
+## 2. Percabangan \`if\`, \`elif\`, \`else\`
+Python menggunakan indentasi (spasi/tab masuk ke dalam) untuk menentukan blok kode.
 
 \`\`\`python
-command = "move 10 20"
+nilai = 85
 
-match command.split():
-    case ["quit"]:
-        print("Keluar...")
-    case ["move", x, y] if int(y) > 0: # Guard clause
-        print(f"Maju ke X:{x}, Y:{y}")
-    case _:
-        print("Perintah salah.")
+if nilai >= 90:
+    print("Grade A - Luar Biasa!")
+elif nilai >= 80:
+    print("Grade B - Bagus!")
+elif nilai >= 70:
+    print("Grade C - Cukup.")
+else:
+    print("Grade D - Belajar lagi ya!")
 \`\`\`
+*Catatan: \`elif\` singkatan dari "else if". Anda bisa menggunakan \`elif\` sebanyak yang dibutuhkan. Blok \`else\` menangkap semua kondisi yang tidak terpenuhi di atasnya.*
 
----
-
-## 2. Walrus Operator (\`:=\`)
-Memungkinkan assign variabel sekaligus mengeceknya dalam satu baris (sangat berguna untuk efisiensi memori di loops).
-
-\`\`\`python
-# Terus jalankan sampai user ketik 'exit'
-while (cmd := input("Command: ").lower()) != "exit":
-    print(f"Processing: {cmd}")
-\`\`\`
-
----
-
-## 3. Iterasi Level Menengah: Enumerate & Zip
-Jangan pernah pakai \`for i in range(len(data))\`. Gunakan cara "Pythonic".
+## 3. Operator Logika (And, Or, Not)
+Kita bisa menggabungkan beberapa kondisi sekaligus.
+- **\`and\`**: Bernilai \`True\` jika KEDUA kondisi benar.
+- **\`or\`**: Bernilai \`True\` jika SALAH SATU kondisi benar.
+- **\`not\`**: Membalikkan nilai (contoh: \`not True\` menjadi \`False\`).
 
 \`\`\`python
-names = ["Ali", "Budi"]
-scores = [90, 85]
+punya_ktp = True
+umur = 20
 
-# Menggabungkan 2 list secara paralel
-for name, score in zip(names, scores):
-    print(f"{name} dapet {score}")
-
-# Mendapatkan index
-for index, name in enumerate(names, start=1):
-    print(f"{index}. {name}")
+if umur >= 17 and punya_ktp:
+    print("Boleh membuat SIM.")
+else:
+    print("Belum boleh membuat SIM.")
 \`\`\`
 
 ---
 
 ## 📝 Quiz Singkat
-1. Kapan sebaiknya kita menggunakan \`match-case\` dibanding \`if-elif-else\`?
-2. Apa kegunaan utama dari fungsi \`zip()\`?
+1. Apa bedanya \`=\` (satu sama dengan) dan \`==\` (dua sama dengan)?
+2. Jika \`x = 5\`, apakah hasil dari kondisi \`x > 2 and x < 4\`?
 
 ## ✍️ Latihan (20 Menit)
-1. Buat list berisi 5 angka acak.
-2. Gunakan \`for\` loop dipadukan dengan blok \`else\` (For-Else loop).
-3. Cari angka genap dalam list. Jika ketemu, \`break\`. Jika loop selesai tanpa menemukan angka genap (masuk blok else), print "Tidak ada angka genap".
+1. Buat program yang meminta input angka dari user.
+2. Tentukan apakah angka tersebut "Positif", "Negatif", atau "Nol" menggunakan struktur \`if-elif-else\`.
 `,
-    level: 'intermediate',
+    level: 'beginner',
     order: 3,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -207,57 +199,71 @@ for index, name in enumerate(names, start=1):
     id: 'py-04',
     user_type: 'student',
     language: 'python',
-    title: 'Data Structures Deep Dive & Comprehensions',
-    description: 'Kompleksitas List vs Set, Dictionary operations, dan List/Dict Comprehensions.',
-    content: `# 🧱 Modul 4: Data Structures & Comprehensions
+    title: 'Modul 4: Perulangan (Loops)',
+    description: 'Melakukan tugas berulang secara otomatis menggunakan For Loop, While Loop, dan mengendalikannya dengan Break/Continue.',
+    content: `# 🔄 Modul 4: Perulangan (Loops)
 
-## 1. Big O & Pemilihan Struktur Data
-Programmer ahli tahu kapan harus pakai List, Set, atau Dict:
-- **List**: O(n) untuk pencarian. Cepat untuk iterasi urut.
-- **Set**: O(1) untuk pencarian. Pakai ini untuk cek keanggotaan (\`if x in data\`) dan membuang duplikat!
-- **Dict**: O(1) key lookup. Mapping data terbaik.
+Perulangan sangat penting agar kita tidak perlu menulis kode yang sama berulang-ulang.
 
----
+## 1. For Loop (Perulangan Pasti)
+\`for\` digunakan saat kita tahu persis berapa kali kita ingin mengulang, atau saat kita ingin menelusuri kumpulan data (seperti list atau string).
 
-## 2. Advanced Slicing & Unpacking
-Cara elegan memanipulasi list tanpa loop.
+Fungsi \`range(start, stop)\` sangat sering digunakan bersama \`for\` untuk menghasilkan deretan angka.
 
 \`\`\`python
-data = [1, 2, 3, 4, 5]
-reverse = data[::-1] # Dibalik
+# Akan mengulang dari 0 sampai 4 (stop di 5)
+print("Contoh Range 1:")
+for i in range(5):
+    print("Perulangan ke-", i)
 
-# Extended Unpacking
-head, *middle, tail = data
-print(middle) # [2, 3, 4]
+# Range dengan start dan stop (mulai 1 sampai 5)
+print("\\nContoh Range 2:")
+for angka in range(1, 6):
+    print(angka)
 \`\`\`
 
----
-
-## 3. Comprehensions (Pythonic & Cepat)
-Comprehensions dieksekusi di level C, sehingga lebih cepat dari loop biasa.
+## 2. While Loop (Perulangan Bersyarat)
+\`while\` digunakan saat perulangan bergantung pada kondisi tertentu yang bernilai \`True\`. Loop akan berhenti jika kondisi menjadi \`False\`.
 
 \`\`\`python
-# List Comprehension
-scores = [45, 80, 55, 90]
-status = ["Lulus" if s >= 60 else "Gagal" for s in scores]
+hitung = 3
+while hitung > 0:
+    print("Sisa waktu:", hitung)
+    hitung -= 1  # Sama dengan hitung = hitung - 1
+print("Waktu habis!")
+\`\`\`
+*Hati-hati: Jika kondisi \`while\` tidak pernah bernilai \`False\`, program akan berjalan terus menerus (Infinite Loop).*
 
-# Dictionary Comprehension
-users = [("id1", "Ali"), ("id2", "Budi")]
-user_dict = {uid: name.upper() for uid, name in users}
+## 3. Kendali Loop: Break dan Continue
+- **\`break\`**: Langsung menghentikan keseluruhan loop saat itu juga.
+- **\`continue\`**: Meloncati sisa kode di iterasi saat ini, lalu lanjut ke iterasi loop berikutnya.
+
+\`\`\`python
+# Contoh Break
+for i in range(10):
+    if i == 4:
+        break # Berhenti ketika i adalah 4
+    print(i) # Output: 0, 1, 2, 3
+
+# Contoh Continue
+for i in range(5):
+    if i == 2:
+        continue # Melewati angka 2
+    print(i) # Output: 0, 1, 3, 4
 \`\`\`
 
 ---
 
 ## 📝 Quiz Singkat
-1. Kenapa mengecek data \`if "budi" in set_nama\` jauh lebih cepat daripada \`list_nama\` pada data yang berjumlah jutaan?
-2. Tulis output dari \`[x**2 for x in range(3)]\`.
+1. Jika ada \`for x in range(3, 6):\`, angka berapa saja yang akan dicetak?
+2. Apa fungsi \`break\` dalam perulangan?
 
 ## ✍️ Latihan (20 Menit)
-1. Diberikan list kotor: \`emails = ["a@mail.com", "b@mail.com", "a@mail.com", "c@mail.com"]\`
-2. Hilangkan duplikat menggunakan **Set**.
-3. Gunakan **Dictionary Comprehension** untuk membuat dictionary berisi email sebagai key, dan panjang karakternya sebagai value.
+1. Buat program dengan \`while\` loop yang meminta user memasukkan kata sandi (misal: "rahasia").
+2. Jika kata sandi salah, terus tanyakan "Masukkan sandi: ".
+3. Jika benar, hentikan loop (gunakan \`break\`) dan print "Akses diberikan".
 `,
-    level: 'intermediate',
+    level: 'beginner',
     order: 4,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -265,73 +271,74 @@ user_dict = {uid: name.upper() for uid, name in users}
     id: 'py-05',
     user_type: 'student',
     language: 'python',
-    title: 'Advanced Functions: Decorators & Generators',
-    description: 'Membedah *args, **kwargs, Lambda, Yield (Generators), dan Decorators (Metaprogramming).',
-    content: `# ⚙️ Modul 5: Advanced Functions (Expert Core)
+    title: 'Modul 5: Struktur Data: List & Tuple',
+    description: 'Menyimpan banyak data dalam satu variabel berurutan menggunakan List (Bisa diubah) dan Tuple (Tidak bisa diubah).',
+    content: `# 📦 Modul 5: Struktur Data: List & Tuple
 
-## 1. Argumen Fleksibel: *args & **kwargs
+Variabel biasa hanya bisa menyimpan satu nilai. Untuk menyimpan banyak nilai sekaligus dalam urutan tertentu, kita bisa menggunakan List dan Tuple.
+
+## 1. List (Daftar yang bisa diubah)
+List didefinisikan dengan kurung siku \`[]\`. Elemen dalam List dapat diakses melalui nomor urutannya yang disebut **Index** (dimulai dari 0). List bersifat *mutable* (isinya bisa ditambah, dihapus, atau diubah).
+
 \`\`\`python
-def config_server(host, *ports, **settings):
-    print(f"Host: {host}, Ports (Tuple): {ports}")
-    print(f"Settings (Dict): {settings}")
+buah = ["Apel", "Jeruk", "Mangga"]
 
-config_server("localhost", 80, 443, debug=True, timeout=30)
+# Mengakses elemen
+print(buah[0]) # Apel
+print(buah[-1]) # Mangga (Index negatif menghitung dari belakang)
+
+# Mengubah elemen
+buah[1] = "Anggur"
+
+# Menambah elemen di akhir list
+buah.append("Pisang")
+
+# Menghapus elemen
+buah.remove("Apel") # Berdasarkan nilai
+del buah[0]         # Berdasarkan index
+
+print(buah) # ['Anggur', 'Mangga', 'Pisang']
 \`\`\`
 
----
-
-## 2. Generators (Efisiensi Memori Tingkat Dewa)
-Jika kamu memproses file 10GB, menggunakan list biasa akan membuat RAM penuh (Crash). Gunakan **Generators** (\`yield\`). Generator menghasilkan data satu-per-satu (Lazy Evaluation).
-
+### Menelusuri (Iterasi) List
+Kita sangat sering menggunakan \`for\` untuk membaca seluruh isi list.
 \`\`\`python
-def infinite_sequence():
-    num = 0
-    while True:
-        yield num # Mengembalikan nilai sementara & pause fungsi
-        num += 1
-
-gen = infinite_sequence()
-print(next(gen)) # 0
-print(next(gen)) # 1
+for b in buah:
+    print("- " + b)
 \`\`\`
 
----
-
-## 3. Decorators (Metaprogramming Dasar)
-Decorator memungkinkan kita memodifikasi kelakuan fungsi lain tanpa mengubah kodenya (misal untuk logging, timer, atau autentikasi).
+## 2. Tuple (Daftar yang Kaku)
+Tuple sangat mirip dengan list, namun ditulis menggunakan kurung biasa \`()\`. Bedanya? Tuple bersifat **Immutable** (setelah dibuat, isinya TIDAK bisa diubah, ditambah, atau dihapus).
 
 \`\`\`python
-import time
+koordinat = (10, 20)
+print(koordinat[0]) # 10
 
-# Fungsi pembuat Decorator
-def timer_decorator(func):
-    def wrapper(*args, **kwargs):
-        start = time.time()
-        result = func(*args, **kwargs)
-        end = time.time()
-        print(f"[{func.__name__}] dieksekusi dalam {end-start:.4f} detik")
-        return result
-    return wrapper
+# koordinat[0] = 15 # INI AKAN ERROR! Tuple tidak bisa diubah nilainya.
+\`\`\`
+*Kenapa butuh Tuple?* Karena isinya tidak bisa diubah, Tuple sedikit lebih cepat dari List dan lebih aman untuk menyimpan data konstan (seperti koordinat, warna RGB, dll).
 
-@timer_decorator # Tempelkan ke fungsi target
-def proses_lama(n):
-    return sum(i**2 for i in range(n))
+## 3. List Slicing (Memotong List)
+Kita bisa mengambil beberapa elemen list sekaligus menggunakan format \`list[mulai:sampai_sebelum]\`.
 
-proses_lama(1000000)
+\`\`\`python
+angka = [10, 20, 30, 40, 50]
+print(angka[1:4]) # Mengambil dari index 1 hingga sebelum index 4 -> [20, 30, 40]
+print(angka[:3])  # Mengambil dari awal sampai sebelum index 3 -> [10, 20, 30]
 \`\`\`
 
 ---
 
 ## 📝 Quiz Singkat
-1. Apa perbedaan utama fungsi yang menggunakan \`return\` vs \`yield\`?
-2. Bagaimana cara kerja fungsi *Wrapper* di dalam sebuah Decorator?
+1. Apa perbedaan utama antara List dan Tuple?
+2. Jika \`data = ["a", "b", "c", "d"]\`, apa hasil dari \`data[-2]\`?
 
-## ✍️ Latihan (30 Menit)
-1. Buat sebuah decorator bernama \`@require_auth\`.
-2. Decorator ini mengecek variabel global \`USER_ROLE\`. Jika \`USER_ROLE != "admin"\`, tolak eksekusi fungsi dan print "Access Denied".
-3. Buat fungsi \`delete_database()\` dan tempelkan decorator tersebut. Uji dengan role admin dan user biasa.
+## ✍️ Latihan (20 Menit)
+1. Buat sebuah list berisi 5 angka sembarang.
+2. Gunakan perulangan \`for\` untuk menelusuri list tersebut.
+3. Hitung total penjumlahan dari semua angka dalam list tersebut (simpan dalam variabel \`total\`) lalu print hasilnya.
 `,
-    level: 'advanced',
+    level: 'beginner',
     order: 5,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -339,77 +346,67 @@ proses_lama(1000000)
     id: 'py-06',
     user_type: 'student',
     language: 'python',
-    title: 'OOP Mastery: Dunder, Properties & Class Methods',
-    description: 'Enkapsulasi tingkat lanjut, @property, @classmethod, dan Multiple Inheritance.',
-    content: `# 🏛️ Modul 6: OOP Mastery
+    title: 'Modul 6: Struktur Data: Dictionary & Set',
+    description: 'Menyimpan data dengan pasangan Kunci-Nilai menggunakan Dictionary, dan kumpulan data unik tanpa urutan menggunakan Set.',
+    content: `# 🏷️ Modul 6: Struktur Data: Dictionary & Set
 
-OOP di Python sangat fleksibel. Mari pelajari fitur tingkat lanjutnya.
+Selain List yang berurutan menggunakan index angka, ada tipe struktur data lain yang sangat berguna untuk kasus spesifik.
 
-## 1. @property (Getter & Setter Elegan)
-Jangan pakai metode Java seperti \`get_umur()\` atau \`set_umur()\`. Gunakan \`@property\`.
-
-\`\`\`python
-class Karyawan:
-    def __init__(self, nama, gaji):
-        self.nama = nama
-        self._gaji = gaji # Protected
-
-    @property
-    def gaji(self): # Getter
-        return self._gaji
-
-    @gaji.setter
-    def gaji(self, nominal): # Setter dengan validasi
-        if nominal < 0:
-            raise ValueError("Gaji tidak bisa minus!")
-        self._gaji = nominal
-
-k = Karyawan("Andi", 5000)
-k.gaji = 6000 # Pemanggilan terlihat seperti variabel biasa, tapi fungsi setter berjalan!
-\`\`\`
-
----
-
-## 2. Class Methods & Static Methods
-- **@classmethod**: Menerima class (\`cls\`) sebagai argumen pertama. Sering dipakai untuk *Alternative Constructors*.
-- **@staticmethod**: Tidak menerima \`self\` atau \`cls\`. Murni fungsi utility yang menempel di dalam class.
+## 1. Dictionary (Kamus Kunci-Nilai)
+Dictionary (\`dict\`) menyimpan data dalam pasangan **Key-Value** (Kunci-Nilai), seperti buku telepon di mana "Nama" merujuk pada "Nomor Telepon". Dictionary menggunakan kurung kurawal \`{}\` dengan format \`kunci: nilai\`.
 
 \`\`\`python
-import datetime
+siswa = {
+    "nama": "Ali",
+    "umur": 21,
+    "jurusan": "Informatika"
+}
 
-class User:
-    def __init__(self, nama, umur):
-        self.nama = nama
-        self.umur = umur
+# Mengakses nilai menggunakan kuncinya
+print(siswa["nama"]) # Output: Ali
 
-    @classmethod
-    def dari_tahun_lahir(cls, nama, tahun_lahir):
-        umur = datetime.date.today().year - tahun_lahir
-        return cls(nama, umur) # Memanggil __init__
+# Menambah / Memperbarui data
+siswa["IPK"] = 3.8       # Menambah kunci baru
+siswa["umur"] = 22       # Memperbarui nilai
+print(siswa)
 
-u = User.dari_tahun_lahir("Budi", 1995)
+# Iterasi Dictionary
+for key, value in siswa.items():
+    print(f"{key} : {value}")
 \`\`\`
 
----
+## 2. Set (Himpunan Data Unik)
+Set juga menggunakan \`{}\` (namun tanpa pasangan \`:\`). Karakteristik utama Set adalah:
+- **Unik:** Tidak boleh ada data ganda (duplikat akan otomatis dihapus).
+- **Tidak Berurutan:** Tidak ada index (tidak bisa diakses seperti \`set[0]\`).
 
-## 3. Dunder Methods (Magic Methods)
-Overloading operator standar menggunakan method bawaan (Double Underscores).
-- \`__str__\`: Format string (untuk user).
-- \`__len__\`: Custom return untuk fungsi \`len()\`.
-- \`__add__\`: Custom behavior untuk operator \`+\`.
+Sangat berguna untuk mencari data unik atau operasi himpunan (gabungan, irisan).
+
+\`\`\`python
+# Elemen ganda (angka 2) otomatis dibuang
+angka_unik = {1, 2, 2, 3, 4, 4, 5}
+print(angka_unik) # Output: {1, 2, 3, 4, 5}
+
+# Operasi Himpunan
+A = {1, 2, 3}
+B = {3, 4, 5}
+
+print(A.union(B))        # Gabungan: {1, 2, 3, 4, 5}
+print(A.intersection(B)) # Irisan (Yang ada di keduanya): {3}
+\`\`\`
 
 ---
 
 ## 📝 Quiz Singkat
-1. Kapan waktu yang tepat menggunakan \`@classmethod\`?
-2. Mengapa kita butuh \`@property\` dibanding langsung memanipulasi variabel public?
+1. Untuk mengakses nilai di dalam List kita menggunakan Index angka. Jika di dalam Dictionary, kita menggunakan apa?
+2. Struktur data apa yang otomatis membuang elemen yang duplikat?
 
-## ✍️ Latihan (30 Menit)
-1. Buat class \`KeranjangBelanja\`.
-2. Gunakan \`__len__\` agar saat dipanggil \`len(keranjang)\` mengembalikan jumlah total item.
-3. Gunakan \`@property\` untuk method \`total_harga\` yang otomatis menghitung seluruh harga item yang ada di list.
+## ✍️ Latihan (20 Menit)
+1. Buat sebuah \`Dictionary\` kosong bernama \`kontak\`.
+2. Tambahkan 2 pasangan data baru. Contoh kuncinya adalah nama teman, dan nilainya adalah nomor teleponnya.
+3. Coba print nomor telepon dari salah satu teman menggunakan kunci (nama) nya!
 `,
-    level: 'advanced',
+    level: 'beginner',
     order: 6,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -417,65 +414,73 @@ Overloading operator standar menggunakan method bawaan (Double Underscores).
     id: 'py-07',
     user_type: 'student',
     language: 'python',
-    title: 'Exception Handling & Custom Context Managers',
-    description: 'Membangun aplikasi tahan banting dan mendesain blok `with` buatan sendiri.',
-    content: `# 🛡️ Modul 7: Exceptions & Context Managers
+    title: 'Modul 7: Fungsi (Functions) & Modularitas',
+    description: 'Membungkus kode yang sering dipakai menjadi blok Fungsi yang bisa dipanggil berulang kali, menggunakan Argumen dan Return.',
+    content: `# 🛠️ Modul 7: Fungsi (Functions) & Modularitas
 
-## 1. Custom Exceptions
-Buat program lebih terbaca dengan Hierarchy Exception buatan sendiri.
+Jika kita menyalin-tempel (copy-paste) blok kode yang sama berkali-kali di program kita, itu pertanda buruk! Solusinya adalah membungkus kode tersebut ke dalam **Fungsi**.
+
+## 1. Mendefinisikan dan Memanggil Fungsi
+Kita membuat fungsi menggunakan kata kunci \`def\` diikuti nama fungsi, kurung \`()\`, dan titik dua \`:\`.
 
 \`\`\`python
-class BankError(Exception):
-    """Base exception untuk sistem bank"""
-    pass
+# Mendefinisikan fungsi
+def sapa():
+    print("Halo, selamat datang di program ini!")
 
-class SaldoTidakCukup(BankError):
-    pass
-
-def tarik_tunai(saldo, jumlah):
-    if jumlah > saldo:
-        raise SaldoTidakCukup(f"Gagal. Saldo kurang {jumlah - saldo}")
-    return saldo - jumlah
+# Memanggil (menggunakan) fungsi
+sapa()
+sapa()
 \`\`\`
 
----
-
-## 2. Custom Context Manager (__enter__ & __exit__)
-Anda tahu blok \`with open(file) as f:\`? Anda bisa membuat blok \`with\` sendiri untuk resource lain (misal: koneksi DB) agar otomatis menutup/membersihkan resource.
+## 2. Argumen (Parameter) Fungsi
+Fungsi bisa menerima data masuk yang disebut **Argumen**. Hal ini membuat fungsi menjadi fleksibel.
 
 \`\`\`python
-class KoneksiDatabase:
-    def __init__(self, db_name):
-        self.db_name = db_name
+def sapa_nama(nama):
+    print(f"Halo {nama}, selamat datang!")
 
-    def __enter__(self):
-        print(f"Membuka koneksi ke {self.db_name}")
-        return self # Objek yang ditangkap oleh 'as'
+sapa_nama("Budi")
+sapa_nama("Siti")
+\`\`\`
 
-    def __exit__(self, exc_type, exc_val, traceback):
-        # Selalu berjalan saat keluar blok 'with', error maupun sukses
-        print(f"Menutup koneksi ke {self.db_name}")
-        if exc_type:
-            print(f"Terjadi error: {exc_val}")
-        return True # Menekan exception agar program tidak crash
+## 3. Mengembalikan Nilai (\`return\`)
+Fungsi seringkali memproses data lalu memberikan hasil akhirnya. Gunakan \`return\` untuk mengirim kembali hasil hitungan, bukan sekadar mem-print-nya.
 
-with KoneksiDatabase("Produksi_DB") as db:
-    print("Sedang melakukan query...")
-    raise ValueError("Simulasi error query") # Program tidak akan crash!
+\`\`\`python
+def tambah(a, b):
+    hasil = a + b
+    return hasil
+
+# Nilai dari return disimpan ke variabel
+total = tambah(5, 7)
+print("Total adalah:", total) # 12
+\`\`\`
+*Catatan: Saat program mencapai baris \`return\`, fungsi tersebut akan langsung selesai dan keluar.*
+
+## 4. Default Argumen (Nilai Bawaan)
+Kita bisa memberikan nilai default pada parameter. Jika user memanggil fungsi tanpa mengisi parameter tersebut, nilai default akan dipakai.
+
+\`\`\`python
+def cetak_profil(nama, negara="Indonesia"):
+    print(f"{nama} berasal dari {negara}")
+
+cetak_profil("Andi")               # "Andi berasal dari Indonesia"
+cetak_profil("John", "Amerika")    # "John berasal dari Amerika"
 \`\`\`
 
 ---
 
 ## 📝 Quiz Singkat
-1. Pada \`try-except-else-finally\`, kapan blok \`else\` dieksekusi?
-2. Apa argumen ajaib di \`__exit__\` yang menangani exception?
+1. Apa kata kunci yang digunakan untuk membuat fungsi di Python?
+2. Apa bedanya mem-\`print()\` hasil dalam fungsi dengan me-\`return\` hasil dalam fungsi?
 
-## ✍️ Latihan (20 Menit)
-1. Buat Custom Context Manager bernama \`Timer\`.
-2. Saat masuk blok \`with\`, catat waktu mulai.
-3. Saat keluar blok \`with\`, catat waktu selesai, dan print selisih waktunya ("Proses memakan waktu: X detik").
+## ✍️ Latihan (25 Menit)
+1. Buat fungsi bernama \`hitung_diskon(harga_awal, persen_diskon)\`.
+2. Di dalam fungsi, hitung besaran diskon dan kembalikan (\`return\`) harga akhir (harga_awal dikurangi diskon).
+3. Panggil fungsi tersebut dengan argumen harga 100.000 dan diskon 20%, simpan hasilnya ke dalam variabel, lalu print hasilnya.
 `,
-    level: 'advanced',
+    level: 'beginner',
     order: 7,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -483,57 +488,68 @@ with KoneksiDatabase("Produksi_DB") as db:
     id: 'py-08',
     user_type: 'student',
     language: 'python',
-    title: 'Asynchronous Programming (Asyncio)',
-    description: 'Bekerja secara konkuren: Coroutines, Event Loop, dan eksekusi Non-Blocking.',
-    content: `# ⚡ Modul 8: Asyncio & Concurrency
+    title: 'Modul 8: Penanganan Error (Exception Handling)',
+    description: 'Menangani error saat program berjalan (runtime error) secara anggun menggunakan blok Try, Except, Else, dan Finally.',
+    content: `# 🛡️ Modul 8: Penanganan Error (Exception Handling)
 
-Python standar berjalan secara *Synchronous* (satu perintah kelar, baru lanjut ke perintah berikutnya). Di tingkat expert, jika ada proses I/O (seperti baca file besar), kita menggunakan **Asyncio** agar program tidak nge-hang (Non-blocking).
+Di dunia nyata, program akan sering mengalami masalah: user memasukkan huruf saat diminta angka, file tidak ditemukan, atau koneksi internet terputus. Jika dibiarkan, program akan **Crash** (berhenti total secara tiba-tiba).
 
-## 1. Memahami Coroutine (\`async\` & \`await\`)
-Fungsi yang diawali dengan \`async def\` tidak mengembalikan hasil langsung, melainkan mengembalikan objek **Coroutine**. Untuk menjalankannya, butuh *Event Loop*.
+Untuk mencegah crash, kita menggunakan Exception Handling (Blok \`try-except\`).
+
+## 1. Blok Try-Except Dasar
+Kita menaruh kode yang "berpotensi error" di dalam blok \`try\`. Jika terjadi error, Python tidak akan crash, melainkan melompat ke blok \`except\`.
 
 \`\`\`python
-import asyncio
-import time
+try:
+    angka = int(input("Masukkan sebuah angka: "))
+    hasil = 100 / angka
+    print("Hasil 100 dibagi angka Anda adalah:", hasil)
+except ValueError:
+    # Error jika user tidak memasukkan angka (misal memasukkan huruf "A")
+    print("Error: Harap masukkan sebuah angka yang valid!")
+except ZeroDivisionError:
+    # Error jika user memasukkan angka 0
+    print("Error: Tidak bisa membagi dengan nol!")
+\`\`\`
 
-async def masak_air():
-    print("Mulai masak air...")
-    await asyncio.sleep(2) # Simulasi non-blocking delay
-    print("Air mendidih!")
-    return "Kopi Siap"
+## 2. Menangkap Semua Error Secara Umum
+Jika kita tidak tahu jenis error apa yang mungkin muncul, kita bisa menggunakan \`except Exception as e:\` untuk menangkap detail pesannya.
 
-async def goreng_telur():
-    print("Mulai goreng telur...")
-    await asyncio.sleep(1)
-    print("Telur matang!")
+\`\`\`python
+try:
+    data = [1, 2, 3]
+    print(data[10]) # Akan memicu IndexError
+except Exception as e:
+    print(f"Terjadi kesalahan yang tidak terduga: {e}")
+\`\`\`
 
-async def main():
-    start = time.time()
-    
-    # Menjalankan tugas secara BERSAMAAN (Concurrent)
-    hasil = await asyncio.gather(
-        masak_air(),
-        goreng_telur()
-    )
-    
-    print(f"Selesai dalam {time.time() - start:.2f} detik")
+## 3. Blok Tambahan: Else dan Finally
+- **\`else\`**: Dieksekusi **HANYA JIKA** blok \`try\` berhasil (tidak ada error sama sekali).
+- **\`finally\`**: Akan **SELALU** dieksekusi di akhir, baik terjadi error maupun tidak. Biasanya digunakan untuk "membersihkan" sesuatu, seperti menutup file.
 
-if __name__ == "__main__":
-    asyncio.run(main())
+\`\`\`python
+try:
+    x = int(input("Pilih angka (1/2): "))
+except ValueError:
+    print("Itu bukan angka!")
+else:
+    print("Bagus, Anda memasukkan angka yang benar.")
+finally:
+    print("Selesai memproses input.")
 \`\`\`
 
 ---
 
 ## 📝 Quiz Singkat
-1. Apa perbedaan utama antara \`time.sleep()\` dan \`asyncio.sleep()\`?
-2. Fungsi apa yang digunakan untuk mengeksekusi coroutine dari kode *synchronous* reguler?
+1. Blok apa yang digunakan untuk menangkap masalah dan mencegah program crash?
+2. Kapan blok \`finally\` dieksekusi?
 
-## ✍️ Latihan (30 Menit)
-1. Buat 3 coroutine yang mensimulasikan proses download file (gunakan \`asyncio.sleep\` dengan waktu random 1-3 detik).
-2. Gunakan \`asyncio.gather\` di fungsi \`main()\` untuk menjalankan ketiganya secara konkuren.
-3. Hitung total waktu yang dihemat dibandingkan jika menjalankannya secara *synchronous*.
+## ✍️ Latihan (20 Menit)
+1. Buat program kalkulator pembagian sederhana.
+2. Minta input 2 angka dari user.
+3. Gunakan blok \`try-except\` untuk memastikan aplikasi tidak crash jika user menginputkan teks atau membagi dengan 0.
 `,
-    level: 'expert',
+    level: 'intermediate',
     order: 8,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -541,59 +557,65 @@ if __name__ == "__main__":
     id: 'py-09',
     user_type: 'student',
     language: 'python',
-    title: 'Studi Kasus 1: Advanced CLI File Organizer',
-    description: 'Proyek Murni Python: Script utilitas tingkat lanjut dengan Generators dan Decorators.',
-    content: `# 🛠️ Project 1: Advanced File Organizer
+    title: 'Modul 9: Membaca & Menulis File (File I/O)',
+    description: 'Cara membuka, membaca konten, dan menulis teks ke dalam file eksternal (txt) menggunakan Context Manager (With Open).',
+    content: `# 📂 Modul 9: Membaca & Menulis File
 
-## 📜 Tujuan
-Membangun tool CLI murni Python untuk mensortir file ke dalam folder berdasarkan ekstensinya, menggunakan Generator agar hemat memori dan Decorator untuk logging.
+Saat variabel hilang ketika program ditutup, satu-satunya cara menyimpan data secara permanen adalah dengan menyimpannya ke dalam File atau Database.
 
-## 💻 Implementasi Kode
+## 1. Membuka File (Metode Lama vs Baru)
+Cara kuno membuka file adalah dengan \`f = open()\` lalu wajib memanggil \`f.close()\` (Jika lupa close, file bisa rusak!).
+Cara Modern dan Terbaik di Python adalah menggunakan blok \`with\`.
+
+\`with open()\` akan secara otomatis menutup file ketika blok selesai, bahkan jika terjadi error di tengah-tengah. Ini disebut **Context Manager**.
+
+## 2. Menulis File (Write Mode \`'w'\`)
+Mode \`'w'\` akan membuat file baru. Jika file sudah ada, isi lamanya akan **dihapus bersih** lalu diganti dengan yang baru.
 
 \`\`\`python
-import os
-import shutil
-from pathlib import Path
-
-# 1. Decorator untuk Tracking Operasi
-def log_operation(func):
-    def wrapper(*args, **kwargs):
-        print(f"⚙️ Memulai tugas: {func.__name__}...")
-        result = func(*args, **kwargs)
-        print("✅ Tugas Selesai.")
-        return result
-    return wrapper
-
-# 2. Generator untuk List File (Hemat Memori)
-def get_files_generator(folder_path):
-    path = Path(folder_path)
-    for file_path in path.iterdir():
-        if file_path.is_file():
-            yield file_path
-
-# 3. Logika Utama
-@log_operation
-def organize_folder(target_folder):
-    if not os.path.exists(target_folder):
-        print("Folder tidak ditemukan!")
-        return
-
-    for file_path in get_files_generator(target_folder):
-        extension = file_path.suffix.lstrip('.')
-        if not extension:
-            continue
-
-        dest_folder = Path(target_folder) / extension
-        dest_folder.mkdir(exist_ok=True)
-
-        shutil.move(str(file_path), str(dest_folder / file_path.name))
-        print(f"Memindahkan: {file_path.name} -> /{extension}")
-
-if __name__ == "__main__":
-    pass
+# Menulis file (w = write)
+with open("catatan.txt", "w") as file:
+    file.write("Ini baris pertama.\\n") # \\n untuk pindah baris
+    file.write("Ini baris kedua.\\n")
+print("File berhasil dibuat!")
 \`\`\`
+
+## 3. Menambah Isi File (Append Mode \`'a'\`)
+Jika tidak ingin menghapus isi lama, gunakan mode \`'a'\` (append). Ini akan menambahkan tulisan di bagian paling bawah.
+
+\`\`\`python
+with open("catatan.txt", "a") as file:
+    file.write("Ini baris tambahan dari append mode.\\n")
+\`\`\`
+
+## 4. Membaca File (Read Mode \`'r'\`)
+Mode bawaan adalah \`'r'\`. Kita bisa membaca seluruh file, atau membacanya baris demi baris menggunakan perulangan.
+
+\`\`\`python
+# Membaca seluruh file sekaligus
+with open("catatan.txt", "r") as file:
+    konten = file.read()
+    print("Isi file:")
+    print(konten)
+
+# Membaca baris demi baris (Lebih hemat memori untuk file besar)
+with open("catatan.txt", "r") as file:
+    for baris in file:
+        print(baris.strip()) # .strip() membuang newline bawaan di akhir
+\`\`\`
+
+---
+
+## 📝 Quiz Singkat
+1. Kenapa kita sangat disarankan menggunakan \`with open( ... )\` saat berinteraksi dengan file?
+2. Apa bedanya mode \`"w"\` dan \`"a"\` saat membuka file?
+
+## ✍️ Latihan (25 Menit)
+1. Buat program yang meminta user menginputkan "Daftar Belanja" (misal: "Telur", "Beras").
+2. Gunakan mode \`"a"\` untuk menambahkan setiap barang ke dalam file \`belanja.txt\`.
+3. Setelah selesai, tulis kode untuk membuka kembali \`belanja.txt\` dengan mode \`"r"\` dan print seluruh isinya!
 `,
-    level: 'expert',
+    level: 'intermediate',
     order: 9,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -601,137 +623,140 @@ if __name__ == "__main__":
     id: 'py-10',
     user_type: 'student',
     language: 'python',
-    title: 'Studi Kasus 2: Robust Library System (Full Pythonic OOP)',
-    description: 'Proyek Final: Menggabungkan Dataclasses, Properties, Custom Exceptions, dan Dunder Methods.',
-    content: `# 🏛️ Project 2: Robust Library System
+    title: 'Modul 10: Pengenalan Object-Oriented Programming (OOP)',
+    description: 'Paradigma PBO Dasar: Membuat Cetakan (Class), Objek (Instance), Atribut, Method, dan Konsep Pewarisan (Inheritance).',
+    content: `# 🏛️ Modul 10: Object-Oriented Programming (OOP) Dasar
 
-## 📜 Tujuan
-Menguji pemahaman *Core Python OOP* level expert. Bebas dari library eksternal.
+OOP adalah cara berpikir/paradigma dalam pemrograman di mana kita memodelkan program sebagai sekumpulan "Objek" yang saling berinteraksi, seperti di dunia nyata.
 
-## 💻 Implementasi Kode
+## 1. Class (Cetakan) dan Object
+- **Class:** Adalah cetakan biru (Blueprint) atau konsep abstrak. Contoh: "Mobil"
+- **Object/Instance:** Adalah wujud nyata dari cetakan tersebut. Contoh: "Toyota Avanza warna Hitam B 1234 CD"
 
 \`\`\`python
-from dataclasses import dataclass, field
-import uuid
+# Mendefinisikan Class
+class Kucing:
+    # __init__ adalah "Constructor". Dipanggil otomatis saat object dibuat.
+    def __init__(self, nama, warna):
+        # self merujuk pada object itu sendiri
+        self.nama = nama       # Ini disebut Atribut (Variabel di dalam class)
+        self.warna = warna
+        
+    # Ini disebut Method (Fungsi di dalam class)
+    def meong(self):
+        print(f"{self.nama} bilang: Meooong!!")
 
-class PeminjamanError(Exception):
-    pass
+# Membuat Object dari Class Kucing
+kucing1 = Kucing("Oyen", "Oranye")
+kucing2 = Kucing("Milo", "Coklat")
 
-@dataclass
-class Buku:
-    judul: str
-    penulis: str
-    _is_loaned: bool = field(default=False, init=False)
-    id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
-
-    @property
-    def status(self):
-        return "Dipinjam" if self._is_loaned else "Tersedia"
-
-    def pinjam(self):
-        if self._is_loaned:
-            raise PeminjamanError(f"Buku '{self.judul}' sedang dipinjam.")
-        self._is_loaned = True
-
-    def __str__(self):
-        return f"[{self.id}] {self.judul} oleh {self.penulis} ({self.status})"
-
-class Perpustakaan:
-    def __init__(self):
-        self.__koleksi = []
-
-    def tambah_buku(self, buku: Buku):
-        self.__koleksi.append(buku)
-
-    def cari_buku(self, kata_kunci: str):
-        for buku in self.__koleksi:
-            if kata_kunci.lower() in buku.judul.lower():
-                yield buku
-
-    def __iter__(self):
-        return iter(self.__koleksi)
-
-if __name__ == "__main__":
-    perpus = Perpustakaan()
-    perpus.tambah_buku(Buku("Automate The Boring Stuff", "Al Sweigart"))
-    
-    buku_target = list(perpus)[0]
-    buku_target.pinjam()
-    print("Berhasil dipinjam!")
+# Mengakses Atribut dan Method
+print(kucing1.nama)   # Oyen
+kucing2.meong()       # Milo bilang: Meooong!!
 \`\`\`
-`,
-    level: 'expert',
-    order: 10,
-    created_at: '2025-01-01T00:00:00Z'
-  },
-  // ==================== ALGORITHMS & DATA STRUCTURES (NEW) ====================
-  {
-    id: 'py-11',
-    user_type: 'student',
-    language: 'python',
-    title: 'Algoritma Pencarian (Searching): Linear & Binary Search',
-    description: 'Memahami dasar pencarian data dan optimasi dari O(n) menjadi O(log n) dengan Binary Search.',
-    content: `# 🔍 Modul 11: Algoritma Pencarian (Searching)
 
-Dalam pemrograman, menemukan data dengan cepat adalah kunci performa aplikasi. Kita akan bahas dua algoritma utama: **Linear Search** dan **Binary Search**.
+## 2. Mengapa butuh \`self\`?
+Kata kunci \`self\` wajib menjadi argumen pertama pada method di dalam class. \`self\` adalah cara object mengenali data miliknya sendiri, sehingga data "Oyen" tidak tertukar dengan "Milo".
 
-## 1. Linear Search (Pencarian Berurutan)
-Cara paling sederhana: cek item satu per satu dari awal sampai akhir.
-- **Kelebihan:** Data tidak perlu diurutkan sebelumnya.
-- **Kekurangan:** Lambat jika datanya banyak. Kompleksitas waktunya adalah O(n).
+## 3. Inheritance (Pewarisan)
+Pewarisan memungkinkan kita membuat class baru yang mewarisi sifat dari class lain yang sudah ada. Menghemat penulisan ulang kode!
 
 \`\`\`python
-def linear_search(arr: list, target: int) -> int:
-    """Mengembalikan index dari target, atau -1 jika tidak ditemukan."""
-    for i in range(len(arr)):
-        if arr[i] == target:
-            return i
-    return -1
+class Hewan:
+    def bernafas(self):
+        print("Menghirup oksigen...")
 
-# Testing
-data = [10, 50, 30, 70, 80, 20]
-print("Index target 70:", linear_search(data, 70)) # Output: 3
+# Burung mewarisi Hewan
+class Burung(Hewan):
+    def terbang(self):
+        print("Mengepakkan sayap!")
+
+burung_elang = Burung()
+burung_elang.bernafas() # Bisa memakai fungsi dari Class Induk (Hewan)
+burung_elang.terbang()  # Bisa memakai fungsi spesifiknya sendiri
 \`\`\`
 
 ---
 
-## 2. Binary Search (Pencarian Bagi Dua)
-Cara kerja bagaikan mencari kata di kamus: buka tengahnya, cek apakah kata tersebut ada di paruh kiri atau kanan, lalu ulangi.
-- **Syarat Mutlak:** Array atau list **HARUS** sudah dalam keadaan terurut (sorted).
-- **Performa:** Sangat cepat! Kompleksitas waktunya O(log n).
+## 📝 Quiz Singkat
+1. Di dalam OOP, apa istilah untuk "Blueprint/Cetakan" dan "Benda nyata hasil cetakan"?
+2. Fungsi spesial bernama apa di Python yang dipanggil otomatis saat kita membuat sebuah object (Constructor)?
 
-### Cara Kerja (Step-by-Step):
-1. Tentukan batas \`kiri\` (index 0) dan \`kanan\` (index terakhir).
-2. Cari nilai \`tengah\` = (kiri + kanan) // 2.
-3. Jika nilai tengah = target, pencarian selesai!
-4. Jika nilai tengah < target, geser batas \`kiri\` ke \`tengah + 1\` (karena target pasti di kanan).
-5. Jika nilai tengah > target, geser batas \`kanan\` ke \`tengah - 1\` (target pasti di kiri).
+## ✍️ Latihan (30 Menit)
+1. Buat class bernama \`RekeningBank\`.
+2. Di \`__init__\`, minta \`nama_pemilik\` dan set atribut \`saldo = 0\`.
+3. Buat method \`setor(jumlah)\` yang menambah saldo, dan \`tarik(jumlah)\` yang mengurangi saldo (pastikan saldo tidak boleh minus!).
+4. Buat objek rekening untuk Anda sendiri, setor Rp 50.000, tarik Rp 20.000, lalu print sisa saldonya.
+`,
+    level: 'intermediate',
+    order: 10,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'py-11',
+    user_type: 'student',
+    language: 'python',
+    title: 'Modul 11: Python Package & Virtual Environment',
+    description: 'Menggunakan PIP untuk menginstal library eksternal, membuat Virtual Environment (venv) untuk isolasi project, dan menulis requirements.txt.',
+    content: `# 📦 Modul 11: Python Package & Virtual Environment
 
-\`\`\`python
-def binary_search(arr: list, target: int) -> int:
-    kiri = 0
-    kanan = len(arr) - 1
-    
-    while kiri <= kanan:
-        tengah = (kiri + kanan) // 2
-        
-        if arr[tengah] == target:
-            return tengah # Ketemu!
-        elif arr[tengah] < target:
-            kiri = tengah + 1 # Buang paruh kiri
-        else:
-            kanan = tengah - 1 # Buang paruh kanan
-            
-    return -1 # Tidak ditemukan
+Kekuatan utama Python adalah pada komunitasnya yang telah membuat ribuan alat (Library/Package) gratis yang siap pakai!
 
-# Testing (Pastikan data terurut!)
-data_terurut = [10, 20, 30, 50, 70, 80]
-print("Index target 70:", binary_search(data_terurut, 70)) # Output: 4
+## 1. PIP (Python Package Installer)
+PIP adalah alat bawaan Python yang digunakan untuk mengunduh package dari internet (melalui PyPI - Python Package Index).
+
+Contoh, kita butuh alat untuk mendownload halaman web. Kita tidak perlu koding dari awal, kita cukup instal package populer bernama \`requests\`.
+Buka Terminal/Command Prompt lalu ketik:
+\`\`\`bash
+pip install requests
 \`\`\`
 
+Setelah terinstal, kita bisa menggunakannya di kode kita:
+\`\`\`python
+import requests
+
+response = requests.get("https://api.github.com")
+print(response.status_code) # Biasanya 200 (OK)
+\`\`\`
+
+## 2. Kenapa Butuh Virtual Environment (venv)?
+Bayangkan Anda membuat Project A dengan Django versi 3, lalu 6 bulan kemudian membuat Project B dengan Django versi 4. Jika Anda menginstal semuanya secara "Global" di komputer Anda, versi tersebut akan saling tabrak dan merusak project lainnya (disebut *Dependency Hell*).
+
+**Solusi:** Kita membuat "Ruang Isolasi" (Virtual Environment) untuk setiap proyek.
+
+## 3. Cara Menggunakan Venv
+Lakukan ini di Terminal, berada di dalam folder project Anda:
+
+**Langkah 1: Membuat venv (cukup sekali)**
+\`\`\`bash
+python -m venv env
+\`\`\`
+*(Perintah ini akan membuat folder bernama \`env\` yang berisi instalasi Python mandiri)*
+
+**Langkah 2: Mengaktifkan venv (Lakukan setiap akan ngoding)**
+- Windows: \`env\\Scripts\\activate\`
+- macOS/Linux: \`source env/bin/activate\`
+*(Tanda bahwa venv aktif: akan ada awalan \`(env)\` di terminal Anda)*
+
+**Langkah 3: Menginstal paket di dalam venv**
+Sekarang jalankan \`pip install ...\`. Paket hanya akan terinstal untuk folder ini saja.
+
+**Langkah 4: Mencatat Dependensi**
+Agar teman Anda tahu paket apa saja yang butuh diinstal:
+\`\`\`bash
+pip freeze > requirements.txt
+\`\`\`
+
+---
+
+## 📝 Quiz Singkat
+1. Apa nama alat bawaan Python untuk mendownload dan menginstal package dari internet?
+2. Mengapa kita wajib menggunakan Virtual Environment di dalam project yang serius?
+
 ## ✍️ Latihan (20 Menit)
-1. Buat list berisi 1000 angka acak yang sudah di-sort.
-2. Hitung berapa kali perulangan \`while\` terjadi pada \`binary_search\` saat mencari angka tertentu dengan menambahkan variabel counter. Buktikan logikanya jauh lebih cepat dari \`linear_search\`!
+1. Buat folder baru bernama \`proyek_kalkulator\`.
+2. Buka terminal, masuk ke folder tersebut, lalu buat virtual environment bernama \`venv\`.
+3. Aktifkan venv tersebut! Cek apakah tanda \`(venv)\` muncul di terminal.
 `,
     level: 'intermediate',
     order: 11,
@@ -741,69 +766,78 @@ print("Index target 70:", binary_search(data_terurut, 70)) # Output: 4
     id: 'py-12',
     user_type: 'student',
     language: 'python',
-    title: 'Algoritma Pengurutan Dasar (Basic Sorting)',
-    description: 'Mempelajari algoritma sorting sederhana: Bubble Sort dan Selection Sort (O(n^2)).',
-    content: `# 📊 Modul 12: Pengurutan Dasar (Basic Sorting)
+    title: 'Modul 12: List Comprehension & Fitur Fungsional',
+    description: 'Menulis kode lebih Pythonic dan ringkas dengan List Comprehension, serta pengenalan Lambda, Map, dan Filter.',
+    content: `# ✨ Modul 12: List Comprehension & Fitur Fungsional
 
-Sebelum masuk ke algoritma kompleks, bro harus paham dulu dasar-dasar memindahkan posisi elemen di memori. Walau lambat (O(n^2)), ini fundamental banget!
+Di Python menengah (Intermediate), kita belajar menulis kode agar lebih elegan, ringkas, dan "Pythonic".
 
-## 1. Bubble Sort (Gelembung)
-Algoritma ini bekerja dengan membandingkan elemen yang bersebelahan dan menukarnya (swap) jika urutannya salah. Elemen terbesar akan "menggelembung" ke paling kanan.
+## 1. List Comprehension
+Cara standar (dan panjang) untuk membuat list baru berdasarkan list yang lama:
+\`\`\`python
+angka = [1, 2, 3, 4, 5]
+kuadrat = []
+for a in angka:
+    kuadrat.append(a * a)
+\`\`\`
 
-### Cara Kerja:
-1. Looping dari elemen pertama ke elemen terakhir.
-2. Jika elemen ke-i > elemen ke-(i+1), tukar posisi mereka!
-3. Ulangi terus sampai tidak ada pertukaran lagi.
+Kita bisa meringkas 4 baris di atas menjadi 1 baris menggunakan List Comprehension!
+Format: \`[EKSPRESI for ITEM in KUMPULAN if KONDISI]\`
 
 \`\`\`python
-def bubble_sort(arr: list) -> list:
-    n = len(arr)
-    for i in range(n):
-        # Optimasi: Jika array sudah terurut, hentikan loop
-        swapped = False
-        
-        # Elemen terakhir (sejumlah i) sudah pasti berada di posisi benar
-        for j in range(0, n - i - 1):
-            if arr[j] > arr[j + 1]:
-                # Tukar posisi (Pythonic way)
-                arr[j], arr[j + 1] = arr[j + 1], arr[j]
-                swapped = True
-                
-        if not swapped:
-            break # Berhenti jika tidak ada lagi yang ditukar
-            
-    return arr
+angka = [1, 2, 3, 4, 5]
+# List Comprehension
+kuadrat = [a * a for a in angka]
+print(kuadrat) # [1, 4, 9, 16, 25]
 
-print("Bubble Sort:", bubble_sort([64, 34, 25, 12, 22, 11, 90]))
+# Dengan filter kondisi bersyarat (Hanya angka ganjil)
+ganjil_kuadrat = [a * a for a in angka if a % 2 != 0]
+print(ganjil_kuadrat) # [1, 9, 25]
+\`\`\`
+
+## 2. Fungsi Lambda (Fungsi Anonim)
+Fungsi biasa dibuat dengan \`def\`. \`lambda\` digunakan untuk membuat fungsi kecil "sekali pakai" tanpa nama dalam satu baris.
+
+\`\`\`python
+# Fungsi biasa
+def tambah_dua(x):
+    return x + 2
+
+# Menggunakan lambda
+tambah_lambda = lambda x: x + 2
+
+print(tambah_lambda(5)) # 7
+\`\`\`
+
+## 3. Map & Filter
+Biasanya digunakan berdampingan dengan fungsi lambda.
+
+- **\`map(fungsi, list)\`**: Menjalankan fungsi ke setiap elemen di dalam list.
+- **\`filter(fungsi, list)\`**: Membuang elemen list yang fungsinya mengembalikan \`False\`.
+
+\`\`\`python
+data = [10, 15, 20, 25, 30]
+
+# Membagi semua angka dengan 2 (map)
+hasil_map = list(map(lambda x: x / 2, data))
+print(hasil_map) # [5.0, 7.5, 10.0, 12.5, 15.0]
+
+# Memfilter yang lebih besar dari 18 (filter)
+hasil_filter = list(filter(lambda x: x > 18, data))
+print(hasil_filter) # [20, 25, 30]
 \`\`\`
 
 ---
 
-## 2. Selection Sort (Pemilihan)
-Membagi array jadi 2 bagian: Kiri (sudah terurut) dan Kanan (belum terurut). Dia mencari nilai paling kecil di bagian kanan, lalu menaruhnya di ujung batas kiri.
-
-\`\`\`python
-def selection_sort(arr: list) -> list:
-    n = len(arr)
-    for i in range(n):
-        # Anggap elemen ke-i adalah yang terkecil saat ini
-        min_idx = i
-        
-        # Cari elemen yang lebih kecil di sisa array (bagian kanan)
-        for j in range(i + 1, n):
-            if arr[j] < arr[min_idx]:
-                min_idx = j
-                
-        # Tukar elemen terkecil yang ditemukan dengan elemen pertama di sisa array
-        arr[i], arr[min_idx] = arr[min_idx], arr[i]
-        
-    return arr
-
-print("Selection Sort:", selection_sort([29, 10, 14, 37, 14]))
-\`\`\`
+## 📝 Quiz Singkat
+1. Ubah perulangan ini menjadi List Comprehension: \`for i in range(5): listku.append(i * 10)\`
+2. Apakah \`lambda\` bisa memiliki lebih dari 1 baris kode (multi-line)?
 
 ## ✍️ Latihan (20 Menit)
-1. Modifikasi \`bubble_sort\` agar bisa melakukan sorting secara menurun (Descending). Apa yang perlu diubah pada simbol operatornya?
+1. Diberikan list \`suhu_celcius = [0, 10, 20, 30, 40]\`.
+2. Gunakan **List Comprehension** untuk membuat list baru bernama \`suhu_fahrenheit\`.
+*(Rumus konversi: F = (C * 9/5) + 32)*
+3. Print list hasilnya.
 `,
     level: 'intermediate',
     order: 12,
@@ -813,56 +847,64 @@ print("Selection Sort:", selection_sort([29, 10, 14, 37, 14]))
     id: 'py-13',
     user_type: 'student',
     language: 'python',
-    title: 'Advanced Sorting: Divide & Conquer (Quick Sort)',
-    description: 'Menguasai paradigma Divide and Conquer dengan Quick Sort (O(n log n)).',
-    content: `# 🚀 Modul 13: Advanced Sorting (Divide & Conquer)
+    title: 'Modul 13: Fungsi Lanjutan (*args, **kwargs, Type Hinting)',
+    description: 'Menangani fungsi dengan parameter tak terbatas menggunakan *args dan **kwargs, serta standar Type Hinting industri.',
+    content: `# 🚀 Modul 13: Fungsi Lanjutan
 
-Algoritma pengurutan dasar lambat untuk jutaan data. Solusinya? **Divide and Conquer** (Pecah dan Taklukkan). Di modul ini kita akan membedah **Quick Sort**, salah satu algoritma tercepat (O(n log n)).
-
-## 1. Memahami Logika Quick Sort
-Ide utamanya adalah memilih satu elemen sebagai **Pivot** (poros), lalu memisahkan array menjadi dua grup:
-1. Grup yang nilainya **lebih kecil** dari Pivot.
-2. Grup yang nilainya **lebih besar** dari Pivot.
-Setelah dipisah, proses diulang (Rekursi) untuk masing-masing grup, lalu digabung kembali.
-
-### Implementasi Super Pythonic (Menggunakan List Comprehension)
-Cara ini sangat mudah dibaca, meskipun memakan memori sedikit lebih banyak karena kita membuat list baru di setiap iterasi.
+## 1. Menerima Banyak Argumen (*args)
+Pernahkah Anda bertanya bagaimana fungsi bawaan seperti \`print(1, 2, 3, 4)\` bisa menerima berapapun argumen? Jawabannya adalah dengan menaruh bintang satu \`*\` di depan argumen. \`*args\` (Arbitrary Arguments) akan membungkus sisa argumen menjadi **Tuple**.
 
 \`\`\`python
-def quick_sort(arr: list) -> list:
-    # Base case: Jika array kosong atau isi 1, otomatis sudah terurut
-    if len(arr) <= 1:
-        return arr
-    else:
-        # Pilih elemen terakhir sebagai pivot
-        pivot = arr.pop()
-        
-        # Partisi array menggunakan List Comprehension
-        lebih_kecil = [x for x in arr if x <= pivot]
-        lebih_besar = [x for x in arr if x > pivot]
-        
-        # Panggil ulang secara rekursif, lalu gabungkan: (Kecil) + Pivot + (Besar)
-        return quick_sort(lebih_kecil) + [pivot] + quick_sort(lebih_besar)
+def jumlahkan_semua(*args):
+    total = 0
+    for angka in args:
+        total += angka
+    return total
 
-# Testing
-data_mentah = [33, 10, 55, 71, 29, 99, 14]
-hasil_sort = quick_sort(data_mentah.copy())
-print(f"Data Awal: {data_mentah}")
-print(f"Hasil Quick Sort: {hasil_sort}")
+print(jumlahkan_semua(10, 20))         # 30
+print(jumlahkan_semua(1, 2, 3, 4, 5))  # 15
+\`\`\`
+
+## 2. Menerima Argumen Kata Kunci (**kwargs)
+Bintang dua \`**\` digunakan jika argumen yang diberikan berupa format *Key-Value* (misal \`nama="Andi"\`). \`**kwargs\` (Keyword Arguments) akan menampung data tersebut menjadi sebuah **Dictionary**.
+
+\`\`\`python
+def cetak_data(**kwargs):
+    for kunci, nilai in kwargs.items():
+        print(f"{kunci}: {nilai}")
+
+cetak_data(nama="Budi", umur=25, kota="Jakarta")
+# Output:
+# nama: Budi
+# umur: 25
+# kota: Jakarta
+\`\`\`
+
+## 3. Type Hinting (Saran Tipe Data)
+Python bersifat dinamis (tidak mewajibkan deklarasi tipe data). Tapi, di dunia kerja/industri, sangat disarankan menggunakan **Type Hinting**.
+Fungsinya? Agar editor (seperti VS Code) bisa mendeteksi error lebih awal dan memberikan *Autocomplete* (saran ketik) yang akurat.
+
+\`\`\`python
+# Tanda ':' setelah variabel adalah Type Hint untuk input
+# Tanda '->' adalah Type Hint untuk Return fungsi
+
+def sapa_user(nama: str, umur: int) -> str:
+    return f"Halo {nama}, tahun depan umurmu {umur + 1}"
+
+# Jika di IDE Anda memanggil sapa_user(10, "Budi"), IDE akan memberi peringatan garis bawah merah (warning).
 \`\`\`
 
 ---
 
-## 2. Kenapa Rekursi itu Penting?
-Di Python, rekursi (fungsi yang memanggil dirinya sendiri) adalah nyawa dari algoritma *Tree* dan *Sorting*.
-Aturan wajib rekursi: **Harus punya Base Case!**
-Jika di \`quick_sort\` base case-nya (\`if len(arr) <= 1\`) tidak ada, program akan mengalami *RecursionError (Maximum recursion depth exceeded)*.
+## 📝 Quiz Singkat
+1. Argumen yang ditangkap oleh \`*args\` akan disimpan sebagai tipe data apa? (List/Tuple/Dict/Set)
+2. Apa tujuan utama dari penggunaan Type Hinting di Python 3?
 
-## ✍️ Latihan (30 Menit)
-1. Python memiliki built-in method \`.sort()\` dan fungsi \`sorted()\`. Tahukah kamu algoritma apa yang dipakai Python di belakang layar? (Clue: Namanya Timsort, gabungan dari Merge Sort dan Insertion Sort).
-2. Buat fungsi \`merge_sort()\` sederhana dengan konsep membagi dua list ke kiri dan kanan sampai tersisa 1 elemen!
+## ✍️ Latihan (20 Menit)
+1. Buat sebuah fungsi bernama \`buat_profil(nama_depan, nama_belakang, **kwargs)\`.
+2. Fungsi tersebut harus me-return sebuah string/teks rapi yang berisi nama lengkap dan data tambahan yang dimasukkan secara dinamis lewat kwargs (seperti jurusan, hobi, dll).
 `,
-    level: 'advanced',
+    level: 'intermediate',
     order: 13,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -870,64 +912,77 @@ Jika di \`quick_sort\` base case-nya (\`if len(arr) <= 1\`) tidak ada, program a
     id: 'py-14',
     user_type: 'student',
     language: 'python',
-    title: 'Struktur Data Lanjut: Stack & Queue',
-    description: 'Membuat tumpukan LIFO (Stack) dan antrean FIFO (Queue) yang efisien menggunakan collections.deque.',
-    content: `# 🥞 Modul 14: Stack & Queue
+    title: 'Modul 14: Pemrograman Berbasis Modul & Best Practices',
+    description: 'Memecah program besar menjadi beberapa file modul, importing file, dan memahami magic variable `__name__ == "__main__"`.',
+    content: `# 🧩 Modul 14: Pemrograman Berbasis Modul
 
-Di dunia nyata, kita sering butuh menyimpan data dengan aturan spesifik. Misalnya *Undo/Redo* di Word, atau Antrean print dokumen.
+Ketika program Anda sudah sangat panjang (mencapai ribuan baris), menaruh semuanya di satu file \`main.py\` adalah mimpi buruk. Solusinya? Pecah menjadi beberapa modul (file). Setiap file Python yang memiliki akhiran \`.py\` adalah Modul.
 
-## 1. Stack (Tumpukan / LIFO)
-Aturannya **LIFO** (Last In, First Out). Yang terakhir masuk, yang pertama keluar. Bayangkan seperti menumpuk piring.
+## 1. Membuat dan Meng-import Modul
+Buat file baru bernama \`matematika.py\`:
+\`\`\`python
+# File: matematika.py
+def tambah(a, b):
+    return a + b
 
-Di Python, List bawaan sudah sangat optimal untuk dijadikan Stack!
-- **Push (Tambah):** Gunakan \`.append()\`
-- **Pop (Ambil & Hapus):** Gunakan \`.pop()\`
+PI = 3.14159
+\`\`\`
+
+Di file lain (misal \`main.py\`), Anda bisa memanggilnya dengan \`import\`.
+\`\`\`python
+# File: main.py
+import matematika
+
+# Memanggil fungsi
+hasil = matematika.tambah(10, 5)
+print("Hasil:", hasil)
+
+# Memanggil variabel
+print("Nilai PI:", matematika.PI)
+\`\`\`
+
+Anda juga bisa meng-import secara spesifik untuk menghemat pengetikan:
+\`\`\`python
+from matematika import tambah, PI
+
+print(tambah(2, 3))
+\`\`\`
+
+## 2. Misteri \`if __name__ == "__main__":\`
+Anda mungkin sering melihat blok kode ini di file-file open source:
 
 \`\`\`python
-stack_browser = []
+def jalankan_aplikasi():
+    print("Aplikasi berjalan...")
 
-# Navigasi website (Push)
-stack_browser.append("google.com")
-stack_browser.append("youtube.com")
-stack_browser.append("github.com")
-print("Histori saat ini:", stack_browser)
-
-# Klik tombol 'Back' (Pop)
-halaman_terakhir = stack_browser.pop()
-print("Back dari:", halaman_terakhir) # Keluar github.com
-print("Sisa histori:", stack_browser) # Sisa youtube & google
+if __name__ == "__main__":
+    jalankan_aplikasi()
 \`\`\`
+
+**Mengapa ini penting?**
+- Ketika Anda menjalankan file secara langsung di terminal (\`python file.py\`), Python akan men-set variabel ajaib \`__name__\` menjadi string \`"__main__"\`.
+- Namun, jika file tersebut di-\`import\` oleh file lain, \`__name__\` akan berisi nama filenya, sehingga blok \`if\` di atas **TIDAK** akan tereksekusi.
+- Ini mencegah kode utama berjalan dua kali atau dieksekusi secara tak sengaja ketika di-import. **Ini adalah Standar Industri!**
+
+## 3. Best Practices (Aturan Penulisan Kode - PEP 8)
+PEP 8 adalah pedoman gaya penulisan Python agar rapi dan sama di seluruh dunia:
+- **Indentasi:** Gunakan 4 spasi (bukan tab!).
+- **Variabel & Fungsi:** Pakai huruf kecil dengan garis bawah (\`snake_case\`). Contoh: \`nama_lengkap\`.
+- **Class:** Pakai awalan huruf kapital (\`PascalCase\`). Contoh: \`RekeningBank\`.
+- **Konstanta:** Pakai huruf besar semua (\`UPPER_CASE\`). Contoh: \`MAX_TIMEOUT = 60\`.
 
 ---
 
-## 2. Queue (Antrean / FIFO)
-Aturannya **FIFO** (First In, First Out). Yang pertama masuk, yang pertama keluar. Bayangkan antrean di kasir supermarket.
+## 📝 Quiz Singkat
+1. File dengan ekstensi apa di Python yang disebut sebagai Modul?
+2. Jika Anda membuat variabel konstan bernilai 3.14 yang tidak boleh diubah, bagaimana format penamaan yang direkomendasikan oleh PEP 8?
 
-**🚨 PENTING:** Jangan gunakan List biasa untuk Queue! Menghapus elemen pertama dari List (\`list.pop(0)\`) itu lambat (O(n)) karena semua elemen di belakangnya harus digeser satu per satu.
-Gunakan \`collections.deque\` (Double Ended Queue) untuk performa instan O(1)!
-
-\`\`\`python
-from collections import deque
-
-antrean_tiket = deque(["Andi", "Budi"])
-
-# Ada yang datang masuk antrean (Enqueue)
-antrean_tiket.append("Citra")
-antrean_tiket.append("Deni")
-print("Antrean saat ini:", antrean_tiket)
-
-# Loket melayani pelanggan (Dequeue)
-dilayani = antrean_tiket.popleft() # Cepat dan efisien!
-print(f"Sedang melayani: {dilayani}") # Andi keluar duluan
-print("Sisa Antrean:", antrean_tiket)
-\`\`\`
-
-## ✍️ Latihan (20 Menit)
-1. Buat fungsi \`is_balanced(kurung: str) -> bool\` yang menggunakan **Stack** untuk mengecek apakah sepasang tanda kurung valid.
-   Contoh: \`"{[()]}"\` -> True, \`"{[(])}"\` -> False.
-   (Hint: Push jika kurung buka, Pop dan cek pasangannya jika kurung tutup).
+## ✍️ Latihan (25 Menit)
+1. Buat file bernama \`utilitas.py\` yang berisi fungsi \`sapa_pagi(nama)\`.
+2. Buat file \`utama.py\`. Import \`sapa_pagi\` dari modul \`utilitas.py\`.
+3. Di dalam \`utama.py\`, tulis blok standar industri \`if __name__ == "__main__":\` dan letakkan eksekusi pemanggilan fungsi di bawah blok tersebut!
 `,
-    level: 'advanced',
+    level: 'intermediate',
     order: 14,
     created_at: '2025-01-01T00:00:00Z'
   },
@@ -935,86 +990,858 @@ print("Sisa Antrean:", antrean_tiket)
     id: 'py-15',
     user_type: 'student',
     language: 'python',
-    title: 'Graph & Tree Traversal (BFS & DFS)',
-    description: 'Merepresentasikan Graph dengan Dictionary dan menjelajahinya menggunakan algoritma BFS dan DFS.',
-    content: `# 🕸️ Modul 15: Graph, Tree & Traversal
+    title: 'Modul 15: Mini Project - Aplikasi Manajemen Kontak',
+    description: 'Menggabungkan semua ilmu dasar-menengah (While loop, Dictionary, File I/O, Error Handling) menjadi aplikasi utuh berbasis Terminal (CLI).',
+    content: `# 🏆 Modul 15: Mini Project - Manajemen Kontak (CLI)
 
-Bagaimana Google Maps mencari jalan? Bagaimana AI mencari langkah catur? Jawabannya ada pada struktur data **Graph** dan **Tree**!
+Selamat! Anda telah mempelajari seluruh fundamental Python dari dasar hingga menengah. Sekarang saatnya membuktikan pemahaman Anda dengan membangun Aplikasi CLI (Command Line Interface).
 
-## 1. Representasi Graph di Python
-Graph adalah kumpulan Node (Simpul) yang dihubungkan oleh Edge (Garis). Cara paling umum merepresentasikan Graph di Python adalah menggunakan **Adjacency List** berbasis Dictionary.
+## 🎯 Objektif Proyek
+Kita akan membuat "Buku Kontak". Fitur utamanya:
+1. Menampilkan semua kontak
+2. Menambah kontak baru
+3. Mencari kontak berdasarkan nama
+4. Menyimpan data otomatis ke file \`kontak.txt\` agar tidak hilang saat aplikasi ditutup.
 
-\`\`\`python
-# Teman-temannya setiap orang (Graph tak berarah)
-graph_sosmed = {
-    'A': ['B', 'C'],
-    'B': ['A', 'D', 'E'],
-    'C': ['A', 'F'],
-    'D': ['B'],
-    'E': ['B', 'F'],
-    'F': ['C', 'E']
-}
-\`\`\`
+## 🛠️ Langkah-langkah Pembuatan
+
+### Step 1: Struktur Data
+Kita akan menggunakan **Dictionary**. Nama sebagai Key, dan Nomor sebagai Value.
+Contoh: \`{"Budi": "08123", "Siti": "08567"}\`
+
+### Step 2: Fungsi Load & Save (File I/O)
+Buat fungsi membaca \`kontak.txt\` dan mengisi Dictionary saat aplikasi dimulai.
+Buat fungsi menulis Dictionary ke \`kontak.txt\` setiap ada penambahan data. (Gunakan pemisah baris/koma).
+
+### Step 3: Infinite Loop & Menu (While)
+Gunakan \`while True:\` untuk terus menampilkan opsi menu (1. Tambah, 2. Tampil, 3. Keluar) hingga user memilih opsi "Keluar".
+
+### Step 4: Menyatukan Semua dengan Error Handling
+Bungkus logika di atas dan pastikan program tidak crash jika file \`kontak.txt\` belum ada di awal eksekusi (Gunakan \`try-except FileNotFoundError\`).
 
 ---
 
-## 2. Depth First Search (DFS)
-"Selami sedalam mungkin ke satu cabang, kalau buntu baru mundur (backtrack)."
-DFS sangat mudah diimplementasikan menggunakan **Stack** atau **Recursion**.
+## 💻 Referensi Kode Utama (Silakan Kembangkan!)
 
 \`\`\`python
-def dfs(graph: dict, start: str, visited=None):
-    if visited is None:
-        visited = set() # Set untuk mencatat node yang sudah dikunjungi
-        
-    visited.add(start)
-    print(start, end=" -> ")
+import os
+
+FILE_KONTAK = "kontak.txt"
+
+def muat_kontak() -> dict:
+    data_kontak = {}
+    try:
+        with open(FILE_KONTAK, "r") as file:
+            for baris in file:
+                nama, nomor = baris.strip().split(",")
+                data_kontak[nama] = nomor
+    except FileNotFoundError:
+        pass # Jika file tidak ada, biarkan dictionary kosong
+    return data_kontak
+
+def simpan_kontak(data_kontak: dict):
+    with open(FILE_KONTAK, "w") as file:
+        for nama, nomor in data_kontak.items():
+            file.write(f"{nama},{nomor}\\n")
+
+def main():
+    kontak = muat_kontak()
     
-    # Jelajahi semua tetangga yang belum dikunjungi
-    for tetangga in graph[start]:
-        if tetangga not in visited:
-            dfs(graph, tetangga, visited)
+    while True:
+        print("\\n=== BUKU KONTAK ===")
+        print("1. Tampilkan Kontak")
+        print("2. Tambah Kontak")
+        print("3. Keluar")
+        
+        pilihan = input("Pilih menu (1/2/3): ")
+        
+        if pilihan == '1':
+            if not kontak:
+                print("Kontak masih kosong!")
+            else:
+                for nama, no in kontak.items():
+                    print(f"- {nama} : {no}")
+                    
+        elif pilihan == '2':
+            nama = input("Masukkan Nama: ")
+            no = input("Masukkan Nomor HP: ")
+            kontak[nama] = no
+            simpan_kontak(kontak)
+            print("Kontak berhasil disimpan!")
+            
+        elif pilihan == '3':
+            print("Sampai jumpa!")
+            break
+            
+        else:
+            print("Pilihan tidak valid.")
 
-print("Jalur DFS:")
-dfs(graph_sosmed, 'A') 
-# Output (bisa bervariasi tergantung urutan dict): A -> B -> D -> E -> F -> C ->
+if __name__ == "__main__":
+    main()
+\`\`\`
+
+**🚀 Selamat!** Dengan selesainya Modul 15 ini, Anda telah memiliki pondasi Python yang kuat untuk melanjutkan ke tingkat Advanced, Web Development (Django/FastAPI), atau Data Science!
+`,
+    level: 'intermediate',
+    order: 15,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  // ==================== PYTHON ADVANCED MATERIALS ====================
+  {
+    id: 'py-16',
+    user_type: 'student',
+    language: 'python',
+    title: 'Modul 16: Advanced OOP - Dunder Methods & MRO',
+    description: 'Menguasai Object-Oriented Programming lebih dalam dengan Magic Methods (Dunder), @property, dan Multiple Inheritance (MRO).',
+    content: `# 🏛️ Modul 16: Advanced OOP
+
+Selamat datang di Python Advanced! Kita akan membedah kemampuan OOP Python yang jarang diketahui pemula.
+
+## 1. Magic Methods (Dunder Methods)
+Dunder singkatan dari *Double Underscore*. Anda pasti tahu \`__init__\`, tapi ada banyak dunder method lain yang bisa kita manfaatkan untuk meng-overload operator bawaan Python.
+
+\`\`\`python
+class Vektor:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    # Overload operator tambah (+)
+    def __add__(self, other):
+        return Vektor(self.x + other.x, self.y + other.y)
+
+    # Overload cara print object
+    def __str__(self):
+        return f"Vektor({self.x}, {self.y})"
+
+v1 = Vektor(2, 4)
+v2 = Vektor(1, 5)
+print(v1 + v2) # Output: Vektor(3, 9)
+\`\`\`
+
+## 2. Property Decorator (@property)
+Di bahasa seperti Java, kita sering membuat \`get_umur()\` dan \`set_umur()\`. Di Python, cara *Pythonic* adalah menggunakan \`@property\`.
+
+\`\`\`python
+class Karyawan:
+    def __init__(self, nama, gaji):
+        self.nama = nama
+        self._gaji = gaji # Atribut protected (konvensi _)
+
+    @property
+    def gaji(self): # Getter
+        return self._gaji
+
+    @gaji.setter
+    def gaji(self, nominal): # Setter dengan validasi
+        if nominal < 0:
+            raise ValueError("Gaji tidak bisa negatif!")
+        self._gaji = nominal
+
+k = Karyawan("Budi", 5000)
+k.gaji = 6000 # Terlihat seperti mengubah variabel biasa, padahal memanggil setter!
+\`\`\`
+
+## 3. Multiple Inheritance & MRO (Method Resolution Order)
+Python mendukung pewarisan dari banyak class sekaligus. MRO adalah aturan urutan pencarian method.
+
+\`\`\`python
+class Mamalia:
+    def bersuara(self):
+        print("Suara Mamalia")
+
+class Burung:
+    def bersuara(self):
+        print("Suara Burung")
+
+class Kelelawar(Mamalia, Burung):
+    pass
+
+k = Kelelawar()
+k.bersuara() # Output: Suara Mamalia (Karena Mamalia ditulis duluan di pewarisan)
+print(Kelelawar.mro()) # Menampilkan urutan pencarian
 \`\`\`
 
 ---
+## 📝 Quiz Singkat
+1. Dunder method apa yang dipanggil saat kita menggunakan \`len(obj)\`?
+2. Apa kegunaan utama dari \`@property\`?
+`,
+    level: 'advanced',
+    order: 16,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'py-17',
+    user_type: 'student',
+    language: 'python',
+    title: 'Modul 17: Iterators & Generators',
+    description: 'Menghemat penggunaan RAM dan memori saat memproses data besar menggunakan \`yield\`, Generator Expression, dan Iterator.',
+    content: `# 🔄 Modul 17: Iterators & Generators
 
-## 3. Breadth First Search (BFS)
-"Cek semua tetangga terdekat (level 1) dulu, baru turun ke level 2."
-BFS wajib menggunakan **Queue**. Sangat bagus untuk mencari *Shortest Path* (Rute Terpendek).
+Saat memproses data berukuran Gigabyte (seperti Log file atau Database), menggunakan List biasa akan membuat komputer *Crash* kehabisan RAM. Solusinya? **Generators**.
+
+## 1. Perbedaan Iterables dan Iterators
+- **Iterable**: Objek yang bisa diulang (List, String). Bisa dikenakan \`iter()\`.
+- **Iterator**: Objek yang mengembalikan data satu-persatu saat fungsi \`next()\` dipanggil.
+
+\`\`\`python
+data = [1, 2, 3]
+iterator_data = iter(data)
+
+print(next(iterator_data)) # 1
+print(next(iterator_data)) # 2
+\`\`\`
+
+## 2. Generators dengan \`yield\`
+Generator adalah fungsi yang "dijeda" (paused) saat mengembalikan nilai menggunakan \`yield\`, dan bisa dilanjutkan kembali. Memori hanya digunakan untuk 1 data pada satu waktu!
+
+\`\`\`python
+def pembuat_angka(batas):
+    num = 1
+    while num <= batas:
+        yield num # Jeda di sini dan kembalikan num
+        num += 1
+
+gen = pembuat_angka(3)
+print(next(gen)) # 1
+print(next(gen)) # 2
+print(next(gen)) # 3
+# print(next(gen)) # Akan menghasilkan StopIteration Error
+\`\`\`
+
+## 3. Generator Expression
+Sama seperti List Comprehension, tapi menggunakan kurung biasa \`()\`. Menghasilkan Generator Object, bukan List.
+
+\`\`\`python
+# List Comprehension (Memori besar)
+kuadrat_list = [x**2 for x in range(1000000)]
+
+# Generator Expression (Sangat hemat memori)
+kuadrat_gen = (x**2 for x in range(1000000))
+
+import sys
+print("Ukuran List:", sys.getsizeof(kuadrat_list), "bytes")
+print("Ukuran Gen :", sys.getsizeof(kuadrat_gen), "bytes") # Jauh lebih kecil!
+\`\`\`
+
+---
+## 📝 Quiz Singkat
+1. Apa perbedaan utama antara \`return\` dan \`yield\`?
+2. Mengapa Generator sangat direkomendasikan untuk memproses data berukuran besar?
+`,
+    level: 'advanced',
+    order: 17,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'py-18',
+    user_type: 'student',
+    language: 'python',
+    title: 'Modul 18: Decorators',
+    description: 'Memanipulasi dan menambahkan perilaku pada fungsi lain (Metaprogramming) menggunakan Decorators tingkat lanjut.',
+    content: `# 🎀 Modul 18: Decorators
+
+Decorator memungkinkan kita memodifikasi kelakuan fungsi atau class lain secara elegan, tanpa perlu mengubah source code aslinya. Sering dipakai di Web Framework (seperti Django/Flask) untuk Caching atau Pengecekan Login.
+
+## 1. Konsep Dasar Decorator
+Di Python, fungsi adalah *First-Class Object*, artinya fungsi bisa di-passing sebagai argumen ke fungsi lain.
+
+\`\`\`python
+def pembungkus(fungsi_target):
+    def fungsi_dalam():
+        print("=== Sebelum fungsi berjalan ===")
+        fungsi_target()
+        print("=== Setelah fungsi berjalan ===")
+    return fungsi_dalam
+
+@pembungkus # Ini adalah cara memanggil Decorator
+def sapa():
+    print("Halo, dunia!")
+
+sapa()
+\`\`\`
+
+## 2. Decorator dengan Argumen (*args, **kwargs)
+Bagaimana jika fungsi target butuh argumen? Kita gunakan \`*args\` dan \`**kwargs\` di fungsi *wrapper*.
+
+\`\`\`python
+import time
+
+def pengukur_waktu(fungsi):
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        hasil = fungsi(*args, **kwargs)
+        end = time.time()
+        print(f"[{fungsi.__name__}] dieksekusi dalam {end - start:.4f} detik")
+        return hasil
+    return wrapper
+
+@pengukur_waktu
+def loop_lama(n):
+    return sum([x for x in range(n)])
+
+loop_lama(1000000)
+\`\`\`
+
+## 3. Decorator yang Menerima Argumen Khusus
+Kita bisa menambahkan 1 lapis fungsi lagi agar Decorator bisa menerima konfigurasi.
+
+\`\`\`python
+def ulangi(kali):
+    def decorator(fungsi):
+        def wrapper(*args, **kwargs):
+            for _ in range(kali):
+                hasil = fungsi(*args, **kwargs)
+            return hasil
+        return wrapper
+    return decorator
+
+@ulangi(kali=3)
+def print_salam():
+    print("Selamat Pagi!")
+
+print_salam()
+\`\`\`
+
+---
+## 📝 Quiz Singkat
+1. Apa arti dari *Fungsi adalah First-Class Object*?
+2. Bagaimana cara meneruskan parameter acak pada fungsi Wrapper di dalam Decorator?
+`,
+    level: 'advanced',
+    order: 18,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'py-19',
+    user_type: 'student',
+    language: 'python',
+    title: 'Modul 19: Asynchronous Programming (Asyncio)',
+    description: 'Menangani Concurrency dengan Non-Blocking I/O menggunakan Event Loop, Coroutines, dan keyword async/await.',
+    content: `# ⚡ Modul 19: Asynchronous Programming (Asyncio)
+
+Kode Python standar berjalan secara *Synchronous* (berjalan satu per satu dari atas ke bawah). Jika ada proses *download* data yang lama (Misal 5 detik), program akan membeku (Block). **Asyncio** memecahkan masalah ini dengan sistem *Non-Blocking*.
+
+## 1. Coroutines (\`async\` dan \`await\`)
+Fungsi yang diberi awalan \`async def\` disebut **Coroutine**. Coroutine tidak bisa dieksekusi langsung, harus dijalankan dalam sebuah *Event Loop*.
+
+\`\`\`python
+import asyncio
+import time
+
+async def masak_kopi():
+    print("Mulai masak kopi...")
+    await asyncio.sleep(2) # Menunggu (Non-blocking)
+    print("Kopi Selesai!")
+    return "Kopi"
+
+async def panggang_roti():
+    print("Mulai panggang roti...")
+    await asyncio.sleep(3) # Menunggu (Non-blocking)
+    print("Roti Selesai!")
+    return "Roti"
+\`\`\`
+
+## 2. Event Loop (\`asyncio.gather\`)
+Untuk menjalankan Coroutines secara BERSAMAAN (Concurrent), kita kumpulkan mereka menggunakan \`asyncio.gather\`.
+
+\`\`\`python
+async def main():
+    start = time.time()
+    
+    # Menjalankan 2 fungsi sekaligus
+    hasil = await asyncio.gather(
+        masak_kopi(),
+        panggang_roti()
+    )
+    
+    end = time.time()
+    print(f"Total waktu: {end - start:.2f} detik")
+    print("Hasil:", hasil)
+
+# Cara mengeksekusi Async program
+if __name__ == "__main__":
+    asyncio.run(main())
+\`\`\`
+*Catatan: Total waktu yang dihabiskan adalah 3 detik (Waktu terlama), bukan 5 detik (2+3)! Ini karena mereka berjalan berdampingan.*
+
+## 3. Kapan Menggunakan Asyncio?
+Asyncio sempurna untuk pekerjaan **I/O Bound** (Network request, baca/tulis file, database query). JANGAN gunakan Asyncio untuk **CPU Bound** (Proses hitungan matematika berat), untuk itu gunakan Multiprocessing.
+
+---
+## 📝 Quiz Singkat
+1. Apa nama fungsi bawaan asyncio untuk menjalankan beberapa coroutine secara bersamaan?
+2. Jika Anda membuat program pemrosesan AI / *Machine Learning* yang berat di perhitungan kalkulasi angka, apakah cocok menggunakan Asyncio?
+`,
+    level: 'advanced',
+    order: 19,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'py-20',
+    user_type: 'student',
+    language: 'python',
+    title: 'Modul 20: Advanced Data Structures (Collections)',
+    description: 'Eksplorasi modul \`collections\`: Counter, defaultdict, namedtuple, dan deque untuk optimasi struktur data.',
+    content: `# 🧱 Modul 20: Advanced Data Structures
+
+Python punya built-in library bernama \`collections\` yang menyediakan alternatif struktur data berkinerja tinggi dibanding list atau dict biasa.
+
+## 1. Counter (Menghitung Frekuensi)
+Menghitung kemunculan elemen dalam list tanpa menggunakan *for loop* dan logika rumit.
+
+\`\`\`python
+from collections import Counter
+
+kata = ["apel", "jeruk", "apel", "pisang", "jeruk", "apel"]
+hitung = Counter(kata)
+
+print(hitung)             # Counter({'apel': 3, 'jeruk': 2, 'pisang': 1})
+print(hitung.most_common(1)) # Mengambil 1 paling sering muncul -> [('apel', 3)]
+\`\`\`
+
+## 2. DefaultDict (Dictionary Tanpa KeyError)
+Jika mengakses kunci yang belum ada di Dict biasa, akan memicu \`KeyError\`. \`defaultdict\` akan otomatis membuat kunci tersebut dengan nilai default.
+
+\`\`\`python
+from collections import defaultdict
+
+# Set default berupa integer (0)
+skor = defaultdict(int)
+
+skor["Ali"] += 10 # "Ali" tadinya tidak ada, tapi langsung di-set 0, lalu ditambah 10
+print(skor["Ali"]) # 10
+print(skor["Budi"]) # 0 (Otomatis dibuat)
+\`\`\`
+
+## 3. NamedTuple (Tuple yang Mudah Dibaca)
+Tuple sangat ringan, tapi mengakses nilainya dengan index \`data[0]\` sangat tidak rapi. \`namedtuple\` menggabungkan keringanan Tuple dengan kemudahan Dictionary.
+
+\`\`\`python
+from collections import namedtuple
+
+# Membuat "Class" sederhana
+Pemain = namedtuple("Pemain", ["nama", "level", "job"])
+
+p1 = Pemain(nama="Zaki", level=99, job="Warrior")
+
+print(p1.nama) # Jauh lebih rapi dibanding p1[0]
+print(p1.job)
+\`\`\`
+
+## 4. Deque (Double Ended Queue)
+List biasa sangat lambat (O(N)) jika kita menambah/menghapus data dari posisi paling depan (index 0). \`deque\` membuat operasi hapus/tambah dari ujung kiri dan kanan secepat kilat (O(1)).
 
 \`\`\`python
 from collections import deque
 
-def bfs(graph: dict, start: str):
-    visited = set([start])
-    queue = deque([start]) # Masukkan node awal ke antrean
-    
-    while queue:
-        # Ambil orang antrean paling depan
-        node_sekarang = queue.popleft()
-        print(node_sekarang, end=" -> ")
-        
-        # Cek semua temannya
-        for tetangga in graph[node_sekarang]:
-            if tetangga not in visited:
-                visited.add(tetangga)
-                queue.append(tetangga) # Masukkan teman ke antrean
+antrean = deque(["Andi", "Budi", "Citra"])
+antrean.appendleft("Zaki") # Menyelak ke paling depan
+antrean.pop()              # Membuang paling belakang
 
-print("\\nJalur BFS:")
-bfs(graph_sosmed, 'A') 
-# Output: A -> B -> C -> D -> E -> F ->
+print(antrean) # deque(['Zaki', 'Andi', 'Budi'])
 \`\`\`
 
-## 🏆 Kesimpulan Algoritma Master
-Gokil! Bro baru aja nyelesaiin materi Algoritma paling *core* di Computer Science! 
-Kalau bro menguasai modul 1-15 ini, logika dan pemahaman struktur data Python bro udah ada di level *Software Engineer* beneran!
+---
+## 📝 Quiz Singkat
+1. Apa solusi cepat dari modul \`collections\` untuk menghitung huruf/kata terbanyak dalam teks?
+2. Kapan sebaiknya kita menggunakan \`deque\` dibanding \`list\`?
+`,
+    level: 'advanced',
+    order: 20,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'py-21',
+    user_type: 'student',
+    language: 'python',
+    title: 'Modul 21: Context Managers & \`contextlib\`',
+    description: 'Membangun blok \`with\` sendiri untuk manajemen resource otomatis dengan class dunder (__enter__ & __exit__) atau decorator @contextmanager.',
+    content: `# 📦 Modul 21: Context Managers
+
+Anda pasti sering menggunakan blok \`with open('file.txt') as f:\`. Blok \`with\` adalah fitur *Context Manager* yang menjamin suatu *Resource* (seperti Koneksi DB atau File) dibersihkan/ditutup secara otomatis, walau terjadi error!
+
+## 1. Custom Context Manager menggunakan Class
+Kita bisa membuat blok \`with\` kita sendiri menggunakan Dunder Methods: \`__enter__\` dan \`__exit__\`.
+
+\`\`\`python
+class KoneksiDatabase:
+    def __init__(self, host):
+        self.host = host
+
+    def __enter__(self):
+        print(f"[!] Membuka koneksi ke {self.host}")
+        return self # Nilai ini yang akan masuk ke "as"
+
+    def __exit__(self, exc_type, exc_val, traceback):
+        print(f"[!] Menutup koneksi ke {self.host}")
+        if exc_type: # Jika ada Error
+            print(f"Terjadi error: {exc_val}")
+        # Return True akan "menekan" (menelan) error agar program tidak crash
+        return False 
+
+with KoneksiDatabase("localhost:5432") as db:
+    print("Sedang mengambil data pengguna...")
+    # raise Exception("Simulasi database putus!")
+\`\`\`
+
+## 2. Cara Cepat dengan \`@contextmanager\`
+Menulis class cukup panjang. Python punya modul \`contextlib\` agar kita bisa membuat blok \`with\` hanya menggunakan fungsi berbasis *Generator* (\`yield\`).
+
+\`\`\`python
+from contextlib import contextmanager
+
+@contextmanager
+def buka_file_html(nama_file):
+    print(f"<html>\\n<body>")
+    yield nama_file # Jeda dan kirim file ke blok 'with'
+    print(f"</body>\\n</html>")
+
+with buka_file_html("index.html") as file:
+    print(f"  <h1>Halo, {file}</h1>")
+
+# Output:
+# <html>
+# <body>
+#   <h1>Halo, index.html</h1>
+# </body>
+# </html>
+\`\`\`
+
+---
+## 📝 Quiz Singkat
+1. Dunder method apa yang akan selalu dieksekusi di akhir blok \`with\` meskipun terjadi Error?
+2. Jika fungsi \`__exit__\` mengembalikan nilai \`True\`, apa dampaknya terhadap *Exception/Error* yang sedang terjadi?
+`,
+    level: 'advanced',
+    order: 21,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'py-22',
+    user_type: 'student',
+    language: 'python',
+    title: 'Modul 22: Regular Expressions (Regex)',
+    description: 'Pencarian, pemfilteran, dan manipulasi String tingkat lanjut dengan pola Regex menggunakan library \`re\`.',
+    content: `# 🔍 Modul 22: Regular Expressions (Regex)
+
+Regex adalah bahasa mini untuk mencari dan mencocokkan *Pola Teks* (Pattern). Sangat esensial untuk validasi Email, scraping web, dan pembersihan data.
+
+## 1. Fungsi Dasar \`re\` di Python
+Kita menggunakan modul bawaan \`import re\`.
+- \`re.search()\` : Mencari pola (berhenti saat pertama kali ketemu).
+- \`re.findall()\` : Mencari semua yang cocok dan memasukkannya ke List.
+- \`re.sub()\` : Mengganti/Replace teks berdasarkan pola.
+
+\`\`\`python
+import re
+
+teks = "Halo, nomor WA saya 0812-3456-7890 dan teman saya 0899-1111-2222"
+
+# Mencari format pola Nomor HP (Contoh: 4 digit - 4 digit - 4 digit)
+# \\d = digit (angka). {4} = jumlah angka.
+pola = r"\\d{4}-\\d{4}-\\d{4}"
+
+hasil = re.findall(pola, teks)
+print("Nomor ditemukan:", hasil)
+# Output: ['0812-3456-7890', '0899-1111-2222']
+\`\`\`
+
+## 2. Validasi Email dengan Regex
+Contoh nyata yang paling sering dipakai di Backend:
+
+\`\`\`python
+email = "test.user@perusahaan.com"
+email_salah = "user@domain..com"
+
+# Penjelasan Pola:
+# ^ dan $     = Awal dan Akhir string
+# [a-zA-Z0-9.-]+ = Karakter alphanumeric, titik, atau strip minimal 1 buah
+pola_email = r"^[a-zA-Z0-9.-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+
+if re.search(pola_email, email):
+    print("Email 1 Valid!")
+
+if not re.search(pola_email, email_salah):
+    print("Email 2 Tidak Valid!")
+\`\`\`
+
+## 3. Membersihkan Data (Sanitization)
+Menghapus semua karakter yang bukan alfabet menggunakan \`re.sub()\`.
+
+\`\`\`python
+kotor = "Bera$$!pa har#ga b^&arang in*i?"
+# Mengganti semua karakter yang BUKAN huruf dan spasi ([^a-zA-Z\\s]) dengan string kosong
+bersih = re.sub(r"[^a-zA-Z\\s]", "", kotor)
+print(bersih) # "Berapa harga barang ini"
+\`\`\`
+
+---
+## 📝 Quiz Singkat
+1. Jika \`\\d\` digunakan untuk mencari angka (Digit), apa yang digunakan untuk mencari sebuah Kata (Alfabet/Word)? (Silakan riset tentang Regex Cheatsheet)
+2. Apa guna karakter awalan \`r""\` (Raw String) saat menulis Pola Regex di Python?
+`,
+    level: 'advanced',
+    order: 22,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'py-23',
+    user_type: 'student',
+    language: 'python',
+    title: 'Modul 23: Metaprogramming & Reflection',
+    description: 'Menulis kode yang bisa memanipulasi kode lain secara dinamis: getattr, setattr, dan pengenalan Metaclasses.',
+    content: `# 🧠 Modul 23: Metaprogramming & Reflection
+
+Metaprogramming adalah menulis program yang dapat "membaca, memahami, atau mengubah" program lain atau dirinya sendiri saat program sedang berjalan (Runtime). 
+
+## 1. Reflection dengan \`getattr\`, \`setattr\`, \`hasattr\`
+Biasanya kita mengakses atribut dengan nama yang *Hardcoded* (misal: \`user.nama\`). Dengan fungsi dinamis ini, kita bisa mengakses atribut menggunakan String.
+
+\`\`\`python
+class Pengguna:
+    def __init__(self):
+        self.nama = "Admin"
+        self.level = 100
+
+user = Pengguna()
+
+# Mengecek apakah atribut ada
+if hasattr(user, "nama"):
+    # Mengambil atribut menggunakan string
+    # Mirip dengan user.nama
+    print(getattr(user, "nama")) 
+
+# Menyetel/Membuat atribut baru secara dinamis
+nama_kolom = "pekerjaan"
+setattr(user, nama_kolom, "Developer")
+print(user.pekerjaan) # "Developer"
+\`\`\`
+
+## 2. Fungsi \`type()\` Tingkat Lanjut (Membuat Class Dinamis)
+\`type()\` tidak hanya untuk mengecek tipe data. Jika kita memberikan 3 argumen (\`type(nama, pewarisan, dict_atribut)\`), ia akan membuat Class baru secara dinamis (on-the-fly)!
+
+\`\`\`python
+# Membuat class "Robot" tanpa menulis \`class Robot:\`
+RobotDinamic = type('Robot', (), {'kekuatan': 9000, 'nama': 'Optimus'})
+
+r1 = RobotDinamic()
+print(r1.nama)     # Optimus
+print(r1.kekuatan) # 9000
+\`\`\`
+
+## 3. Metaclasses (Pembuat Class)
+Metaclass adalah "Class dari sebuah Class". Class membuat Objek, Metaclass membuat Class.
+Contoh: Memaksa semua nama fungsi di dalam class harus huruf kecil (*Lowercase*).
+
+\`\`\`python
+class PaksaHurufKecilMeta(type):
+    def __new__(cls, name, bases, attrs):
+        huruf_kecil_attrs = {}
+        for kunci, nilai in attrs.items():
+            if not kunci.startswith("__"): # Abaikan dunder method
+                huruf_kecil_attrs[kunci.lower()] = nilai
+            else:
+                huruf_kecil_attrs[kunci] = nilai
+                
+        return super().__new__(cls, name, bases, huruf_kecil_attrs)
+
+class Pengujian(metaclass=PaksaHurufKecilMeta):
+    # Sengaja menggunakan huruf kapital
+    def CETAK_NAMA(self):
+        print("Tercetak!")
+
+p = Pengujian()
+p.cetak_nama() # Otomatis diubah menjadi lowercase oleh Metaclass!
+\`\`\`
+
+---
+## 📝 Quiz Singkat
+1. Jika nama atribut/kolom database kita terima dari input User dalam bentuk *String*, fungsi apa yang kita gunakan untuk menarik properti class tersebut secara dinamis?
+2. Apa kegunaan parameter \`metaclass=...\` pada definisi suatu class?
+`,
+    level: 'advanced',
+    order: 23,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'py-24',
+    user_type: 'student',
+    language: 'python',
+    title: 'Modul 24: Testing & Debugging',
+    description: 'Membangun aplikasi tahan banting dengan Unit Testing menggunakan \`unittest\`, \`pytest\`, dan teknik Mocking.',
+    content: `# 🐛 Modul 24: Testing & Debugging
+
+Programmer handal tidak mengetes aplikasinya secara manual. Mereka menulis kode untuk mengetes kode mereka sendiri (Automated Testing / TDD).
+
+## 1. Menggunakan \`unittest\` (Bawaan Python)
+Modul bawaan untuk melakukan *Unit Testing* terhadap logika spesifik.
+
+\`\`\`python
+import unittest
+
+def hitung_diskon(harga, persen):
+    if persen < 0 or persen > 100:
+        raise ValueError("Diskon tidak valid")
+    return harga - (harga * persen / 100)
+
+# Class Testing
+class TestPerhitungan(unittest.TestCase):
+    
+    def test_diskon_normal(self):
+        hasil = hitung_diskon(100000, 20)
+        self.assertEqual(hasil, 80000) # Harus persis sama
+        
+    def test_diskon_error(self):
+        # Memastikan exception dipicu jika diskon minus
+        with self.assertRaises(ValueError):
+            hitung_diskon(50000, -10)
+
+if __name__ == '__main__':
+    unittest.main()
+\`\`\`
+
+## 2. Pengenalan PyTest (Standar Industri Baru)
+Meski \`unittest\` bagus, industri kini lebih banyak menggunakan **PyTest** karena penulisannya sangat ringkas tanpa perlu OOP class.
+
+*(Membutuhkan \`pip install pytest\`)*
+\`\`\`python
+# file: test_app.py
+def kali(a, b):
+    return a * b
+
+# Di pytest, kita cukup menggunakan assert standar Python!
+def test_perkalian_sukses():
+    assert kali(4, 5) == 20
+    
+def test_perkalian_negatif():
+    assert kali(2, -3) == -6
+\`\`\`
+Jalankan di terminal cukup dengan mengetik: \`pytest\`
+
+## 3. Mocking (Memalsukan Eksekusi)
+Bagaimana jika fungsi Anda melakukan *request HTTP* atau *insert Database*? Kita tidak ingin hal itu benar-benar dijalankan saat *Testing* (Memakan waktu dan merusak DB produksi). Kita memalsukannya (*Mocking*).
+
+\`\`\`python
+from unittest.mock import MagicMock
+
+class APIClient:
+    def fetch_data(self):
+        # Misal ini memanggil API internet sungguhan
+        pass
+
+# Dalam testing:
+client = APIClient()
+# Ganti fungsi sungguhan dengan tiruan (Mock)
+client.fetch_data = MagicMock(return_value={"status": "OK", "data": "Tiruan"})
+
+print(client.fetch_data()) # Mengembalikan data palsu tanpa menyentuh internet!
+\`\`\`
+
+---
+## 📝 Quiz Singkat
+1. Kenapa kita memerlukan \`Mocking\` dalam proses testing suatu aplikasi Backend?
+2. Jika menggunakan \`pytest\`, *keyword* apa dari Python standar yang menjadi tumpuan utama pengecekan *Test Case*?
+`,
+    level: 'advanced',
+    order: 24,
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'py-25',
+    user_type: 'student',
+    language: 'python',
+    title: 'Modul 25: Final Advanced Project - Asynchronous API Scraper',
+    description: 'Proyek akhir level Advanced: Menggabungkan Asyncio, Aiohttp, OOP, dan Context Manager untuk menarik data secara massal dari internet super cepat.',
+    content: `# 🏆 Modul 25: Final Advanced Project
+
+Selamat! Anda mencapai puncak ilmu Python Backend *Core*. Proyek ini akan menggabungkan **Asyncio, OOP (Dunder/Property), dan Context Managers** ke dalam arsitektur nyata: *Asynchronous API Scraper*.
+
+## 🎯 Objektif Proyek
+Mengambil data (JSON) dari ratusan URL secara paralel menggunakan library \`aiohttp\`. Kecepatannya bisa 100x lebih cepat dibanding \`requests\` biasa!
+
+*(Anda butuh menginstal \`pip install aiohttp\`)*
+
+## 💻 Implementasi Arsitektur
+
+\`\`\`python
+import asyncio
+import aiohttp
+import time
+from dataclasses import dataclass
+
+@dataclass
+class APIResult:
+    url: str
+    status: int
+    data: dict
+
+class AsyncScraper:
+    def __init__(self, urls: list[str]):
+        self._urls = urls
+        self._results = []
+
+    @property
+    def url_count(self) -> int:
+        return len(self._urls)
+
+    # Coroutine privat untuk mengambil 1 halaman
+    async def _fetch(self, session, url) -> APIResult:
+        try:
+            async with session.get(url, timeout=5) as response:
+                json_data = await response.json()
+                return APIResult(url, response.status, json_data)
+        except Exception as e:
+            return APIResult(url, 500, {"error": str(e)})
+
+    # Fungsi utama yang mengorkestrasi Async Tasks
+    async def run_scraper(self):
+        print(f"[!] Mulai scraping {self.url_count} URLs...")
+        start_time = time.time()
+
+        # Context manager Async (aiohttp session)
+        async with aiohttp.ClientSession() as session:
+            # Membuat list of Coroutines
+            tasks = [self._fetch(session, url) for url in self._urls]
+            
+            # Eksekusi paralel semuanya secara concurrent!
+            self._results = await asyncio.gather(*tasks)
+
+        print(f"[✅] Selesai dalam {time.time() - start_time:.2f} detik")
+
+    # Dunder untuk iterasi hasil
+    def __iter__(self):
+        return iter(self._results)
+
+
+# --- MAIN EXECUTION ---
+async def main():
+    # Simulasi memanggil Dummy REST API Publik
+    daftar_url = [f"https://jsonplaceholder.typicode.com/posts/{i}" for i in range(1, 21)]
+    
+    scraper = AsyncScraper(daftar_url)
+    await scraper.run_scraper()
+
+    # Iterasi hasil berkat __iter__
+    for res in scraper:
+        print(f"Status: {res.status} | URL: {res.url[-15:]} | Judul: {res.data.get('title', 'Error')[:20]}...")
+
+if __name__ == "__main__":
+    # Menjalankan Event Loop
+    asyncio.run(main())
+\`\`\`
+
+### Kenapa Proyek Ini *Advanced*?
+1. Menggunakan **Dataclasses** (\`@dataclass\`) untuk merepresentasikan objek *Data Transfer*.
+2. Mematuhi **OOP Enkapsulasi** dengan memisahkan variabel *private* (\`_urls\`) dan properti *getter* (\`url_count\`).
+3. Menggunakan **Asyncio & Aiohttp** untuk mencapai Konkurensi I/O yang *Massive*.
+4. Mengimplementasikan **Dunder \`__iter__\`** sehingga objek scraper bisa langsung di-\`for loop\`!
+
+**🚀 Selamat dan Luar Biasa!** Anda sekarang resmi memiliki tingkat kedalaman pemahaman Python setara *Senior Python Backend Engineer*! Langkah selanjutnya? Buat REST API sungguhan menggunakan **FastAPI** atau **Django**!
 `,
     level: 'expert',
-    order: 15,
+    order: 25,
     created_at: '2025-01-01T00:00:00Z'
   }
 ];

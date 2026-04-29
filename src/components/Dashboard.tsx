@@ -17,6 +17,12 @@ import { MOCK_MATERIALS as RB_MATERIAL } from '../data/rubyData';
 import { MOCK_MATERIALS as REACTJS_MATERIAL } from '../data/reactjsData';
 import { MOCK_MATERIALS as NEXTJS_MATERIAL } from '../data/nextjsData';
 import { MOCK_MATERIALS as NEXTJSEND_MATERIAL } from '../data/nextjsendData';
+import { MOCK_MATERIALS as PYTHON_DA_MATERIALS } from '../data/pythonDataAnalysis';
+import { MOCK_MATERIALS as ENG_MATERIALS } from '../data/englishTechData';
+import { MOCK_MATERIALS as JP_MATERIALS } from '../data/japaneseData';
+import { MOCK_MATERIALS as UIUX_MATERIALS } from '../data/uiuxData';
+import { MOCK_MATERIALS as AGILE_MATERIALS } from '../data/agileScrumData';
+import { MOCK_MATERIALS as PM_MATERIALS } from '../data/productManagementData';
 import ProfilePage from './ProfilePage';
 
 // Import Icons
@@ -427,10 +433,10 @@ export default function Dashboard() {
     setLoading(true);
     
     const allMaterials: LearningMaterial[] = [
-      ...OTHER_MATERIALS, ...PYTHON_MATERIALS, ...GO_MATERIALS,
+      ...OTHER_MATERIALS, ...PYTHON_MATERIALS, ...PYTHON_DA_MATERIALS, ...GO_MATERIALS,
       ...MYSQL_MATERIALS, ...TS_MATERIAL, ...JS_MATERIAL,
       ...PSQL_MATERIAL, ...RB_MATERIAL, ...REACTJS_MATERIAL, ...NEXTJS_MATERIAL,
-      ...NEXTJSEND_MATERIAL
+      ...NEXTJSEND_MATERIAL, ...ENG_MATERIALS, ...JP_MATERIALS, ...UIUX_MATERIALS, ...AGILE_MATERIALS, ...PM_MATERIALS
     ];
     
     let list = allMaterials.filter((m) => m.user_type === userType);
@@ -450,10 +456,10 @@ export default function Dashboard() {
   
   const allLanguageStats = useMemo(() => {
     const allMaterials = [
-      ...OTHER_MATERIALS, ...PYTHON_MATERIALS, ...GO_MATERIALS,
+      ...OTHER_MATERIALS, ...PYTHON_MATERIALS, ...PYTHON_DA_MATERIALS, ...GO_MATERIALS,
       ...MYSQL_MATERIALS, ...TS_MATERIAL, ...JS_MATERIAL,
       ...PSQL_MATERIAL, ...RB_MATERIAL, ...REACTJS_MATERIAL, ...NEXTJS_MATERIAL,
-      ...NEXTJSEND_MATERIAL
+      ...NEXTJSEND_MATERIAL, ...ENG_MATERIALS, ...JP_MATERIALS, ...UIUX_MATERIALS, ...AGILE_MATERIALS, ...PM_MATERIALS
     ].filter((m) => m.user_type === userType);
 
     return languageData.map(lang => {
@@ -614,130 +620,93 @@ export default function Dashboard() {
 
         <div className="mb-10 text-center md:text-left">
           {!selectedLanguage && (
-            <div className="mb-10 animate-fade-in-up relative">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold mb-4 shadow-sm">
-                <Sparkles className="w-4 h-4 text-blue-500" /> Jelajahi Dunia Digital
-              </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 mb-4 leading-tight">
-                Halo {user.full_name?.split(' ')[0] || 'Dev'},<br />
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">
-                  Ayo Lanjutkan Progressmu!
-                </span>
-              </h1>
-              
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-6">
-                 <div className="bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
-                   <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><Target className="w-5 h-5" /></div>
-                   <div className="text-left">
-                     <p className="text-[10px] text-slate-500 font-bold uppercase">Modul Selesai</p>
-                     <p className="text-lg font-black text-slate-800">{userGlobalStats.completed}</p>
-                   </div>
-                 </div>
-                 <div className="bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
-                   <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><Boxes className="w-5 h-5" /></div>
-                   <div className="text-left">
-                     <p className="text-[10px] text-slate-500 font-bold uppercase">Akses Course</p>
-                     <p className="text-lg font-black text-slate-800">{userGlobalStats.totalCourseAccess}</p>
-                   </div>
-                 </div>
-              </div>
+            <>
+              {/* LMS STYLE HERO SECTION */}
+              <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 rounded-[2rem] p-8 md:p-12 text-white shadow-2xl mb-12 relative overflow-hidden flex flex-col md:flex-row justify-between items-center gap-10 animate-fade-in-up">
+                {/* Background Details */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-72 h-72 bg-cyan-500/20 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none"></div>
 
-              {isPremium && (
-                <div className="mb-8">
-                  <h3 className="text-sm font-extrabold text-slate-800 mb-3">Akses Fitur Khusus Paketmu:</h3>
-                  <div className="flex flex-wrap gap-3">
-                    <Link to="/tutorial" className="inline-flex items-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 border border-indigo-200 text-red-700 rounded-xl text-sm font-bold shadow-sm transition-colors">
-                      <BookMarked className="w-4 h-4" /> Tutorial
-                    </Link>
-                    {canAccessPortfolioTemplate && (
-                      <Link to="/coming-soon" className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-xl text-sm font-bold shadow-sm transition-colors">
-                        <Briefcase className="w-4 h-4" /> Template Portofolio
-                      </Link>
-                    )}
-                    {canAccessVideoCall && (
-                      <button onClick={() => { window.open("https://wa.me/6285183209494"); }} className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 rounded-xl text-sm font-bold shadow-sm transition-colors">
-                        <MonitorPlay className="w-4 h-4" /> Jadwalkan Video Call
-                      </button>
-                    )}
-                    {canAccessOfflineMentoring && (
-                      <Link to="/offline-mentoring" className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-xl text-sm font-bold shadow-sm transition-colors">
-                        <Building2 className="w-4 h-4" /> Mentoring Offline
-                      </Link>
-                    )}
+                <div className="relative z-10 w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-[11px] font-black uppercase tracking-widest mb-6 backdrop-blur-md shadow-sm">
+                    <Sparkles className="w-4 h-4 text-cyan-300" /> Selamat datang kembali
                   </div>
-                </div>
-              )}
-
-              {/* === SECTION LANJUT BELAJAR (Diambil dari progress terakhir) === */}
-              {lastActiveCourse && (
-                <div className="mb-10 relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl p-6 md:p-8 group animate-fade-in-up">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transition-transform group-hover:scale-110 duration-700"></div>
-                  <div className="absolute bottom-0 left-0 w-40 h-40 bg-cyan-500/20 rounded-full blur-2xl -ml-10 -mb-10 pointer-events-none transition-transform group-hover:scale-110 duration-700"></div>
-
-                  <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                    <div className="flex items-center gap-5">
-                       <div className={`w-16 h-16 rounded-2xl ${lastActiveCourse.gradient} flex items-center justify-center shadow-lg shrink-0 border border-white/10`}>
-                         {lastActiveCourse.iconUrl ? <img src={lastActiveCourse.iconUrl} className="w-8 h-8 object-contain" alt="Icon" /> : <Boxes className="w-8 h-8 text-white"/>}
-                       </div>
-                       <div className="text-left">
-                         <span className="text-blue-400 text-[10px] font-black uppercase tracking-widest mb-1 flex items-center gap-1.5"><MonitorPlay className="w-3.5 h-3.5"/> Terakhir Dipelajari</span>
-                         <h3 className="text-2xl font-extrabold text-white mb-2">{lastActiveCourse.name}</h3>
-                         <div className="flex items-center gap-3">
-                           <div className="w-32 h-2 bg-slate-800 rounded-full overflow-hidden">
-                             <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full" style={{ width: `${lastActiveCourse.progress}%` }}></div>
-                           </div>
-                           <span className="text-slate-300 text-xs font-bold">{lastActiveCourse.progress}% Selesai</span>
-                         </div>
-                       </div>
-                    </div>
-                    <button 
-                      onClick={() => setSelectedLanguage(lastActiveCourse.id)} 
-                      className="px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 flex-shrink-0 w-full md:w-auto justify-center"
-                    >
-                      Lanjut Belajar <ChevronRight className="w-4 h-4"/>
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              <div className="mb-10 relative w-full h-64 md:h-80 rounded-3xl overflow-hidden shadow-lg group bg-slate-900">
-                 {SLIDER_DATA.map((slide, index) => (
-                    <div key={slide.id} className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
-                      <img src={slide.image} alt={slide.title} className="w-full h-full object-cover opacity-60" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
-                      <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full md:w-3/4">
-                        <span className="inline-block px-3 py-1 mb-3 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-md shadow-md">
-                          {slide.badge}
-                        </span>
-                        <h2 className="text-2xl md:text-4xl font-extrabold text-white mb-2 leading-tight drop-shadow-lg">{slide.title}</h2>
-                        <p className="text-slate-200 text-sm md:text-base font-medium mb-5 line-clamp-2 drop-shadow-md">{slide.desc}</p>
-                        <button onClick={() => navigate(slide.link)} className="bg-white text-slate-900 hover:bg-slate-100 px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors shadow-lg">
-                          Cek Detail <ExternalLink className="w-4 h-4" />
-                        </button>
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-5 leading-[1.1] tracking-tight">
+                    Halo, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200">{user.full_name?.split(' ')[0]}!</span>
+                  </h1>
+                  <p className="text-blue-100/80 font-medium text-base md:text-lg mb-8 max-w-md leading-relaxed">
+                    Siap untuk menguasai keahlian baru hari ini? Lanjutkan progressmu dan raih impian karirmu.
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                    <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-4 border border-white/10 flex items-center gap-4">
+                      <div className="p-3 bg-emerald-500/20 rounded-xl"><Target className="w-6 h-6 text-emerald-300"/></div>
+                      <div>
+                        <div className="text-2xl font-black text-white">{userGlobalStats.completed}</div>
+                        <div className="text-[10px] text-emerald-200 font-bold uppercase tracking-widest">Modul Selesai</div>
                       </div>
                     </div>
-                 ))}
-                 <button onClick={() => setCurrentSlide(prev => (prev - 1 + SLIDER_DATA.length) % SLIDER_DATA.length)} className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full text-white opacity-0 group-hover:opacity-100 transition-all duration-300">
-                   <ChevronLeft className="w-6 h-6" />
-                 </button>
-                 <button onClick={() => setCurrentSlide(prev => (prev + 1) % SLIDER_DATA.length)} className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full text-white opacity-0 group-hover:opacity-100 transition-all duration-300">
-                   <ChevronRight className="w-6 h-6" />
-                 </button>
-                 <div className="absolute bottom-6 right-6 md:right-10 z-20 flex gap-2">
-                   {SLIDER_DATA.map((_, i) => (
-                     <button key={i} onClick={() => setCurrentSlide(i)} className={`h-2 rounded-full transition-all duration-300 ${i === currentSlide ? 'w-6 bg-blue-500' : 'w-2 bg-white/50 hover:bg-white/80'}`} />
-                   ))}
-                 </div>
+                    <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-4 border border-white/10 flex items-center gap-4">
+                      <div className="p-3 bg-purple-500/20 rounded-xl"><Boxes className="w-6 h-6 text-purple-300"/></div>
+                      <div>
+                        <div className="text-2xl font-black text-white">{userGlobalStats.totalCourseAccess}</div>
+                        <div className="text-[10px] text-purple-200 font-bold uppercase tracking-widest">Course Akses</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="relative z-10 w-full md:w-[45%] lg:w-[40%]">
+                  {lastActiveCourse ? (
+                    <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-7 border border-white/20 shadow-2xl hover:border-white/30 transition-colors">
+                      <div className="flex items-center justify-between mb-5">
+                        <span className="text-xs font-black text-cyan-300 uppercase tracking-widest flex items-center gap-2">
+                          <Clock className="w-4 h-4"/> Terakhir Belajar
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-5 mb-6">
+                        <div className={`w-16 h-16 rounded-2xl ${lastActiveCourse.gradient} flex items-center justify-center shrink-0 shadow-inner`}>
+                          {lastActiveCourse.iconUrl ? <img src={lastActiveCourse.iconUrl} className="w-8 h-8 object-contain drop-shadow-md" alt="" /> : <Boxes className="w-8 h-8 text-white"/>}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-xl font-extrabold text-white mb-2 line-clamp-1">{lastActiveCourse.name}</h3>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full" style={{ width: `${lastActiveCourse.progress}%` }}></div>
+                            </div>
+                            <span className="text-cyan-300 text-[10px] font-black">{lastActiveCourse.progress}%</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button onClick={() => setSelectedLanguage(lastActiveCourse.id)} className="w-full py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-2">
+                        Lanjutkan Kursus <ChevronRight className="w-4 h-4"/>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 text-center shadow-2xl">
+                      <div className="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-5 border border-blue-400/30">
+                        <Rocket className="w-10 h-10 text-cyan-300" />
+                      </div>
+                      <h3 className="text-2xl font-extrabold text-white mb-2">Mulai Perjalananmu!</h3>
+                      <p className="text-blue-200/80 text-sm mb-6 font-medium">Pilih course pertamamu dari katalog di bawah untuk memulai pembelajaran.</p>
+                      <button onClick={() => window.scrollTo({top: 500, behavior: 'smooth'})} className="px-6 py-3 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-100 transition-colors">
+                        Jelajahi Katalog
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="flex overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 gap-3 md:flex-wrap scrollbar-hide">
+              <div className="flex items-center justify-between mb-4 px-1">
+                <h2 className="text-2xl font-extrabold text-slate-900">Katalog Kursus</h2>
+              </div>
+              <div className="flex overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 gap-3 md:flex-wrap scrollbar-hide mb-6">
                 {[{ id: 'all', label: 'Semua Kategori', icon: Layout }, ...CATEGORIES_INFO].map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as Category)}
                     className={`flex items-center whitespace-nowrap gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all border shadow-sm flex-shrink-0 ${
                       activeTab === tab.id
-                        ? 'bg-blue-600 text-white border-blue-500 shadow-blue-500/20'
+                        ? 'bg-slate-900 text-white border-slate-800 shadow-slate-900/20'
                         : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 hover:border-slate-300'
                     }`}
                   >
@@ -745,7 +714,7 @@ export default function Dashboard() {
                   </button>
                 ))}
               </div>
-            </div>
+            </>
           )}
 
           <div className="relative max-w-xl mb-10 mx-auto md:mx-0">
@@ -793,7 +762,7 @@ export default function Dashboard() {
                       )}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative">
                       {sectionLanguages.map((lang) => {
                         const showProgress = isPremium && lang.total > 0;
                         const missingPrereqs = lang.prerequisites?.filter(reqId => !completedLangIds.has(reqId)) || [];
@@ -808,146 +777,117 @@ export default function Dashboard() {
                                 setSelectedLanguage(lang.id);
                               }
                             }}
-                            className={`group relative h-full text-left transition-all duration-300 ${openDropdownId === lang.id ? 'z-[110]' : 'z-10'} ${
-                              lang.comingSoon ? 'opacity-60 cursor-not-allowed' : 
-                              isLockedByPrereq ? 'cursor-not-allowed' : 
-                              'cursor-pointer hover:-translate-y-1.5'
+                            className={`group flex flex-col h-full bg-white rounded-2xl border border-slate-200 transition-all duration-300 ${openDropdownId === lang.id ? 'z-[110] relative shadow-xl ring-2 ring-blue-500/20' : 'z-10'} ${
+                              lang.comingSoon ? 'opacity-70 cursor-not-allowed grayscale-[50%]' : 
+                              isLockedByPrereq ? 'cursor-not-allowed opacity-80' : 
+                              'cursor-pointer shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-slate-300'
                             }`}
                           >
-                            <div className={`relative h-full bg-white rounded-3xl p-6 flex flex-col border border-slate-200 shadow-sm transition-all ${
-                               isLockedByPrereq ? 'bg-slate-50/80 border-slate-200' : 'group-hover:border-blue-300 group-hover:shadow-xl'
-                            }`}>
+                            {/* Card Header Thumbnail */}
+                            <div className={`h-36 w-full rounded-t-2xl overflow-hidden ${lang.gradient} relative flex items-center justify-center`}>
+                              <div className="absolute inset-0 bg-black/10 mix-blend-overlay"></div>
+                              {lang.iconUrl ? (
+                                <img src={lang.iconUrl} alt="icon" className="w-16 h-16 object-contain drop-shadow-2xl transform group-hover:scale-110 transition-transform duration-500" />
+                              ) : (
+                                <Boxes className="w-16 h-16 text-white drop-shadow-2xl transform group-hover:scale-110 transition-transform duration-500" />
+                              )}
                               
-                              <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
-                                {!isLockedByPrereq && (
-                                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                )}
-                              </div>
-                              
-                              <div className="flex justify-between items-start mb-5 relative z-10">
-                                <div className={`w-14 h-14 rounded-2xl ${lang.gradient} flex items-center justify-center transition-transform duration-300 ${isLockedByPrereq ? 'grayscale opacity-70' : 'group-hover:scale-105'}`}>
-                                  {lang.iconUrl ? (
-                                    <img src={lang.iconUrl} alt="icon" className="w-8 h-8 object-contain drop-shadow-md" />
-                                  ) : (
-                                    <Boxes className="w-8 h-8 text-white drop-shadow-md" />
-                                  )}
+                              {/* Badge */}
+                              {lang.badge && !lang.comingSoon && (
+                                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-slate-800 text-[10px] font-black px-2.5 py-1 rounded border border-white/50 shadow-sm uppercase tracking-wider">
+                                  {lang.badge}
                                 </div>
-                                <div className="text-right flex flex-col items-end gap-1.5">
-                                  <div className={`flex items-center gap-1 px-2 py-0.5 rounded-md border text-xs font-extrabold shadow-sm ${isLockedByPrereq ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
-                                    <Star className={`w-3 h-3 fill-current ${isLockedByPrereq ? 'text-slate-400' : 'text-amber-500'}`} /> {lang.rating}
-                                  </div>
-                                  <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200">
-                                    <Users className="w-3 h-3" /> {lang.totalStudents}
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              <div className="mb-4 flex-1 relative z-10">
-                                <div className="flex items-center gap-2 mb-1.5">
-                                  <h3 className={`text-xl font-extrabold transition-colors ${isLockedByPrereq ? 'text-slate-600' : 'text-slate-900 group-hover:text-blue-600'}`}>
-                                    {lang.name}
-                                  </h3>
-                                  {lang.badge && !lang.comingSoon && (
-                                    <span className={`text-[10px] font-black px-2 py-0.5 rounded border shadow-sm uppercase tracking-wider ${isLockedByPrereq ? 'bg-slate-100 text-slate-500 border-slate-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
-                                      {lang.badge}
-                                    </span>
-                                  )}
-                                </div>
-                                <p className={`text-sm font-medium leading-relaxed line-clamp-2 ${isLockedByPrereq ? 'text-slate-400' : 'text-slate-600'}`}>
-                                  {lang.description}
-                                </p>
-                              </div>
+                              )}
 
-                              {lang.comingSoon ? (
-                                <div className="mt-auto pt-4 border-t border-slate-200/60 relative z-10">
-                                  <span className="flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg w-fit border border-slate-200">
+                              {/* Coming Soon Overlay */}
+                              {lang.comingSoon && (
+                                <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center">
+                                  <span className="flex items-center gap-1.5 text-white text-[11px] font-bold px-3 py-1.5 rounded-full bg-white/20 border border-white/30 uppercase tracking-widest shadow-lg">
                                     <Clock className="w-3 h-3" /> Segera Hadir
                                   </span>
                                 </div>
-                              ) : isLockedByPrereq ? (
-                                <div className="mt-auto pt-4 border-t border-slate-200/60 relative z-10">
-                                  <div className="text-xs font-bold text-rose-500 flex flex-col gap-1.5 bg-rose-50 p-2.5 rounded-lg border border-rose-100">
-                                    <span className="flex items-center gap-1.5 uppercase tracking-wide text-[10px]">
-                                      <ShieldAlert className="w-3 h-3"/> Terkunci (Prasyarat)
-                                    </span>
-                                    <span className="text-slate-600 font-medium">Selesaikan <b className="text-slate-800">{missingNames}</b> terlebih dahulu.</span>
-                                  </div>
-                                </div>
-                              ) : showProgress ? (
-                                <div className="mt-auto relative z-10">
-                                  <div className="flex justify-between text-xs font-bold text-slate-600 mb-2">
-                                    <span>{lang.completed}/{lang.total} Modul</span>
-                                    <span className={lang.isComplete ? 'text-blue-600' : 'text-slate-500'}>{lang.progress}%</span>
-                                  </div>
-                                  
-                                  {lang.isComplete && (
-                                    <div className="relative w-full mt-4">
-                                      <button
-                                        onClick={(e) => { 
-                                          e.stopPropagation(); 
-                                          setOpenDropdownId(openDropdownId === lang.id ? null : lang.id); 
-                                        }}
-                                        disabled={generatingCert && openDropdownId === lang.id}
-                                        className="w-full py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-xl border border-blue-200 flex items-center justify-between px-4 transition-all shadow-sm"
-                                      >
-                                        <span className="flex items-center gap-2">
-                                          {generatingCert && openDropdownId === lang.id ? <Loader2 className="w-4 h-4 animate-spin"/> : <Award className="w-4 h-4"/>}
-                                          Unduh Sertifikat
-                                        </span>
-                                        <ChevronDown className={`w-4 h-4 transition-transform ${openDropdownId === lang.id ? 'rotate-180' : ''}`} />
-                                      </button>
-
-                                      {/* Dropdown Options Menu */}
-                                      {openDropdownId === lang.id && (
-                                        <>
-                                          <div 
-                                            className="fixed inset-0 z-[9998]" 
-                                            onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); }}
-                                          ></div>
-                                          
-                                          <div 
-                                            className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-2xl border border-slate-200 z-[9999] overflow-hidden animate-fade-in-up"
-                                            onClick={(e) => e.stopPropagation()} 
-                                          >
-                                            <div className="p-1.5 flex flex-col gap-1">
-                                              <button 
-                                                onClick={(e) => { e.stopPropagation(); processCertificate(lang.id, true, false); }} 
-                                                className="flex items-center gap-2.5 w-full p-2.5 text-left text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-colors"
-                                              >
-                                                <div className="bg-slate-100 p-1.5 rounded-md"><HardDrive className="w-3.5 h-3.5" /></div>
-                                                Ke Perangkat Saja
-                                              </button>
-                                              
-                                              <button 
-                                                onClick={(e) => { e.stopPropagation(); processCertificate(lang.id, false, true); }} 
-                                                className="flex items-center gap-2.5 w-full p-2.5 text-left text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-colors"
-                                              >
-                                                <div className="bg-slate-100 p-1.5 rounded-md"><Cloud className="w-3.5 h-3.5" /></div>
-                                                Ke CloudNest Saja
-                                              </button>
-                                              
-                                              <button 
-                                                onClick={(e) => { e.stopPropagation(); processCertificate(lang.id, true, true); }} 
-                                                className="flex items-center gap-2.5 w-full p-2.5 text-left text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-                                              >
-                                                <div className="bg-blue-100 p-1.5 rounded-md"><CheckCircle className="w-3.5 h-3.5" /></div>
-                                                Unduh & Cadangkan
-                                              </button>
-                                            </div>
-                                          </div>
-                                        </>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              ) : (
-                                <div className="mt-auto flex items-center justify-between text-sm font-bold text-blue-600 group-hover:text-blue-700 transition-colors relative z-10 border-t border-slate-100 pt-4">
-                                  <span>Mulai Belajar</span>
-                                  <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors border border-blue-100">
-                                    <ChevronRight className="w-4 h-4" />
-                                  </div>
-                                </div>
                               )}
+                            </div>
+
+                            {/* Card Body */}
+                            <div className="p-5 flex flex-col flex-1 relative bg-white">
+                              {/* Ratings & Students */}
+                              <div className="flex items-center gap-3 text-xs font-bold text-slate-500 mb-3">
+                                <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 text-amber-500 fill-current" /> {lang.rating}</span>
+                                <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {lang.totalStudents} Siswa</span>
+                              </div>
+
+                              <h3 className="text-lg font-extrabold text-slate-900 mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                                {lang.name}
+                              </h3>
+                              <p className="text-sm font-medium text-slate-500 line-clamp-2 leading-relaxed mb-5">
+                                {lang.description}
+                              </p>
+
+                              {/* Footer Action Area */}
+                              <div className="mt-auto pt-4 border-t border-slate-100 relative">
+                                {isLockedByPrereq ? (
+                                  <div className="text-xs font-bold text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-100 flex flex-col gap-1">
+                                    <span className="flex items-center gap-1.5 uppercase tracking-wide text-[10px]">
+                                      <ShieldAlert className="w-3 h-3"/> Terkunci Prasyarat
+                                    </span>
+                                    <span className="text-slate-600 font-medium line-clamp-1">Selesaikan: <b className="text-slate-800">{missingNames}</b></span>
+                                  </div>
+                                ) : showProgress ? (
+                                  <div className="relative">
+                                    <div className="flex justify-between items-end text-[10px] font-extrabold text-slate-500 mb-2 uppercase tracking-widest">
+                                      <span>Progress</span>
+                                      <span className={lang.isComplete ? 'text-blue-600 text-xs' : 'text-slate-700'}>{lang.progress}%</span>
+                                    </div>
+                                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-3">
+                                      <div className="h-full bg-blue-500 rounded-full" style={{ width: `${lang.progress}%` }}></div>
+                                    </div>
+
+                                    {lang.isComplete && (
+                                      <div className="relative w-full">
+                                        <button
+                                          onClick={(e) => { 
+                                            e.stopPropagation(); 
+                                            setOpenDropdownId(openDropdownId === lang.id ? null : lang.id); 
+                                          }}
+                                          disabled={generatingCert && openDropdownId === lang.id}
+                                          className="w-full py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-lg border border-slate-200 flex items-center justify-between px-3 transition-colors"
+                                        >
+                                          <span className="flex items-center gap-2">
+                                            {generatingCert && openDropdownId === lang.id ? <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600"/> : <Award className="w-3.5 h-3.5 text-amber-500"/>}
+                                            Sertifikat
+                                          </span>
+                                          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${openDropdownId === lang.id ? 'rotate-180' : ''}`} />
+                                        </button>
+
+                                        {openDropdownId === lang.id && (
+                                          <>
+                                            <div className="fixed inset-0 z-[9998]" onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); }}></div>
+                                            <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-xl border border-slate-200 z-[9999] overflow-hidden animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
+                                              <div className="p-1 flex flex-col">
+                                                <button onClick={(e) => { e.stopPropagation(); processCertificate(lang.id, true, false); }} className="flex items-center gap-2 w-full p-2 text-left text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-colors">
+                                                  <HardDrive className="w-3.5 h-3.5" /> Ke Perangkat
+                                                </button>
+                                                <button onClick={(e) => { e.stopPropagation(); processCertificate(lang.id, false, true); }} className="flex items-center gap-2 w-full p-2 text-left text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-colors">
+                                                  <Cloud className="w-3.5 h-3.5" /> Ke CloudNest
+                                                </button>
+                                              </div>
+                                            </div>
+                                          </>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : !lang.comingSoon ? (
+                                  <div className="flex items-center justify-between text-sm font-bold text-blue-600 group-hover:text-blue-700 transition-colors">
+                                    <span>Mulai Belajar</span>
+                                    <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors transform group-hover:translate-x-1">
+                                      <ChevronRight className="w-3.5 h-3.5" />
+                                    </div>
+                                  </div>
+                                ) : null}
+                              </div>
                             </div>
                           </div>
                         );

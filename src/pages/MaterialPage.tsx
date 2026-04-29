@@ -16,6 +16,12 @@ import { MOCK_MATERIALS as RB_MATERIAL } from '../data/rubyData';
 import { MOCK_MATERIALS as REACTJS_MATERIAL } from '../data/reactjsData';
 import { MOCK_MATERIALS as NEXTJS_MATERIAL } from '../data/nextjsData';
 import { MOCK_MATERIALS as NEXTJSEND_MATERIAL } from '../data/nextjsendData';
+import { MOCK_MATERIALS as PYTHON_DA_MATERIALS } from '../data/pythonDataAnalysis';
+import { MOCK_MATERIALS as ENG_MATERIALS } from '../data/englishTechData';
+import { MOCK_MATERIALS as JP_MATERIALS } from '../data/japaneseData';
+import { MOCK_MATERIALS as UIUX_MATERIALS } from '../data/uiuxData';
+import { MOCK_MATERIALS as AGILE_MATERIALS } from '../data/agileScrumData';
+import { MOCK_MATERIALS as PM_MATERIALS } from '../data/productManagementData';
 
 // Icons & Components
 import { 
@@ -29,10 +35,11 @@ const API_BASE = 'https://authx.astbyte.com';
 
 // Gabungkan semua materi untuk pencarian ID
 const ALL_MATERIALS: LearningMaterial[] = [
-  ...OTHER_MATERIALS, ...PYTHON_MATERIALS, 
+  ...OTHER_MATERIALS, ...PYTHON_MATERIALS, ...PYTHON_DA_MATERIALS, 
   ...GO_MATERIALS, ...MYSQL_MATERIALS, ...TS_MATERIAL, 
   ...JS_MATERIAL, ...PSQL_MATERIAL, ...RB_MATERIAL,
-  ...REACTJS_MATERIAL, ...NEXTJS_MATERIAL, ...NEXTJSEND_MATERIAL
+  ...REACTJS_MATERIAL, ...NEXTJS_MATERIAL, ...NEXTJSEND_MATERIAL,
+  ...ENG_MATERIALS, ...JP_MATERIALS, ...UIUX_MATERIALS, ...AGILE_MATERIALS, ...PM_MATERIALS
 ];
 
 type Plan = 'free' | 'pro' | 'plus';
