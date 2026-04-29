@@ -6,23 +6,23 @@
 
 ## 🖥️ Tech Stack
 
-| Kategori          | Teknologi                                                      |
-| ----------------- | -------------------------------------------------------------- |
-| **Framework**     | React 18 + TypeScript                                          |
-| **Build Tool**    | Vite 5                                                         |
-| **Styling**       | Tailwind CSS 3                                                 |
-| **Routing**       | React Router DOM v7                                            |
-| **Icons**         | Lucide React                                                   |
-| **AI Chatbot**    | Google Generative AI (Gemini Flash Lite)                       |
-| **Auth & API**    | AstByte AuthX REST API (`https://authx.astbyte.com`)           |
-| **Sertifikat**    | jsPDF + html2canvas                                            |
-| **reCAPTCHA**     | react-google-recaptcha                                         |
-| **Markdown**      | react-markdown + remark-gfm                                    |
-| **Maps**          | Leaflet + react-leaflet                                        |
-| **Enkripsi**      | crypto-js                                                      |
-| **Database**      | Supabase (via `@supabase/supabase-js`)                         |
-| **Backend**       | Python Flask (untuk fitur tambahan)                            |
-| **Deployment**    | Vercel                                                         |
+| Kategori       | Teknologi                                            |
+| -------------- | ---------------------------------------------------- |
+| **Framework**  | React 18 + TypeScript                                |
+| **Build Tool** | Vite 5                                               |
+| **Styling**    | Tailwind CSS 3                                       |
+| **Routing**    | React Router DOM v7                                  |
+| **Icons**      | Lucide React                                         |
+| **AI Chatbot** | Google Generative AI (Gemini Flash Lite)             |
+| **Auth & API** | AstByte AuthX REST API (`https://authx.astbyte.com`) |
+| **Sertifikat** | jsPDF + html2canvas                                  |
+| **reCAPTCHA**  | react-google-recaptcha                               |
+| **Markdown**   | react-markdown + remark-gfm                          |
+| **Maps**       | Leaflet + react-leaflet                              |
+| **Enkripsi**   | crypto-js                                            |
+| **Database**   | PostgreSQL                                           |
+| **Backend**    | Python Flask (untuk fitur tambahan)                  |
+| **Deployment** | Vercel                                               |
 
 ---
 
@@ -116,31 +116,37 @@ new-coreline/
 ## 🚀 Fitur Utama
 
 ### 🎓 Platform Pembelajaran
+
 - **15+ Kursus Aktif** — Coding (Python, JS, TS, Go, React, Next.js, Ruby, MySQL, PostgreSQL) dan Non-Coding (UI/UX, Agile & Scrum, Product Management, English for Tech, Japanese N5-N4).
 - **200+ Modul Pembelajaran** — Setiap kursus berisi 15-30 modul terstruktur dari dasar hingga lanjutan.
 - **Kuis & Latihan Interaktif** — Setiap modul dilengkapi kuis pilihan ganda dan latihan coding langsung.
 - **Progress Tracking** — Sistem pelacakan progres belajar real-time per modul dan per kursus.
 
 ### 🏆 Sertifikasi
+
 - **Sertifikat Otomatis** — Sertifikat PDF dihasilkan otomatis (via jsPDF) setelah kursus selesai 100%.
 - **Unduh ke Perangkat atau CloudNest** — Pilihan download sertifikat langsung atau simpan ke cloud.
 
 ### 🤖 CoreBot AI
+
 - **Asisten AI berbasis Gemini** — Chatbot pintar yang memahami konteks pengguna (nama, plan, progress).
 - **Rate Limiting** — Batasan 3 pertanyaan per 30 detik untuk mencegah penyalahgunaan.
 - **Formatting Otomatis** — Respons AI diformat dengan bold, italic, dan link otomatis.
 
 ### 💳 Sistem Langganan
+
 - **4 Tier Member** — Free, Pro/Plus, Ultra (Mentoring Online), Ultimate (Mentoring Offline).
 - **Pembayaran** — Integrasi pembayaran via saldo AstByte.
 - **Riwayat Transaksi** — Tersimpan dan ditampilkan di halaman profil.
 
 ### 👤 Profil Pengguna
+
 - **Dashboard Pelajar** — Menampilkan kursus yang sedang dipelajari & yang sudah selesai.
 - **Lencana Pencapaian** — Badge dinamis berdasarkan aktivitas (Verified, Sultan, Pelanggan Setia, dll).
 - **Integrasi AXID** — Edit profil terhubung ke sistem identitas AstByte.
 
 ### 🔒 Keamanan
+
 - **reCAPTCHA v2** — Verifikasi login untuk mencegah bot.
 - **Token-based Auth** — JWT token disimpan di localStorage.
 - **Protected Routes** — Route guard mencegah akses tanpa autentikasi.
@@ -151,6 +157,7 @@ new-coreline/
 ## ⚙️ Cara Menjalankan
 
 ### Prasyarat
+
 - **Node.js** v18+
 - **npm** v9+
 
@@ -173,13 +180,13 @@ npm run dev
 
 ### Scripts
 
-| Perintah           | Deskripsi                              |
-| ------------------ | -------------------------------------- |
-| `npm run dev`      | Jalankan dev server (Vite)             |
-| `npm run build`    | Build untuk produksi                   |
-| `npm run preview`  | Preview hasil build                    |
-| `npm run lint`     | Jalankan ESLint                        |
-| `npm run typecheck`| Cek tipe TypeScript                    |
+| Perintah            | Deskripsi                  |
+| ------------------- | -------------------------- |
+| `npm run dev`       | Jalankan dev server (Vite) |
+| `npm run build`     | Build untuk produksi       |
+| `npm run preview`   | Preview hasil build        |
+| `npm run lint`      | Jalankan ESLint            |
+| `npm run typecheck` | Cek tipe TypeScript        |
 
 ---
 
@@ -187,17 +194,17 @@ npm run dev
 
 Base URL: `https://authx.astbyte.com`
 
-| Endpoint                                       | Method | Deskripsi                          |
-| ---------------------------------------------- | ------ | ---------------------------------- |
-| `/api/auth/login`                              | POST   | Login via email                    |
-| `/api/auth/login/public-id`                    | POST   | Login via Public ID                |
-| `/api/auth/me`                                 | GET    | Data user yang sedang login        |
-| `/api/subscriptions/me`                        | GET    | Riwayat langganan user             |
-| `/api/learning/progress`                       | GET    | Progress belajar user              |
-| `/api/learning/progress`                       | POST   | Update progress modul              |
-| `/api/coreline/courses`                        | GET    | Daftar semua kursus                |
-| `/api/coreline/courses/{id}/rate`              | POST   | Submit rating kursus               |
-| `/api/coreline/courses/{id}/reviews`           | GET    | Ambil ulasan kursus                |
+| Endpoint                             | Method | Deskripsi                   |
+| ------------------------------------ | ------ | --------------------------- |
+| `/api/auth/login`                    | POST   | Login via email             |
+| `/api/auth/login/public-id`          | POST   | Login via Public ID         |
+| `/api/auth/me`                       | GET    | Data user yang sedang login |
+| `/api/subscriptions/me`              | GET    | Riwayat langganan user      |
+| `/api/learning/progress`             | GET    | Progress belajar user       |
+| `/api/learning/progress`             | POST   | Update progress modul       |
+| `/api/coreline/courses`              | GET    | Daftar semua kursus         |
+| `/api/coreline/courses/{id}/rate`    | POST   | Submit rating kursus        |
+| `/api/coreline/courses/{id}/reviews` | GET    | Ambil ulasan kursus         |
 
 ---
 
