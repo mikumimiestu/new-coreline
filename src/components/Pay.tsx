@@ -74,6 +74,12 @@ const VOUCHERS: Record<string, VoucherConfig> = {
     note: 'Potongan Rp60.000 & Bebas PPN',
     freePPN: true, // <- Menggratiskan PPN
     validTiers: ['ultimate']
+  },
+  HBDASTBYTE: {
+    type: 'percent',
+    value: 40,
+    note: 'Potongan 40%',
+    validTiers: ['pro', 'plus', 'ultra', 'ultimate']
   }
 };
 
