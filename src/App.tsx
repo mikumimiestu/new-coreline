@@ -17,6 +17,7 @@ import TutorialPage from "./pages/TutorialPage";
 // Import Quiz & Exercise Pages yang baru dibuat
 import QuizPage from "./pages/QuizPage";
 import ExercisePage from "./pages/ExercisePage";
+import LyraChatPage from "./pages/LyraChatPage";
 
 // Import ProtectedRoute yang baru dibuat
 import ProtectedRoute from "./routers/ProtectedRoute";
@@ -109,6 +110,16 @@ function AppContent() {
 
       {/* Halaman Tutorial */}
       <Route path="/tutorial" element={<TutorialPage />} />
+
+      {/* Halaman Chat Dedicated Lyra */}
+      <Route 
+        path="/lyra" 
+        element={
+          <ProtectedRoute>
+            <LyraChatPage />
+          </ProtectedRoute>
+        } 
+      />
       
       {/* Halaman segera hadir */}
       <Route path="/coming-soon" element={<ComingSoonPage />} />

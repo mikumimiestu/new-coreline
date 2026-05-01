@@ -695,6 +695,50 @@ export default function Dashboard() {
                   )}
                 </div>
               </div>
+              
+              {/* QUICK NAVIGATION SECTION */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+                <Link 
+                  to="/offline-mentoring" 
+                  className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all group"
+                >
+                  <div className="p-3 bg-blue-100 rounded-xl text-blue-600 group-hover:scale-110 transition-transform shadow-inner">
+                    <Users className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-black text-slate-900 uppercase tracking-tight">Mentoring Offline</div>
+                    <div className="text-[10px] text-slate-500 font-bold">Bimbingan Tatap Muka</div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 ml-auto text-slate-300 group-hover:text-blue-500 transition-colors" />
+                </Link>
+                <Link 
+                  to="/tutorial" 
+                  className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-300 transition-all group"
+                >
+                  <div className="p-3 bg-amber-100 rounded-xl text-amber-600 group-hover:scale-110 transition-transform shadow-inner">
+                    <BookOpen className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-black text-slate-900 uppercase tracking-tight">Tutorial</div>
+                    <div className="text-[10px] text-slate-500 font-bold">Panduan Belajar</div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 ml-auto text-slate-300 group-hover:text-amber-500 transition-colors" />
+                </Link>
+                <Link 
+                  to="/lyra" 
+                  className="flex items-center gap-4 p-5 bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl border border-slate-700 shadow-xl hover:shadow-blue-500/20 hover:border-blue-500/50 transition-all group overflow-hidden relative"
+                >
+                  <div className="absolute top-0 right-0 p-1 bg-blue-500 text-[8px] font-black text-white uppercase tracking-tighter -rotate-45 translate-x-3 translate-y-1 w-16 text-center shadow-md">NEW</div>
+                  <div className="p-3 bg-blue-500 rounded-xl text-white group-hover:scale-110 group-hover:rotate-6 transition-all shadow-lg shadow-blue-500/30">
+                    <Bot className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-black text-white uppercase tracking-tight">Lyra AI Chat</div>
+                    <div className="text-[10px] text-blue-200/60 font-bold">Asisten Virtual 31B</div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 ml-auto text-white/30 group-hover:text-blue-400 transition-colors" />
+                </Link>
+              </div>
 
               <div className="flex items-center justify-between mb-4 px-1">
                 <h2 className="text-2xl font-extrabold text-slate-900">Katalog Kursus</h2>

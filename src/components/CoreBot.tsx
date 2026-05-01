@@ -1,11 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Minus, MessageCircle, Send, Loader2, Maximize2, Minimize2, Timer } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { Bot, Minus, MessageCircle, Send, Loader2, Maximize2, Minimize2, Timer, Settings2, Cpu, BrainCircuit, Sparkles, ChevronDown, Terminal, Info } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { useAuth } from '../contexts/AuthContext';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // --- Setup Gemini API ---
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY || ""; 
 const genAI = new GoogleGenerativeAI(apiKey);
+
 const AUTHX_BASE = 'https://authx.astbyte.com';
 
 // --- Data FAQ Chatbot (Fallback Cepat) ---
@@ -33,9 +37,17 @@ export default function CoreBot() {
   const [userData, setUserData] = useState<any>(null);
   const [userSubs, setUserSubs] = useState<any[]>([]);
   const [userProgress, setUserProgress] = useState<Record<string, number>>({});
+  
+  const location = useLocation();
+  
+  // Jangan tampilkan widget melayang jika sedang di halaman chat khusus Lyra
+  if (location.pathname === '/lyra') return null;
 
-  const [chatMessages, setChatMessages] = useState<{sender: 'bot' | 'user', text: string}[]>([
-    { sender: 'bot', text: 'Halo! Saya CoreBot, asisten AI resmi dari Coreline. Ada yang bisa saya bantu hari ini?' }
+  // State Thinking
+  const [isThinking, setIsThinking] = useState(false);
+
+  const [chatMessages, setChatMessages] = useState<{sender: 'bot' | 'user', text: string, model?: 'Lyra', thought?: string}[]>([
+    { sender: 'bot', text: 'Halo! Saya Lyra Nebula 31B, asisten AI resmi dari Coreline. Ada yang bisa saya bantu hari ini?', model: 'Lyra' }
   ]);
 
   // --- 1. Fetch User Data saat komponen load ---
@@ -87,14 +99,11 @@ export default function CoreBot() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages, isChatOpen, isExpanded]);
 
-  // --- 3. Fungsi Formatting Teks Biar Rapi ---
+  // --- 3. Fungsi Formatting Teks ---
+  // Kita pakai ReactMarkdown sekarang, tapi tetap simpan helper jika butuh post-processing
   const formatBotMessage = (text: string) => {
     if (!text) return '';
-    return text
-      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>') // Format Bold
-      .replace(/\*([^*]+)\*/g, '<em>$1</em>') // Format Italic
-      .replace(/(https?:\/\/[^\s]+)/g, "<a href='$1' target='_blank' class='underline font-bold text-blue-500 hover:text-blue-700 transition-colors'>$1</a>") // Format Link
-      // Hapus replace newline (\n) dengan <br> karena kita pakai CSS 'whitespace-pre-wrap' biar list otomatis rapi
+    return text; // ReactMarkdown handles formatting
   };
 
   // --- Fungsi Penanganan FAQ (Instan) ---
@@ -109,7 +118,17 @@ export default function CoreBot() {
     }, 600);
   };
 
-  // --- Fungsi Penanganan Input Bebas (Gemini AI) ---
+  // --- Fungsi Pemanggilan Gemma (Gemma 4 31B Engine) ---
+  const callGemma = async (prompt: string, systemInstruction: string) => {
+    const model = genAI.getGenerativeModel({ 
+      model: "gemma-4-31b-it",
+      systemInstruction: systemInstruction 
+    });
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  };
+
+  // --- Fungsi Penanganan Input Bebas ---
   const handleSendMessage = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!inputText.trim() || isLoading || cooldownTime > 0) return;
@@ -118,71 +137,146 @@ export default function CoreBot() {
     setChatMessages(prev => [...prev, { sender: 'user', text: userMessage }]);
     setInputText("");
     setIsLoading(true);
+    setIsThinking(true);
 
-    try {
-      const model = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
-      
-      let userContextString = "Status Pengguna: Belum Login / Guest.";
-      if (userData) {
-        userContextString = `
-        INFORMASI PENGGUNA YANG SEDANG MENYAPA KAMU:
-        - Nama: ${userData.full_name || 'User'}
-        - Email: ${userData.email}
-        - Tipe Member: ${userData.subscription_type || 'Free'}
-        - Status Langganan: ${userData.subscription_status || 'Tidak Aktif'}
-        - Total Riwayat Transaksi: ${userSubs.length}
-        - ID Publik: ${userData.public_id || '-'}
-        - Data Progress Belajar: ${JSON.stringify(userProgress)}
-        `;
-      }
-
-      // --- SYSTEM PROMPT ---
-      const prompt = `
-        Kamu adalah CoreBot, asisten AI resmi untuk platform belajar coding "Coreline by AstByte". 
-        Gunakan bahasa Indonesia yang santai, ramah, empati, namun tetap profesional. Cukup berikan jawaban yang jelas, singkat, dan mudah dipahami. Jika tidak tahu jawabannya, jujur saja bilang tidak tahu, jangan coba-coba buat jawaban palsu, dan pastikan tidak selalu memberikan jawaban beserta data user.
-        
-        ${userContextString}
-
-        Panduan pengetahuan Coreline:
-        1. Fitur Premium: Pro/Plus (Akses materi penuh, sertifikat), Ultra (Mentoring Online), Ultimate (Mentoring Offline & Online).
-        2. Sertifikat otomatis bisa diunduh jika modul mencapai 100%.
-        3. Kontak CS/Admin: WA di +62 851-8320-9494.
-        4. Katalog Kursus Saat Ini: Python (Dasar & Lanjut), Python Data Analysis, Golang, MySQL, PostgreSQL, TypeScript, Javascript, Ruby, ReactJS, Next.js, English for Tech, Japanese N5-N4 for IT, UI/UX Design, Agile & Scrum, dan Product Management.
-
-        Instruksi Formatting WAJIB:
-        - Gunakan paragraf yang pendek dan berikan jeda baris (Enter) antar paragraf agar mudah dibaca.
-        - Jika membuat daftar (list), gunakan tanda strip (-) dan buat baris baru untuk setiap poin.
-        - Panggil user dengan nama depannya.
-        
-        Pertanyaan user: "${userMessage}"
+    let userContextString = "Status Pengguna: Belum Login / Guest.";
+    if (userData) {
+      userContextString = `
+      INFORMASI PENGGUNA YANG SEDANG MENYAPA KAMU:
+      - Nama: ${userData.full_name || 'User'}
+      - Email: ${userData.email}
+      - Tipe Member: ${userData.subscription_type || 'Free'}
+      - Status Langganan: ${userData.subscription_status || 'Tidak Aktif'}
+      - Total Riwayat Transaksi: ${userSubs.length}
+      - ID Publik: ${userData.public_id || '-'}
+      - Data Progress Belajar: ${JSON.stringify(userProgress)}
       `;
+    }
 
-      const result = await model.generateContent(prompt);
-      const botResponse = result.response.text();
+    const projectSummary = `
+      INTERNAL PROJECT CONTEXT (Coreline v2):
+      - Framework: Vite + React (TypeScript).
+      - Main Routes: Dashboard (/), Profile (/profile), Materials (/materials/:id), Quiz (/quiz/:id), Pricing (/pricing).
+      - Specialized Pages: Offline Mentoring (/offline-mentoring), Priority Member (/priority-member), Tutorial (/tutorial).
+      - Components: CoreBot (You are here), Dashboard (LMS Catalog), MaterialContent (Reading).
+    `;
 
-      setChatMessages(prev => [...prev, { sender: 'bot', text: botResponse }]);
+    const systemPrompt = `
+      Kamu adalah Lyra Nebula 31B, asisten AI resmi Coreline by AstByte.
+      Kamu terintegrasi ke dalam sistem project dengan struktur berikut:
+      ${projectSummary}
+      
+      IDENTITAS USER REAL-TIME:
+      ${userContextString}
+      
+      TUGAS UTAMA:
+      1. Membantu navigasi platform Coreline (Arahkan ke route yang sesuai jika user bertanya).
+      2. Menjawab pertanyaan teknis coding.
+      3. Memberikan motivasi berdasarkan progres belajar user.
+      
+      ATURAN FORMATTING (WAJIB):
+      - Responmu HARUS mengikuti format ini:
+      
+      [THOUGHT]
+      (Tuliskan analisis data user dan rencana jawabanmu di sini. JANGAN tampilkan bagian ini ke user secara langsung.)
+      
+      [RESPONSE]
+      (Tuliskan jawaban ramah dalam Bahasa Indonesia di sini. Mulai dengan "Halo [Nama]!" atau sapaan akrab lainnya.)
+      
+      PENTING: Jangan menulis teks apapun sebelum tag [THOUGHT].
 
-      // --- Eksekusi Rate Limit ---
-      const newCount = askCount + 1;
-      setAskCount(newCount);
-      if (newCount >= 3) {
-        setCooldownTime(30); // Set cooldown 30 detik
-      }
+      DATA PENGETAHUAN:
+      - Premium: Pro/Plus (Materi & Sertifikat), Ultra (Online Mentor), Ultimate (Offline & Online Mentor).
+      - Sertifikat: Otomatis jika modul 100%.
+      - CS: WA +62 851-8320-9494.
+      - Katalog: Python, JS, TS, Go, React, Next.js, UI/UX, Product Mgmt, dll.
+    `;
 
-    } catch (error) {
-      console.error("Error Gemini API:", error);
+    // --- LOGIKA LIMIT BERDASARKAN PAKET ---
+    const subType = (userData?.subscription_type || 'free').toLowerCase();
+    const limits: Record<string, number> = {
+      'free': 5,
+      'pro': 30,
+      'plus': 60,
+      'ultra': 120,
+      'ultimate': 999
+    };
+    const maxAsk = limits[subType] || 5;
+
+    if (askCount >= maxAsk) {
       setChatMessages(prev => [...prev, { 
         sender: 'bot', 
-        text: 'Maaf ya, server AI kami sedang padat. Boleh coba ketik lagi pertanyaannya?' 
+        text: `Maaf ${userData?.full_name?.split(' ')[0] || 'User'}, kamu sudah mencapai batas pertanyaan harian untuk paket **${subType.toUpperCase()}** (${maxAsk} pertanyaan). Silakan upgrade paketmu untuk kuota yang lebih besar! 🚀` 
+      }]);
+      return;
+    }
+
+    try {
+      const botResponse = await callGemma(userMessage, systemPrompt);
+
+      // --- ADVANCED PARSER ---
+      let finalThought = "";
+      let finalText = botResponse;
+
+      // 1. Cek format standar [THOUGHT]...[RESPONSE]...
+      if (botResponse.includes("[RESPONSE]")) {
+        const parts = botResponse.split("[RESPONSE]");
+        finalText = parts[1].trim();
+        finalThought = parts[0].replace(/\[THOUGHT\]/g, "").trim();
+      } 
+      // 2. Cek jika model menulis [THOUGHT] tapi lupa [RESPONSE]
+      else if (botResponse.includes("[THOUGHT]")) {
+        const thoughtIndex = botResponse.indexOf("[THOUGHT]");
+        const contentAfterThought = botResponse.substring(thoughtIndex + 9).trim();
+        
+        // Cari sapaan sebagai pemisah manual
+        const greetingMatch = contentAfterThought.match(/(Halo|Halo,|Gila|Hai|Halo!)\s+\w+/i);
+        if (greetingMatch && greetingMatch.index !== undefined) {
+          finalThought = contentAfterThought.substring(0, greetingMatch.index).trim();
+          finalText = contentAfterThought.substring(greetingMatch.index).trim();
+        } else {
+          finalThought = contentAfterThought;
+          finalText = "Maaf, sepertinya aku sedikit bingung. Bisa tanya lagi?";
+        }
+      }
+      // 3. Fallback jika berantakan (Model langsung jawab tanpa tag)
+      else {
+        const lines = botResponse.split("\n");
+        const firstGreetingLine = lines.findIndex(l => l.trim().match(/^(Halo|Gila|Hai|Selamat)/i));
+        if (firstGreetingLine > 0) {
+          finalThought = lines.slice(0, firstGreetingLine).join("\n").trim();
+          finalText = lines.slice(firstGreetingLine).join("\n").trim();
+        }
+      }
+
+      // Bersihkan sisa-sisa marker yang mungkin tertinggal
+      finalText = finalText.replace(/\[RESPONSE\]/g, "").replace(/\[THOUGHT\]/g, "").trim();
+
+      setChatMessages(prev => [...prev, { 
+        sender: 'bot', 
+        text: finalText, 
+        model: 'Lyra',
+        thought: finalThought 
+      }]);
+
+      const newCount = askCount + 1;
+      setAskCount(newCount);
+      if (newCount >= 5) setCooldownTime(30);
+
+    } catch (error) {
+      console.error("AI Handler failed:", error);
+      setChatMessages(prev => [...prev, { 
+        sender: 'bot', 
+        text: 'Maaf ya, engine AI kami sedang sibuk. Silakan coba lagi sebentar lagi.' 
       }]);
     } finally {
       setIsLoading(false);
+      setIsThinking(false);
     }
   };
 
   return (
     <>
-      {/* Container utama dengan position: fixed biar nempel persis di kanan bawah layar */}
       <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[9999] flex flex-col items-end">
         {isChatOpen ? (
           <div 
@@ -195,15 +289,27 @@ export default function CoreBot() {
           >
             
             {/* Header Bot */}
-            <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-4 flex items-center justify-between text-white shrink-0 shadow-sm transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center shadow-inner">
+            <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-4 flex items-center justify-between text-white shrink-0 shadow-sm relative transition-colors z-20">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-inner">
                   <Bot className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm tracking-wide">CoreBot AI</h3>
-                  <div className="flex items-center gap-1.5 text-[10px] font-medium text-blue-100">
-                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]"></span> Sedang Online
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="text-sm font-black text-white uppercase tracking-wider leading-none">Lyra Nebula 31B</h3>
+                    <div className="group/info relative cursor-help">
+                      <Info className="w-3 h-3 text-white/50 hover:text-white transition-colors" />
+                      <div className="absolute left-0 top-full mt-2 w-48 p-2.5 bg-slate-900/95 backdrop-blur-md rounded-xl shadow-2xl border border-white/10 text-[9px] font-medium leading-relaxed text-blue-100 opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-[100]">
+                        <div className="font-black text-white mb-1 uppercase tracking-widest text-[8px] flex items-center gap-1">
+                          <Sparkles className="w-2.5 h-2.5 text-blue-400" /> Lyra Engine Detail
+                        </div>
+                        Lyra Nebula 31B adalah asisten AI yang dibangun di atas fondasi <span className="text-blue-400 font-bold italic">Gemma 4 31B</span> yang telah disempurnakan khusus untuk ekosistem Coreline.
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+                    <span className="text-[9px] font-bold text-emerald-200 uppercase tracking-widest">Active System</span>
                   </div>
                 </div>
               </div>
@@ -218,27 +324,102 @@ export default function CoreBot() {
               </div>
             </div>
 
-            {/* Area Pesan */}
-            <div className="flex-1 overflow-y-auto p-4 bg-slate-50/50 flex flex-col gap-4">
+
+
+            <div className="flex-1 overflow-y-auto p-4 bg-slate-50/50 flex flex-col gap-4 relative z-10">
               {chatMessages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-message-pop`}>
-                  <div className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm whitespace-pre-wrap ${
-                    msg.sender === 'user' 
-                      ? 'bg-blue-600 text-white rounded-br-sm' 
-                      : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm'
-                  }`}>
-                    <span dangerouslySetInnerHTML={{ 
-                      __html: msg.sender === 'bot' ? formatBotMessage(msg.text) : formatBotMessage(msg.text)
-                    }} />
+                  <div className="flex flex-col gap-1 max-w-[90%]">
+                    {msg.sender === 'bot' && msg.thought && (
+                      <details className="group/thought bg-slate-100 border border-slate-200 rounded-xl mb-1 overflow-hidden transition-all">
+                        <summary className="flex items-center gap-2 p-2.5 cursor-pointer hover:bg-slate-200/50 transition-colors list-none">
+                          <div className="p-1 bg-white rounded-md shadow-sm">
+                            <BrainCircuit className="w-3 h-3 text-blue-500 group-open/thought:rotate-12 transition-transform" />
+                          </div>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">CoreBot Thinking Process</span>
+                          <ChevronDown className="w-3 h-3 ml-auto text-slate-400 group-open/thought:rotate-180 transition-transform" />
+                        </summary>
+                        <div className="p-3 border-t border-slate-200 bg-white/50 text-[11px] leading-relaxed text-slate-600 font-medium italic whitespace-pre-wrap animate-fade-in">
+                          {msg.thought}
+                        </div>
+                      </details>
+                    )}
+                    
+                    <div className={`p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                      msg.sender === 'user' 
+                        ? 'bg-blue-600 text-white rounded-br-sm' 
+                        : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm'
+                    }`}>
+                      {msg.sender === 'bot' ? (
+                        <article className="prose prose-sm max-w-none prose-slate prose-p:leading-relaxed prose-pre:p-0 prose-pre:bg-transparent prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-strong:text-blue-700 prose-ul:my-2 prose-li:my-1">
+                          <ReactMarkdown 
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              code({node, inline, className, children, ...props}: any) {
+                                const match = /language-(\w+)/.exec(className || '');
+                                return !inline ? (
+                                  <div className="my-4 rounded-xl overflow-hidden border border-slate-700 bg-slate-900 shadow-lg">
+                                    <div className="bg-slate-800 px-4 py-1.5 flex items-center justify-between border-b border-slate-700">
+                                      <div className="flex items-center gap-2">
+                                        <Terminal className="w-3.5 h-3.5 text-slate-400" />
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{match ? match[1] : 'code'}</span>
+                                      </div>
+                                    </div>
+                                    <pre className="p-4 overflow-x-auto text-[13px] leading-relaxed text-blue-100 font-mono">
+                                      <code className={className} {...props}>
+                                        {children}
+                                      </code>
+                                    </pre>
+                                  </div>
+                                ) : (
+                                  <code className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-bold text-[13px]" {...props}>
+                                    {children}
+                                  </code>
+                                );
+                              }
+                            }}
+                          >
+                            {msg.text}
+                          </ReactMarkdown>
+                        </article>
+                      ) : (
+                        <div className="whitespace-pre-wrap">{msg.text}</div>
+                      )}
+                    </div>
+                    {msg.sender === 'bot' && msg.model && (
+                      <div className="flex items-center gap-1 px-1 mt-0.5">
+                        <div className="w-1 h-1 rounded-full bg-blue-400" />
+                        <span className="text-[9px] font-black uppercase tracking-tighter text-slate-400 italic">
+                          Responded by <span className="text-blue-500">Lyra Nebula 31B</span>
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
               
               {isLoading && (
-                <div className="flex justify-start animate-pulse">
-                  <div className="bg-white border border-slate-200 text-slate-500 p-3.5 rounded-2xl rounded-bl-sm shadow-sm flex items-center gap-2.5">
-                    <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-                    <span className="text-xs font-bold tracking-wide">Sedang mengetik...</span>
+                <div className="flex justify-start">
+                  <div className="bg-white border border-slate-200 p-4 rounded-2xl rounded-bl-sm shadow-sm flex flex-col gap-3 min-w-[200px] animate-message-pop">
+                    <div className="flex items-center gap-3">
+                      {isThinking ? (
+                        <div className="relative">
+                          <BrainCircuit className="w-5 h-5 text-blue-500 animate-pulse" />
+                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full animate-ping" />
+                        </div>
+                      ) : (
+                        <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+                      )}
+                      <span className="text-xs font-black tracking-wide text-slate-700 uppercase">
+                        {isThinking ? 'CoreBot sedang berfikir...' : 'Sedang mengetik...'}
+                      </span>
+                    </div>
+                    
+                    <div className="flex gap-1">
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                      <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"></div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -317,6 +498,13 @@ export default function CoreBot() {
         .animate-message-pop { animation: messagePop 0.3s ease-out forwards; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Custom Prose Overrides */
+        .prose pre { margin: 0 !important; }
+        .prose ul { list-style-type: disc !important; padding-left: 1.25rem !important; }
+        .prose ol { list-style-type: decimal !important; padding-left: 1.25rem !important; }
+        .prose li { margin-top: 0.25rem !important; margin-bottom: 0.25rem !important; }
+        .prose p { margin-top: 0.5rem !important; margin-bottom: 0.5rem !important; }
       `}</style>
     </>
   );
