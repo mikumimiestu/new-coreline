@@ -25,181 +25,204 @@ interface Tutorial {
 const tutorials: Tutorial[] = [
   {
     id: 'vscode',
-    title: 'VS Code',
+    title: 'Visual Studio Code',
     icon: '💻',
     install: [
       { 
-        title: 'Unduh Installer', 
-        desc: 'Silakan kunjungi situs resmi code.visualstudio.com dan unduh installer yang sesuai dengan sistem operasi kamu (Windows, Mac, atau Linux).' 
+        title: '1. Unduh Installer Resmi', 
+        desc: 'Buka browser dan kunjungi https://code.visualstudio.com. Klik tombol besar bertuliskan "Download for Windows" atau pilih versi untuk Mac/Linux. Tunggu hingga file .exe atau .dmg selesai diunduh sepenuhnya.' 
       },
       { 
-        title: 'Proses Instalasi', 
-        desc: 'Jalankan file installer yang sudah diunduh. Ikuti instruksi di layar (cukup klik Next). Pastikan kamu mencentang opsi "Add to PATH" jika muncul agar VS Code bisa diakses dari terminal.' 
+        title: '2. Menjalankan Instalasi', 
+        desc: 'Buka file yang baru saja diunduh. Klik "I accept the agreement". Klik "Next" terus-menerus. PENTING: Saat sampai di halaman "Select Additional Tasks", centang SEMUA kotak yang tersedia, termasuk "Add to PATH" dan "Open with Code". Lalu klik Install.' 
       },
       {
-        title: 'Pemasangan Selesai',
-        desc: 'Setelah instalasi selesai, buka aplikasi Visual Studio Code. Kamu akan disambut dengan halaman "Get Started".'
+        title: '3. Verifikasi & Halaman Sambutan',
+        desc: 'Setelah selesai, klik "Finish" untuk membuka VS Code. Jika kamu melihat jendela dengan tema gelap dan tulisan "Get Started", berarti instalasi kamu berhasil!'
       }
     ],
     usage: [
       { 
-        title: 'Membuka Folder Project', 
-        desc: 'Untuk mulai membuat project, klik menu "File" di kiri atas, lalu pilih "Open Folder". Pilih folder kosong tempat kamu akan menyimpan kode.' 
+        title: '1. Membuat Ruang Kerja (Workspace)', 
+        desc: 'Buatlah folder baru di komputer kamu (misal: "Belajar-Coding"). Di VS Code, klik menu "File" > "Open Folder", lalu pilih folder tersebut. Sekarang kamu punya tempat untuk menyimpan semua kodemu.' 
       },
       { 
-        title: 'Membuka Terminal Bawaan', 
-        desc: 'VS Code memiliki terminal bawaan. Kamu bisa membukanya dengan menekan pintasan keyboard `Ctrl + \`` (tombol backtick di bawah Esc) atau melalui menu "Terminal" > "New Terminal".' 
+        title: '2. Membuat File Pertama', 
+        desc: 'Klik ikon "New File" di kolom kiri (Explorer) atau tekan Ctrl+N. Beri nama file tersebut `index.html`. Ketikkan tanda seru (!) lalu tekan Enter untuk membuat struktur HTML otomatis. Jangan lupa tekan Ctrl+S untuk simpan.' 
       },
       { 
-        title: 'Install Ekstensi (Opsional namun Penting)', 
-        desc: 'Klik ikon kotak-kotak di menu sebelah kiri (Extensions). Sangat disarankan untuk mencari dan menginstal ekstensi "Prettier - Code formatter" agar kodemu otomatis rapi saat disimpan.' 
+        title: '3. Memasang Ekstensi "Live Server"', 
+        desc: 'Klik ikon kotak-kotak di menu kiri (Extensions). Cari "Live Server" oleh Ritwick Dey, lalu klik Install. Ini berguna agar kamu bisa melihat hasil kodemu di browser secara otomatis setiap kali file disimpan.' 
       }
     ]
   },
   {
     id: 'python',
-    title: 'Python',
+    title: 'Python (Backend)',
     icon: '🐍',
     install: [
       { 
-        title: 'Unduh Python', 
-        desc: 'Kunjungi situs python.org dan masuk ke menu Downloads. Pilih versi terbaru yang stabil untuk sistem operasi kamu.' 
+        title: '1. Persiapan Unduhan', 
+        desc: 'Buka https://www.python.org/downloads/. Klik tombol kuning "Download Python 3.x.x". Pastikan kamu tidak mengunduh versi yang terlalu lama (dibawah versi 3.10).' 
       },
       { 
-        title: 'Centang "Add Python to PATH"', 
-        desc: 'PENTING: Saat pertama kali menjalankan installer (khusus Windows), pastikan kotak kecil bertuliskan "Add Python to PATH" di bagian bawah layar sudah dicentang sebelum menekan tombol Install.' 
+        title: '2. Pemasangan & Konfigurasi PATH', 
+        desc: 'Jalankan installer. SEBELUM klik "Install Now", kamu WAJIB mencentang kotak "Add Python to PATH" di bagian paling bawah. Ini agar komputer kamu mengenali perintah python di terminal. Jika sudah, baru klik Install Now.' 
       },
       { 
-        title: 'Verifikasi Instalasi', 
-        desc: 'Buka Terminal atau Command Prompt (CMD), lalu ketikkan perintah di bawah ini untuk memastikan Python sudah terpasang dengan baik:', 
+        title: '3. Tes Melalui Terminal', 
+        desc: 'Tekan tombol Windows di keyboard, ketik "cmd" dan Enter. Di jendela hitam yang muncul, ketik perintah di bawah ini. Jika muncul angka versi Python, selamat kamu berhasil!', 
         code: 'python --version' 
       }
     ],
     usage: [
       { 
-        title: 'Membuat File Python', 
-        desc: 'Di dalam VS Code, buat file baru dan beri nama `main.py`. Ketikkan kode sederhana ini ke dalam file tersebut: `print("Halo, saya siap belajar Python!")` lalu simpan (Ctrl+S).' 
+        title: '1. Menyiapkan Script', 
+        desc: 'Di VS Code, buat file baru bernama `hello.py`. Ketik kode: `nama = input("Siapa namamu? "); print("Halo " + nama)`. Simpan file tersebut.' 
       },
       { 
-        title: 'Menjalankan Kode', 
-        desc: 'Buka terminal di VS Code, pastikan kamu berada di folder yang sama dengan file `main.py`, lalu ketik perintah berikut untuk menjalankannya:', 
-        code: 'python main.py' 
-      },
-      { 
-        title: 'Menginstal Library Eksternal (PIP)', 
-        desc: 'Python memiliki PIP (Package Installer). Jika kamu butuh fitur tambahan (misalnya untuk mengambil data dari internet), kamu bisa menginstalnya lewat terminal:', 
-        code: 'pip install requests' 
+        title: '2. Eksekusi Program', 
+        desc: 'Buka Terminal di VS Code (Ctrl+`). Ketik perintah di bawah ini untuk menjalankan programmu. Masukkan namamu saat diminta dan lihat hasilnya!', 
+        code: 'python hello.py' 
       }
     ]
   },
   {
     id: 'nodejs',
-    title: 'Node.js',
+    title: 'Node.js (JavaScript)',
     icon: '🌐',
     install: [
       { 
-        title: 'Unduh Node.js LTS', 
-        desc: 'Buka situs nodejs.org. Sangat disarankan untuk mengunduh versi yang berlabel "LTS" (Long Term Support) karena versi ini jauh lebih stabil untuk pemula.' 
+        title: '1. Memilih Versi LTS', 
+        desc: 'Kunjungi https://nodejs.org. Kamu akan melihat dua pilihan: LTS dan Current. PILIH LTS (Long Term Support) karena ini adalah versi paling stabil dan jarang error untuk belajar.' 
       },
       { 
-        title: 'Proses Instalasi', 
-        desc: 'Jalankan installer-nya. Kamu bisa langsung menekan Next hingga proses selesai tanpa perlu mengubah pengaturan default-nya.' 
+        title: '2. Proses Wizard', 
+        desc: 'Jalankan installer. Klik "Next" untuk semua tahap. Jika muncul pilihan "Automatically install the necessary tools", biarkan kosong saja (opsional) agar proses lebih cepat. Klik Install.' 
       },
       { 
-        title: 'Verifikasi Node & NPM', 
-        desc: 'Buka terminal kamu, lalu cek apakah Node.js beserta NPM (Node Package Manager) sudah terinstal dengan mengetik perintah berikut secara bergantian:', 
+        title: '3. Verifikasi Command Line', 
+        desc: 'Buka terminal/CMD, lalu ketik perintah berikut untuk memastikan Node.js dan NPM (pengelola paket) sudah aktif:', 
         code: 'node -v\nnpm -v' 
       }
     ],
     usage: [
       { 
-        title: 'Inisialisasi Project (NPM Init)', 
-        desc: 'Untuk memulai project berbasis Node.js yang rapi, kamu butuh file `package.json`. Jalankan perintah ini di terminal dalam folder projectmu:', 
+        title: '1. Inisialisasi Project', 
+        desc: 'Masuk ke folder projectmu di terminal, lalu jalankan perintah ini untuk membuat file konfigurasi `package.json`. Ini adalah identitas dari project Node.js kamu.', 
         code: 'npm init -y' 
       },
       { 
-        title: 'Menjalankan Script JavaScript', 
-        desc: 'Buat file bernama `app.js`, isikan dengan kode: `console.log("Node.js berhasil berjalan!");`. Jalankan file tersebut dengan perintah:', 
-        code: 'node app.js' 
-      },
-      { 
-        title: 'Menginstal Package', 
-        desc: 'Jika kamu ingin membuat server web dengan framework Express, kamu bisa menginstalnya dengan mudah melalui NPM:', 
-        code: 'npm install express' 
+        title: '2. Mengelola Library (NPM)', 
+        desc: 'Jika kamu butuh fitur tambahan, gunakan NPM. Contoh, mari instal library "colors" agar terminalmu bisa berwarna:', 
+        code: 'npm install colors' 
       }
     ]
   },
   {
     id: 'git',
-    title: 'Git & GitHub',
+    title: 'Git (Version Control)',
     icon: '📦',
     install: [
       { 
-        title: 'Unduh Git', 
-        desc: 'Buka situs git-scm.com/downloads dan pilih sistem operasi kamu. Git adalah alat wajib untuk melacak perubahan pada kodemu.' 
+        title: '1. Unduh Git SCM', 
+        desc: 'Buka https://git-scm.com. Download versi terbaru. Untuk Windows, pilih "64-bit Git for Windows Setup".' 
       },
       { 
-        title: 'Proses Instalasi', 
-        desc: 'Jalankan installer. Meskipun ada banyak opsi yang muncul, kamu bisa terus menekan Next dan menggunakan pengaturan default bawaan Git.' 
+        title: '2. Pengaturan Default Editor', 
+        desc: 'Saat instalasi, akan muncul banyak pilihan. Saat ditanya "Choosing the default editor used by Git", pilih "Use Visual Studio Code as Git\'s default editor". Sisanya biarkan default (klik Next sampai akhir).' 
       },
       { 
-        title: 'Konfigurasi Awal (Wajib)', 
-        desc: 'Setelah terinstal, buka terminal dan beri tahu Git siapa kamu. Ganti nama dan email di bawah ini dengan milikmu sendiri:', 
-        code: 'git config --global user.name "Nama Kamu"\ngit config --global user.email "email@kamu.com"' 
+        title: '3. Identitas Global', 
+        desc: 'Buka terminal dan jalankan dua perintah ini agar Git tahu siapa yang menulis kode. Gunakan nama dan email aslimu:', 
+        code: 'git config --global user.name "Nama Lengkapmu"\ngit config --global user.email "email@kamu.com"' 
       }
     ],
     usage: [
       { 
-        title: 'Inisialisasi Git di Project', 
-        desc: 'Buka terminal di dalam folder project kodemu, lalu jalankan perintah ini untuk mulai melacak folder tersebut menggunakan Git:', 
+        title: '1. Membuat Repositori', 
+        desc: 'Di terminal folder projectmu, jalankan perintah ini. Sekarang Git akan mulai memantau setiap perubahan karakter yang kamu ketik.', 
         code: 'git init' 
       },
       { 
-        title: 'Menyimpan Perubahan (Commit)', 
-        desc: 'Setiap kali kamu selesai membuat fitur, simpan perubahannya. Tambahkan semua file terlebih dahulu, lalu beri pesan yang jelas.', 
-        code: 'git add .\ngit commit -m "Menambahkan fitur login"' 
-      },
-      { 
-        title: 'Melihat Status File', 
-        desc: 'Jika kamu bingung file apa saja yang baru diubah atau belum disimpan, jalankan perintah status:', 
-        code: 'git status' 
+        title: '2. Menandai & Menyimpan (Commit)', 
+        desc: 'Gunakan perintah ini untuk "memotret" kondisi kodemu saat ini sebagai backup.', 
+        code: 'git add .\ngit commit -m "Latihan pertama saya"' 
       }
     ]
   },
   {
-    id: 'docker',
-    title: 'Docker',
-    icon: '🐳',
+    id: 'db',
+    title: 'Database GUI',
+    icon: '🗄️',
     install: [
       { 
-        title: 'Unduh Docker Desktop', 
-        desc: 'Kunjungi docs.docker.com/get-docker/ dan unduh Docker Desktop. Docker berguna agar aplikasimu bisa berjalan konsisten di perangkat mana saja.' 
+        title: '1. Unduh DBeaver Community', 
+        desc: 'Kunjungi https://dbeaver.io/download/. Pilih "Windows 64 bit (installer)" atau versi macOS sesuai laptopmu. Pastikan pilih versi Community (Gratis).' 
       },
       { 
-        title: 'Persyaratan Khusus Windows (WSL 2)', 
-        desc: 'Jika kamu menggunakan Windows, Docker biasanya meminta kamu untuk menginstal atau mengaktifkan WSL 2 (Windows Subsystem for Linux). Pastikan kamu menyetujuinya saat proses instalasi.' 
-      },
-      { 
-        title: 'Verifikasi Instalasi', 
-        desc: 'Buka Docker Desktop agar mesin Docker berjalan di latar belakang. Kemudian buka terminal dan cek versinya:', 
-        code: 'docker --version' 
+        title: '2. Jalankan Installer', 
+        desc: 'Buka installer, pilih bahasa, klik Next. Jika ditanya komponen, biarkan default dan klik Install. DBeaver akan otomatis menyertakan driver Java yang dibutuhkan.' 
       }
     ],
     usage: [
       { 
-        title: 'Menjalankan Container Pertama', 
-        desc: 'Mari kita tes apakah Docker sudah berfungsi penuh dengan menjalankan "image" percobaan bernama hello-world:', 
-        code: 'docker run hello-world' 
+        title: '1. Koneksi Pertama', 
+        desc: 'Buka DBeaver. Klik ikon "Colokan Listrik" di pojok kiri atas. Pilih "MySQL" (atau database yang kamu pelajari di Coreline). Klik Next.' 
       },
       { 
-        title: 'Melihat Container yang Aktif', 
-        desc: 'Untuk melihat proses aplikasi (container) apa saja yang sedang berjalan di dalam Docker kamu saat ini:', 
-        code: 'docker ps' 
+        title: '2. Database Settings', 
+        desc: 'Masukkan Server Host (biasanya localhost), Username (root), dan Password database kamu. Klik "Test Connection". Jika muncul pesan "Connected", klik Finish.' 
+      }
+    ]
+  },
+  {
+    id: 'api',
+    title: 'Postman (API)',
+    icon: '🚀',
+    install: [
+      { 
+        title: '1. Unduh App Desktop', 
+        desc: 'Kunjungi https://www.postman.com/downloads/. Sebenarnya ada versi web, tapi versi Desktop jauh lebih stabil dan bisa mengakses server lokal (localhost) dengan lebih mudah.' 
       },
       { 
-        title: 'Menghentikan Container', 
-        desc: 'Jika ada container yang ingin dimatikan, cari ID-nya menggunakan perintah `docker ps`, lalu gunakan perintah stop:', 
-        code: 'docker stop <container_id_disini>' 
+        title: '2. Instalasi & Akun', 
+        desc: 'Jalankan installer. Kamu bisa klik "Skip and go to the app" jika tidak ingin membuat akun sekarang, tapi membuat akun disarankan agar data tes kamu tidak hilang.' 
+      }
+    ],
+    usage: [
+      { 
+        title: '1. Membuat Request', 
+        desc: 'Klik ikon (+) di tengah layar. Di kolom URL, masukkan alamat API (contoh: https://jsonplaceholder.typicode.com/posts). Pastikan sebelah kiri URL bertuliskan GET.' 
+      },
+      { 
+        title: '2. Analisis Response', 
+        desc: 'Klik tombol biru "Send". Di bagian bawah layar (Response), kamu akan melihat data berupa JSON. Jika muncul angka 200 OK, berarti API tersebut berjalan normal.' 
+      }
+    ]
+  },
+  {
+    id: 'coreline',
+    title: 'Panduan Platform',
+    icon: '🚀',
+    install: [
+      { 
+        title: '1. Navigasi Dashboard', 
+        desc: 'Dashboard adalah pusat belajarmu. Di sini kamu bisa melihat daftar semua course yang tersedia, dari dasar hingga advanced.' 
+      },
+      { 
+        title: '2. Membaca Materi', 
+        desc: 'Klik pada salah satu course untuk mulai membaca materi. Materi disusun secara sistematis agar mudah dipahami oleh pemula.' 
+      }
+    ],
+    usage: [
+      { 
+        title: '1. Mengambil Quiz', 
+        desc: 'Setiap modul memiliki quiz. Selesaikan quiz dengan nilai minimal untuk membuka progres modul berikutnya.' 
+      },
+      { 
+        title: '2. Konsultasi AI (Lyra)', 
+        desc: 'Gunakan fitur Lyra Chat untuk bertanya tentang kode yang sulit. Lyra tahu progres belajarmu dan akan memberikan jawaban yang personal.' 
       }
     ]
   }
