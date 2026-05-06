@@ -280,7 +280,7 @@ export default function CoreBot() {
       <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[9999] flex flex-col items-end">
         {isChatOpen ? (
           <div 
-            className={`bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-bottom-right chat-lux-anim
+            className={`bg-white rounded-none shadow-[4px_4px_0px_#1e3a8a] border-2 border-blue-900 border-blue-900 flex flex-col overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-bottom-right chat-lux-anim
               ${isExpanded 
                 ? 'w-[90vw] md:w-[600px] h-[80vh] md:h-[700px]'
                 : 'w-80 sm:w-[26rem] h-[500px]'
@@ -289,9 +289,9 @@ export default function CoreBot() {
           >
             
             {/* Header Bot */}
-            <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-4 flex items-center justify-between text-white shrink-0 shadow-sm relative transition-colors z-20">
+            <div className="bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all p-4 flex items-center justify-between text-white shrink-0 shadow-[4px_4px_0px_#1e3a8a] relative transition-colors z-20">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-inner">
+                <div className="w-8 h-8 rounded-none bg-white/20 backdrop-blur-md flex items-center justify-center border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a]">
                   <Bot className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -299,7 +299,7 @@ export default function CoreBot() {
                     <h3 className="text-sm font-black text-white uppercase tracking-wider leading-none">Lyra Nebula 31B</h3>
                     <div className="group/info relative cursor-help">
                       <Info className="w-3 h-3 text-white/50 hover:text-white transition-colors" />
-                      <div className="absolute left-0 top-full mt-2 w-48 p-2.5 bg-slate-900/95 backdrop-blur-md rounded-xl shadow-2xl border border-white/10 text-[9px] font-medium leading-relaxed text-blue-100 opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-[100]">
+                      <div className="absolute left-0 top-full mt-2 w-48 p-2.5 bg-slate-900/95 backdrop-blur-md rounded-none shadow-[4px_4px_0px_#1e3a8a] border-2 border-blue-900 border-blue-900 text-[9px] font-medium leading-relaxed text-blue-100 opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-[100]">
                         <div className="font-black text-white mb-1 uppercase tracking-widest text-[8px] flex items-center gap-1">
                           <Sparkles className="w-2.5 h-2.5 text-blue-400" /> Lyra Engine Detail
                         </div>
@@ -308,17 +308,17 @@ export default function CoreBot() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 mt-0.5">
-                    <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+                    <div className="w-1.5 h-1.5 bg-emerald-400 rounded-none animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
                     <span className="text-[9px] font-bold text-emerald-200 uppercase tracking-widest">Active System</span>
                   </div>
                 </div>
               </div>
               
               <div className="flex items-center gap-1">
-                <button onClick={() => setIsExpanded(!isExpanded)} className="hover:bg-white/20 p-2 rounded-xl transition-all">
+                <button onClick={() => setIsExpanded(!isExpanded)} className="hover:bg-white/20 p-2 rounded-none transition-all">
                   {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                 </button>
-                <button onClick={() => setIsChatOpen(false)} className="hover:bg-white/20 p-2 rounded-xl transition-all">
+                <button onClick={() => setIsChatOpen(false)} className="hover:bg-white/20 p-2 rounded-none transition-all">
                   <Minus className="w-5 h-5" />
                 </button>
               </div>
@@ -326,40 +326,40 @@ export default function CoreBot() {
 
 
 
-            <div className="flex-1 overflow-y-auto p-4 bg-slate-50/50 flex flex-col gap-4 relative z-10">
+            <div className="flex-1 overflow-y-auto p-4 bg-sky-50/50 flex flex-col gap-4 relative z-10">
               {chatMessages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-message-pop`}>
                   <div className="flex flex-col gap-1 max-w-[90%]">
                     {msg.sender === 'bot' && msg.thought && (
-                      <details className="group/thought bg-slate-100 border border-slate-200 rounded-xl mb-1 overflow-hidden transition-all">
+                      <details className="group/thought bg-sky-100 border-2 border-blue-900 border-blue-900 rounded-none mb-1 overflow-hidden transition-all">
                         <summary className="flex items-center gap-2 p-2.5 cursor-pointer hover:bg-slate-200/50 transition-colors list-none">
-                          <div className="p-1 bg-white rounded-md shadow-sm">
+                          <div className="p-1 bg-white rounded-none shadow-[4px_4px_0px_#1e3a8a]">
                             <BrainCircuit className="w-3 h-3 text-blue-500 group-open/thought:rotate-12 transition-transform" />
                           </div>
                           <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">CoreBot Thinking Process</span>
                           <ChevronDown className="w-3 h-3 ml-auto text-slate-400 group-open/thought:rotate-180 transition-transform" />
                         </summary>
-                        <div className="p-3 border-t border-slate-200 bg-white/50 text-[11px] leading-relaxed text-slate-600 font-medium italic whitespace-pre-wrap animate-fade-in">
+                        <div className="p-3 border-t border-blue-900 bg-white/50 text-[11px] leading-relaxed text-blue-950 font-bold font-medium italic whitespace-pre-wrap animate-fade-in">
                           {msg.thought}
                         </div>
                       </details>
                     )}
                     
-                    <div className={`p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                    <div className={`p-4 rounded-none text-sm leading-relaxed shadow-[4px_4px_0px_#1e3a8a] ${
                       msg.sender === 'user' 
                         ? 'bg-blue-600 text-white rounded-br-sm' 
-                        : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm'
+                        : 'bg-white border-2 border-blue-900 border-blue-900 text-blue-950 font-bold rounded-bl-sm'
                     }`}>
                       {msg.sender === 'bot' ? (
-                        <article className="prose prose-sm max-w-none prose-slate prose-p:leading-relaxed prose-pre:p-0 prose-pre:bg-transparent prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-strong:text-blue-700 prose-ul:my-2 prose-li:my-1">
+                        <article className="prose prose-sm max-w-none prose-slate prose-p:leading-relaxed prose-pre:p-0 prose-pre:bg-transparent prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded-none prose-strong:text-blue-700 prose-ul:my-2 prose-li:my-1">
                           <ReactMarkdown 
                             remarkPlugins={[remarkGfm]}
                             components={{
                               code({node, inline, className, children, ...props}: any) {
                                 const match = /language-(\w+)/.exec(className || '');
                                 return !inline ? (
-                                  <div className="my-4 rounded-xl overflow-hidden border border-slate-700 bg-slate-900 shadow-lg">
-                                    <div className="bg-slate-800 px-4 py-1.5 flex items-center justify-between border-b border-slate-700">
+                                  <div className="my-4 rounded-none overflow-hidden border-2 border-blue-900 border-blue-900 bg-slate-900 shadow-[4px_4px_0px_#1e3a8a]">
+                                    <div className="bg-slate-800 px-4 py-1.5 flex items-center justify-between border-b border-blue-900">
                                       <div className="flex items-center gap-2">
                                         <Terminal className="w-3.5 h-3.5 text-slate-400" />
                                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{match ? match[1] : 'code'}</span>
@@ -372,7 +372,7 @@ export default function CoreBot() {
                                     </pre>
                                   </div>
                                 ) : (
-                                  <code className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-bold text-[13px]" {...props}>
+                                  <code className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-none font-bold text-[13px]" {...props}>
                                     {children}
                                   </code>
                                 );
@@ -388,7 +388,7 @@ export default function CoreBot() {
                     </div>
                     {msg.sender === 'bot' && msg.model && (
                       <div className="flex items-center gap-1 px-1 mt-0.5">
-                        <div className="w-1 h-1 rounded-full bg-blue-400" />
+                        <div className="w-1 h-1 rounded-none bg-blue-400" />
                         <span className="text-[9px] font-black uppercase tracking-tighter text-slate-400 italic">
                           Responded by <span className="text-blue-500">Lyra Nebula 31B</span>
                         </span>
@@ -400,25 +400,25 @@ export default function CoreBot() {
               
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-white border border-slate-200 p-4 rounded-2xl rounded-bl-sm shadow-sm flex flex-col gap-3 min-w-[200px] animate-message-pop">
+                  <div className="bg-white border-2 border-blue-900 border-blue-900 p-4 rounded-none rounded-bl-sm shadow-[4px_4px_0px_#1e3a8a] flex flex-col gap-3 min-w-[200px] animate-message-pop">
                     <div className="flex items-center gap-3">
                       {isThinking ? (
                         <div className="relative">
                           <BrainCircuit className="w-5 h-5 text-blue-500 animate-pulse" />
-                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full animate-ping" />
+                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-400 rounded-none animate-ping" />
                         </div>
                       ) : (
                         <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
                       )}
-                      <span className="text-xs font-black tracking-wide text-slate-700 uppercase">
+                      <span className="text-xs font-black tracking-wide text-blue-950 font-bold uppercase">
                         {isThinking ? 'CoreBot sedang berfikir...' : 'Sedang mengetik...'}
                       </span>
                     </div>
                     
                     <div className="flex gap-1">
-                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                      <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-none animate-bounce [animation-delay:-0.3s]"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-none animate-bounce [animation-delay:-0.15s]"></div>
+                      <div className="w-1.5 h-1.5 bg-cyan-500 rounded-none animate-bounce"></div>
                     </div>
                   </div>
                 </div>
@@ -435,14 +435,14 @@ export default function CoreBot() {
             )}
 
             {/* Input Area & FAQ */}
-            <div className="bg-white border-t border-slate-100 shrink-0">
-              <div className="flex gap-2 overflow-x-auto p-3 scrollbar-hide border-b border-slate-50">
+            <div className="bg-white border-t border-blue-900 shrink-0">
+              <div className="flex gap-2 overflow-x-auto p-3 scrollbar-hide border-b border-blue-900">
                 {chatbotFaqs.map((faq, i) => (
                   <button 
                     key={i} 
                     onClick={() => handleAskFaq(faq)} 
                     disabled={isLoading || cooldownTime > 0}
-                    className="whitespace-nowrap text-[11px] text-blue-700 bg-blue-50 hover:bg-blue-100 px-3.5 py-2 rounded-full transition-colors font-bold border border-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="whitespace-nowrap text-[11px] text-blue-700 bg-blue-50 hover:bg-blue-100 px-3.5 py-2 rounded-none transition-colors font-bold border-2 border-blue-900 border-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {faq.q}
                   </button>
@@ -456,12 +456,12 @@ export default function CoreBot() {
                   onChange={(e) => setInputText(e.target.value)}
                   placeholder={cooldownTime > 0 ? "Bentar ya, lagi cooldown..." : "Tanya seputar Coreline..."}
                   disabled={isLoading || cooldownTime > 0}
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:bg-slate-100 disabled:cursor-not-allowed"
+                  className="flex-1 bg-sky-50 border-2 border-blue-900 border-blue-900 rounded-none py-3 px-4 text-sm font-medium focus:outline-none focus:border-blue-900 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:bg-sky-100 disabled:cursor-not-allowed"
                 />
                 <button 
                   type="submit"
                   disabled={!inputText.trim() || isLoading || cooldownTime > 0}
-                  className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg flex-shrink-0"
+                  className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-none transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a] flex-shrink-0"
                 >
                   <Send className="w-5 h-5" />
                 </button>
@@ -472,12 +472,12 @@ export default function CoreBot() {
         ) : (
           <button 
             onClick={() => setIsChatOpen(true)} 
-            className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-4 rounded-full shadow-[0_10px_40px_-10px_rgba(59,130,246,0.8)] hover:scale-110 transition-all duration-300 flex items-center justify-center group border border-blue-400 relative" 
+            className="bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all text-white p-4 rounded-none shadow-[0_10px_40px_-10px_rgba(59,130,246,0.8)] hover:scale-110 transition-all duration-300 flex items-center justify-center group border-2 border-blue-900 border-blue-900 relative" 
           >
              <MessageCircle className="w-7 h-7" />
-             <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full animate-pulse"></span>
+             <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-blue-900 rounded-none animate-pulse"></span>
              
-             <span className="absolute right-full mr-4 bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none hidden md:block shadow-lg">
+             <span className="absolute right-full mr-4 bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none hidden md:block shadow-[4px_4px_0px_#1e3a8a]">
                Ada kendala? Tanya CoreBot di sini.
              </span>
           </button>

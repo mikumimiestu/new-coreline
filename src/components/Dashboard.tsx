@@ -510,8 +510,8 @@ export default function Dashboard() {
   }, [progressMap, allLanguageStats]);
 
   if (authLoading || loadingCourses) return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
-      <div className="w-16 h-16 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin flex items-center justify-center">
+    <div className="min-h-screen bg-sky-50 flex flex-col items-center justify-center gap-4">
+      <div className="w-16 h-16 border-4 border-blue-900 border-t-blue-600 rounded-none animate-spin flex items-center justify-center">
          <Terminal className="w-6 h-6 text-blue-600 animate-pulse" />
       </div>
       <p className="text-slate-500 font-bold animate-pulse">Memuat Server...</p>
@@ -519,12 +519,12 @@ export default function Dashboard() {
   );
 
   if (!user) return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-sky-50 flex items-center justify-center p-6 relative overflow-hidden">
       <div className="absolute inset-0 opacity-[0.4] bg-[linear-gradient(rgba(203,213,225,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(203,213,225,0.5)_1px,transparent_1px)] bg-[size:30px_30px]"></div>
-      <div className="text-center p-8 bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200 shadow-xl relative z-10 max-w-md w-full">
-        <h1 className="text-3xl font-bold text-slate-900 mb-4">Sesi Berakhir</h1>
-        <p className="text-slate-600 mb-6 font-medium">Silakan login kembali untuk melanjutkan sesi belajar Anda.</p>
-        <Link to="/login" className="px-6 py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors inline-block w-full shadow-md">Masuk Kembali</Link>
+      <div className="text-center p-8 bg-white/80 backdrop-blur-md rounded-none border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] relative z-10 max-w-md w-full">
+        <h1 className="text-3xl font-bold text-blue-950 font-bold mb-4">Sesi Berakhir</h1>
+        <p className="text-blue-950 font-bold mb-6 font-medium">Silakan login kembali untuk melanjutkan sesi belajar Anda.</p>
+        <Link to="/login" className="px-6 py-3.5 bg-blue-600 text-white font-bold rounded-none hover:bg-blue-700 transition-colors inline-block w-full shadow-[4px_4px_0px_#1e3a8a]">Masuk Kembali</Link>
       </div>
     </div>
   );
@@ -532,13 +532,13 @@ export default function Dashboard() {
   if (showProfile) return <ProfilePage onBack={() => setShowProfile(false)} />;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans relative overflow-x-hidden selection:bg-blue-500/30">
+    <div className="min-h-screen bg-sky-50 text-blue-950 font-bold font-sans relative overflow-x-hidden selection:bg-blue-500/30">
       
       <div className="fixed inset-0 opacity-[0.4] pointer-events-none z-0 bg-[linear-gradient(rgba(203,213,225,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(203,213,225,0.5)_1px,transparent_1px)] bg-[size:30px_30px]"></div>
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-blue-100/50 to-transparent -z-10" />
-      <div className="absolute top-20 right-0 w-96 h-96 bg-cyan-300/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-20 right-0 w-96 h-96 bg-cyan-300/20 rounded-none blur-3xl pointer-events-none" />
 
-      <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 shadow-sm">
+      <nav className="sticky top-0 z-50 border-b border-blue-900 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 shadow-[4px_4px_0px_#1e3a8a]">
         <div className="container mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center gap-3 group cursor-pointer hover:opacity-80 transition-opacity">
@@ -548,28 +548,28 @@ export default function Dashboard() {
 
           <div className="flex items-center gap-4">
             {isSyncing && (
-              <div className="hidden md:flex items-center gap-2 text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200 shadow-sm">
+              <div className="hidden md:flex items-center gap-2 text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-none border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a]">
                 <RefreshCw className="w-3 h-3 animate-spin" /> Menyimpan...
               </div>
             )}
 
             <div className="hidden md:block text-right">
-              <div className="text-sm font-bold text-slate-900">{user.full_name}</div>
-              <div className={`text-[10px] font-black uppercase tracking-wider inline-block px-2 py-0.5 rounded border mt-0.5 shadow-sm ${
+              <div className="text-sm font-bold text-blue-950 font-bold">{user.full_name}</div>
+              <div className={`text-[10px] font-black uppercase tracking-wider inline-block px-2 py-0.5 rounded-none border-2 border-blue-900 mt-0.5 shadow-[4px_4px_0px_#1e3a8a] ${
                 plan === 'ultimate' ? 'bg-amber-100 text-amber-700 border-amber-200' :
                 plan === 'ultra' ? 'bg-purple-100 text-purple-700 border-purple-200' :
-                plan === 'plus' ? 'bg-indigo-100 text-indigo-700 border-indigo-200' :
-                plan === 'pro'  ? 'bg-blue-100 text-blue-700 border-blue-200' :
-                'bg-slate-100 text-slate-600 border-slate-200'
+                plan === 'plus' ? 'bg-indigo-100 text-indigo-700 border-blue-900' :
+                plan === 'pro'  ? 'bg-blue-100 text-blue-700 border-blue-900' :
+                'bg-sky-100 text-blue-950 font-bold border-blue-900'
               }`}>
                 {plan} Member
               </div>
             </div>
 
-            <button onClick={() => setShowProfile(true)} className="p-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all text-slate-600 hover:text-blue-600 shadow-sm hover:shadow">
+            <button onClick={() => setShowProfile(true)} className="p-2.5 bg-white hover:bg-sky-50 border-2 border-blue-900 border-blue-900 rounded-none transition-all text-blue-950 font-bold hover:text-blue-600 shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a]">
               <UserIcon className="w-5 h-5" />
             </button>
-            <button onClick={logout} className="p-2.5 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl transition-all text-red-500 hover:text-red-600 shadow-sm hover:shadow">
+            <button onClick={logout} className="p-2.5 bg-red-50 hover:bg-red-100 border-2 border-blue-900 border-red-200 rounded-none transition-all text-red-500 hover:text-red-600 shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a]">
               <LogOut className="w-5 h-5" />
             </button>
           </div>
@@ -580,10 +580,10 @@ export default function Dashboard() {
 
         {plan !== 'ultimate' && (
           <div className="mb-8 animate-fade-in-up">
-            <div className={`relative overflow-hidden rounded-3xl border p-8 shadow-lg transition-all hover:shadow-xl ${
+            <div className={`relative overflow-hidden rounded-none border-2 border-blue-900 p-8 shadow-[4px_4px_0px_#1e3a8a] transition-all hover:shadow-[4px_4px_0px_#1e3a8a] ${
               plan === 'free' 
-                ? 'bg-gradient-to-r from-white via-slate-50 to-white border-slate-200' 
-                : 'bg-gradient-to-r from-blue-50 via-indigo-50 to-white border-blue-200'
+                ? 'bg-gradient-to-r from-white via-slate-50 to-white border-blue-900' 
+                : 'bg-gradient-to-r from-blue-50 via-indigo-50 to-white border-blue-900'
             }`}>
               <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-blue-500/5 to-transparent pointer-events-none"></div>
               <Cpu className="absolute -bottom-10 -right-10 w-48 h-48 text-slate-200 rotate-12" />
@@ -591,23 +591,23 @@ export default function Dashboard() {
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border bg-blue-100 text-blue-700 border-blue-200 shadow-sm">
+                    <div className="px-3 py-1 rounded-none text-[10px] font-black uppercase tracking-widest border-2 border-blue-900 bg-blue-100 text-blue-700 border-blue-900 shadow-[4px_4px_0px_#1e3a8a]">
                       {plan === 'free' ? 'Unlock All Features' : 'Tingkatkan Akses'}
                     </div>
                   </div>
                   
-                  <h2 className="text-3xl font-extrabold text-slate-900 mb-2 leading-tight">
+                  <h2 className="text-3xl font-extrabold text-blue-950 font-bold mb-2 leading-tight">
                     {plan === 'free' ? 'Upgrade ke Paket Premium' : 'Upgrade ke Paket Ultimate'}
                   </h2>
                   
-                  <p className="text-slate-600 max-w-2xl text-sm leading-relaxed font-medium">
+                  <p className="text-blue-950 font-bold max-w-2xl text-sm leading-relaxed font-medium">
                     Dapatkan akses penuh ke seluruh materi premium, sertifikat eksklusif, studi kasus industri, dan dukungan mentor profesional.
                   </p>
                 </div>
 
                 <Link 
                   to="/pricing" 
-                  className="group relative px-8 py-4 rounded-xl font-bold text-white shadow-lg transition-all transform hover:-translate-y-1 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 border border-blue-400/50 flex-shrink-0 animate-pulse"
+                  className="group relative px-8 py-4 rounded-none font-bold text-white shadow-[4px_4px_0px_#1e3a8a] transition-all transform hover:-translate-y-1 bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all hover:from-blue-700 hover:to-cyan-600 border-2 border-blue-900 border-blue-900 flex-shrink-0 animate-pulse"
                 >
                   <span className="flex items-center gap-3 text-sm uppercase tracking-wider">
                     <Crown className="w-5 h-5 fill-current text-yellow-300" /> Upgrade Sekarang
@@ -622,31 +622,31 @@ export default function Dashboard() {
           {!selectedLanguage && (
             <>
               {/* LMS STYLE HERO SECTION */}
-              <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 rounded-[2rem] p-8 md:p-12 text-white shadow-2xl mb-12 relative overflow-hidden flex flex-col md:flex-row justify-between items-center gap-10 animate-fade-in-up">
+              <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 rounded-[2rem] p-8 md:p-12 text-white shadow-[4px_4px_0px_#1e3a8a] mb-12 relative overflow-hidden flex flex-col md:flex-row justify-between items-center gap-10 animate-fade-in-up">
                 {/* Background Details */}
-                <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-                <div className="absolute bottom-0 left-0 w-72 h-72 bg-cyan-500/20 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none"></div>
+                <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/20 rounded-none blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-72 h-72 bg-cyan-500/20 rounded-none blur-3xl -ml-20 -mb-20 pointer-events-none"></div>
 
                 <div className="relative z-10 w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left">
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-[11px] font-black uppercase tracking-widest mb-6 backdrop-blur-md shadow-sm">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-500/20 border-2 border-blue-900 border-blue-900 text-blue-200 text-[11px] font-black uppercase tracking-widest mb-6 backdrop-blur-md shadow-[4px_4px_0px_#1e3a8a]">
                     <Sparkles className="w-4 h-4 text-cyan-300" /> Selamat datang kembali
                   </div>
                   <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-5 leading-[1.1] tracking-tight">
-                    Halo, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200">{user.full_name?.split(' ')[0]}!</span>
+                    Halo, <span className="text-transparent bg-clip-text bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all">{user.full_name?.split(' ')[0]}!</span>
                   </h1>
                   <p className="text-blue-100/80 font-medium text-base md:text-lg mb-8 max-w-md leading-relaxed">
                     Siap untuk menguasai keahlian baru hari ini? Lanjutkan progressmu dan raih impian karirmu.
                   </p>
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                    <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-4 border border-white/10 flex items-center gap-4">
-                      <div className="p-3 bg-emerald-500/20 rounded-xl"><Target className="w-6 h-6 text-emerald-300"/></div>
+                    <div className="bg-white/10 backdrop-blur-md rounded-none px-6 py-4 border-2 border-blue-900 border-blue-900 flex items-center gap-4">
+                      <div className="p-3 bg-emerald-500/20 rounded-none"><Target className="w-6 h-6 text-emerald-300"/></div>
                       <div>
                         <div className="text-2xl font-black text-white">{userGlobalStats.completed}</div>
                         <div className="text-[10px] text-emerald-200 font-bold uppercase tracking-widest">Modul Selesai</div>
                       </div>
                     </div>
-                    <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-4 border border-white/10 flex items-center gap-4">
-                      <div className="p-3 bg-purple-500/20 rounded-xl"><Boxes className="w-6 h-6 text-purple-300"/></div>
+                    <div className="bg-white/10 backdrop-blur-md rounded-none px-6 py-4 border-2 border-blue-900 border-blue-900 flex items-center gap-4">
+                      <div className="p-3 bg-purple-500/20 rounded-none"><Boxes className="w-6 h-6 text-purple-300"/></div>
                       <div>
                         <div className="text-2xl font-black text-white">{userGlobalStats.totalCourseAccess}</div>
                         <div className="text-[10px] text-purple-200 font-bold uppercase tracking-widest">Course Akses</div>
@@ -657,38 +657,38 @@ export default function Dashboard() {
 
                 <div className="relative z-10 w-full md:w-[45%] lg:w-[40%]">
                   {lastActiveCourse ? (
-                    <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-7 border border-white/20 shadow-2xl hover:border-white/30 transition-colors">
+                    <div className="bg-white/10 backdrop-blur-xl rounded-none p-7 border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] hover:border-blue-900 transition-colors">
                       <div className="flex items-center justify-between mb-5">
                         <span className="text-xs font-black text-cyan-300 uppercase tracking-widest flex items-center gap-2">
                           <Clock className="w-4 h-4"/> Terakhir Belajar
                         </span>
                       </div>
                       <div className="flex items-center gap-5 mb-6">
-                        <div className={`w-16 h-16 rounded-2xl ${lastActiveCourse.gradient} flex items-center justify-center shrink-0 shadow-inner`}>
-                          {lastActiveCourse.iconUrl ? <img src={lastActiveCourse.iconUrl} className="w-8 h-8 object-contain drop-shadow-md" alt="" /> : <Boxes className="w-8 h-8 text-white"/>}
+                        <div className={`w-16 h-16 rounded-none ${lastActiveCourse.gradient} flex items-center justify-center shrink-0 shadow-[4px_4px_0px_#1e3a8a]`}>
+                          {lastActiveCourse.iconUrl ? <img src={lastActiveCourse.iconUrl} className="w-8 h-8 object-contain drop-shadow-[4px_4px_0px_#1e3a8a]" alt="" /> : <Boxes className="w-8 h-8 text-white"/>}
                         </div>
                         <div className="flex-1">
                           <h3 className="text-xl font-extrabold text-white mb-2 line-clamp-1">{lastActiveCourse.name}</h3>
                           <div className="flex items-center gap-3">
-                            <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                              <div className="h-full bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full" style={{ width: `${lastActiveCourse.progress}%` }}></div>
+                            <div className="flex-1 h-1.5 bg-white/10 rounded-none overflow-hidden">
+                              <div className="h-full bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all rounded-none" style={{ width: `${lastActiveCourse.progress}%` }}></div>
                             </div>
                             <span className="text-cyan-300 text-[10px] font-black">{lastActiveCourse.progress}%</span>
                           </div>
                         </div>
                       </div>
-                      <button onClick={() => setSelectedLanguage(lastActiveCourse.id)} className="w-full py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-2">
+                      <button onClick={() => setSelectedLanguage(lastActiveCourse.id)} className="w-full py-3.5 bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all hover:from-blue-400 hover:to-blue-500 text-white font-bold rounded-none transition-all shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a] flex items-center justify-center gap-2">
                         Lanjutkan Kursus <ChevronRight className="w-4 h-4"/>
                       </button>
                     </div>
                   ) : (
-                    <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 text-center shadow-2xl">
-                      <div className="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-5 border border-blue-400/30">
+                    <div className="bg-white/10 backdrop-blur-xl rounded-none p-8 border-2 border-blue-900 border-blue-900 text-center shadow-[4px_4px_0px_#1e3a8a]">
+                      <div className="w-20 h-20 bg-blue-500/20 rounded-none flex items-center justify-center mx-auto mb-5 border-2 border-blue-900 border-blue-900">
                         <Rocket className="w-10 h-10 text-cyan-300" />
                       </div>
                       <h3 className="text-2xl font-extrabold text-white mb-2">Mulai Perjalananmu!</h3>
                       <p className="text-blue-200/80 text-sm mb-6 font-medium">Pilih course pertamamu dari katalog di bawah untuk memulai pembelajaran.</p>
-                      <button onClick={() => window.scrollTo({top: 500, behavior: 'smooth'})} className="px-6 py-3 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-100 transition-colors">
+                      <button onClick={() => window.scrollTo({top: 500, behavior: 'smooth'})} className="px-6 py-3 bg-white text-blue-950 font-bold font-bold rounded-none hover:bg-sky-100 transition-colors">
                         Jelajahi Katalog
                       </button>
                     </div>
@@ -700,36 +700,36 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
                 <Link 
                   to="/offline-mentoring" 
-                  className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all group"
+                  className="flex items-center gap-4 p-5 bg-white rounded-none border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a] hover:border-blue-900 transition-all group"
                 >
-                  <div className="p-3 bg-blue-100 rounded-xl text-blue-600 group-hover:scale-110 transition-transform shadow-inner">
+                  <div className="p-3 bg-blue-100 rounded-none text-blue-600 group-hover:scale-110 transition-transform shadow-[4px_4px_0px_#1e3a8a]">
                     <Users className="w-6 h-6" />
                   </div>
                   <div>
-                    <div className="text-sm font-black text-slate-900 uppercase tracking-tight">Mentoring Offline</div>
+                    <div className="text-sm font-black text-blue-950 font-bold uppercase tracking-tight">Mentoring Offline</div>
                     <div className="text-[10px] text-slate-500 font-bold">Bimbingan Tatap Muka</div>
                   </div>
                   <ChevronRight className="w-4 h-4 ml-auto text-slate-300 group-hover:text-blue-500 transition-colors" />
                 </Link>
                 <Link 
                   to="/tutorial" 
-                  className="flex items-center gap-4 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-300 transition-all group"
+                  className="flex items-center gap-4 p-5 bg-white rounded-none border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a] hover:border-amber-300 transition-all group"
                 >
-                  <div className="p-3 bg-amber-100 rounded-xl text-amber-600 group-hover:scale-110 transition-transform shadow-inner">
+                  <div className="p-3 bg-amber-100 rounded-none text-amber-600 group-hover:scale-110 transition-transform shadow-[4px_4px_0px_#1e3a8a]">
                     <BookOpen className="w-6 h-6" />
                   </div>
                   <div>
-                    <div className="text-sm font-black text-slate-900 uppercase tracking-tight">Tutorial</div>
+                    <div className="text-sm font-black text-blue-950 font-bold uppercase tracking-tight">Tutorial</div>
                     <div className="text-[10px] text-slate-500 font-bold">Panduan Belajar</div>
                   </div>
                   <ChevronRight className="w-4 h-4 ml-auto text-slate-300 group-hover:text-amber-500 transition-colors" />
                 </Link>
                 <Link 
                   to="/lyra" 
-                  className="flex items-center gap-4 p-5 bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl border border-slate-700 shadow-xl hover:shadow-blue-500/20 hover:border-blue-500/50 transition-all group overflow-hidden relative"
+                  className="flex items-center gap-4 p-5 bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all rounded-none border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a] hover:border-blue-900 transition-all group overflow-hidden relative"
                 >
-                  <div className="absolute top-0 right-0 p-1 bg-blue-500 text-[8px] font-black text-white uppercase tracking-tighter -rotate-45 translate-x-3 translate-y-1 w-16 text-center shadow-md">NEW</div>
-                  <div className="p-3 bg-blue-500 rounded-xl text-white group-hover:scale-110 group-hover:rotate-6 transition-all shadow-lg shadow-blue-500/30">
+                  <div className="absolute top-0 right-0 p-1 bg-blue-500 text-[8px] font-black text-white uppercase tracking-tighter -rotate-45 translate-x-3 translate-y-1 w-16 text-center shadow-[4px_4px_0px_#1e3a8a]">NEW</div>
+                  <div className="p-3 bg-blue-500 rounded-none text-white group-hover:scale-110 group-hover:rotate-6 transition-all shadow-[4px_4px_0px_#1e3a8a] shadow-[4px_4px_0px_#1e3a8a]">
                     <Bot className="w-6 h-6" />
                   </div>
                   <div>
@@ -741,17 +741,17 @@ export default function Dashboard() {
               </div>
 
               <div className="flex items-center justify-between mb-4 px-1">
-                <h2 className="text-2xl font-extrabold text-slate-900">Katalog Kursus</h2>
+                <h2 className="text-2xl font-extrabold text-blue-950 font-bold">Katalog Kursus</h2>
               </div>
               <div className="flex overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 gap-3 md:flex-wrap scrollbar-hide mb-6">
                 {[{ id: 'all', label: 'Semua Kategori', icon: Layout }, ...CATEGORIES_INFO].map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as Category)}
-                    className={`flex items-center whitespace-nowrap gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all border shadow-sm flex-shrink-0 ${
+                    className={`flex items-center whitespace-nowrap gap-2 px-5 py-2.5 rounded-none text-sm font-bold transition-all border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] flex-shrink-0 ${
                       activeTab === tab.id
-                        ? 'bg-slate-900 text-white border-slate-800 shadow-slate-900/20'
-                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 hover:border-slate-300'
+                        ? 'bg-slate-900 text-white border-blue-900 shadow-[4px_4px_0px_#1e3a8a]'
+                        : 'bg-white border-blue-900 text-blue-950 font-bold hover:bg-sky-50 hover:text-blue-950 font-bold hover:border-blue-900'
                     }`}
                   >
                     <tab.icon className="w-4 h-4" /> {tab.label}
@@ -767,7 +767,7 @@ export default function Dashboard() {
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               placeholder={selectedLanguage ? "Cari materi di modul ini..." : "Cari course (Contoh: React, Python, Docker)..."}
-              className="w-full bg-white border border-slate-200 rounded-xl py-4 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm font-medium"
+              className="w-full bg-white border-2 border-blue-900 border-blue-900 rounded-none py-4 pl-12 pr-4 text-blue-950 font-bold placeholder:text-slate-400 focus:outline-none focus:border-blue-900 focus:ring-2 focus:ring-blue-500/20 transition-all shadow-[4px_4px_0px_#1e3a8a] font-medium"
             />
           </div>
 
@@ -789,17 +789,17 @@ export default function Dashboard() {
                     {/* Header Kategori dengan Tombol "Lihat Semua Materi" */}
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                       <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-blue-100 rounded-xl text-blue-600 shadow-sm border border-blue-200">
+                        <div className="p-2.5 bg-blue-100 rounded-none text-blue-600 shadow-[4px_4px_0px_#1e3a8a] border-2 border-blue-900 border-blue-900">
                           <catInfo.icon className="w-5 h-5" />
                         </div>
-                        <h2 className="text-2xl font-extrabold text-slate-800">{catInfo.label}</h2>
+                        <h2 className="text-2xl font-extrabold text-blue-950 font-bold">{catInfo.label}</h2>
                       </div>
                       
                       {/* Tombol Lihat Semua (Hanya muncul jika tab "Semua Kategori" aktif) */}
                       {activeTab === 'all' && (
                         <button 
                           onClick={() => setActiveTab(catInfo.id as Category)} 
-                          className="text-sm font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg transition-colors flex items-center gap-1 border border-blue-100"
+                          className="text-sm font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-none transition-colors flex items-center gap-1 border-2 border-blue-900 border-blue-900"
                         >
                           Lihat Semua <ChevronRight className="w-4 h-4" />
                         </button>
@@ -821,24 +821,24 @@ export default function Dashboard() {
                                 setSelectedLanguage(lang.id);
                               }
                             }}
-                            className={`group flex flex-col h-full bg-white rounded-2xl border border-slate-200 transition-all duration-300 ${openDropdownId === lang.id ? 'z-[110] relative shadow-xl ring-2 ring-blue-500/20' : 'z-10'} ${
+                            className={`group flex flex-col h-full bg-white rounded-none border-2 border-blue-900 border-blue-900 transition-all duration-300 ${openDropdownId === lang.id ? 'z-[110] relative shadow-[4px_4px_0px_#1e3a8a] ring-2 ring-blue-500/20' : 'z-10'} ${
                               lang.comingSoon ? 'opacity-70 cursor-not-allowed grayscale-[50%]' : 
                               isLockedByPrereq ? 'cursor-not-allowed opacity-80' : 
-                              'cursor-pointer shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-slate-300'
+                              'cursor-pointer shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a] hover:-translate-y-1 hover:border-blue-900'
                             }`}
                           >
                             {/* Card Header Thumbnail */}
                             <div className={`h-36 w-full rounded-t-2xl overflow-hidden ${lang.gradient} relative flex items-center justify-center`}>
                               <div className="absolute inset-0 bg-black/10 mix-blend-overlay"></div>
                               {lang.iconUrl ? (
-                                <img src={lang.iconUrl} alt="icon" className="w-16 h-16 object-contain drop-shadow-2xl transform group-hover:scale-110 transition-transform duration-500" />
+                                <img src={lang.iconUrl} alt="icon" className="w-16 h-16 object-contain drop-shadow-[4px_4px_0px_#1e3a8a] transform group-hover:scale-110 transition-transform duration-500" />
                               ) : (
-                                <Boxes className="w-16 h-16 text-white drop-shadow-2xl transform group-hover:scale-110 transition-transform duration-500" />
+                                <Boxes className="w-16 h-16 text-white drop-shadow-[4px_4px_0px_#1e3a8a] transform group-hover:scale-110 transition-transform duration-500" />
                               )}
                               
                               {/* Badge */}
                               {lang.badge && !lang.comingSoon && (
-                                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-slate-800 text-[10px] font-black px-2.5 py-1 rounded border border-white/50 shadow-sm uppercase tracking-wider">
+                                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-blue-950 font-bold text-[10px] font-black px-2.5 py-1 rounded-none border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] uppercase tracking-wider">
                                   {lang.badge}
                                 </div>
                               )}
@@ -846,7 +846,7 @@ export default function Dashboard() {
                               {/* Coming Soon Overlay */}
                               {lang.comingSoon && (
                                 <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center">
-                                  <span className="flex items-center gap-1.5 text-white text-[11px] font-bold px-3 py-1.5 rounded-full bg-white/20 border border-white/30 uppercase tracking-widest shadow-lg">
+                                  <span className="flex items-center gap-1.5 text-white text-[11px] font-bold px-3 py-1.5 rounded-none bg-white/20 border-2 border-blue-900 border-blue-900 uppercase tracking-widest shadow-[4px_4px_0px_#1e3a8a]">
                                     <Clock className="w-3 h-3" /> Segera Hadir
                                   </span>
                                 </div>
@@ -858,11 +858,11 @@ export default function Dashboard() {
                               {/* Ratings & Students */}
                               <div className="flex items-center gap-3 text-xs font-bold text-slate-500 mb-3">
                                 <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 text-amber-500 fill-current" /> {lang.rating}</span>
-                                <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                <span className="w-1 h-1 bg-slate-300 rounded-none"></span>
                                 <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {lang.totalStudents} Siswa</span>
                               </div>
 
-                              <h3 className="text-lg font-extrabold text-slate-900 mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                              <h3 className="text-lg font-extrabold text-blue-950 font-bold mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors">
                                 {lang.name}
                               </h3>
                               <p className="text-sm font-medium text-slate-500 line-clamp-2 leading-relaxed mb-5">
@@ -870,22 +870,22 @@ export default function Dashboard() {
                               </p>
 
                               {/* Footer Action Area */}
-                              <div className="mt-auto pt-4 border-t border-slate-100 relative">
+                              <div className="mt-auto pt-4 border-t border-blue-900 relative">
                                 {isLockedByPrereq ? (
-                                  <div className="text-xs font-bold text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-100 flex flex-col gap-1">
+                                  <div className="text-xs font-bold text-rose-600 bg-rose-50 p-2.5 rounded-none border-2 border-blue-900 border-rose-100 flex flex-col gap-1">
                                     <span className="flex items-center gap-1.5 uppercase tracking-wide text-[10px]">
                                       <ShieldAlert className="w-3 h-3"/> Terkunci Prasyarat
                                     </span>
-                                    <span className="text-slate-600 font-medium line-clamp-1">Selesaikan: <b className="text-slate-800">{missingNames}</b></span>
+                                    <span className="text-blue-950 font-bold font-medium line-clamp-1">Selesaikan: <b className="text-blue-950 font-bold">{missingNames}</b></span>
                                   </div>
                                 ) : showProgress ? (
                                   <div className="relative">
                                     <div className="flex justify-between items-end text-[10px] font-extrabold text-slate-500 mb-2 uppercase tracking-widest">
                                       <span>Progress</span>
-                                      <span className={lang.isComplete ? 'text-blue-600 text-xs' : 'text-slate-700'}>{lang.progress}%</span>
+                                      <span className={lang.isComplete ? 'text-blue-600 text-xs' : 'text-blue-950 font-bold'}>{lang.progress}%</span>
                                     </div>
-                                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-3">
-                                      <div className="h-full bg-blue-500 rounded-full" style={{ width: `${lang.progress}%` }}></div>
+                                    <div className="w-full h-1.5 bg-sky-100 rounded-none overflow-hidden mb-3">
+                                      <div className="h-full bg-blue-500 rounded-none" style={{ width: `${lang.progress}%` }}></div>
                                     </div>
 
                                     {lang.isComplete && (
@@ -896,7 +896,7 @@ export default function Dashboard() {
                                             setOpenDropdownId(openDropdownId === lang.id ? null : lang.id); 
                                           }}
                                           disabled={generatingCert && openDropdownId === lang.id}
-                                          className="w-full py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-lg border border-slate-200 flex items-center justify-between px-3 transition-colors"
+                                          className="w-full py-2 bg-sky-50 hover:bg-sky-100 text-blue-950 font-bold text-xs font-bold rounded-none border-2 border-blue-900 border-blue-900 flex items-center justify-between px-3 transition-colors"
                                         >
                                           <span className="flex items-center gap-2">
                                             {generatingCert && openDropdownId === lang.id ? <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600"/> : <Award className="w-3.5 h-3.5 text-amber-500"/>}
@@ -908,12 +908,12 @@ export default function Dashboard() {
                                         {openDropdownId === lang.id && (
                                           <>
                                             <div className="fixed inset-0 z-[9998]" onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); }}></div>
-                                            <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-xl border border-slate-200 z-[9999] overflow-hidden animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
+                                            <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-none shadow-[4px_4px_0px_#1e3a8a] border-2 border-blue-900 border-blue-900 z-[9999] overflow-hidden animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
                                               <div className="p-1 flex flex-col">
-                                                <button onClick={(e) => { e.stopPropagation(); processCertificate(lang.id, true, false); }} className="flex items-center gap-2 w-full p-2 text-left text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-colors">
+                                                <button onClick={(e) => { e.stopPropagation(); processCertificate(lang.id, true, false); }} className="flex items-center gap-2 w-full p-2 text-left text-xs font-bold text-blue-950 font-bold hover:bg-sky-50 hover:text-blue-600 rounded-none transition-colors">
                                                   <HardDrive className="w-3.5 h-3.5" /> Ke Perangkat
                                                 </button>
-                                                <button onClick={(e) => { e.stopPropagation(); processCertificate(lang.id, false, true); }} className="flex items-center gap-2 w-full p-2 text-left text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-colors">
+                                                <button onClick={(e) => { e.stopPropagation(); processCertificate(lang.id, false, true); }} className="flex items-center gap-2 w-full p-2 text-left text-xs font-bold text-blue-950 font-bold hover:bg-sky-50 hover:text-blue-600 rounded-none transition-colors">
                                                   <Cloud className="w-3.5 h-3.5" /> Ke CloudNest
                                                 </button>
                                               </div>
@@ -926,7 +926,7 @@ export default function Dashboard() {
                                 ) : !lang.comingSoon ? (
                                   <div className="flex items-center justify-between text-sm font-bold text-blue-600 group-hover:text-blue-700 transition-colors">
                                     <span>Mulai Belajar</span>
-                                    <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors transform group-hover:translate-x-1">
+                                    <div className="w-6 h-6 rounded-none bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors transform group-hover:translate-x-1">
                                       <ChevronRight className="w-3.5 h-3.5" />
                                     </div>
                                   </div>
@@ -944,32 +944,32 @@ export default function Dashboard() {
           ) : (
             // === BAGIAN DETAIL MODULE (Ketik dipilih) ===
             <div className="max-w-4xl mx-auto animate-fade-in-up">
-              <button onClick={() => setSelectedLanguage(null)} className="group flex items-center gap-2 text-slate-500 hover:text-blue-600 mb-8 font-bold text-sm transition-colors bg-white px-4 py-2.5 rounded-full border border-slate-200 shadow-sm hover:shadow-md w-fit">
+              <button onClick={() => setSelectedLanguage(null)} className="group flex items-center gap-2 text-slate-500 hover:text-blue-600 mb-8 font-bold text-sm transition-colors bg-white px-4 py-2.5 rounded-none border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a] w-fit">
                 <ArrowLeft className="w-4 h-4" /> Kembali ke Kategori
               </button>
 
-              <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-10 p-6 sm:p-8 bg-white rounded-3xl border border-slate-200 relative overflow-hidden shadow-md">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-10 p-6 sm:p-8 bg-white rounded-none border-2 border-blue-900 border-blue-900 relative overflow-hidden shadow-[4px_4px_0px_#1e3a8a]">
                 <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-blue-500/5 to-transparent pointer-events-none"></div>
-                <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br ${filteredLanguageStats.find(l => l.id === selectedLanguage)?.gradient} flex items-center justify-center shadow-lg z-10 shrink-0`}>
+                <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-none bg-gradient-to-br ${filteredLanguageStats.find(l => l.id === selectedLanguage)?.gradient} flex items-center justify-center shadow-[4px_4px_0px_#1e3a8a] z-10 shrink-0`}>
                   {filteredLanguageStats.find(l => l.id === selectedLanguage)?.iconUrl ? (
-                    <img src={filteredLanguageStats.find(l => l.id === selectedLanguage)?.iconUrl} className="w-10 h-10 sm:w-12 sm:h-12 object-contain drop-shadow-md" alt="Icon" />
+                    <img src={filteredLanguageStats.find(l => l.id === selectedLanguage)?.iconUrl} className="w-10 h-10 sm:w-12 sm:h-12 object-contain drop-shadow-[4px_4px_0px_#1e3a8a]" alt="Icon" />
                   ) : (
                     <Boxes className="w-10 h-10 text-white" />
                   )}
                 </div>
                 <div className="z-10">
-                  <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-3 tracking-tight">
+                  <h2 className="text-3xl md:text-4xl font-extrabold text-blue-950 font-bold mb-3 tracking-tight">
                     {filteredLanguageStats.find(l => l.id === selectedLanguage)?.name}
                   </h2>
-                  <div className="flex flex-wrap items-center gap-3 text-slate-600 text-sm font-medium">
-                    <span className="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 flex items-center gap-1.5 font-bold shadow-sm">
+                  <div className="flex flex-wrap items-center gap-3 text-blue-950 font-bold text-sm font-medium">
+                    <span className="bg-sky-50 px-3 py-1.5 rounded-none border-2 border-blue-900 border-blue-900 flex items-center gap-1.5 font-bold shadow-[4px_4px_0px_#1e3a8a]">
                       <BookOpen className="w-4 h-4 text-blue-600" /> {materials.length} Modul
                     </span>
-                    <span className="bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg border border-amber-200 flex items-center gap-1.5 font-bold shadow-sm">
+                    <span className="bg-amber-50 text-amber-700 px-3 py-1.5 rounded-none border-2 border-blue-900 border-amber-200 flex items-center gap-1.5 font-bold shadow-[4px_4px_0px_#1e3a8a]">
                       <Star className="w-4 h-4 fill-current text-amber-500" /> {filteredLanguageStats.find(l => l.id === selectedLanguage)?.rating}
                     </span>
                     {isPremium && (
-                       <span className="text-blue-700 font-bold bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200 flex items-center gap-1.5 shadow-sm">
+                       <span className="text-blue-700 font-bold bg-blue-50 px-3 py-1.5 rounded-none border-2 border-blue-900 border-blue-900 flex items-center gap-1.5 shadow-[4px_4px_0px_#1e3a8a]">
                          <Target className="w-4 h-4" /> {filteredLanguageStats.find(l => l.id === selectedLanguage)?.progress}% Selesai
                        </span>
                     )}
@@ -979,9 +979,9 @@ export default function Dashboard() {
 
               <div className="space-y-4">
                 {materials.length === 0 ? (
-                   <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 border-dashed">
+                   <div className="text-center py-16 bg-white rounded-none border-2 border-blue-900 border-blue-900 border-dashed">
                       <Terminal className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                      <h3 className="text-xl font-bold text-slate-700">Modul Belum Tersedia</h3>
+                      <h3 className="text-xl font-bold text-blue-950 font-bold">Modul Belum Tersedia</h3>
                       <p className="text-slate-500 mt-2 font-medium">Materi untuk kategori ini sedang dalam tahap penyusunan. Cek lagi nanti!</p>
                    </div>
                 ) : (
@@ -994,28 +994,28 @@ export default function Dashboard() {
                     const estTime = (m as any).estimated_time ?? 15;
 
                     return (
-                      <div key={m.id} className={`group relative bg-white border border-slate-200 hover:border-blue-300 rounded-2xl p-5 sm:p-6 transition-all duration-300 shadow-sm ${locked ? 'opacity-70 bg-slate-50' : 'hover:shadow-md'}`} style={{ animationDelay: `${idx * 50}ms` }}>
+                      <div key={m.id} className={`group relative bg-white border-2 border-blue-900 border-blue-900 hover:border-blue-900 rounded-none p-5 sm:p-6 transition-all duration-300 shadow-[4px_4px_0px_#1e3a8a] ${locked ? 'opacity-70 bg-sky-50' : 'hover:shadow-[4px_4px_0px_#1e3a8a]'}`} style={{ animationDelay: `${idx * 50}ms` }}>
                         <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 sm:items-start">
-                          <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-lg font-black transition-colors shadow-sm ${
-                            isCompleted ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
-                            locked ? 'bg-slate-100 text-slate-400 border border-slate-200' :
-                            'bg-blue-50 text-blue-600 border border-blue-200'
+                          <div className={`flex-shrink-0 w-12 h-12 rounded-none flex items-center justify-center text-lg font-black transition-colors shadow-[4px_4px_0px_#1e3a8a] ${
+                            isCompleted ? 'bg-emerald-50 text-emerald-600 border-2 border-blue-900 border-emerald-200' :
+                            locked ? 'bg-sky-100 text-slate-400 border-2 border-blue-900 border-blue-900' :
+                            'bg-blue-50 text-blue-600 border-2 border-blue-900 border-blue-900'
                           }`}>
                             {isCompleted ? <CheckCircle className="w-6 h-6" /> : locked ? <Lock className="w-5 h-5" /> : <PlayCircle className="w-6 h-6" />}
                           </div>
 
                           <div className="flex-1">
                             <div className="flex justify-between items-start mb-1">
-                              <h3 className={`text-lg font-extrabold ${locked ? 'text-slate-500' : 'text-slate-900 group-hover:text-blue-600 transition-colors'}`}>
+                              <h3 className={`text-lg font-extrabold ${locked ? 'text-slate-500' : 'text-blue-950 font-bold group-hover:text-blue-600 transition-colors'}`}>
                                 {m.order}. {m.title}
                               </h3>
                               {isPremium && !locked && (
                                 <div className="flex gap-2">
-                                  <button onClick={(e) => { e.stopPropagation(); toggleModuleCompletion(m.id, selectedLanguage!); }} className={`p-2.5 rounded-lg transition-all border shadow-sm ${isCompleted ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100' : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200'}`} title={isCompleted ? "Batal Selesai" : "Tandai Selesai"}>
+                                  <button onClick={(e) => { e.stopPropagation(); toggleModuleCompletion(m.id, selectedLanguage!); }} className={`p-2.5 rounded-none transition-all border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] ${isCompleted ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100' : 'bg-white text-slate-400 border-blue-900 hover:bg-sky-50 hover:text-blue-600 hover:border-blue-900'}`} title={isCompleted ? "Batal Selesai" : "Tandai Selesai"}>
                                     <CheckCircle className="w-4 h-4" />
                                   </button>
                                   {plan === 'plus' && (
-                                    <button className="p-2.5 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100 transition-all shadow-sm" title="Unduh Materi">
+                                    <button className="p-2.5 rounded-none bg-indigo-50 text-indigo-600 border-2 border-blue-900 border-blue-900 hover:bg-indigo-100 transition-all shadow-[4px_4px_0px_#1e3a8a]" title="Unduh Materi">
                                       <Download className="w-4 h-4" />
                                     </button>
                                   )}
@@ -1023,22 +1023,22 @@ export default function Dashboard() {
                               )}
                             </div>
                             
-                            <p className="text-slate-600 text-sm line-clamp-2 leading-relaxed font-medium mb-3 pr-8">{m.description}</p>
+                            <p className="text-blue-950 font-bold text-sm line-clamp-2 leading-relaxed font-medium mb-3 pr-8">{m.description}</p>
                             
                             <div className="flex flex-wrap items-center gap-2 mb-4">
-                               <span className="flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200 shadow-sm uppercase tracking-wider">
+                               <span className="flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-1 rounded-none bg-sky-100 text-blue-950 font-bold border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] uppercase tracking-wider">
                                  <Clock className="w-3 h-3" /> ~{estTime} Min
                                </span>
                             </div>
                             
-                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-4 pt-4 border-t border-slate-100">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-4 pt-4 border-t border-blue-900">
                               <button
                                 onClick={() => !locked && handleStartModule(m.id, selectedLanguage!)}
                                 disabled={locked}
-                                className={`flex-1 sm:flex-none px-6 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-                                  locked ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 shadow-none' :
-                                  isCompleted ? 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-blue-600 shadow-sm' :
-                                  'bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:shadow-lg border border-blue-400/50 hover:-translate-y-0.5'
+                                className={`flex-1 sm:flex-none px-6 py-2.5 rounded-none text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                                  locked ? 'bg-sky-100 text-slate-400 cursor-not-allowed border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a]' :
+                                  isCompleted ? 'bg-white border-2 border-blue-900 border-blue-900 text-blue-950 font-bold hover:bg-sky-50 hover:text-blue-600 shadow-[4px_4px_0px_#1e3a8a]' :
+                                  'bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all text-white hover:shadow-[4px_4px_0px_#1e3a8a] border-2 border-blue-900 border-blue-900 hover:-translate-y-0.5'
                                 }`}
                               >
                                 {locked ? 'Terkunci (Pro ke atas)' : isCompleted ? 'Ulangi Materi' : 'Mulai Belajar'}
@@ -1046,13 +1046,13 @@ export default function Dashboard() {
                               </button>
 
                               {!locked && hasQuiz && (
-                                <button onClick={() => navigate(`/quiz/${m.id}`)} className="px-5 py-2.5 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 flex-1 sm:flex-none">
+                                <button onClick={() => navigate(`/quiz/${m.id}`)} className="px-5 py-2.5 bg-purple-50 text-purple-700 hover:bg-purple-100 border-2 border-blue-900 border-purple-200 rounded-none text-sm font-bold transition-all shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a] flex items-center justify-center gap-2 flex-1 sm:flex-none">
                                   <Brain className="w-4 h-4" /> Kuis
                                 </button>
                               )}
 
                               {!locked && hasExercise && (
-                                <button onClick={() => navigate(`/exercise/${m.id}`)} className="px-5 py-2.5 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 flex-1 sm:flex-none">
+                                <button onClick={() => navigate(`/exercise/${m.id}`)} className="px-5 py-2.5 bg-amber-50 text-amber-700 hover:bg-amber-100 border-2 border-blue-900 border-amber-200 rounded-none text-sm font-bold transition-all shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a] flex items-center justify-center gap-2 flex-1 sm:flex-none">
                                   <PenTool className="w-4 h-4" /> Praktik
                                 </button>
                               )}
@@ -1065,19 +1065,19 @@ export default function Dashboard() {
                 )}
 
                 {materials.length > 0 && selectedLanguage && (
-                  <div className="mt-12 bg-gradient-to-br from-white to-slate-50 rounded-3xl border border-slate-200 p-8 shadow-md relative overflow-hidden">
+                  <div className="mt-12 bg-gradient-to-br from-white to-slate-50 rounded-none border-2 border-blue-900 border-blue-900 p-8 shadow-[4px_4px_0px_#1e3a8a] relative overflow-hidden">
                     {ratingSuccess ? (
                       <div className="text-center py-6 animate-fade-in-up">
-                        <div className="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-emerald-50">
+                        <div className="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-none flex items-center justify-center mx-auto mb-4 border-4 border-emerald-50">
                           <CheckCircle className="w-8 h-8" />
                         </div>
-                        <h3 className="text-2xl font-black text-slate-800 mb-2">Terima Kasih!</h3>
+                        <h3 className="text-2xl font-black text-blue-950 font-bold mb-2">Terima Kasih!</h3>
                         <p className="text-slate-500 font-medium">Ulasan kamu sangat berarti untuk perkembangan materi Coreline.</p>
                       </div>
                     ) : (
                       <form onSubmit={handleSubmitRating} className="relative z-10">
                         <div className="text-center mb-6">
-                          <h3 className="text-2xl font-black text-slate-800 mb-2">Bagaimana pengalaman belajarmu?</h3>
+                          <h3 className="text-2xl font-black text-blue-950 font-bold mb-2">Bagaimana pengalaman belajarmu?</h3>
                           <p className="text-slate-500 text-sm font-medium">Beri nilai untuk materi <span className="font-bold text-blue-600">{filteredLanguageStats.find(l => l.id === selectedLanguage)?.name}</span></p>
                         </div>
                         
@@ -1093,7 +1093,7 @@ export default function Dashboard() {
                             >
                               <Star className={`w-10 h-10 transition-colors ${
                                 star <= (hoverRating || userRating) 
-                                  ? 'fill-amber-400 text-amber-500 drop-shadow-md' 
+                                  ? 'fill-amber-400 text-amber-500 drop-shadow-[4px_4px_0px_#1e3a8a]' 
                                   : 'text-slate-300'
                               }`} />
                             </button>
@@ -1105,14 +1105,14 @@ export default function Dashboard() {
                             value={reviewText}
                             onChange={(e) => setReviewText(e.target.value)}
                             placeholder="Tulis ulasanmu di sini (opsional)..."
-                            className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none shadow-sm mb-4"
+                            className="w-full bg-white border-2 border-blue-900 border-blue-900 rounded-none p-4 text-sm font-medium text-blue-950 font-bold placeholder:text-slate-400 focus:outline-none focus:border-blue-900 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none shadow-[4px_4px_0px_#1e3a8a] mb-4"
                             rows={3}
                           ></textarea>
                           
                           <button 
                             type="submit" 
                             disabled={userRating === 0 || isSubmittingRating}
-                            className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md"
+                            className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-none flex items-center justify-center gap-2 transition-all shadow-[4px_4px_0px_#1e3a8a]"
                           >
                             {isSubmittingRating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-4 h-4" />}
                             Kirim Penilaian
@@ -1128,9 +1128,9 @@ export default function Dashboard() {
           )}
 
           {!selectedLanguage && (
-            <div className="mt-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-8 md:p-12 relative overflow-hidden shadow-xl animate-fade-in-up" style={{animationDelay: '300ms'}}>
-               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-               <div className="absolute bottom-0 left-0 w-40 h-40 bg-black/10 rounded-full blur-2xl -ml-10 -mb-10 pointer-events-none"></div>
+            <div className="mt-16 bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all rounded-none p-8 md:p-12 relative overflow-hidden shadow-[4px_4px_0px_#1e3a8a] animate-fade-in-up" style={{animationDelay: '300ms'}}>
+               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-none blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+               <div className="absolute bottom-0 left-0 w-40 h-40 bg-black/10 rounded-none blur-2xl -ml-10 -mb-10 pointer-events-none"></div>
                
                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
                   <div className="text-center md:text-left">
@@ -1148,10 +1148,10 @@ export default function Dashboard() {
         </div>
       </main>
 
-      <footer className="bg-white border-t border-slate-200 py-8 relative z-10">
+      <footer className="bg-white border-t border-blue-900 py-8 relative z-10">
         <div className="container mx-auto px-6 text-center text-slate-500 font-medium">
           <p className="mb-2">&copy; {new Date().getFullYear()} Coreline by AstByte. All rights reserved.</p>
-          <div className="flex items-center justify-center gap-2 text-xs font-bold bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 w-fit mx-auto shadow-sm">
+          <div className="flex items-center justify-center gap-2 text-xs font-bold bg-sky-50 px-3 py-1.5 rounded-none border-2 border-blue-900 border-blue-900 w-fit mx-auto shadow-[4px_4px_0px_#1e3a8a]">
             <RefreshCw className="w-3 h-3 text-blue-500" /> Last Update: {LAST_UPDATE}
           </div>
         </div>

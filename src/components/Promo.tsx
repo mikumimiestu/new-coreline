@@ -100,7 +100,7 @@ export default function PromoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans transition-colors duration-300 overflow-hidden relative selection:bg-blue-500/30">
+    <div className="min-h-screen bg-sky-50 font-sans transition-colors duration-300 overflow-hidden relative selection:bg-blue-500/30">
       
       {/* BACKGROUND DECORATION (Light Theme) */}
       <div className="fixed inset-0 pointer-events-none z-0">
@@ -108,21 +108,21 @@ export default function PromoPage() {
         <div className="absolute inset-0 opacity-[0.4] bg-[linear-gradient(rgba(203,213,225,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(203,213,225,0.5)_1px,transparent_1px)] bg-[size:30px_30px]"></div>
         
         {/* Glows */}
-        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-300/30 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-300/20 rounded-full blur-[120px]" />
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-300/30 rounded-none blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-300/20 rounded-none blur-[120px]" />
       </div>
 
       <div className="relative z-10">
         {/* HEADER */}
         <header className="pt-24 pb-16 px-4 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-sm font-bold mb-6 tracking-wide uppercase shadow-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-700 border-2 border-blue-900 border-blue-900 text-sm font-bold mb-6 tracking-wide uppercase shadow-[4px_4px_0px_#1e3a8a]">
             <Gift className="w-4 h-4" />
             Eksklusif Penawaran
           </div>
-          <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">
-            Hemat Lebih <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 drop-shadow-sm">Banyak.</span>
+          <h1 className="text-4xl md:text-6xl font-black text-blue-950 font-bold mb-6 tracking-tight">
+            Hemat Lebih <span className="text-transparent bg-clip-text bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all drop-shadow-[4px_4px_0px_#1e3a8a]">Banyak.</span>
           </h1>
-          <p className="max-w-xl mx-auto text-slate-600 text-lg leading-relaxed font-medium">
+          <p className="max-w-xl mx-auto text-blue-950 font-bold text-lg leading-relaxed font-medium">
             Dapatkan akses ke materi premium dengan harga spesial. Gunakan kode promo di bawah sebelum masa berlaku habis.
           </p>
         </header>
@@ -137,10 +137,10 @@ export default function PromoPage() {
                 <div
                   key={promo.id}
                   style={{ animationDelay: `${idx * 150}ms` }}
-                  className={`group relative flex flex-col rounded-3xl overflow-hidden border transition-all duration-500 animate-slide-up
+                  className={`group relative flex flex-col rounded-none overflow-hidden border-2 border-blue-900 transition-all duration-500 animate-slide-up
                     ${active 
-                      ? 'bg-white border-slate-200 shadow-lg hover:shadow-2xl hover:border-blue-300 hover:-translate-y-1.5' 
-                      : 'bg-slate-100/50 border-slate-200 grayscale-[0.8] opacity-80'
+                      ? 'bg-white border-blue-900 shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a] hover:border-blue-900 hover:-translate-y-1.5' 
+                      : 'bg-sky-100/50 border-blue-900 grayscale-[0.8] opacity-80'
                     }
                   `}
                 >
@@ -159,19 +159,19 @@ export default function PromoPage() {
                     <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                       <div className="flex items-center gap-2 mb-2">
                         {active ? (
-                          <span className="flex items-center gap-1 text-[10px] font-bold bg-emerald-500 text-white px-2.5 py-1 rounded-full uppercase tracking-widest shadow-sm">
+                          <span className="flex items-center gap-1 text-[10px] font-bold bg-emerald-500 text-white px-2.5 py-1 rounded-none uppercase tracking-widest shadow-[4px_4px_0px_#1e3a8a]">
                             <CheckCircle className="w-3 h-3" /> Aktif
                           </span>
                         ) : (
-                          <span className="flex items-center gap-1 text-[10px] font-bold bg-slate-700 text-slate-200 px-2.5 py-1 rounded-full uppercase tracking-widest border border-slate-600 shadow-sm">
+                          <span className="flex items-center gap-1 text-[10px] font-bold bg-slate-700 text-slate-200 px-2.5 py-1 rounded-none uppercase tracking-widest border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a]">
                             <XCircle className="w-3 h-3" /> Berakhir
                           </span>
                         )}
                       </div>
-                      <h2 className="text-2xl font-black leading-tight mb-2 group-hover:text-blue-300 transition-colors drop-shadow-md">
+                      <h2 className="text-2xl font-black leading-tight mb-2 group-hover:text-blue-300 transition-colors drop-shadow-[4px_4px_0px_#1e3a8a]">
                         {promo.title}
                       </h2>
-                      <div className="flex items-center gap-2 text-slate-300 text-xs font-bold drop-shadow-sm">
+                      <div className="flex items-center gap-2 text-slate-300 text-xs font-bold drop-shadow-[4px_4px_0px_#1e3a8a]">
                         <Clock className="w-3.5 h-3.5" />
                         <span>Sampai {formatDate(promo.endDate)}</span>
                       </div>
@@ -180,7 +180,7 @@ export default function PromoPage() {
 
                   {/* Body Content */}
                   <div className="flex flex-col p-6 space-y-5 bg-white">
-                    <p className="text-sm text-slate-600 leading-relaxed line-clamp-2 font-medium">
+                    <p className="text-sm text-blue-950 font-bold leading-relaxed line-clamp-2 font-medium">
                       {promo.description}
                     </p>
 
@@ -193,10 +193,10 @@ export default function PromoPage() {
                         <button
                           onClick={() => active && copyToClipboard(promo.promoCode!, promo.id, 'code')}
                           disabled={!active}
-                          className={`w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-2xl border-2 border-dashed transition-all group
+                          className={`w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-none border-2 border-dashed transition-all group
                             ${active 
-                              ? 'border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 cursor-pointer' 
-                              : 'border-slate-200 bg-slate-50 cursor-not-allowed'
+                              ? 'border-blue-900 bg-sky-50 hover:bg-blue-50 hover:border-blue-900 cursor-pointer' 
+                              : 'border-blue-900 bg-sky-50 cursor-not-allowed'
                             }
                           `}
                         >
@@ -218,10 +218,10 @@ export default function PromoPage() {
                         href={active ? (promo.link || '#') : '#'}
                         target={active ? "_blank" : "_self"}
                         rel="noreferrer"
-                        className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm transition-all
+                        className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-none font-bold text-sm transition-all
                           ${active 
-                            ? 'bg-slate-900 text-white hover:bg-blue-700 hover:-translate-y-0.5 active:scale-95 shadow-lg shadow-slate-900/20' 
-                            : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                            ? 'bg-slate-900 text-white hover:bg-blue-700 hover:-translate-y-0.5 active:scale-95 shadow-[4px_4px_0px_#1e3a8a] shadow-[4px_4px_0px_#1e3a8a]' 
+                            : 'bg-sky-100 text-slate-400 cursor-not-allowed border-2 border-blue-900 border-blue-900'
                           }`}
                       >
                         Klaim Sekarang
@@ -230,10 +230,10 @@ export default function PromoPage() {
                       
                       <button
                         onClick={() => copyToClipboard(`${window.location.origin}/promo/${promo.id}`, promo.id, 'share')}
-                        className={`p-3.5 rounded-2xl border transition-all shadow-sm
+                        className={`p-3.5 rounded-none border-2 border-blue-900 transition-all shadow-[4px_4px_0px_#1e3a8a]
                           ${active
-                            ? 'border-slate-200 text-slate-600 bg-white hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200'
-                            : 'border-slate-200 text-slate-400 bg-slate-50'
+                            ? 'border-blue-900 text-blue-950 font-bold bg-white hover:bg-sky-50 hover:text-blue-600 hover:border-blue-900'
+                            : 'border-blue-900 text-slate-400 bg-sky-50'
                           }`}
                         title="Bagikan"
                       >
@@ -246,7 +246,7 @@ export default function PromoPage() {
             })}
           </div>
           
-          <div className="mt-20 py-8 border-t border-slate-200 text-center">
+          <div className="mt-20 py-8 border-t border-blue-900 text-center">
             <p className="text-sm text-slate-500 font-medium italic">
               *Syarat dan ketentuan berlaku. Pastikan kode promo dimasukkan saat checkout.
             </p>

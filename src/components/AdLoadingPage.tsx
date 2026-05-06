@@ -104,37 +104,37 @@ export default function AdLoadingPage() {
             </svg>
 
             <div className="absolute inset-0 flex flex-col items-center justify-center px-2">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl backdrop-blur border border-white/20 flex items-center justify-center mb-2">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-none backdrop-blur border-2 border-blue-900 border-blue-900 flex items-center justify-center mb-2">
                 <Clock className="w-6 h-6 text-white/80" />
               </div>
-              <div className="text-4xl font-black bg-gradient-to-r from-slate-900 to-slate-900 bg-clip-text text-transparent drop-shadow-xl">
+              <div className="text-4xl font-black bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all bg-clip-text text-transparent drop-shadow-[4px_4px_0px_#1e3a8a]">
                 {countdown}
               </div>
-              <div className="text-xs font-bold text-slate-700 uppercase tracking-widest mt-1">
+              <div className="text-xs font-bold text-blue-950 font-bold uppercase tracking-widest mt-1">
                 Detik
               </div>
             </div>
 
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400/20 to-purple-400/20 blur-xl opacity-60 animate-pulse" />
+            <div className="absolute inset-0 rounded-none bg-gradient-to-r from-blue-400/20 to-purple-400/20 blur-xl opacity-60 animate-pulse" />
           </div>
         </div>
 
         <div className="text-center mb-8 px-2">
-          <h2 className="text-2xl font-black bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-clip-text text-transparent mb-2 drop-shadow-lg">
+          <h2 className="text-2xl font-black bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-clip-text text-transparent mb-2 drop-shadow-[4px_4px_0px_#1e3a8a]">
             {countdown > 0 ? '📚 Siap Belajar' : '🚀 Loading...'}
           </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 font-medium max-w-sm mx-auto leading-tight">
+          <p className="text-sm text-blue-950 font-bold dark:text-slate-400 font-medium max-w-sm mx-auto leading-tight">
             {countdown > 0 ? 'Auto lanjut dalam' : 'Sedang memproses...'}
           </p>
         </div>
 
-        <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200/60 dark:border-slate-800/60 p-6 mb-8 overflow-hidden group">
+        <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl rounded-none shadow-[4px_4px_0px_#1e3a8a] border-2 border-blue-900 border-blue-900 dark:border-blue-900 p-6 mb-8 overflow-hidden group">
           <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500/50 via-purple-500/50 to-pink-500/50 -skew-x-12" />
           
           <div className="relative z-10 flex flex-col items-center justify-center min-h-[280px]">
             <div 
               id="container-6f13d85cf0212ab9aa6a4e87a32c0096" 
-              className="w-full h-[240px] relative flex justify-center items-center overflow-hidden rounded-xl bg-gradient-to-br from-slate-100/60 to-slate-200/60 dark:from-slate-800/60 dark:to-slate-700/60 border border-slate-200/40 dark:border-slate-700/40 shadow-sm"
+              className="w-full h-[240px] relative flex justify-center items-center overflow-hidden rounded-none bg-gradient-to-br from-slate-100/60 to-slate-200/60 dark:from-slate-800/60 dark:to-slate-700/60 border-2 border-blue-900 border-blue-900 dark:border-blue-900 shadow-[4px_4px_0px_#1e3a8a]"
             />
             
             <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-slate-400 dark:text-slate-500 pointer-events-none">
@@ -148,7 +148,7 @@ export default function AdLoadingPage() {
           <div className="flex justify-center mb-6">
             <button
               onClick={handleContinue}
-              className="group relative px-8 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-black text-base shadow-2xl hover:shadow-3xl border border-white/20 hover:border-white/40 hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2"
+              className="group relative px-8 py-3 rounded-none bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all text-white font-black text-base shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 hover:-translate-x-1 transition-all border-2 border-blue-900 border-blue-900 hover:border-blue-900 hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2"
             >
               <Sparkles className="w-4 h-4 group-hover:scale-110" />
               <span>Lanjut</span>
@@ -159,11 +159,11 @@ export default function AdLoadingPage() {
         )}
 
         <div className="text-center space-y-2 px-2">
-          <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur px-6 py-2.5 rounded-2xl border border-slate-200/50 shadow-lg">
+          <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur px-6 py-2.5 rounded-none border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a]">
             <CheckCircle className="w-5 h-5 text-emerald-500" />
-            <p className="font-bold text-sm text-slate-900 dark:text-white">Terima kasih! ✨</p>
+            <p className="font-bold text-sm text-blue-950 font-bold dark:text-white">Terima kasih! ✨</p>
           </div>
-          <div className="px-4 py-1.5 bg-gradient-to-r from-slate-100/70 to-slate-200/70 dark:from-slate-800/70 dark:to-slate-700/70 rounded-xl border border-slate-200/40 text-xs font-bold text-slate-600 uppercase tracking-wider">
+          <div className="px-4 py-1.5 bg-gradient-to-r from-slate-100/70 to-slate-200/70 dark:from-slate-800/70 dark:to-slate-700/70 rounded-none border-2 border-blue-900 border-blue-900 text-xs font-bold text-blue-950 font-bold uppercase tracking-wider">
             Coreline Sponsors
           </div>
         </div>

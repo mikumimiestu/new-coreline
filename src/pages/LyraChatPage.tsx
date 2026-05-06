@@ -218,26 +218,26 @@ export default function LyraChatPage() {
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200 flex flex-col font-sans selection:bg-blue-500/30">
       {/* Header */}
-      <header className="h-16 shrink-0 border-b border-white/5 bg-slate-900/50 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 z-50 sticky top-0">
+      <header className="h-16 shrink-0 border-b border-blue-900 bg-slate-900/50 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 z-50 sticky top-0">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/')} className="p-2 hover:bg-white/5 rounded-xl transition-all text-slate-400 hover:text-white">
+          <button onClick={() => navigate('/')} className="p-2 hover:bg-white/5 rounded-none transition-all text-slate-400 hover:text-white">
             <ChevronLeft className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <div className="w-10 h-10 rounded-none bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all flex items-center justify-center shadow-[4px_4px_0px_#1e3a8a] shadow-[4px_4px_0px_#1e3a8a]">
               <Bot className="w-6 h-6 text-white" />
             </div>
             <div>
               <h1 className="text-sm md:text-base font-black text-white uppercase tracking-wider leading-none">Lyra Nebula 31B</h1>
               <div className="flex items-center gap-1.5 mt-1">
-                <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                <div className="w-1.5 h-1.5 bg-emerald-400 rounded-none animate-pulse" />
                 <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Neural Sync Active</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="hidden md:flex items-center gap-3 bg-white/5 px-4 py-2 rounded-2xl border border-white/10">
+        <div className="hidden md:flex items-center gap-3 bg-white/5 px-4 py-2 rounded-none border-2 border-blue-900 border-blue-900">
           <Zap className="w-4 h-4 text-amber-400" />
           <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Quota: {askCount}/{userData?.subscription_type === 'ultimate' ? '∞' : '50'}</span>
         </div>
@@ -255,30 +255,30 @@ export default function LyraChatPage() {
                 
                 {/* Bot Thought Process (Accordion style) */}
                 {msg.sender === 'bot' && msg.thought && (
-                  <details className="group/thought bg-white/5 border border-white/10 rounded-2xl overflow-hidden transition-all w-full">
+                  <details className="group/thought bg-white/5 border-2 border-blue-900 border-blue-900 rounded-none overflow-hidden transition-all w-full">
                     <summary className="flex items-center gap-3 p-3 cursor-pointer hover:bg-white/10 transition-colors list-none">
                       <BrainCircuit className="w-4 h-4 text-blue-400" />
                       <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Neural Reasoning Process</span>
                     </summary>
-                    <div className="p-4 border-t border-white/5 bg-black/20 text-xs leading-relaxed text-slate-400 italic font-medium whitespace-pre-wrap">
+                    <div className="p-4 border-t border-blue-900 bg-black/20 text-xs leading-relaxed text-slate-400 italic font-medium whitespace-pre-wrap">
                       {msg.thought}
                     </div>
                   </details>
                 )}
 
-                <div className={`p-4 md:p-6 rounded-3xl shadow-2xl relative ${
+                <div className={`p-4 md:p-6 rounded-none shadow-[4px_4px_0px_#1e3a8a] relative ${
                   msg.sender === 'user' 
-                    ? 'bg-blue-600 text-white rounded-tr-none border border-blue-400/30' 
-                    : 'bg-slate-800/80 backdrop-blur-md text-slate-100 rounded-tl-none border border-white/10'
+                    ? 'bg-blue-600 text-white rounded-tr-none border-2 border-blue-900 border-blue-900' 
+                    : 'bg-slate-800/80 backdrop-blur-md text-slate-100 rounded-tl-none border-2 border-blue-900 border-blue-900'
                 }`}>
-                  <div className="prose prose-invert prose-sm md:prose-base max-w-none prose-headings:font-black prose-a:text-blue-400 prose-code:bg-black/30 prose-code:p-1 prose-code:rounded prose-pre:bg-black/50 prose-pre:border prose-pre:border-white/10">
+                  <div className="prose prose-invert prose-sm md:prose-base max-w-none prose-headings:font-black prose-a:text-blue-400 prose-code:bg-black/30 prose-code:p-1 prose-code:rounded-none prose-pre:bg-black/50 prose-pre:border-2 border-blue-900 prose-pre:border-blue-900">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {msg.text}
                     </ReactMarkdown>
                   </div>
 
                   {msg.sender === 'bot' && (
-                    <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                    <div className="mt-4 pt-4 border-t border-blue-900 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
                         <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 italic">Verified Output</span>
@@ -293,7 +293,7 @@ export default function LyraChatPage() {
 
           {isLoading && (
             <div className="flex justify-start animate-pulse">
-              <div className="bg-slate-800/50 p-4 rounded-3xl border border-white/10 flex items-center gap-3">
+              <div className="bg-slate-800/50 p-4 rounded-none border-2 border-blue-900 border-blue-900 flex items-center gap-3">
                 <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Lyra is thinking...</span>
               </div>
@@ -312,12 +312,12 @@ export default function LyraChatPage() {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder="Tanya Lyra tentang coding, progresmu, atau navigasi..."
-              className="w-full bg-slate-800/80 backdrop-blur-xl border border-white/10 rounded-2xl py-4 md:py-5 pl-6 pr-16 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all placeholder:text-slate-500 shadow-2xl"
+              className="w-full bg-slate-800/80 backdrop-blur-xl border-2 border-blue-900 border-blue-900 rounded-none py-4 md:py-5 pl-6 pr-16 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-900 transition-all placeholder:text-slate-500 shadow-[4px_4px_0px_#1e3a8a]"
             />
             <button 
               type="submit"
               disabled={isLoading || !inputText.trim()}
-              className="absolute right-2 top-2 bottom-2 px-4 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:opacity-50 text-white rounded-xl transition-all flex items-center justify-center shadow-lg shadow-blue-500/20"
+              className="absolute right-2 top-2 bottom-2 px-4 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:opacity-50 text-white rounded-none transition-all flex items-center justify-center shadow-[4px_4px_0px_#1e3a8a] shadow-[4px_4px_0px_#1e3a8a]"
             >
               <Send className="w-5 h-5" />
             </button>

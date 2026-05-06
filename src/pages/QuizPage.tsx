@@ -288,20 +288,20 @@ export default function QuizPage() {
   const scoreData = calculateScore();
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-blue-500/30 relative overflow-x-hidden">
+    <div className="min-h-screen bg-sky-50 text-blue-950 font-bold font-sans selection:bg-blue-500/30 relative overflow-x-hidden">
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 opacity-[0.4] bg-[linear-gradient(rgba(203,213,225,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(203,213,225,0.5)_1px,transparent_1px)] bg-[size:30px_30px]"></div>
-        <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-purple-300/20 rounded-full blur-[100px]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-purple-300/20 rounded-none blur-[100px]" />
       </div>
 
       {/* Navbar Minimalis */}
-      <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-xl shadow-sm">
+      <nav className="sticky top-0 z-50 border-b border-blue-900 bg-white/80 backdrop-blur-xl shadow-[4px_4px_0px_#1e3a8a]">
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-purple-600 transition-colors bg-white hover:bg-purple-50 px-4 py-2 rounded-full border border-slate-200 shadow-sm hover:shadow">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-purple-600 transition-colors bg-white hover:bg-purple-50 px-4 py-2 rounded-none border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a]">
             <ArrowLeft className="w-4 h-4" /> Keluar Kuis
           </button>
-          <div className="flex items-center gap-2 font-black text-slate-900">
+          <div className="flex items-center gap-2 font-black text-blue-950 font-bold">
             <Brain className="w-5 h-5 text-purple-600" /> Kuis Interaktif
           </div>
         </div>
@@ -313,23 +313,23 @@ export default function QuizPage() {
           <div className="animate-fade-in-up">
             {/* Header Kuis & Progress */}
             <div className="mb-8">
-              <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-6">{quizData.title}</h1>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-blue-950 font-bold mb-6">{quizData.title}</h1>
               
               <div className="flex justify-between items-center text-sm font-bold text-slate-500 mb-2">
                 <span>Pertanyaan {currentIdx + 1} dari {quizData.questions.length}</span>
                 <span className="text-purple-600">{Math.round(progress)}% Selesai</span>
               </div>
-              <div className="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden shadow-inner">
+              <div className="h-2.5 w-full bg-slate-200 rounded-none overflow-hidden shadow-[4px_4px_0px_#1e3a8a]">
                 <div 
-                  className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-500"
+                  className="h-full bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all rounded-none transition-all duration-500"
                   style={{ width: `${progress}%` }}
                 ></div>
               </div>
             </div>
 
             {/* Kotak Pertanyaan */}
-            <div className="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-10 shadow-lg mb-6">
-              <h2 className="text-xl md:text-2xl font-bold text-slate-900 leading-relaxed mb-8">
+            <div className="bg-white border-2 border-blue-900 border-blue-900 rounded-[2rem] p-6 md:p-10 shadow-[4px_4px_0px_#1e3a8a] mb-6">
+              <h2 className="text-xl md:text-2xl font-bold text-blue-950 font-bold leading-relaxed mb-8">
                 {currentQ.question}
               </h2>
 
@@ -340,15 +340,15 @@ export default function QuizPage() {
                     <button
                       key={oIdx}
                       onClick={() => handleSelectOption(oIdx)}
-                      className={`w-full text-left p-5 rounded-2xl border-2 transition-all font-medium text-base md:text-lg flex items-center justify-between group
+                      className={`w-full text-left p-5 rounded-none border-2 transition-all font-medium text-base md:text-lg flex items-center justify-between group
                         ${isSelected 
-                          ? 'border-purple-500 bg-purple-50 text-purple-900 shadow-md' 
-                          : 'border-slate-200 bg-white text-slate-700 hover:border-purple-300 hover:bg-slate-50'
+                          ? 'border-purple-500 bg-purple-50 text-purple-900 shadow-[4px_4px_0px_#1e3a8a]' 
+                          : 'border-blue-900 bg-white text-blue-950 font-bold hover:border-purple-300 hover:bg-sky-50'
                         }`}
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold text-sm transition-colors
-                          ${isSelected ? 'border-purple-500 bg-purple-500 text-white' : 'border-slate-300 text-slate-400 group-hover:border-purple-300'}`}>
+                        <div className={`w-8 h-8 rounded-none border-2 flex items-center justify-center font-bold text-sm transition-colors
+                          ${isSelected ? 'border-purple-500 bg-purple-500 text-white' : 'border-blue-900 text-slate-400 group-hover:border-purple-300'}`}>
                           {String.fromCharCode(65 + oIdx)}
                         </div>
                         {opt}
@@ -365,7 +365,7 @@ export default function QuizPage() {
               <button 
                 onClick={handlePrev} 
                 disabled={currentIdx === 0}
-                className="px-6 py-3.5 rounded-xl font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-50 shadow-sm transition-all"
+                className="px-6 py-3.5 rounded-none font-bold text-blue-950 font-bold bg-white border-2 border-blue-900 border-blue-900 hover:bg-sky-50 disabled:opacity-50 shadow-[4px_4px_0px_#1e3a8a] transition-all"
               >
                 Kembali
               </button>
@@ -374,7 +374,7 @@ export default function QuizPage() {
                 <button 
                   onClick={handleNext}
                   disabled={selectedAnswers[currentIdx] === undefined}
-                  className="px-8 py-3.5 rounded-xl font-bold text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 shadow-md shadow-purple-500/20 transition-all flex items-center gap-2"
+                  className="px-8 py-3.5 rounded-none font-bold text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 shadow-[4px_4px_0px_#1e3a8a] shadow-purple-500/20 transition-all flex items-center gap-2"
                 >
                   Selanjutnya <ChevronRight className="w-5 h-5" />
                 </button>
@@ -382,7 +382,7 @@ export default function QuizPage() {
                 <button 
                   onClick={handleSubmit}
                   disabled={Object.keys(selectedAnswers).length < quizData.questions.length}
-                  className="px-8 py-3.5 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-2 transform hover:-translate-y-0.5"
+                  className="px-8 py-3.5 rounded-none font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 shadow-[4px_4px_0px_#1e3a8a] shadow-emerald-500/20 transition-all flex items-center gap-2 transform hover:-translate-y-0.5"
                 >
                   Kumpulkan <CheckCircle className="w-5 h-5" />
                 </button>
@@ -397,33 +397,33 @@ export default function QuizPage() {
           </div>
         ) : (
           /* --- HALAMAN HASIL (RESULT) --- */
-          <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 md:p-12 shadow-xl text-center animate-fade-in-up">
-            <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg
-              ${scoreData.percentage >= 70 ? 'bg-emerald-50 text-emerald-500 border border-emerald-200' : 'bg-amber-50 text-amber-500 border border-amber-200'}`}>
+          <div className="bg-white border-2 border-blue-900 border-blue-900 rounded-[2.5rem] p-8 md:p-12 shadow-[4px_4px_0px_#1e3a8a] text-center animate-fade-in-up">
+            <div className={`w-24 h-24 rounded-none flex items-center justify-center mx-auto mb-6 shadow-[4px_4px_0px_#1e3a8a]
+              ${scoreData.percentage >= 70 ? 'bg-emerald-50 text-emerald-500 border-2 border-blue-900 border-emerald-200' : 'bg-amber-50 text-amber-500 border-2 border-blue-900 border-amber-200'}`}>
               <Award className="w-12 h-12" />
             </div>
             
-            <h2 className="text-3xl font-black text-slate-900 mb-2">Kuis Selesai!</h2>
+            <h2 className="text-3xl font-black text-blue-950 font-bold mb-2">Kuis Selesai!</h2>
             <p className="text-slate-500 font-medium mb-8">Kamu telah menyelesaikan {quizData.title}.</p>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 mb-8 inline-block min-w-[250px]">
+            <div className="bg-sky-50 border-2 border-blue-900 border-blue-900 rounded-none p-8 mb-8 inline-block min-w-[250px]">
               <p className="text-sm font-extrabold text-slate-500 uppercase tracking-widest mb-2">Nilai Akhir</p>
               <div className={`text-6xl font-black ${scoreData.percentage >= 70 ? 'text-emerald-600' : 'text-amber-600'}`}>
                 {scoreData.percentage}
               </div>
-              <p className="text-sm font-bold text-slate-600 mt-3">Benar {scoreData.correct} dari {scoreData.total}</p>
+              <p className="text-sm font-bold text-blue-950 font-bold mt-3">Benar {scoreData.correct} dari {scoreData.total}</p>
             </div>
 
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <button 
                 onClick={() => { setIsSubmitted(false); setCurrentIdx(0); setSelectedAnswers({}); }}
-                className="px-8 py-4 rounded-xl font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 shadow-sm transition-all flex items-center justify-center gap-2"
+                className="px-8 py-4 rounded-none font-bold text-blue-950 font-bold bg-white border-2 border-blue-900 border-blue-900 hover:bg-sky-50 shadow-[4px_4px_0px_#1e3a8a] transition-all flex items-center justify-center gap-2"
               >
                 <RefreshCw className="w-5 h-5" /> Ulangi Kuis
               </button>
               <button 
                 onClick={() => navigate(-1)}
-                className="px-8 py-4 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 transition-all transform hover:-translate-y-0.5"
+                className="px-8 py-4 rounded-none font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-[4px_4px_0px_#1e3a8a] shadow-[4px_4px_0px_#1e3a8a] transition-all transform hover:-translate-y-0.5"
               >
                 Kembali ke Modul
               </button>

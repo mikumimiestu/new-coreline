@@ -167,24 +167,24 @@ export default function OfflineMentoringPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-amber-500/30 overflow-x-hidden relative flex flex-col">
+    <div className="min-h-screen bg-sky-50 text-blue-950 font-bold font-sans selection:bg-amber-500/30 overflow-x-hidden relative flex flex-col">
       
       {/* Background Ambience */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 opacity-[0.4] bg-[linear-gradient(rgba(203,213,225,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(203,213,225,0.5)_1px,transparent_1px)] bg-[size:30px_30px]"></div>
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-300/10 rounded-full blur-[100px]" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-orange-300/10 rounded-full blur-[100px]" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-300/10 rounded-none blur-[100px]" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-orange-300/10 rounded-none blur-[100px]" />
       </div>
 
       {/* Navbar Minimalis */}
-      <nav className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/80 backdrop-blur-xl shadow-sm">
+      <nav className="sticky top-0 z-40 w-full border-b border-blue-900 bg-white/80 backdrop-blur-xl shadow-[4px_4px_0px_#1e3a8a]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className="group flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-500 hover:text-amber-600 transition-colors bg-white rounded-full border border-slate-200 shadow-sm hover:shadow-md">
+          <button onClick={() => navigate(-1)} className="group flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-500 hover:text-amber-600 transition-colors bg-white rounded-none border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a]">
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             Kembali
           </button>
           
-          <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 px-4 py-2 rounded-xl">
+          <div className="flex items-center gap-2 bg-amber-50 border-2 border-blue-900 border-amber-200 px-4 py-2 rounded-none">
              <Building2 className="w-4 h-4 text-amber-600" />
              <span className="text-sm font-black text-amber-700 uppercase tracking-wider">Ultimate Feature</span>
           </div>
@@ -196,14 +196,14 @@ export default function OfflineMentoringPage() {
         <div className="flex flex-col lg:flex-row gap-8">
             {/* Kolom Kiri: Info & Search */}
             <div className="w-full lg:w-5/12 flex flex-col animate-fade-in-up">
-               <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white mb-6 shadow-lg shadow-amber-500/30">
+               <div className="inline-flex items-center justify-center w-14 h-14 rounded-none bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all text-white mb-6 shadow-[4px_4px_0px_#1e3a8a] shadow-amber-500/30">
                   <MapPin className="w-7 h-7" />
                </div>
-               <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">
+               <h1 className="text-3xl sm:text-4xl font-extrabold text-blue-950 font-bold mb-4 tracking-tight">
                  Tentukan Titik Temu Mentoring
                </h1>
-               <p className="text-slate-600 text-sm font-medium leading-relaxed mb-8">
-                 Ketik lokasi atau langsung <b className="text-slate-800">klik pada area peta</b> untuk mengatur titik kumpul mentoring offline Anda.
+               <p className="text-blue-950 font-bold text-sm font-medium leading-relaxed mb-8">
+                 Ketik lokasi atau langsung <b className="text-blue-950 font-bold">klik pada area peta</b> untuk mengatur titik kumpul mentoring offline Anda.
                </p>
 
                {/* Input Search */}
@@ -214,10 +214,10 @@ export default function OfflineMentoringPage() {
                      value={searchText}
                      onChange={(e) => setSearchText(e.target.value)}
                      placeholder="Cari lokasi secara manual..."
-                     className="w-full bg-white border border-slate-200 rounded-2xl py-4 pl-12 pr-10 text-slate-900 font-bold placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all shadow-sm"
+                     className="w-full bg-white border-2 border-blue-900 border-blue-900 rounded-none py-4 pl-12 pr-10 text-blue-950 font-bold font-bold placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all shadow-[4px_4px_0px_#1e3a8a]"
                   />
                   {searchText && (
-                     <button onClick={() => setSearchText('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                     <button onClick={() => setSearchText('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-950 font-bold">
                         <X className="w-5 h-5" />
                      </button>
                   )}
@@ -227,7 +227,7 @@ export default function OfflineMentoringPage() {
                <button 
                   onClick={handleGetLocation}
                   disabled={isLocating}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl font-bold transition-all shadow-sm active:scale-95 border bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-amber-600 hover:border-amber-200 disabled:opacity-70 disabled:cursor-not-allowed mb-8"
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-none font-bold transition-all shadow-[4px_4px_0px_#1e3a8a] active:scale-95 border-2 border-blue-900 bg-white border-blue-900 text-blue-950 font-bold hover:bg-sky-50 hover:text-amber-600 hover:border-amber-200 disabled:opacity-70 disabled:cursor-not-allowed mb-8"
                >
                   {isLocating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Navigation className="w-5 h-5 text-blue-500" />}
                   Deteksi Lokasi Anda Saat Ini
@@ -235,7 +235,7 @@ export default function OfflineMentoringPage() {
 
                {/* Status Ketersediaan Panel */}
                {availability !== 'idle' && (
-                  <div className={`p-6 rounded-3xl border shadow-sm transition-all duration-500 ${
+                  <div className={`p-6 rounded-none border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] transition-all duration-500 ${
                      availability === 'available' 
                        ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
                        : 'bg-orange-50 border-orange-200 text-orange-800'
@@ -263,7 +263,7 @@ export default function OfflineMentoringPage() {
                             onClick={handleBooking}
                             className={`w-full flex items-center justify-center gap-2 px-6 py-3.5 ${
                               availability === 'available' ? 'bg-slate-900 hover:bg-slate-800 text-white' : 'bg-orange-600 hover:bg-orange-700 text-white'
-                            } rounded-xl font-bold transition-all shadow-md hover:shadow-lg active:scale-95`}
+                            } rounded-none font-bold transition-all shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a] active:scale-95`}
                          >
                             <MessageCircle className="w-5 h-5" /> Hubungi Admin via WA
                          </button>
@@ -271,7 +271,7 @@ export default function OfflineMentoringPage() {
                          {availability !== 'available' && (
                             <button 
                                onClick={handleShowAvailableArea}
-                               className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 rounded-xl font-bold transition-all shadow-sm active:scale-95"
+                               className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-white hover:bg-sky-50 text-blue-950 font-bold border-2 border-blue-900 border-blue-900 rounded-none font-bold transition-all shadow-[4px_4px_0px_#1e3a8a] active:scale-95"
                             >
                                <MapPin className="w-5 h-5 text-amber-500" /> Tampilkan Area Gratis
                             </button>
@@ -283,12 +283,12 @@ export default function OfflineMentoringPage() {
 
             {/* Kolom Kanan: Peta */}
             <div className="w-full lg:w-7/12 animate-fade-in-up flex flex-col" style={{ animationDelay: '150ms' }}>
-               <div className="relative w-full flex-1 min-h-[400px] lg:min-h-[500px] rounded-[2.5rem] border-4 border-white shadow-xl overflow-hidden z-10 bg-slate-100">
+               <div className="relative w-full flex-1 min-h-[400px] lg:min-h-[500px] rounded-[2.5rem] border-4 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] overflow-hidden z-10 bg-sky-100">
                   
                   {/* Pesan Bantuan Sebelum Klik Peta */}
                   {!pinPos && (
                      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-none">
-                        <div className="bg-slate-900/80 backdrop-blur-md px-6 py-3 rounded-full text-white font-bold text-sm shadow-lg flex items-center gap-2 animate-bounce">
+                        <div className="bg-slate-900/80 backdrop-blur-md px-6 py-3 rounded-none text-white font-bold text-sm shadow-[4px_4px_0px_#1e3a8a] flex items-center gap-2 animate-bounce">
                            <MapPin className="w-4 h-4 text-amber-400" /> Silakan klik di area peta
                         </div>
                      </div>
@@ -308,7 +308,7 @@ export default function OfflineMentoringPage() {
                         offset={[0, 20]}
                         opacity={1}
                         permanent
-                        className="inline-flex items-center gap-2 font-extrabold text-amber-700 bg-amber-50 border-amber-200 shadow-md"
+                        className="inline-flex items-center gap-2 font-extrabold text-amber-700 bg-amber-50 border-amber-200 shadow-[4px_4px_0px_#1e3a8a]"
                       >
                         <img src="https://www.astbyte.com/icon.png" className="h-6 w-6" alt="ASTBYTE" />
                         <span>{OFFICE_LOCATION.name}</span>
@@ -331,15 +331,15 @@ export default function OfflineMentoringPage() {
         </div>
 
         {/* --- INFORMASI JANGKAUAN WILAYAH BAWAH --- */}
-        <div className="mt-12 bg-white rounded-3xl p-8 border border-slate-200 shadow-sm animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-          <h3 className="text-xl font-extrabold text-slate-900 mb-6 flex items-center gap-2">
+        <div className="mt-12 bg-white rounded-none p-8 border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+          <h3 className="text-xl font-extrabold text-blue-950 font-bold mb-6 flex items-center gap-2">
             <MapPin className="w-6 h-6 text-amber-500" /> Informasi Jangkauan Wilayah
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             {/* Area Tercover Saat Ini */}
-            <div className="bg-emerald-50 rounded-2xl p-6 border border-emerald-100">
+            <div className="bg-emerald-50 rounded-none p-6 border-2 border-blue-900 border-emerald-100">
               <h4 className="font-bold text-emerald-800 mb-3 flex items-center gap-2">
                 <CheckCircle className="w-5 h-5" /> Area Tercover Gratis
               </h4>
@@ -354,7 +354,7 @@ export default function OfflineMentoringPage() {
             </div>
 
             {/* Area Sedang Dibangun (Coming Soon Lokal) */}
-            <div className="bg-amber-50 rounded-2xl p-6 border border-amber-100">
+            <div className="bg-amber-50 rounded-none p-6 border-2 border-blue-900 border-amber-100">
               <h4 className="font-bold text-amber-800 mb-3 flex items-center gap-2">
                 <Building2 className="w-5 h-5" /> Sedang Pengembangan
               </h4>
@@ -368,7 +368,7 @@ export default function OfflineMentoringPage() {
             </div>
 
             {/* Area Ekspansi Nasional (Luar Sumbar) */}
-            <div className="bg-purple-50 rounded-2xl p-6 border border-purple-100">
+            <div className="bg-purple-50 rounded-none p-6 border-2 border-blue-900 border-purple-100">
               <h4 className="font-bold text-purple-800 mb-3 flex items-center gap-2">
                 <Globe className="w-5 h-5" /> Ekspansi Nasional
               </h4>

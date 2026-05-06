@@ -47,14 +47,14 @@ export default function ExercisePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-blue-500/30 relative flex flex-col">
+    <div className="min-h-screen bg-sky-50 text-blue-950 font-bold font-sans selection:bg-blue-500/30 relative flex flex-col">
       {/* Navbar Minimalis */}
-      <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-xl shadow-sm">
+      <nav className="sticky top-0 z-50 border-b border-blue-900 bg-white/80 backdrop-blur-xl shadow-[4px_4px_0px_#1e3a8a]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-amber-600 transition-colors bg-white hover:bg-amber-50 px-4 py-2 rounded-full border border-slate-200 shadow-sm hover:shadow">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-amber-600 transition-colors bg-white hover:bg-amber-50 px-4 py-2 rounded-none border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a]">
             <ArrowLeft className="w-4 h-4" /> Batal & Kembali
           </button>
-          <div className="flex items-center gap-2 font-black text-slate-900">
+          <div className="flex items-center gap-2 font-black text-blue-950 font-bold">
             <PenTool className="w-5 h-5 text-amber-500" /> Latihan Praktik
           </div>
         </div>
@@ -64,18 +64,18 @@ export default function ExercisePage() {
         
         {/* PANEL KIRI: Task Description */}
         <div className="lg:w-1/3 flex flex-col gap-6">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm">
+          <div className="bg-white border-2 border-blue-900 border-blue-900 rounded-none p-6 md:p-8 shadow-[4px_4px_0px_#1e3a8a]">
             <div className="flex items-center gap-2 text-amber-600 text-sm font-extrabold uppercase tracking-widest mb-4">
                <FileCode className="w-5 h-5" /> Tugas {id?.split('-').pop()}
             </div>
-            <h1 className="text-2xl font-black text-slate-900 mb-4">{MOCK_EXERCISE.title}</h1>
-            <p className="text-slate-600 font-medium leading-relaxed mb-6">
+            <h1 className="text-2xl font-black text-blue-950 font-bold mb-4">{MOCK_EXERCISE.title}</h1>
+            <p className="text-blue-950 font-bold font-medium leading-relaxed mb-6">
               {MOCK_EXERCISE.description}
             </p>
             
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+            <div className="bg-sky-50 border-2 border-blue-900 border-blue-900 rounded-none p-4">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Expected Output:</p>
-              <code className="text-sm font-mono font-bold text-slate-800 bg-white px-3 py-1.5 rounded-lg border border-slate-200 block shadow-sm">
+              <code className="text-sm font-mono font-bold text-blue-950 font-bold bg-white px-3 py-1.5 rounded-none border-2 border-blue-900 border-blue-900 block shadow-[4px_4px_0px_#1e3a8a]">
                 {MOCK_EXERCISE.expectedOutput}
               </code>
             </div>
@@ -83,15 +83,15 @@ export default function ExercisePage() {
 
           {/* Sukses Alert (Jika berhasil) */}
           {isSuccess && (
-            <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-6 shadow-sm animate-fade-in-up text-center">
-              <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <div className="bg-emerald-50 border-2 border-blue-900 border-emerald-200 rounded-none p-6 shadow-[4px_4px_0px_#1e3a8a] animate-fade-in-up text-center">
+              <div className="w-12 h-12 bg-emerald-100 rounded-none flex items-center justify-center mx-auto mb-3">
                 <CheckCircle className="w-6 h-6 text-emerald-600" />
               </div>
               <h3 className="font-bold text-emerald-800 mb-2">Kerja Bagus!</h3>
               <p className="text-emerald-600 text-sm font-medium mb-4">Kamu telah menyelesaikan latihan ini dengan benar.</p>
               <button 
                 onClick={() => navigate(-1)}
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition-colors"
+                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-none shadow-[4px_4px_0px_#1e3a8a] transition-colors"
               >
                 Kembali ke Modul
               </button>
@@ -103,21 +103,21 @@ export default function ExercisePage() {
         <div className="lg:w-2/3 flex flex-col gap-4">
           
           {/* EDITOR AREA */}
-          <div className="flex-1 bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-xl flex flex-col min-h-[400px]">
+          <div className="flex-1 bg-slate-900 rounded-none overflow-hidden border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] flex flex-col min-h-[400px]">
             {/* Editor Header */}
-            <div className="bg-slate-950 px-6 py-3 flex items-center justify-between border-b border-slate-800">
+            <div className="bg-slate-950 px-6 py-3 flex items-center justify-between border-b border-blue-900">
               <div className="flex items-center gap-2">
                 <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+                  <div className="w-3 h-3 rounded-none bg-red-500/80"></div>
+                  <div className="w-3 h-3 rounded-none bg-yellow-500/80"></div>
+                  <div className="w-3 h-3 rounded-none bg-green-500/80"></div>
                 </div>
                 <span className="ml-4 text-xs font-bold text-slate-500 font-mono tracking-wider">main.js</span>
               </div>
               <button
                 onClick={handleRunCode}
                 disabled={isExecuting}
-                className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-4 py-1.5 rounded-lg transition-colors shadow-sm disabled:opacity-50"
+                className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-4 py-1.5 rounded-none transition-colors shadow-[4px_4px_0px_#1e3a8a] disabled:opacity-50"
               >
                 {isExecuting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 fill-current" />}
                 RUN CODE
@@ -137,21 +137,21 @@ export default function ExercisePage() {
           </div>
 
           {/* CONSOLE / OUTPUT AREA */}
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm min-h-[150px]">
+          <div className="bg-white border-2 border-blue-900 border-blue-900 rounded-none p-6 shadow-[4px_4px_0px_#1e3a8a] min-h-[150px]">
              <div className="flex items-center gap-2 text-slate-500 text-xs font-black uppercase tracking-widest mb-3">
                <Terminal className="w-4 h-4" /> Output Console
              </div>
              
              {isExecuting ? (
-               <div className="flex items-center gap-3 text-slate-400 font-mono text-sm p-4 bg-slate-50 rounded-xl border border-slate-100">
+               <div className="flex items-center gap-3 text-slate-400 font-mono text-sm p-4 bg-sky-50 rounded-none border-2 border-blue-900 border-blue-900">
                  <Loader2 className="w-4 h-4 animate-spin" /> Menjalankan kode...
                </div>
              ) : output ? (
-               <pre className={`font-mono text-sm p-4 rounded-xl whitespace-pre-wrap ${isSuccess ? 'bg-emerald-50 text-emerald-800 border border-emerald-100' : 'bg-red-50 text-red-800 border border-red-100'}`}>
+               <pre className={`font-mono text-sm p-4 rounded-none whitespace-pre-wrap ${isSuccess ? 'bg-emerald-50 text-emerald-800 border-2 border-blue-900 border-emerald-100' : 'bg-red-50 text-red-800 border-2 border-blue-900 border-red-100'}`}>
                  {output}
                </pre>
              ) : (
-               <div className="text-slate-400 italic text-sm p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-2">
+               <div className="text-slate-400 italic text-sm p-4 bg-sky-50 rounded-none border-2 border-blue-900 border-blue-900 flex items-center gap-2">
                   <AlertCircle className="w-4 h-4" /> Klik "RUN CODE" untuk melihat hasil eksekusi.
                </div>
              )}

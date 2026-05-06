@@ -38,9 +38,9 @@ export default function ComingSoonPage() {
       {/* BACKGROUND EFFECTS */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Top Blob */}
-        <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-600/20 rounded-none blur-[120px] animate-pulse" />
         {/* Bottom Blob */}
-        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-none blur-[120px]" />
         
         {/* Grid Pattern Overlay */}
         <div 
@@ -56,7 +56,7 @@ export default function ComingSoonPage() {
       <nav className="absolute top-0 w-full p-6 flex justify-between items-center z-20">
         <Link 
           to="/" 
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-sm font-medium text-slate-300 hover:text-white backdrop-blur-md"
+          className="flex items-center gap-2 px-4 py-2 rounded-none bg-white/5 hover:bg-white/10 border-2 border-blue-900 border-blue-900 transition-all text-sm font-medium text-slate-300 hover:text-white backdrop-blur-md"
         >
           <ArrowLeft className="w-4 h-4" />
           Kembali ke Beranda
@@ -73,21 +73,21 @@ export default function ComingSoonPage() {
         <div className="flex flex-col items-center animate-fade-in-up">
           <div className="relative mb-8 group cursor-default">
             <div className="absolute inset-0 bg-blue-500 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-500" />
-            <div className="relative w-20 h-20 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-3xl flex items-center justify-center shadow-2xl transform group-hover:scale-110 transition-transform duration-500">
+            <div className="relative w-20 h-20 bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all border-2 border-blue-900 border-blue-900 rounded-none flex items-center justify-center shadow-[4px_4px_0px_#1e3a8a] transform group-hover:scale-110 transition-transform duration-500">
               <Rocket className="w-10 h-10 text-blue-400" />
             </div>
             
             {/* Floating Elements */}
-            <div className="absolute -top-2 -right-2 w-8 h-8 bg-slate-800 rounded-xl border border-slate-700 flex items-center justify-center animate-bounce delay-700">
+            <div className="absolute -top-2 -right-2 w-8 h-8 bg-slate-800 rounded-none border-2 border-blue-900 border-blue-900 flex items-center justify-center animate-bounce delay-700">
               <Sparkles className="w-4 h-4 text-amber-400" />
             </div>
-            <div className="absolute -bottom-2 -left-2 w-8 h-8 bg-slate-800 rounded-xl border border-slate-700 flex items-center justify-center animate-bounce delay-1000">
+            <div className="absolute -bottom-2 -left-2 w-8 h-8 bg-slate-800 rounded-none border-2 border-blue-900 border-blue-900 flex items-center justify-center animate-bounce delay-1000">
               <Construction className="w-4 h-4 text-emerald-400" />
             </div>
           </div>
 
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest mb-6">
-            <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-blue-500/10 border-2 border-blue-900 border-blue-900 text-blue-400 text-xs font-bold uppercase tracking-widest mb-6">
+            <span className="w-2 h-2 rounded-none bg-blue-400 animate-pulse" />
             Under Construction
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function ComingSoonPage() {
         {/* Headings */}
         <div className="space-y-6 mb-12 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white leading-tight">
-            Sesuatu yang <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">Luar Biasa</span> <br className="hidden sm:block" />
+            Sesuatu yang <span className="text-transparent bg-clip-text bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all">Luar Biasa</span> <br className="hidden sm:block" />
             Sedang Kami Racik.
           </h1>
           <p className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
@@ -107,16 +107,16 @@ export default function ComingSoonPage() {
         {/* Waitlist Form */}
         <div className="max-w-md mx-auto animate-fade-in-up" style={{ animationDelay: '200ms' }}>
           {status === 'success' ? (
-            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col items-center gap-2 animate-scale-in">
-              <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+            <div className="p-4 rounded-none bg-emerald-500/10 border-2 border-blue-900 border-emerald-500/20 flex flex-col items-center gap-2 animate-scale-in">
+              <div className="w-10 h-10 rounded-none bg-emerald-500/20 flex items-center justify-center text-emerald-400">
                 <Check className="w-6 h-6" />
               </div>
               <p className="font-semibold text-emerald-100">Terima kasih! Kami akan memberi kabar.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-500" />
-              <div className="relative flex items-center bg-slate-900 rounded-xl p-1.5 border border-slate-800">
+              <div className="absolute -inset-0.5 bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all rounded-none blur opacity-30 group-hover:opacity-75 transition duration-500" />
+              <div className="relative flex items-center bg-slate-900 rounded-none p-1.5 border-2 border-blue-900 border-blue-900">
                 <div className="pl-4 text-slate-500">
                   <Mail className="w-5 h-5" />
                 </div>
@@ -131,7 +131,7 @@ export default function ComingSoonPage() {
                 <button
                   type="submit"
                   disabled={status === 'loading'}
-                  className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-70 flex items-center gap-2"
+                  className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-none font-semibold transition-all disabled:opacity-70 flex items-center gap-2"
                 >
                   {status === 'loading' ? (
                     'Menyimpan...'
@@ -150,7 +150,7 @@ export default function ComingSoonPage() {
         </div>
 
         {/* Footer Stats / Social Proof */}
-        <div className="mt-16 pt-8 border-t border-white/5 grid grid-cols-2 sm:grid-cols-3 gap-8 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+        <div className="mt-16 pt-8 border-t border-blue-900 grid grid-cols-2 sm:grid-cols-3 gap-8 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
           <div>
             <div className="text-2xl font-bold text-white">50+</div>
             <div className="text-xs text-slate-500 uppercase tracking-wide font-medium mt-1">Student Waiting</div>
@@ -169,7 +169,7 @@ export default function ComingSoonPage() {
 
       {/* FOOTER */}
       <footer className="absolute bottom-6 text-center w-full z-10">
-        <p className="text-xs text-slate-600">
+        <p className="text-xs text-blue-950 font-bold">
           &copy; {new Date().getFullYear()} AstByte Technology. Making the future.
         </p>
       </footer>

@@ -241,12 +241,12 @@ export default function TutorialPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans relative overflow-x-hidden selection:bg-blue-500/30">
+    <div className="min-h-screen bg-sky-50 text-blue-950 font-bold font-sans relative overflow-x-hidden selection:bg-blue-500/30">
       
       {/* --- BACKGROUNDS (Matching Dashboard) --- */}
       <div className="fixed inset-0 opacity-[0.4] pointer-events-none z-0 bg-[linear-gradient(rgba(203,213,225,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(203,213,225,0.5)_1px,transparent_1px)] bg-[size:30px_30px]"></div>
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-blue-100/50 to-transparent -z-10" />
-      <div className="absolute top-20 right-0 w-96 h-96 bg-cyan-300/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-20 right-0 w-96 h-96 bg-cyan-300/20 rounded-none blur-3xl pointer-events-none" />
 
       {/* --- MAIN CONTENT --- */}
       <main className="container mx-auto px-4 sm:px-6 py-10 relative z-10 flex-1 min-h-screen max-w-6xl">
@@ -254,20 +254,20 @@ export default function TutorialPage() {
         {/* Navigation / Back Button */}
         <div className="animate-fade-in-up mb-8">
           {/* Ganti <a> pakai <Link to="/"> kalau pakai react-router */}
-          <a href="/" className="group flex items-center gap-2 text-slate-500 hover:text-blue-600 font-bold text-sm transition-colors bg-white px-4 py-2.5 rounded-full border border-slate-200 shadow-sm hover:shadow-md w-fit">
+          <a href="/" className="group flex items-center gap-2 text-slate-500 hover:text-blue-600 font-bold text-sm transition-colors bg-white px-4 py-2.5 rounded-none border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a] w-fit">
             <ArrowLeft className="w-4 h-4" /> Kembali ke Dashboard
           </a>
         </div>
 
         {/* Hero Section */}
         <div className="mb-10 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold mb-4 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-none bg-blue-50 border-2 border-blue-900 border-blue-900 text-blue-700 text-xs font-bold mb-4 shadow-[4px_4px_0px_#1e3a8a]">
             <Sparkles className="w-4 h-4 text-blue-500" /> Panduan Pemula
           </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 leading-tight">
-            Persiapan <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">Workspace Ngoding</span>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-blue-950 font-bold mb-4 leading-tight">
+            Persiapan <span className="bg-clip-text text-transparent bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all">Workspace Ngoding</span>
           </h1>
-          <p className="text-slate-600 max-w-2xl text-base font-medium leading-relaxed">
+          <p className="text-blue-950 font-bold max-w-2xl text-base font-medium leading-relaxed">
             Ikuti panduan langkah demi langkah ini untuk menginstal dan menggunakan berbagai tools yang wajib kamu miliki sebelum memulai course di Coreline.
           </p>
         </div>
@@ -276,20 +276,20 @@ export default function TutorialPage() {
           
           {/* Sidebar Navigation */}
           <aside className="w-full md:w-72 flex-shrink-0">
-            <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-sm border border-slate-200 p-5 sticky top-24">
+            <div className="bg-white/80 backdrop-blur-xl rounded-none shadow-[4px_4px_0px_#1e3a8a] border-2 border-blue-900 border-blue-900 p-5 sticky top-24">
               <h2 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-4 px-2">Pilih Tools</h2>
               <nav className="space-y-2">
                 {tutorials.map((tut) => (
                   <button
                     key={tut.id}
                     onClick={() => setActiveTabId(tut.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left transition-all font-bold ${
+                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-none text-left transition-all font-bold ${
                       activeTabId === tut.id
-                        ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-sm'
-                        : 'text-slate-600 hover:bg-slate-50 border border-transparent hover:border-slate-200'
+                        ? 'bg-blue-50 text-blue-700 border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a]'
+                        : 'text-blue-950 font-bold hover:bg-sky-50 border-2 border-blue-900 border-blue-900 hover:border-blue-900'
                     }`}
                   >
-                    <span className="text-2xl w-8 h-8 flex items-center justify-center drop-shadow-sm">{tut.icon}</span>
+                    <span className="text-2xl w-8 h-8 flex items-center justify-center drop-shadow-[4px_4px_0px_#1e3a8a]">{tut.icon}</span>
                     {tut.title}
                     {activeTabId === tut.id && <ChevronRight className="w-4 h-4 ml-auto text-blue-500" />}
                   </button>
@@ -300,33 +300,33 @@ export default function TutorialPage() {
 
           {/* Content Area */}
           <div className="flex-1">
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden relative">
+            <div className="bg-white rounded-none shadow-[4px_4px_0px_#1e3a8a] border-2 border-blue-900 border-blue-900 overflow-hidden relative">
               <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-blue-500/5 to-transparent pointer-events-none"></div>
 
               {/* View Mode Toggle */}
-              <div className="p-6 md:p-8 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-                <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-3">
+              <div className="p-6 md:p-8 border-b border-blue-900 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+                <h2 className="text-2xl font-extrabold text-blue-950 font-bold flex items-center gap-3">
                   <Laptop className="w-6 h-6 text-blue-600" />
                   {activeTutorial.title}
                 </h2>
 
-                <div className="flex p-1 bg-slate-100 rounded-xl border border-slate-200 shrink-0">
+                <div className="flex p-1 bg-sky-100 rounded-none border-2 border-blue-900 border-blue-900 shrink-0">
                   <button
                     onClick={() => setViewMode('install')}
-                    className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all ${
+                    className={`flex items-center gap-2 px-5 py-2 rounded-none text-sm font-bold transition-all ${
                       viewMode === 'install'
-                        ? 'bg-white text-blue-600 shadow-sm border border-slate-200/50'
-                        : 'text-slate-500 hover:text-slate-700'
+                        ? 'bg-white text-blue-600 shadow-[4px_4px_0px_#1e3a8a] border-2 border-blue-900 border-blue-900'
+                        : 'text-slate-500 hover:text-blue-950 font-bold'
                     }`}
                   >
                     <Settings className="w-4 h-4" /> Instalasi
                   </button>
                   <button
                     onClick={() => setViewMode('usage')}
-                    className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all ${
+                    className={`flex items-center gap-2 px-5 py-2 rounded-none text-sm font-bold transition-all ${
                       viewMode === 'usage'
-                        ? 'bg-white text-blue-600 shadow-sm border border-slate-200/50'
-                        : 'text-slate-500 hover:text-slate-700'
+                        ? 'bg-white text-blue-600 shadow-[4px_4px_0px_#1e3a8a] border-2 border-blue-900 border-blue-900'
+                        : 'text-slate-500 hover:text-blue-950 font-bold'
                     }`}
                   >
                     <PlayCircle className="w-4 h-4" /> Penggunaan
@@ -340,29 +340,29 @@ export default function TutorialPage() {
                   {stepsToShow.map((step, index) => (
                     <div 
                       key={index} 
-                      className="group relative bg-white border border-slate-200 hover:border-blue-300 rounded-2xl p-5 sm:p-6 transition-all duration-300 shadow-sm hover:shadow-md"
+                      className="group relative bg-white border-2 border-blue-900 border-blue-900 hover:border-blue-900 rounded-none p-5 sm:p-6 transition-all duration-300 shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a]"
                     >
                       <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 sm:items-start">
                         {/* Number Badge */}
                         <div className="flex-shrink-0">
-                          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center text-lg font-black shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                          <div className="w-12 h-12 rounded-none bg-blue-50 text-blue-600 border-2 border-blue-900 border-blue-900 flex items-center justify-center text-lg font-black shadow-[4px_4px_0px_#1e3a8a] group-hover:bg-blue-600 group-hover:text-white transition-colors">
                             {index + 1}
                           </div>
                         </div>
                         
                         {/* Step Details */}
                         <div className="flex-1">
-                          <h3 className="text-lg font-extrabold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">
+                          <h3 className="text-lg font-extrabold text-blue-950 font-bold mb-2 group-hover:text-blue-600 transition-colors">
                             {step.title}
                           </h3>
-                          <p className="text-slate-600 mb-4 leading-relaxed font-medium">
+                          <p className="text-blue-950 font-bold mb-4 leading-relaxed font-medium">
                             {step.desc}
                           </p>
                           
                           {/* Code Block if exists */}
                           {step.code && (
-                            <div className="bg-slate-900 rounded-xl p-4 overflow-x-auto shadow-inner border border-slate-800">
-                              <div className="flex items-center gap-2 mb-3 border-b border-slate-700/50 pb-2">
+                            <div className="bg-slate-900 rounded-none p-4 overflow-x-auto shadow-[4px_4px_0px_#1e3a8a] border-2 border-blue-900 border-blue-900">
+                              <div className="flex items-center gap-2 mb-3 border-b border-blue-900 pb-2">
                                 <Terminal className="w-4 h-4 text-slate-400" />
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Terminal / CLI</span>
                               </div>
@@ -378,13 +378,13 @@ export default function TutorialPage() {
                 </div>
                 
                 {/* Footer Bantuan */}
-                <div className="mt-8 bg-blue-50 border border-blue-200 rounded-2xl p-6 flex items-start sm:items-center gap-4">
-                   <div className="p-3 bg-white rounded-full shadow-sm text-blue-600">
+                <div className="mt-8 bg-blue-50 border-2 border-blue-900 border-blue-900 rounded-none p-6 flex items-start sm:items-center gap-4">
+                   <div className="p-3 bg-white rounded-none shadow-[4px_4px_0px_#1e3a8a] text-blue-600">
                      <CheckCircle className="w-6 h-6" />
                    </div>
                    <div>
-                     <h4 className="text-sm font-extrabold text-slate-800 mb-1">Sudah selesai mengatur semuanya?</h4>
-                     <p className="text-sm text-slate-600 font-medium">Jika kamu sudah berhasil mengikuti semua langkah di atas, kamu sudah siap seratus persen untuk melanjutkan materi belajar di Dashboard!</p>
+                     <h4 className="text-sm font-extrabold text-blue-950 font-bold mb-1">Sudah selesai mengatur semuanya?</h4>
+                     <p className="text-sm text-blue-950 font-bold font-medium">Jika kamu sudah berhasil mengikuti semua langkah di atas, kamu sudah siap seratus persen untuk melanjutkan materi belajar di Dashboard!</p>
                    </div>
                 </div>
 

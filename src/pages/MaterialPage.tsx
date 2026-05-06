@@ -173,16 +173,16 @@ export default function MaterialPage() {
   // Not Found State
   if (!material) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6 relative overflow-hidden">
-        <div className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-10 text-center shadow-xl relative z-10">
-          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
+      <div className="min-h-screen flex items-center justify-center bg-sky-50 p-6 relative overflow-hidden">
+        <div className="max-w-md w-full bg-white border-2 border-blue-900 border-blue-900 rounded-none p-10 text-center shadow-[4px_4px_0px_#1e3a8a] relative z-10">
+          <div className="w-16 h-16 bg-red-50 rounded-none flex items-center justify-center mx-auto mb-6 text-red-500">
             <XCircle className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-black text-slate-900 mb-3">Materi Tidak Ditemukan</h1>
+          <h1 className="text-2xl font-black text-blue-950 font-bold mb-3">Materi Tidak Ditemukan</h1>
           <p className="text-slate-500 mb-8 font-medium">Materi yang kamu cari tidak tersedia atau sudah dihapus.</p>
           <button
             onClick={() => navigate('/dashboard')}
-            className="w-full px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-md"
+            className="w-full px-6 py-3.5 rounded-none bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-[4px_4px_0px_#1e3a8a]"
           >
             Kembali ke Dashboard
           </button>
@@ -208,7 +208,7 @@ export default function MaterialPage() {
     intermediate: 'bg-amber-50 text-amber-600 border-amber-200',
     advanced: 'bg-rose-50 text-rose-600 border-rose-200',
     expert: 'bg-purple-50 text-purple-600 border-purple-200',
-  }[material.level] || 'bg-slate-100 text-slate-600 border-slate-200';
+  }[material.level] || 'bg-sky-100 text-blue-950 font-bold border-blue-900';
 
   const userInfoText = `${(user as any)?.email || 'User'} - ${new Date().toLocaleDateString()}`;
 
@@ -235,26 +235,26 @@ export default function MaterialPage() {
         </div>
       )}
 
-      <div className="min-h-screen bg-slate-50 text-slate-800 font-sans relative">
+      <div className="min-h-screen bg-sky-50 text-blue-950 font-bold font-sans relative">
         
         {/* WATERMARK OVERLAY - Lebih clean & elegan (nggak terlalu ribut) */}
         <div className="fixed inset-0 pointer-events-none z-[9998] flex flex-col justify-between p-8 opacity-[0.05] select-none mix-blend-multiply overflow-hidden">
-          <div className="text-right text-lg font-bold text-slate-900">{userInfoText}</div>
+          <div className="text-right text-lg font-bold text-blue-950 font-bold">{userInfoText}</div>
           <div className="flex justify-center items-center h-full w-full absolute top-0 left-0">
-            <div className="text-3xl sm:text-5xl font-black text-slate-900 -rotate-12 tracking-widest whitespace-nowrap">
+            <div className="text-3xl sm:text-5xl font-black text-blue-950 font-bold -rotate-12 tracking-widest whitespace-nowrap">
               ASTBYTE • {userInfoText}
             </div>
           </div>
-          <div className="text-left text-lg font-bold text-slate-900 mt-auto">{userInfoText}</div>
+          <div className="text-left text-lg font-bold text-blue-950 font-bold mt-auto">{userInfoText}</div>
         </div>
 
         {/* Navbar */}
-        <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200 shadow-sm no-print">
+        <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-blue-900 shadow-[4px_4px_0px_#1e3a8a] no-print">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div className="flex items-center gap-4 sm:gap-6">
               <button
                 onClick={() => navigate('/dashboard')}
-                className="group flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors bg-slate-50 hover:bg-blue-50 rounded-full border border-slate-200 shadow-sm"
+                className="group flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors bg-sky-50 hover:bg-blue-50 rounded-none border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a]"
               >
                 <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                 <span className="hidden sm:inline">Dashboard</span>
@@ -263,12 +263,12 @@ export default function MaterialPage() {
               <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
               
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100 shadow-sm">
+                <div className="w-10 h-10 rounded-none bg-blue-50 flex items-center justify-center text-blue-600 border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a]">
                   <BookOpen className="w-5 h-5" />
                 </div>
                 <div className="hidden md:block leading-tight">
                   <p className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Module #{material.order}</p>
-                  <p className="text-sm font-bold text-slate-900 line-clamp-1 max-w-[200px]">{material.title}</p>
+                  <p className="text-sm font-bold text-blue-950 font-bold line-clamp-1 max-w-[200px]">{material.title}</p>
                 </div>
               </div>
             </div>
@@ -278,10 +278,10 @@ export default function MaterialPage() {
                 <button
                   onClick={handleMarkComplete}
                   disabled={isCompleting}
-                  className={`px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-sm disabled:opacity-50 border ${
+                  className={`px-5 py-2.5 rounded-none font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-[4px_4px_0px_#1e3a8a] disabled:opacity-50 border-2 border-blue-900 ${
                     isCompleted
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:shadow-md'
-                      : 'bg-blue-600 text-white hover:bg-blue-700 border-transparent shadow-md hover:-translate-y-0.5'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:shadow-[4px_4px_0px_#1e3a8a]'
+                      : 'bg-blue-600 text-white hover:bg-blue-700 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] hover:-translate-y-0.5'
                   }`}
                 >
                   {isCompleting ? (
@@ -300,30 +300,30 @@ export default function MaterialPage() {
         <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10 print-hide">
           
           {/* HERO SECTION */}
-          <div className="mb-10 bg-white border border-slate-200 rounded-[2.5rem] p-8 sm:p-10 shadow-lg animate-fade-in-up">
+          <div className="mb-10 bg-white border-2 border-blue-900 border-blue-900 rounded-[2.5rem] p-8 sm:p-10 shadow-[4px_4px_0px_#1e3a8a] animate-fade-in-up">
             <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-8">
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-3 mb-6">
-                  <span className={`px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest border shadow-sm ${levelBadgeColor}`}>
+                  <span className={`px-3 py-1.5 rounded-none text-[10px] font-extrabold uppercase tracking-widest border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] ${levelBadgeColor}`}>
                     {material.level}
                   </span>
-                  <span className="px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest bg-blue-50 text-blue-700 border border-blue-200 shadow-sm">
+                  <span className="px-3 py-1.5 rounded-none text-[10px] font-extrabold uppercase tracking-widest bg-blue-50 text-blue-700 border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a]">
                     {material.language}
                   </span>
                 </div>
                 
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 mb-6 leading-tight tracking-tight">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-blue-950 font-bold mb-6 leading-tight tracking-tight">
                   {material.title}
                 </h1>
                 
-                <p className="text-lg text-slate-600 font-medium leading-relaxed max-w-2xl">
+                <p className="text-lg text-blue-950 font-bold font-medium leading-relaxed max-w-2xl">
                   {material.description}
                 </p>
               </div>
               
               <div className="shrink-0 w-full lg:w-72">
                 {isPremium && (
-                  <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 relative overflow-hidden group shadow-sm hover:shadow-md transition-shadow">
+                  <div className="bg-sky-50 border-2 border-blue-900 border-blue-900 rounded-none p-6 relative overflow-hidden group shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a] transition-shadow-[4px_4px_0px_#1e3a8a]">
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 group-hover:opacity-100 opacity-50 transition-opacity"></div>
                     <div className="relative">
                       <div className="flex items-center gap-2 mb-4 text-slate-500 text-xs font-black uppercase tracking-widest">
@@ -331,12 +331,12 @@ export default function MaterialPage() {
                         Your Progress
                       </div>
                       <div className="flex items-baseline gap-1 mb-4">
-                        <span className="text-4xl font-black text-slate-900">{progress}</span>
+                        <span className="text-4xl font-black text-blue-950 font-bold">{progress}</span>
                         <span className="text-sm font-bold text-slate-500">%</span>
                       </div>
-                      <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden border border-slate-300/50">
+                      <div className="h-2 w-full bg-slate-200 rounded-none overflow-hidden border-2 border-blue-900 border-blue-900">
                         <div 
-                          className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-700 ease-out"
+                          className="h-full bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all rounded-none transition-all duration-700 ease-out"
                           style={{ width: `${progress}%` }}
                         ></div>
                       </div>
@@ -348,8 +348,8 @@ export default function MaterialPage() {
           </div>
 
           {/* CONTENT AREA */}
-          <div className="bg-white border border-slate-200 text-slate-700 rounded-[2.5rem] p-8 sm:p-12 shadow-xl mb-10 animate-fade-in-up select-none" style={{ animationDelay: '100ms' }}>
-            <div className="prose prose-slate prose-lg max-w-none prose-headings:font-black prose-headings:text-slate-900 prose-p:text-slate-700 prose-p:font-medium prose-strong:text-slate-900 prose-ul:text-slate-700 prose-ol:text-slate-700 prose-a:text-blue-600 hover:prose-a:text-blue-700 prose-code:text-blue-700 prose-code:bg-blue-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-pre:bg-slate-900 prose-pre:text-slate-50 prose-pre:border prose-pre:border-slate-800 prose-pre:shadow-lg prose-img:rounded-2xl prose-img:shadow-md">
+          <div className="bg-white border-2 border-blue-900 border-blue-900 text-blue-950 font-bold rounded-[2.5rem] p-8 sm:p-12 shadow-[4px_4px_0px_#1e3a8a] mb-10 animate-fade-in-up select-none" style={{ animationDelay: '100ms' }}>
+            <div className="prose prose-slate prose-lg max-w-none prose-headings:font-black prose-headings:text-blue-950 font-bold prose-p:text-blue-950 font-bold prose-p:font-medium prose-strong:text-blue-950 font-bold prose-ul:text-blue-950 font-bold prose-ol:text-blue-950 font-bold prose-a:text-blue-600 hover:prose-a:text-blue-700 prose-code:text-blue-700 prose-code:bg-blue-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-none prose-pre:bg-slate-900 prose-pre:text-slate-50 prose-pre:border-2 border-blue-900 prose-pre:border-blue-900 prose-pre:shadow-[4px_4px_0px_#1e3a8a] prose-img:rounded-none prose-img:shadow-[4px_4px_0px_#1e3a8a]">
                <MaterialContent content={material.content} />
             </div>
           </div>
@@ -360,14 +360,14 @@ export default function MaterialPage() {
               <button
                 // URL menggunakan encodeId()
                 onClick={() => navigate(`/materials/${encodeId(prevMaterial.id)}`)}
-                className="group flex items-center gap-4 p-5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-300 rounded-2xl transition-all text-left shadow-sm hover:shadow-md"
+                className="group flex items-center gap-4 p-5 bg-white hover:bg-sky-50 border-2 border-blue-900 border-blue-900 hover:border-blue-900 rounded-none transition-all text-left shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a]"
               >
-                <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center border border-slate-200 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 bg-sky-100 rounded-none flex items-center justify-center border-2 border-blue-900 border-blue-900 group-hover:scale-110 transition-transform">
                   <ChevronLeft className="w-5 h-5 text-slate-500 group-hover:text-blue-600" />
                 </div>
                 <div>
                   <p className="text-[10px] text-slate-500 font-extrabold uppercase tracking-widest mb-1">Previous Lesson</p>
-                  <p className="text-sm font-bold text-slate-900 line-clamp-1 group-hover:text-blue-700 transition-colors">{prevMaterial.title}</p>
+                  <p className="text-sm font-bold text-blue-950 font-bold line-clamp-1 group-hover:text-blue-700 transition-colors">{prevMaterial.title}</p>
                 </div>
               </button>
             )}
@@ -376,13 +376,13 @@ export default function MaterialPage() {
               <button
                 // URL menggunakan encodeId()
                 onClick={() => navigate(`/materials/${encodeId(nextMaterial.id)}`)}
-                className="group flex items-center justify-between gap-4 p-5 bg-blue-600 hover:bg-blue-700 border border-blue-500 rounded-2xl transition-all text-left shadow-lg shadow-blue-600/20 transform hover:-translate-y-0.5"
+                className="group flex items-center justify-between gap-4 p-5 bg-blue-600 hover:bg-blue-700 border-2 border-blue-900 border-blue-900 rounded-none transition-all text-left shadow-[4px_4px_0px_#1e3a8a] shadow-[4px_4px_0px_#1e3a8a] transform hover:-translate-y-0.5"
               >
                 <div className="pl-2">
                   <p className="text-[10px] text-blue-200 font-extrabold uppercase tracking-widest mb-1">Next Lesson</p>
                   <p className="text-sm font-bold text-white line-clamp-1">{nextMaterial.title}</p>
                 </div>
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                <div className="w-12 h-12 bg-white/20 rounded-none flex items-center justify-center group-hover:scale-110 transition-transform shadow-[4px_4px_0px_#1e3a8a]">
                   <ChevronRight className="w-5 h-5 text-white" />
                 </div>
               </button>
@@ -392,7 +392,7 @@ export default function MaterialPage() {
           <div className="text-center pb-8 no-print">
              <button 
                onClick={() => navigate('/dashboard')}
-               className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all text-sm font-bold shadow-sm hover:shadow-md"
+               className="inline-flex items-center gap-2 px-6 py-3 rounded-none bg-white border-2 border-blue-900 border-blue-900 text-blue-950 font-bold hover:text-blue-600 hover:border-blue-900 transition-all text-sm font-bold shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a]"
              >
                 <Home className="w-4 h-4" />
                 Back to Dashboard

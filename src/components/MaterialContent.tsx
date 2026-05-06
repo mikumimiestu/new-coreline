@@ -30,7 +30,7 @@ const InlineCode = ({ inline, children, ...rest }: InlineCodeProps) => {
     return (
       <code
         {...rest}
-        className="inline-flex items-center rounded-md bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[0.875em] font-mono font-medium text-pink-600 dark:text-pink-400 border border-slate-200 dark:border-slate-700 mx-0.5 align-middle"
+        className="inline-flex items-center rounded-none bg-sky-100 dark:bg-slate-800 px-1.5 py-0.5 text-[0.875em] font-mono font-medium text-pink-600 dark:text-pink-400 border-2 border-blue-900 border-blue-900 dark:border-blue-900 mx-0.5 align-middle"
       >
         {children}
       </code>
@@ -69,7 +69,7 @@ export default function MaterialContent({ content }: MaterialContentProps) {
   const mdComponents: Components = {
     // --- Layout Elements ---
     table: ({ children }) => (
-      <div className="my-8 w-full overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm relative z-0">
+      <div className="my-8 w-full overflow-x-auto rounded-none border-2 border-blue-900 border-blue-900 dark:border-blue-900 shadow-[4px_4px_0px_#1e3a8a] relative z-0">
         {/* Pastikan z-index rendah agar tidak menutupi dropdown dari parent */}
         <table className="w-full text-left text-sm whitespace-nowrap md:whitespace-normal">
           {children}
@@ -77,7 +77,7 @@ export default function MaterialContent({ content }: MaterialContentProps) {
       </div>
     ),
     thead: ({ children }) => (
-      <thead className="bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+      <thead className="bg-sky-100 dark:bg-slate-800/50 border-b border-blue-900 dark:border-blue-900">
         {children}
       </thead>
     ),
@@ -87,20 +87,20 @@ export default function MaterialContent({ content }: MaterialContentProps) {
       </tbody>
     ),
     tr: ({ children }) => (
-      <tr className="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/30">
+      <tr className="transition-colors hover:bg-sky-50/80 dark:hover:bg-slate-800/30">
         {children}
       </tr>
     ),
     th: ({ children, ...props }) => (
       <th
         {...props}
-        className="px-6 py-4 font-bold text-slate-900 dark:text-slate-100"
+        className="px-6 py-4 font-bold text-blue-950 font-bold dark:text-slate-100"
       >
         {children}
       </th>
     ),
     td: ({ children, ...props }) => (
-      <td {...props} className="px-6 py-4 text-slate-600 dark:text-slate-400">
+      <td {...props} className="px-6 py-4 text-blue-950 font-bold dark:text-slate-400">
         {children}
       </td>
     ),
@@ -118,12 +118,12 @@ export default function MaterialContent({ content }: MaterialContentProps) {
       </a>
     ),
     h1: ({ children }) => (
-      <h1 className="mt-10 mb-6 text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-4">
+      <h1 className="mt-10 mb-6 text-3xl sm:text-4xl font-extrabold tracking-tight text-blue-950 font-bold dark:text-white border-b border-blue-900 dark:border-blue-900 pb-4">
         {children}
       </h1>
     ),
     h2: ({ children }) => (
-      <h2 className="group mt-10 mb-4 flex items-center gap-2 text-2xl font-bold tracking-tight text-slate-800 dark:text-slate-100">
+      <h2 className="group mt-10 mb-4 flex items-center gap-2 text-2xl font-bold tracking-tight text-blue-950 font-bold dark:text-slate-100">
         <span className="hidden lg:block -ml-6 opacity-0 transition-opacity group-hover:opacity-100 text-blue-500">
           #
         </span>
@@ -131,12 +131,12 @@ export default function MaterialContent({ content }: MaterialContentProps) {
       </h2>
     ),
     h3: ({ children }) => (
-      <h3 className="mt-8 mb-3 text-xl font-bold text-slate-800 dark:text-slate-200">
+      <h3 className="mt-8 mb-3 text-xl font-bold text-blue-950 font-bold dark:text-slate-200">
         {children}
       </h3>
     ),
     p: ({ children }) => (
-      <p className="my-5 leading-relaxed text-slate-600 dark:text-slate-300 text-base sm:text-lg">
+      <p className="my-5 leading-relaxed text-blue-950 font-bold dark:text-slate-300 text-base sm:text-lg">
         {children}
       </p>
     ),
@@ -144,23 +144,23 @@ export default function MaterialContent({ content }: MaterialContentProps) {
       <ul className="my-6 space-y-2 pl-2">{children}</ul>
     ),
     ol: ({ children }) => (
-      <ol className="my-6 list-decimal space-y-2 pl-6 text-slate-600 dark:text-slate-300">
+      <ol className="my-6 list-decimal space-y-2 pl-6 text-blue-950 font-bold dark:text-slate-300">
         {children}
       </ol>
     ),
     li: ({ children }) => (
-      <li className="flex items-start gap-3 text-slate-600 dark:text-slate-300">
-        <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-500" />
+      <li className="flex items-start gap-3 text-blue-950 font-bold dark:text-slate-300">
+        <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-none bg-blue-500" />
         <span className="flex-1 leading-relaxed">{children}</span>
       </li>
     ),
     
     // --- Special Components ---
     blockquote: ({ children }) => (
-      <blockquote className="my-8 relative overflow-hidden rounded-r-lg border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-900/10 p-4 sm:p-6">
+      <blockquote className="my-8 relative overflow-hidden rounded-r-lg border-l-4 border-blue-900 bg-blue-50/50 dark:bg-blue-900/10 p-4 sm:p-6">
         <div className="relative z-10 flex gap-4">
           <Info className="h-6 w-6 flex-shrink-0 text-blue-500 mt-1" />
-          <div className="text-slate-700 dark:text-slate-200 italic font-medium">
+          <div className="text-blue-950 font-bold dark:text-slate-200 italic font-medium">
             {children}
           </div>
         </div>
@@ -185,21 +185,21 @@ export default function MaterialContent({ content }: MaterialContentProps) {
           return (
             <div
               key={index}
-              className="group relative my-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-[#0F1117] shadow-xl transition-all hover:shadow-2xl z-0"
+              className="group relative my-8 rounded-none border-2 border-blue-900 border-blue-900 dark:border-blue-900 bg-[#0F1117] shadow-[4px_4px_0px_#1e3a8a] transition-all hover:shadow-[4px_4px_0px_#1e3a8a] z-0"
               // Dihapus overflow-hidden di container ini agar styling scrollbar jalan lancar
             >
               {/* Code Header (Mac Style) */}
-              <div className="flex items-center justify-between border-b border-white/10 bg-white/5 px-4 py-3 rounded-t-xl backdrop-blur-md">
+              <div className="flex items-center justify-between border-b border-blue-900 bg-white/5 px-4 py-3 rounded-t-xl backdrop-blur-md">
                 <div className="flex items-center gap-4">
                   {/* Window Controls Decoration */}
                   <div className="flex gap-1.5 opacity-70 hover:opacity-100 transition-opacity">
-                    <div className="h-3 w-3 rounded-full bg-red-500/80 shadow-sm" />
-                    <div className="h-3 w-3 rounded-full bg-yellow-500/80 shadow-sm" />
-                    <div className="h-3 w-3 rounded-full bg-green-500/80 shadow-sm" />
+                    <div className="h-3 w-3 rounded-none bg-red-500/80 shadow-[4px_4px_0px_#1e3a8a]" />
+                    <div className="h-3 w-3 rounded-none bg-yellow-500/80 shadow-[4px_4px_0px_#1e3a8a]" />
+                    <div className="h-3 w-3 rounded-none bg-green-500/80 shadow-[4px_4px_0px_#1e3a8a]" />
                   </div>
                   
                   {/* Language Badge */}
-                  <div className="flex items-center gap-2 rounded px-2 py-0.5 text-xs font-bold text-slate-400 bg-white/5 border border-white/10 uppercase tracking-wider">
+                  <div className="flex items-center gap-2 rounded-none px-2 py-0.5 text-xs font-bold text-slate-400 bg-white/5 border-2 border-blue-900 border-blue-900 uppercase tracking-wider">
                     <Terminal className="h-3 w-3" />
                     {language}
                   </div>
@@ -209,7 +209,7 @@ export default function MaterialContent({ content }: MaterialContentProps) {
                   {/* Wrap Toggle */}
                   <button
                     onClick={() => toggleWrap(index)}
-                    className={`flex h-8 items-center gap-2 rounded-lg px-3 text-xs font-bold transition-all ${
+                    className={`flex h-8 items-center gap-2 rounded-none px-3 text-xs font-bold transition-all ${
                         isWrapped 
                         ? 'bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/50' 
                         : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200'
@@ -223,7 +223,7 @@ export default function MaterialContent({ content }: MaterialContentProps) {
                   {/* Copy Button */}
                   <button
                     onClick={() => copyToClipboard(part.content, index)}
-                    className="flex h-8 items-center gap-2 rounded-lg bg-white/5 px-3 text-xs font-bold text-slate-400 transition-all hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="flex h-8 items-center gap-2 rounded-none bg-white/5 px-3 text-xs font-bold text-slate-400 transition-all hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                   >
                     {copiedIndex === index ? (
                       <>
@@ -252,7 +252,7 @@ export default function MaterialContent({ content }: MaterialContentProps) {
                   <code className="block min-w-full">
                     {lines.map((line, i) => (
                       <div key={i} className="table-row hover:bg-white/5 transition-colors w-full group/line">
-                        <span className="table-cell select-none pr-4 text-right text-slate-600 w-[40px] align-top group-hover/line:text-slate-400 transition-colors">
+                        <span className="table-cell select-none pr-4 text-right text-blue-950 font-bold w-[40px] align-top group-hover/line:text-slate-400 transition-colors">
                           {i + 1}
                         </span>
                         <span className="table-cell w-full">{line || ' '}</span>
