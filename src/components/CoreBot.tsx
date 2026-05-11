@@ -47,7 +47,7 @@ export default function CoreBot() {
   const [isThinking, setIsThinking] = useState(false);
 
   const [chatMessages, setChatMessages] = useState<{sender: 'bot' | 'user', text: string, model?: 'Lyra', thought?: string}[]>([
-    { sender: 'bot', text: 'Halo! Saya Lyra Nebula 31B, asisten AI resmi dari Coreline. Ada yang bisa saya bantu hari ini?', model: 'Lyra' }
+    { sender: 'bot', text: 'Halo! Saya Lyra, asisten AI resmi dari Coreline. Ada yang bisa saya bantu hari ini?', model: 'Lyra' }
   ]);
 
   // --- 1. Fetch User Data saat komponen load ---
@@ -121,7 +121,7 @@ export default function CoreBot() {
   // --- Fungsi Pemanggilan Gemma (Gemma 4 31B Engine) ---
   const callGemma = async (prompt: string, systemInstruction: string) => {
     const model = genAI.getGenerativeModel({ 
-      model: "gemma-4-31b-it",
+      model: "gemini-2.5-flash",
       systemInstruction: systemInstruction 
     });
     const result = await model.generateContent(prompt);
@@ -162,7 +162,7 @@ export default function CoreBot() {
     `;
 
     const systemPrompt = `
-      Kamu adalah Lyra Nebula 31B, asisten AI resmi Coreline by AstByte.
+      Kamu adalah Lyra, asisten AI resmi Coreline by AstByte.
       Kamu terintegrasi ke dalam sistem project dengan struktur berikut:
       ${projectSummary}
       
@@ -296,14 +296,14 @@ export default function CoreBot() {
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <h3 className="text-sm font-black text-white uppercase tracking-wider leading-none">Lyra Nebula 31B</h3>
+                    <h3 className="text-sm font-black text-white uppercase tracking-wider leading-none">Lyra Nebula</h3>
                     <div className="group/info relative cursor-help">
                       <Info className="w-3 h-3 text-white/50 hover:text-white transition-colors" />
                       <div className="absolute left-0 top-full mt-2 w-48 p-2.5 bg-slate-900/95 backdrop-blur-md rounded-none shadow-[4px_4px_0px_#1e3a8a] border-2 border-blue-900 border-blue-900 text-[9px] font-medium leading-relaxed text-blue-100 opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-[100]">
                         <div className="font-black text-white mb-1 uppercase tracking-widest text-[8px] flex items-center gap-1">
-                          <Sparkles className="w-2.5 h-2.5 text-blue-400" /> Lyra Engine Detail
+                          <Sparkles className="w-2.5 h-2.5 text-blue-400" /> Gemini Engine Detail
                         </div>
-                        Lyra Nebula 31B adalah asisten AI yang dibangun di atas fondasi <span className="text-blue-400 font-bold italic">Gemma 4 31B</span> yang telah disempurnakan khusus untuk ekosistem Coreline.
+                        Lyra adalah asisten AI yang dibangun di atas fondasi <span className="text-blue-400 font-bold italic">Gemini 2.5 Flash</span> yang telah disempurnakan khusus untuk ekosistem Coreline.
                       </div>
                     </div>
                   </div>
@@ -390,7 +390,7 @@ export default function CoreBot() {
                       <div className="flex items-center gap-1 px-1 mt-0.5">
                         <div className="w-1 h-1 rounded-none bg-blue-400" />
                         <span className="text-[9px] font-black uppercase tracking-tighter text-slate-400 italic">
-                          Responded by <span className="text-blue-500">Lyra Nebula 31B</span>
+                          Responded by <span className="text-blue-500">Lyra</span>
                         </span>
                       </div>
                     )}

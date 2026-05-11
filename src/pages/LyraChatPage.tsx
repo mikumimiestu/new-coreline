@@ -27,7 +27,7 @@ export default function LyraChatPage() {
   const [chatMessages, setChatMessages] = useState<{sender: 'bot' | 'user', text: string, model?: 'Lyra', thought?: string}[]>([
     { 
       sender: 'bot', 
-      text: `Halo! Selamat datang di Lyra Nebula 31B Center. Ada yang bisa aku bantu untuk belajarmu hari ini?`, 
+      text: `Halo! Selamat datang. Ada yang bisa Lyra bantu untuk belajarmu hari ini?`, 
       model: 'Lyra' 
     }
   ]);
@@ -77,7 +77,7 @@ export default function LyraChatPage() {
 
   const callGemma = async (prompt: string, systemInstruction: string) => {
     const model = genAI.getGenerativeModel({ 
-      model: "gemma-4-31b-it",
+      model: "gemini-2.5-flash-lite",
       systemInstruction: systemInstruction 
     });
     const result = await model.generateContent(prompt);
@@ -126,13 +126,13 @@ export default function LyraChatPage() {
     `;
 
     const systemPrompt = `
-      Kamu adalah Lyra Nebula 31B, asisten AI resmi Coreline by AstByte.
+      Kamu adalah Lyra, asisten AI resmi Coreline by AstByte.
       Kamu berada di halaman Chat Dedicated Fullscreen.
       ${projectSummary}
       IDENTITAS USER: ${userContextString}
       
       ATURAN FORMATTING (SANGAT KETAT):
-      1. JANGAN menulis label seperti "Neural Reasoning Process", "Verified Output", atau "Lyra v3.1" di dalam teksmu. Label-label itu sudah ada di UI sistem.
+      1. JANGAN menulis label seperti "Neural Reasoning Process", "Verified Output", atau "Lyra Nebula" di dalam teksmu. Label-label itu sudah ada di UI sistem.
       2. Responmu WAJIB diawali dengan [THOUGHT].
       3. Responmu WAJIB memisahkan analisis dan jawaban dengan tag [RESPONSE].
       
@@ -190,7 +190,7 @@ export default function LyraChatPage() {
       }
 
       // Bersihkan sisa-sisa marker atau label UI yang mungkin ter-hallucinate oleh model
-      const uiLabels = [/Neural Reasoning Process/gi, /Verified Output/gi, /Lyra v3\.1/gi, /Neural Sync Active/gi];
+      const uiLabels = [/Neural Reasoning Process/gi, /Verified Output/gi, /Gemma v4\.0/gi, /Neural Sync Active/gi];
       uiLabels.forEach(pattern => {
         finalText = finalText.replace(pattern, "");
         finalThought = finalThought.replace(pattern, "");
@@ -228,7 +228,7 @@ export default function LyraChatPage() {
               <Bot className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-sm md:text-base font-black text-white uppercase tracking-wider leading-none">Lyra Nebula 31B</h1>
+              <h1 className="text-sm md:text-base font-black text-white uppercase tracking-wider leading-none">Lyra</h1>
               <div className="flex items-center gap-1.5 mt-1">
                 <div className="w-1.5 h-1.5 bg-emerald-400 rounded-none animate-pulse" />
                 <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Neural Sync Active</span>
@@ -283,7 +283,7 @@ export default function LyraChatPage() {
                         <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
                         <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 italic">Verified Output</span>
                       </div>
-                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Lyra v3.1</span>
+                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Lyra</span>
                     </div>
                   )}
                 </div>
@@ -323,7 +323,7 @@ export default function LyraChatPage() {
             </button>
           </form>
           <p className="text-center text-[10px] text-slate-500 mt-4 uppercase tracking-[0.2em] font-bold">
-            Powered by Lyra Nebula 31B Engine • Coreline AI Division
+            Powered by Lyra Nebula • Coreline AI Division
           </p>
         </div>
       </main>

@@ -65,7 +65,7 @@ async function generate() {
   }
 
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(vectorIndex, null, 2));
-  console.log(`\n✅ Selesai! Lyra sekarang sudah membaca ${vectorIndex.length} file.`);
+  console.log(`\n✅ Selesai! Gemma sekarang sudah membaca ${vectorIndex.length} file.`);
 }
 
 generate().catch(console.error);

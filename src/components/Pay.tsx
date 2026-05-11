@@ -208,6 +208,16 @@ export default function ManualQRISPage() {
 
   useEffect(() => {
     document.title = 'Checkout Pembayaran | Coreline';
+    
+    // Keamanan: Hapus token dari URL jika ada agar tidak terlihat/tercatat di history
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('token')) {
+        urlParams.delete('token');
+        const newRelativePathQuery = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+        window.history.replaceState(null, '', newRelativePathQuery);
+      }
+    }
   }, []);
 
   // --- Actions ---
@@ -625,7 +635,7 @@ export default function ManualQRISPage() {
                    <div className="flex flex-col mb-5">
                       <span className="font-black text-slate-500 uppercase tracking-widest text-xs mb-2">Total Pembayaran</span>
                       <div className="flex justify-between items-end">
-                        <span className="text-3xl md:text-4xl font-black text-blue-600 tracking-tight leading-none drop-shadow-[4px_4px_0px_#1e3a8a]">
+                        <span className="text-3xl md:text-4xl font-black text-blue-600 tracking-tight leading-none">
                           {rupiah(grandTotal)}
                         </span>
                         <button onClick={handleCopyTotal} className="p-2.5 bg-white hover:bg-blue-50 rounded-none text-slate-500 hover:text-blue-600 transition-colors border-2 border-blue-900 border-blue-900 hover:border-blue-900 shadow-[4px_4px_0px_#1e3a8a] group" title="Salin Nominal">

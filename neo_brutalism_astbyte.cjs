@@ -5,22 +5,18 @@ const targetDirs = [
   '/Users/zakimushthafabillah/account-astbyte/frontend/src/routes'
 ];
 
-// Vibrant Neo-Brutalist colors
-const colors = [
-  'bg-yellow-300', 
-  'bg-pink-300', 
-  'bg-cyan-300', 
-  'bg-green-300', 
-  'bg-purple-300', 
-  'bg-orange-300',
-  'bg-lime-300',
-  'bg-teal-300'
+// AstByte Professional Neo-Brutalist Palette
+// Blue must be dominant, White as clean base, with minimal accents.
+const accentColors = [
+  'bg-cyan-300',   // Soft cyan
+  'bg-purple-400', // Light purple/lavender
+  'bg-yellow-200'  // Subtle pastel yellow
 ];
 
-let colorIndex = 0;
-function getNextColor() {
-  const c = colors[colorIndex % colors.length];
-  colorIndex++;
+let accentIndex = 0;
+function getNextAccent() {
+  const c = accentColors[accentIndex % accentColors.length];
+  accentIndex++;
   return c;
 }
 
@@ -28,50 +24,63 @@ function processFile(filePath) {
   let content = fs.readFileSync(filePath, 'utf-8');
   let originalContent = content;
 
-  // 1. Replace shadows with hard black shadows
-  content = content.replace(/shadow-(sm|md|lg|xl|2xl|inner|none|blue-\w+\/\d+|indigo-\w+\/\d+|gray-\w+\/\d+|slate-\w+\/\d+)/g, 'shadow-[4px_4px_0px_#000]');
-  content = content.replace(/shadow\b(?!\-\[)/g, 'shadow-[4px_4px_0px_#000]');
+  // 1. Neo-Brutalism Shadows & Borders
+  // Replace all shadows with thick black shadows
+  content = content.replace(/shadow-(sm|md|lg|xl|2xl|inner|none|blue-\w+\/\d+|indigo-\w+\/\d+|gray-\w+\/\d+|slate-\w+\/\d+)/g, 'shadow-[6px_6px_0px_0px_#111827]');
+  content = content.replace(/shadow\b(?!\-\[)/g, 'shadow-[6px_6px_0px_0px_#111827]');
+  content = content.replace(/shadow-\[4px_4px_0px_\#000\]/g, 'shadow-[6px_6px_0px_0px_#111827]');
 
-  // 2. Add thick borders
-  content = content.replace(/border-transparent/g, 'border-black');
-  content = content.replace(/border-white(\/\d+)?/g, 'border-black');
-  content = content.replace(/border-gray-\d+/g, 'border-black');
-  content = content.replace(/border-slate-\d+/g, 'border-black');
-  content = content.replace(/border-blue-\d+/g, 'border-black');
-  content = content.replace(/border-indigo-\d+/g, 'border-black');
-
-  // If there's border but no width, make it border-2 or border-4
-  content = content.replace(/\bborder\b(?!\-)/g, 'border-2 border-black');
-
-  // 3. Remove rounded corners (optional, some rounding is ok, but we want flat)
-  content = content.replace(/rounded-(sm|md|lg|xl|2xl|3xl|full)/g, 'rounded-none');
-  content = content.replace(/rounded\b(?!\-)/g, 'rounded-none');
-
-  // 4. Colorize backgrounds
-  // We will replace 'bg-white' in cards with random bright colors!
-  content = content.replace(/\bbg-white\b/g, () => getNextColor());
+  // Add thick black borders
+  content = content.replace(/border-transparent/g, 'border-gray-900');
+  content = content.replace(/border-white(\/\d+)?/g, 'border-gray-900');
+  content = content.replace(/border-gray-\d+(\/\d+)?/g, 'border-gray-900');
+  content = content.replace(/border-slate-\d+(\/\d+)?/g, 'border-gray-900');
+  content = content.replace(/border-blue-\d+(\/\d+)?/g, 'border-gray-900');
   
-  // Replace gradients with solid vibrant colors
-  content = content.replace(/bg-gradient-to-\w+\s+from-\w+-\d+\s+to-\w+-\d+/g, () => getNextColor());
-  content = content.replace(/bg-blue-600/g, () => getNextColor());
-  content = content.replace(/bg-indigo-600/g, () => getNextColor());
+  // If there's border but no width, make it border-4 or border-2
+  content = content.replace(/\bborder\b(?!\-)/g, 'border-4 border-gray-900');
 
-  // Background slates to vibrant main bg like bg-blue-100 or pink-50
-  content = content.replace(/\bbg-slate-50\b/g, 'bg-blue-50');
-  content = content.replace(/\bbg-gray-50\b/g, 'bg-blue-50');
+  // Remove rounded corners or make them consistent (rounded-xl)
+  content = content.replace(/rounded-(sm|md|lg|2xl|3xl|full)/g, 'rounded-xl');
+  content = content.replace(/rounded\b(?!\-)/g, 'rounded-xl');
 
-  // 5. Fix Text Colors
-  // Text inside vibrant backgrounds must be black for contrast
-  content = content.replace(/text-slate-\d+/g, 'text-black font-bold');
-  content = content.replace(/text-gray-\d+/g, 'text-black font-bold');
-  content = content.replace(/text-white/g, 'text-black font-bold');
+  // 2. Color Palette Application (AstByte Blue, White, Accents)
+  
+  // Convert dark/slate backgrounds to White (clean base) or Blue-600 (dominant)
+  content = content.replace(/bg-slate-900(\/\d+)?/g, 'bg-blue-600');
+  content = content.replace(/bg-slate-800(\/\d+)?/g, 'bg-blue-600');
+  content = content.replace(/bg-slate-50\b/g, 'bg-white');
+  content = content.replace(/bg-gray-50\b/g, 'bg-white');
+  content = content.replace(/bg-\[\#0f172a\]/g, 'bg-blue-600');
 
-  // Add hover animations for buttons
-  content = content.replace(/hover:shadow-[a-z0-9\-]+/g, 'hover:shadow-[6px_6px_0px_#000] hover:-translate-y-1 hover:-translate-x-1 transition-all');
+  // Apply Accents to specific elements (like buttons, small cards, or existing bright colors)
+  // We'll replace existing colorful brutalism classes from previous scripts if they exist
+  const oldColors = ['bg-yellow-300', 'bg-pink-300', 'bg-green-300', 'bg-orange-300', 'bg-lime-300', 'bg-teal-300'];
+  oldColors.forEach(color => {
+      const regex = new RegExp(`\\b${color}\\b`, 'g');
+      content = content.replace(regex, () => getNextAccent());
+  });
+
+  // Make primary gradients solid blue or accent
+  content = content.replace(/bg-gradient-to-\w+\s+from-\w+-\d+\s+to-\w+-\d+/g, 'bg-blue-600');
+
+  // 3. Typography & Text Colors
+  // Text inside white/accent backgrounds must be dark
+  content = content.replace(/text-slate-\d+/g, 'text-gray-900 font-bold');
+  content = content.replace(/text-gray-\d+/g, 'text-gray-900 font-bold');
+  
+  // Fix text colors for Blue backgrounds (should be white)
+  // *This is hard to do perfectly with regex without context, but we ensure text-white stays white*
+  content = content.replace(/text-black font-black font-black/g, 'text-gray-900 font-black');
+  content = content.replace(/text-black font-bold/g, 'text-gray-900 font-bold');
+
+  // 4. Hover Animations
+  content = content.replace(/hover:-translate-y-1 hover:-translate-x-1/g, 'hover:-translate-y-1 hover:-translate-x-1');
+  content = content.replace(/hover:shadow-\[[a-z0-9\-\#]+\]/g, 'hover:shadow-[8px_8px_0px_0px_#111827] transition-all');
 
   if (content !== originalContent) {
     fs.writeFileSync(filePath, content);
-    console.log(`Updated ${filePath}`);
+    console.log(`Updated ${filePath} to AstByte Professional Neo-Brutalism`);
   }
 }
 
@@ -82,11 +91,11 @@ function traverse(dir) {
     const fullPath = path.join(dir, file);
     if (fs.statSync(fullPath).isDirectory()) {
       traverse(fullPath);
-    } else if (fullPath.endsWith('.svelte') || fullPath.endsWith('.ts')) {
+    } else if (fullPath.endsWith('.svelte') || fullPath.endsWith('.ts') || fullPath.endsWith('.tsx')) {
       processFile(fullPath);
     }
   }
 }
 
 targetDirs.forEach(dir => traverse(dir));
-console.log('Finished updating files to Neo Brutalism theme.');
+console.log('Finished updating AstByte project to new Neo Brutalism color scheme.');

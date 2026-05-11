@@ -131,7 +131,7 @@ export default function Dashboard() {
   const [generatingCert, setGeneratingCert] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
-  const LAST_UPDATE = "20 Apr 2026, 11:20 PM";
+  const LAST_UPDATE = "11 May 2026, 3:30 PM";
 
   useEffect(() => {
     document.title = 'Dashboard | Coreline by AstByte';
@@ -733,7 +733,7 @@ export default function Dashboard() {
                     <Bot className="w-6 h-6" />
                   </div>
                   <div>
-                    <div className="text-sm font-black text-white uppercase tracking-tight">Lyra AI Chat</div>
+                    <div className="text-sm font-black text-white uppercase tracking-tight">Lyra Nebula</div>
                     <div className="text-[10px] text-blue-200/60 font-bold">Asisten Virtual 31B</div>
                   </div>
                   <ChevronRight className="w-4 h-4 ml-auto text-white/30 group-hover:text-blue-400 transition-colors" />

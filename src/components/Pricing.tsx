@@ -102,9 +102,6 @@ export default function PricingPage() {
     params.set("tier", tier);
     params.set("amount", String(amount));
     params.set("cycle", cycle);
-    if (token) {
-      params.set("token", token);
-    }
 
     return `${base}?${params.toString()}`;
   };

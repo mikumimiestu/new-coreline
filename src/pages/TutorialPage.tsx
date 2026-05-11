@@ -221,8 +221,8 @@ const tutorials: Tutorial[] = [
         desc: 'Setiap modul memiliki quiz. Selesaikan quiz dengan nilai minimal untuk membuka progres modul berikutnya.' 
       },
       { 
-        title: '2. Konsultasi AI (Lyra)', 
-        desc: 'Gunakan fitur Lyra Chat untuk bertanya tentang kode yang sulit. Lyra tahu progres belajarmu dan akan memberikan jawaban yang personal.' 
+        title: '2. Konsultasi AI (Gemma)', 
+        desc: 'Gunakan fitur Gemma 4 31B Chat untuk bertanya tentang kode yang sulit. Gemma tahu progres belajarmu dan akan memberikan jawaban yang personal.' 
       }
     ]
   }
