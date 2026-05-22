@@ -729,8 +729,15 @@ export default function Dashboard() {
                   className="flex items-center gap-4 p-5 bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all rounded-none border-2 border-blue-900 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] hover:shadow-[4px_4px_0px_#1e3a8a] hover:border-blue-900 transition-all group overflow-hidden relative"
                 >
                   <div className="absolute top-0 right-0 p-1 bg-blue-500 text-[8px] font-black text-white uppercase tracking-tighter -rotate-45 translate-x-3 translate-y-1 w-16 text-center shadow-[4px_4px_0px_#1e3a8a]">NEW</div>
-                  <div className="p-3 bg-blue-500 rounded-none text-white group-hover:scale-110 group-hover:rotate-6 transition-all shadow-[4px_4px_0px_#1e3a8a] shadow-[4px_4px_0px_#1e3a8a]">
-                    <Bot className="w-6 h-6" />
+                  <div className="w-12 h-12 bg-blue-500 rounded-none overflow-hidden group-hover:scale-110 group-hover:rotate-6 transition-all shadow-[4px_4px_0px_#1e3a8a] flex items-center justify-center shrink-0">
+                    <video 
+                      src="/animasi.mp4" 
+                      autoPlay 
+                      loop 
+                      muted 
+                      playsInline 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div>
                     <div className="text-sm font-black text-white uppercase tracking-tight">Lyra Nebula</div>
