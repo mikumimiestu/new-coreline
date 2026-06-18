@@ -589,7 +589,10 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
                      <h2 className="text-xl font-black text-blue-950 font-bold tracking-tight">Riwayat Langganan</h2>
                   </div>
                   <button 
-                    onClick={() => navigate('/pricing')}
+                    onClick={() => {
+                      const returnUrl = encodeURIComponent(window.location.origin);
+                      window.location.href = `https://axid.astbyte.com/v2-dashboard-nexara/subscription?returnUrl=${returnUrl}`;
+                    }}
                     className="text-sm font-bold text-purple-600 hover:text-white bg-purple-50 hover:bg-purple-600 px-5 py-2.5 rounded-none transition-all border-2 border-blue-900 border-purple-100 shadow-[4px_4px_0px_#1e3a8a] flex items-center gap-2 hover:-translate-y-0.5"
                   >
                     <Zap className="w-4 h-4" /> Kelola Langganan

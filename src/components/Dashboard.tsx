@@ -605,14 +605,17 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                <Link 
-                  to="/pricing" 
+                <button 
+                  onClick={() => {
+                    const returnUrl = encodeURIComponent(window.location.origin);
+                    window.location.href = `https://axid.astbyte.com/v2-dashboard-nexara/subscription?returnUrl=${returnUrl}`;
+                  }}
                   className="group relative px-8 py-4 rounded-none font-bold text-white shadow-[4px_4px_0px_#1e3a8a] transition-all transform hover:-translate-y-1 bg-blue-600 border-2 border-blue-900 shadow-[4px_4px_0px_#1e3a8a] text-white hover:bg-blue-700 hover:shadow-[6px_6px_0px_#1e3a8a] hover:-translate-y-1 transition-all hover:from-blue-700 hover:to-cyan-600 border-2 border-blue-900 border-blue-900 flex-shrink-0 animate-pulse"
                 >
                   <span className="flex items-center gap-3 text-sm uppercase tracking-wider">
                     <Crown className="w-5 h-5 fill-current text-yellow-300" /> Upgrade Sekarang
                   </span>
-                </Link>
+                </button>
               </div>
             </div>
           </div>
