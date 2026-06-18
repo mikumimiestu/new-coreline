@@ -22,6 +22,25 @@ import LyraChatPage from "./pages/LyraChatPage";
 // Import ProtectedRoute yang baru dibuat
 import ProtectedRoute from "./routers/ProtectedRoute";
 
+import { useEffect } from "react";
+
+function RedirectToSubscription() {
+  useEffect(() => {
+    // Kita mengirimkan parameter returnUrl agar platform Nexara tau kemana harus mengembalikan user
+    const returnUrl = encodeURIComponent(window.location.origin);
+    window.location.href = `https://axid.astbyte.com/v2-dashboard-nexara/subscription?returnUrl=${returnUrl}`;
+  }, []);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="flex flex-col items-center gap-4">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-600 shadow-sm"></div>
+        <p className="text-sm font-bold text-slate-500 animate-pulse">Mengalihkan ke halaman langganan Nexara...</p>
+      </div>
+    </div>
+  );
+}
+
 function AppContent() {
   const { user, loading } = useAuth();
 
@@ -72,8 +91,10 @@ function AppContent() {
         } 
       />
       
-      {/* Pricing bisa diakses siapa pun */}
-      <Route path="/pricing" element={<PricingPage />} />
+      {/* Pricing dialihkan ke halaman langganan Nexara */}
+      <Route path="/pricing" element={
+        <RedirectToSubscription />
+      } />
 
       {/* Halaman pembayaran manual QRIS */}
       <Route 
